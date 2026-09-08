@@ -9,19 +9,24 @@ import {
   Brain,
   StickyNote,
   Timer,
+  Target,
   BarChart3,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// All 8 primary routes — parity with the desktop Sidebar. Inactive tabs
+// are icon-only (with aria-labels) so 8 destinations fit a 360px viewport;
+// the active tab grows to reveal its label.
 const navItems = [
-  { href: "/", label: "HOME", icon: LayoutDashboard },
-  { href: "/subjects", label: "SUBJECTS", icon: BookOpen },
-  { href: "/flashcards", label: "CARDS", icon: Brain },
-  { href: "/notes", label: "NOTES", icon: StickyNote },
-  { href: "/sessions", label: "SESSIONS", icon: Timer },
-  { href: "/stats", label: "STATS", icon: BarChart3 },
-  { href: "/settings", label: "MORE", icon: Settings },
+  { href: "/", label: "Home", icon: LayoutDashboard },
+  { href: "/subjects", label: "Subjects", icon: BookOpen },
+  { href: "/flashcards", label: "Cards", icon: Brain },
+  { href: "/notes", label: "Notes", icon: StickyNote },
+  { href: "/sessions", label: "Sessions", icon: Timer },
+  { href: "/goals", label: "Goals", icon: Target },
+  { href: "/stats", label: "Stats", icon: BarChart3 },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 // Mobile-only bottom navigation. Hidden on md+ (desktop uses Sidebar).
@@ -32,7 +37,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex h-16 border-t-2 border-border bg-bg md:hidden pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed inset-x-0 bottom-0 z-50 flex h-16 border-t border-border bg-bg md:hidden pb-[env(safe-area-inset-bottom)]">
       {navItems.map(({ href, label, icon: Icon }) => {
         const isActive =
           pathname === href || (href !== "/" && pathname.startsWith(href));
@@ -40,9 +45,11 @@ export function BottomNav() {
           <Link
             key={href}
             href={href}
+            aria-label={label}
+            aria-current={isActive ? "page" : undefined}
             className={cn(
-              "relative flex flex-1 flex-col items-center justify-center gap-1 transition-colors duration-200",
-              isActive ? "text-accent" : "text-muted-fg"
+              "relative flex min-w-0 flex-col items-center justify-center gap-1 transition-all duration-200",
+              isActive ? "flex-[1.8] text-accent" : "flex-1 text-muted-fg"
             )}
           >
             {isActive && (
@@ -52,10 +59,12 @@ export function BottomNav() {
                 className="absolute inset-x-3 top-[-2px] h-0.5 rounded-full bg-accent shadow-[0_0_10px_currentColor]"
               />
             )}
-            <Icon size={20} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">
-              {label}
-            </span>
+            <Icon size={20} aria-hidden />
+            {isActive && (
+              <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-widest">
+                {label}
+              </span>
+            )}
           </Link>
         );
       })}

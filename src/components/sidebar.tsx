@@ -14,6 +14,8 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -183,7 +185,7 @@ export function Sidebar() {
             aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
             className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl border border-glass-border text-muted-fg transition-colors hover:text-accent"
           >
-            {theme === "light" ? "☀" : "☾"}
+            {theme === "light" ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
           </button>
         )}
       </div>

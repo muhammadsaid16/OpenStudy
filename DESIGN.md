@@ -37,8 +37,8 @@ concentration is high. It's the emotional center of every dashboard view.
 | `--color-fg` | `#E7EDF7` | Primary text (WCAG AAA on bg: 13.9:1) |
 | `--color-muted-fg` | `#94A3B8` | Secondary text (7.1:1 on bg) |
 | `--color-border` | `rgba(255,255,255,0.08)` | Hairline card borders |
-| `--color-accent` | `#FF5E57` | **Primary hot signal** — coral/neon orange |
-| `--color-accent-soft` | `#FF5E57` @ 14% | Accent washes, glows |
+| `--color-accent` | `#FF7A72` | **Primary hot signal** — coral, softened from `#FF5E57` per contrast audit |
+| `--color-accent-soft` | `#FF7A72` @ 14% | Accent washes, glows |
 | `--color-accent-fg` | `#1A0505` | Text on accent fills |
 | `--color-flow` | `#00E5FF` | Progress, rings, "in flow" state |
 | `--color-grow` | `#10B981` | Growth/success, streaks |
@@ -69,7 +69,7 @@ Dark themes carry `color-scheme: dark`; LIGHT/AURORA-LIGHT flip to light.
 
 | Theme | bg | accent | flow | Character |
 |---|---|---|---|---|
-| `aurora` ★ default | `#0B0F17` | `#FF5E57` coral | `#00E5FF` | The flagship — warm signal on cold slate |
+| `aurora` ★ default | `#0B0F17` | `#FF7A72` coral | `#00E5FF` | The flagship — warm signal on cold slate |
 | `midnight` | `#030712` | `#60A5FA` blue | `#22D3EE` | Classic calm blue night |
 | `nebula` | `#0D0716` | `#C084FC` violet | `#F0ABFC` | Purple cosmos |
 | `matrix` | `#02100B` | `#34D399` green | `#A7F3D0` | Terminal mint |
@@ -134,7 +134,7 @@ grid gaps 16–20px. Max content width 1440px centered with 32–48px gutters.
 
 | Component | Spec |
 |---|---|
-| **Sidebar** | Glass rail on `bg-raised`, icon+label, animated active pill (`layoutId` spring), live DUE badge, inline theme dots row, collapse toggle |
+| **Sidebar** | Glass rail on `bg-raised`, icon+label, animated active pill (`layoutId` spring), grouped sections (Learn/Focus/Insights/System), Dark/Light quick toggle + "All →" link to full picker in Settings, collapse toggle. Mobile: BottomNav with all 8 routes (icon-only inactive, labeled active) |
 | **TopBar** (dashboard) | Greeting + date, global search trigger (⌘K overlay ready), quick actions |
 | **Focus Zone** | Circular SVG Pomodoro: 270° track + gradient progress stroke (coral→cyan), breathing conic glow when running, phase chips, presets, current-task banner, soundscape selector slot, particle field when running |
 | **Daily Progress** | Triple-ring SVG (cards reviewed = coral, time = cyan, goal = mint) with staggered dash animation + CountUp centers |
