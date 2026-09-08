@@ -285,7 +285,7 @@ export default function GoalsPage() {
       {!loaded ? null : goals.length === 0 ? (
         <EmptyState
           icon={<Target size={48} />}
-          title="NO GOALS YET"
+          title="No goals yet"
           description="Capture your long-term vision and daily todos, then move them across the board."
           action={
             <Button
@@ -295,7 +295,7 @@ export default function GoalsPage() {
               }}
             >
               <Plus size={16} />
-              CREATE YOUR FIRST GOAL
+              Create your first goal
             </Button>
           }
         />
@@ -351,8 +351,8 @@ export default function GoalsPage() {
                           onDragStart={(e) => onDragStart(e, g.id)}
                           onDragEnd={onDragEnd}
                         >
-                          {/* Hover actions */}
-                          <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100">
+                          {/* Hover actions — always visible on touch, keyboard-reachable via focus */}
+                          <div className="absolute top-3 right-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100">
                             <button
                               aria-label="Edit goal"
                               onClick={() => {
@@ -503,7 +503,7 @@ export default function GoalsPage() {
                                       await deleteMilestone(m.id);
                                       await refresh();
                                     }}
-                                    className="text-muted-fg opacity-0 transition-opacity group-hover/ms:opacity-100 hover:text-danger"
+                                    className="shrink-0 rounded-full p-1 text-muted-fg opacity-0 transition-opacity group-hover/ms:opacity-100 focus-visible:opacity-100 max-md:opacity-100 hover:text-danger"
                                   >
                                     <Trash2 size={12} />
                                   </button>
@@ -516,7 +516,7 @@ export default function GoalsPage() {
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter") addStep(g.id);
                                 }}
-                                className="w-full rounded-lg border border-transparent bg-transparent px-1 py-1 text-sm text-fg placeholder:text-muted-fg/60 focus:outline-none"
+                                className="w-full rounded-xl border border-transparent bg-transparent px-1 py-1 text-sm text-fg placeholder:text-muted-fg/60 focus:outline-none"
                               />
                             </div>
                           )}
@@ -592,7 +592,7 @@ function DropSlot({
       className={cn(
         "rounded-xl transition-all duration-150",
         active
-          ? "my-1 h-10 rounded-xl border-2 border-dashed border-flow/60 bg-flow/5"
+          ? "my-1 h-10 rounded-xl border border-dashed border-flow/60 bg-flow/5"
           : "h-2"
       )}
     />

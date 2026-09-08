@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from "react";
 import { Play, Pause, Square, Clock, Timer, Trash2, SkipForward, Coffee, Brain, Save, X } from "lucide-react";
-import { Badge, EmptyState, Skeleton } from "@/components/ui";
+import { Badge, EmptyState, Skeleton, Modal, Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
@@ -23,25 +23,28 @@ type TimerMode = "stopwatch" | "pomodoro";
 // never re-fires on parent re-renders (the timer re-renders every second).
 const FALL_TRANSITION = { type: "spring" as const, stiffness: 420, damping: 18 };
 
-// Phase visuals — work / short break / long break
+// Phase visuals — work / short break / long break, mapped to the
+// Aurora signal tokens (accent = heat/focus, flow = in-progress,
+// grow = recovery) so all 12 themes apply. Source strings are
+// normal-case; render sites style them as eyebrows via CSS.
 const PHASE_META = {
   work: {
-    label: "FOCUS",
-    cls: "border-accent/40 bg-accent/10 text-yellow-400",
-    ring: "#FACC15",
-    text: "text-yellow-300 drop-shadow-[0_0_24px_rgba(250,204,21,0.35)]",
+    label: "Focus",
+    cls: "border-accent/40 bg-accent-soft text-accent",
+    ring: "var(--color-accent)",
+    text: "text-accent",
   },
   break: {
-    label: "BREAK",
-    cls: "border-emerald-400/40 bg-emerald-400/10 text-emerald-400",
-    ring: "#34D399",
-    text: "text-emerald-300 drop-shadow-[0_0_24px_rgba(52,211,153,0.35)]",
+    label: "Break",
+    cls: "border-flow/40 bg-flow/10 text-flow",
+    ring: "var(--color-flow)",
+    text: "text-flow",
   },
   long: {
-    label: "LONG BREAK",
-    cls: "border-sky-400/40 bg-sky-400/10 text-sky-400",
-    ring: "#38BDF8",
-    text: "text-sky-300 drop-shadow-[0_0_24px_rgba(56,189,248,0.35)]",
+    label: "Long break",
+    cls: "border-grow/40 bg-grow/10 text-grow",
+    ring: "var(--color-grow)",
+    text: "text-grow",
   },
 } as const;
 
@@ -78,6 +81,9 @@ export default function SessionsPage() {
   const [historyRange, setHistoryRange] = useState<"today" | "7d" | "30d" | "all">("all");
   const [historySubject, setHistorySubject] = useState<string>("all");
 
+  // Shared delete confirmation (presets + history rows).
+  const [deleteConfirm, setDeleteConfirm] = useState<{ kind: "preset" | "session"; id: string; label: string } | null>(null);
+
   const [, startTransition] = useTransition();
 
   useEffect(() => {
@@ -90,7 +96,7 @@ export default function SessionsPage() {
       setLoaded(true);
     }).catch(() => {
       if (!cancelled) {
-        setLoadError("COULD NOT LOAD SAVED DATA — STORAGE MAY BE UNAVAILABLE.");
+        setLoadError("Could not load saved data — storage may be unavailable.");
         setLoaded(true);
       }
     });
@@ -163,7 +169,7 @@ export default function SessionsPage() {
         // the user can retry instead of silently losing the session.
         setTimerSeconds(seconds);
         setSessionTitle(title);
-        setSaveError("COULD NOT SAVE THIS SESSION — TRY STOPPING AGAIN.");
+        setSaveError("Could not save this session — try stopping again.");
       }
     });
   };
@@ -205,10 +211,7 @@ export default function SessionsPage() {
   };
 
   const removePreset = async (id: string) => {
-    if (!confirm("DELETE THIS PRESET?")) return;
-    await deletePomoPreset(id);
-    setPresets((prev) => prev.filter((p) => p.id !== id));
-    if (activePresetId === id) setActivePresetId(null);
+    setDeleteConfirm({ kind: "preset", id, label: presets.find((p) => p.id === id)?.name ?? "preset" });
   };
 
   const startPomodoro = () => {
@@ -226,7 +229,7 @@ export default function SessionsPage() {
     const startedAt = new Date(snap.startedAt);
     timerStartedAtRef.current = null;
     const finalTitle =
-      title || `POMODORO — ${snap.cycles} CYCLE${snap.cycles === 1 ? "" : "S"}`;
+      title || `Pomodoro — ${snap.cycles} cycle${snap.cycles === 1 ? "" : "s"}`;
     persistSession(finalTitle, snap.workSeconds, startedAt);
   };
 
@@ -258,12 +261,22 @@ export default function SessionsPage() {
   };
 
   const handleDeleteSession = async (id: string) => {
-    if (!confirm("DELETE THIS SESSION?")) return;
-    await deleteStudySession(id);
-    setSessions((prev) => prev.filter((s) => s.id !== id));
+    const target = sessions.find((s) => s.id === id);
+    setDeleteConfirm({ kind: "session", id, label: target?.title ?? "session" });
   };
 
-  const totalMinutes = sessions.reduce((acc, s) => acc + s.durationMin, 0);
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+    if (deleteConfirm.kind === "preset") {
+      await deletePomoPreset(deleteConfirm.id);
+      setPresets((prev) => prev.filter((p) => p.id !== deleteConfirm.id));
+      if (activePresetId === deleteConfirm.id) setActivePresetId(null);
+    } else {
+      await deleteStudySession(deleteConfirm.id);
+      setSessions((prev) => prev.filter((s) => s.id !== deleteConfirm.id));
+    }
+    setDeleteConfirm(null);
+  };
 
   // Spec §5: derive the visible history rows from range + subject filters.
   // today = calendar day; 7d/30d = rolling window on startedAt.
@@ -286,7 +299,7 @@ export default function SessionsPage() {
   return (
     <div className="p-8 lg:p-12">
       {/* Header */}
-      <div className="mb-16">
+      <div className="mb-10">
         <RevealHeading text="SESSIONS" className="text-5xl lg:text-8xl" />
         <ScrambleSubtitle
           text="TRACK YOUR STUDY TIME AND PROGRESS"
@@ -295,11 +308,11 @@ export default function SessionsPage() {
       </div>
 
       {/* Mode toggle — sliding pill */}
-      <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-zinc-800 bg-zinc-950 p-1">
+      <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-bg-raised/60 p-1">
         {(
           [
-            { id: "stopwatch", label: "STOPWATCH", icon: <Timer size={14} /> },
-            { id: "pomodoro", label: "POMODORO", icon: <Clock size={14} /> },
+            { id: "stopwatch", label: "Stopwatch", icon: <Timer size={14} /> },
+            { id: "pomodoro", label: "Pomodoro", icon: <Clock size={14} /> },
           ] as { id: TimerMode; label: string; icon: React.ReactNode }[]
         ).map((m) => (
           <button
@@ -308,7 +321,7 @@ export default function SessionsPage() {
             disabled={anyRunning && mode !== m.id}
             className={cn(
               "relative flex items-center rounded-full px-5 py-2 text-xs font-black uppercase tracking-widest transition-colors",
-              mode === m.id ? "text-zinc-950" : "text-zinc-400 hover:text-white",
+              mode === m.id ? "text-accent-fg" : "text-muted-fg hover:text-fg",
               anyRunning && mode !== m.id && "opacity-40 cursor-not-allowed"
             )}
           >
@@ -316,7 +329,7 @@ export default function SessionsPage() {
               <motion.span
                 layoutId="timer-mode-pill"
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                className="absolute inset-0 rounded-full bg-yellow-400"
+                className="absolute inset-0 rounded-full bg-accent"
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
@@ -332,33 +345,32 @@ export default function SessionsPage() {
         {/* Form fields — 3 cols */}
         <div className="space-y-6 lg:col-span-3">
           <div>
-            <label className="text-xs font-bold text-zinc-400 tracking-wider mb-2 block">
-              SESSION TITLE{mode === "pomodoro" ? " (OPTIONAL)" : ""}
+            <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
+              Session title{mode === "pomodoro" ? " (optional)" : ""}
             </label>
             <input
               value={sessionTitle}
               onChange={(e) => setSessionTitle(e.target.value)}
-              placeholder={mode === "pomodoro" ? "AUTO-NAMED FROM CYCLES IF EMPTY" : "E.G. REVIEWING CHAPTER 5"}
+              placeholder={mode === "pomodoro" ? "Auto-named from cycles if empty" : "e.g. Reviewing chapter 5"}
               disabled={anyRunning}
-              className="w-full bg-zinc-950 border border-zinc-800 text-white placeholder-zinc-600 rounded-lg px-4 py-3 text-sm transition-all outline-none disabled:opacity-50"
+              className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:border-accent border border-transparent focus:border-accent"
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-zinc-400 tracking-wider mb-2 block">
-              SUBJECT (OPTIONAL)
+            <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
+              Subject (optional)
             </label>
             <select
               value={selectedSubjectId}
               onChange={(e) => setSelectedSubjectId(e.target.value)}
               disabled={anyRunning}
-              className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm transition-all outline-none disabled:opacity-50 appearance-none"
-              style={{ colorScheme: "dark" }}
+              className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg transition-colors outline-none disabled:opacity-50 appearance-none focus:border-accent border border-transparent"
             >
-              <option value="" className="bg-zinc-950 text-white">
-                GENERAL
+              <option value="" className="bg-bg text-fg">
+                General
               </option>
               {subjects.map((s) => (
-                <option key={s.id} value={s.id} className="bg-zinc-950 text-white">
+                <option key={s.id} value={s.id} className="bg-bg text-fg">
                   {s.name}
                 </option>
               ))}
@@ -367,11 +379,11 @@ export default function SessionsPage() {
 
           {/* Pomodoro settings — custom technique builder */}
           {mode === "pomodoro" && (
-            <div className="border border-zinc-800 rounded-xl p-5 space-y-5">
+            <div className="glass rounded-2xl p-5 space-y-5">
               {/* Built-in presets */}
               <div>
-                <label className="text-xs font-bold text-zinc-400 tracking-wider mb-2 block">
-                  PRESETS
+                <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
+                  Presets
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {BUILTIN_PRESETS.map((p) => {
@@ -387,10 +399,10 @@ export default function SessionsPage() {
                         disabled={pomo.running}
                         aria-pressed={isActive}
                         className={cn(
-                          "px-4 py-2 rounded-lg border text-xs font-black uppercase tracking-widest transition-colors",
+                          "px-4 py-2 rounded-full border text-xs font-black uppercase tracking-widest transition-colors",
                           isActive
-                            ? "border-yellow-400 bg-yellow-400/10 text-yellow-400"
-                            : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-600 hover:text-white",
+                            ? "border-accent bg-accent-soft text-accent"
+                            : "border-border bg-bg text-muted-fg hover:border-fg hover:text-fg",
                           pomo.running && "opacity-50 cursor-not-allowed"
                         )}
                       >
@@ -403,10 +415,10 @@ export default function SessionsPage() {
                     <span
                       key={p.id}
                       className={cn(
-                        "group inline-flex items-center overflow-hidden rounded-lg border text-xs font-black uppercase tracking-widest transition-colors",
+                        "group inline-flex items-center overflow-hidden rounded-full border text-xs font-black uppercase tracking-widest transition-colors",
                         activePresetId === p.id
-                          ? "border-yellow-400 bg-yellow-400/10 text-yellow-400"
-                          : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-600 hover:text-white",
+                          ? "border-accent bg-accent-soft text-accent"
+                          : "border-border bg-bg text-muted-fg hover:border-fg hover:text-fg",
                         pomo.running && "opacity-50"
                       )}
                     >
@@ -427,7 +439,7 @@ export default function SessionsPage() {
                         onClick={() => removePreset(p.id)}
                         disabled={pomo.running}
                         aria-label={`Delete preset ${p.name}`}
-                        className="border-l border-zinc-800 px-2 py-2 text-zinc-600 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed"
+                        className="border-l border-border px-2 py-2 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed"
                       >
                         <X size={12} />
                       </button>
@@ -439,8 +451,8 @@ export default function SessionsPage() {
               {/* Custom durations */}
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div>
-                  <label className="text-xs font-bold text-zinc-400 tracking-wider mb-2 block">
-                    WORK (MIN)
+                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
+                    Work (min)
                   </label>
                   <input
                     type="number"
@@ -449,12 +461,12 @@ export default function SessionsPage() {
                     value={workMin}
                     onChange={(e) => applyConfig({ workMin: parseInt(e.target.value, 10) || 1 })}
                     disabled={pomo.running}
-                    className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm font-mono tabular-nums transition-all outline-none disabled:opacity-50"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:border-accent border border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-zinc-400 tracking-wider mb-2 block">
-                    BREAK (MIN)
+                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
+                    Break (min)
                   </label>
                   <input
                     type="number"
@@ -463,12 +475,12 @@ export default function SessionsPage() {
                     value={breakMin}
                     onChange={(e) => applyConfig({ breakMin: parseInt(e.target.value, 10) || 1 })}
                     disabled={pomo.running}
-                    className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm font-mono tabular-nums transition-all outline-none disabled:opacity-50"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:border-accent border border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-zinc-400 tracking-wider mb-2 block">
-                    LONG BREAK (MIN)
+                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
+                    Long break (min)
                   </label>
                   <input
                     type="number"
@@ -477,12 +489,12 @@ export default function SessionsPage() {
                     value={longBreakMin}
                     onChange={(e) => applyConfig({ longBreakMin: parseInt(e.target.value, 10) || 0 })}
                     disabled={pomo.running}
-                    className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm font-mono tabular-nums transition-all outline-none disabled:opacity-50"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:border-accent border border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-zinc-400 tracking-wider mb-2 block">
-                    CYCLES → LONG
+                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
+                    Cycles → long
                   </label>
                   <input
                     type="number"
@@ -493,14 +505,14 @@ export default function SessionsPage() {
                       applyConfig({ cyclesBeforeLongBreak: parseInt(e.target.value, 10) || 0 })
                     }
                     disabled={pomo.running}
-                    className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm font-mono tabular-nums transition-all outline-none disabled:opacity-50"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:border-accent border border-transparent"
                   />
                 </div>
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
                 {longBreakMin > 0 && cyclesBeforeLongBreak > 0
-                  ? `LONG BREAK (${longBreakMin}M) AFTER EVERY ${cyclesBeforeLongBreak} CYCLES`
-                  : "SET LONG BREAK + CYCLES ABOVE 0 TO ENABLE LONG BREAKS"}
+                  ? `Long break (${longBreakMin}m) after every ${cyclesBeforeLongBreak} cycles`
+                  : "Set long break + cycles above 0 to enable long breaks"}
               </p>
 
               <label className="flex items-center gap-3 cursor-pointer select-none">
@@ -508,35 +520,35 @@ export default function SessionsPage() {
                   type="checkbox"
                   checked={autoAdvance}
                   onChange={(e) => applyConfig({ autoAdvance: e.target.checked })}
-                  className="h-4 w-4 accent-yellow-400"
+                  className="h-4 w-4 accent-accent"
                 />
-                <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
-                  AUTO-START NEXT PHASE
+                <span className="text-xs font-bold text-muted-fg uppercase tracking-widest">
+                  Auto-start next phase
                 </span>
               </label>
 
               {/* Save current setup as a named preset */}
-              <div className="flex gap-2 border-t border-zinc-800 pt-4">
+              <div className="flex gap-2 border-t border-border pt-4">
                 <input
                   value={presetName}
                   onChange={(e) => setPresetName(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") saveCurrentAsPreset();
                   }}
-                  placeholder="SAVE THIS SETUP AS… (E.G. DEEP WORK 50/10)"
+                  placeholder="Save this setup as… (e.g. Deep work 50/10)"
                   disabled={pomo.running}
                   maxLength={50}
-                  className="w-full bg-zinc-950 border border-zinc-800 text-white placeholder-zinc-600 rounded-lg px-4 py-2.5 text-xs font-bold uppercase tracking-widest transition-all outline-none disabled:opacity-50"
+                  className="glass-inset w-full rounded-xl px-4 py-2.5 text-xs text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:border-accent border border-transparent"
                 />
                 <button
                   onClick={saveCurrentAsPreset}
                   disabled={pomo.running || !presetName.trim()}
                   className={cn(
-                    "flex shrink-0 items-center gap-2 rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-4 py-2.5 text-xs font-black uppercase tracking-widest text-yellow-400 transition-colors hover:bg-yellow-400/20",
+                    "flex shrink-0 items-center gap-2 rounded-full border border-accent/40 bg-accent-soft px-4 py-2.5 text-xs font-black uppercase tracking-widest text-accent transition-colors hover:bg-accent hover:text-accent-fg",
                     (pomo.running || !presetName.trim()) && "opacity-40 cursor-not-allowed"
                   )}
                 >
-                  <Save size={13} /> SAVE
+                  <Save size={13} /> Save
                 </button>
               </div>
             </div>
@@ -544,15 +556,15 @@ export default function SessionsPage() {
         </div>
 
         {/* Timer Hero — 2 cols */}
-        <div className="lg:col-span-2 flex flex-col items-center justify-center bg-zinc-900 border border-zinc-800 rounded-xl p-6 sm:p-8">
+        <div className="lg:col-span-2 flex flex-col items-center justify-center glass rounded-2xl p-6 sm:p-8">
           {mode === "stopwatch" ? (
             <>
               <div
                 className={cn(
                   "relative flex w-full flex-col items-center justify-center gap-3 rounded-2xl border px-4 sm:px-6 py-8 transition-colors",
                   timerRunning && !timerPaused
-                    ? "border-accent/40 bg-accent/[0.04] shadow-[0_0_50px_-12px_rgba(250,204,21,0.25)]"
-                    : "border-zinc-800 bg-zinc-900/60"
+                    ? "border-accent/40 bg-accent-soft"
+                    : "border-border bg-bg-raised/60"
                 )}
               >
                 {/* recording dot */}
@@ -564,8 +576,8 @@ export default function SessionsPage() {
                       exit={{ scale: 0 }}
                       className="absolute right-5 top-5 flex h-3 w-3"
                     >
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-60" />
-                      <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger opacity-60" />
+                      <span className="relative inline-flex h-3 w-3 rounded-full bg-danger" />
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -573,13 +585,13 @@ export default function SessionsPage() {
                 <p
                   className={cn(
                     "font-mono text-4xl font-extrabold tracking-tight tabular-nums transition-colors sm:text-5xl lg:text-6xl whitespace-nowrap",
-                    timerRunning && !timerPaused ? "text-yellow-300 drop-shadow-[0_0_24px_rgba(250,204,21,0.35)]" : "text-white"
+                    timerRunning && !timerPaused ? "text-accent" : "text-fg"
                   )}
                 >
                   {formatTimer(timerSeconds)}
                 </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-zinc-500">
-                  {timerRunning && !timerPaused ? "● REC — FOCUS" : timerRunning ? "PAUSED" : "READY"}
+                <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-fg">
+                  {timerRunning && !timerPaused ? "● Rec — focus" : timerRunning ? "Paused" : "Ready"}
                 </p>
               </div>
               <button
@@ -587,34 +599,34 @@ export default function SessionsPage() {
                 {...magneticHandlers(0.18)}
                 disabled={!timerRunning && !sessionTitle.trim() ? true : false}
                 className={cn(
-                  "mt-6 w-full bg-yellow-400 hover:bg-yellow-300 text-zinc-950 font-black text-lg rounded-lg shadow uppercase tracking-wide transition-all py-3 flex items-center justify-center gap-2",
+                  "mt-6 w-full bg-accent hover:opacity-90 text-accent-fg font-black text-lg rounded-full transition-all py-3 flex items-center justify-center gap-2",
                   (!timerRunning && !sessionTitle.trim()) && "opacity-50 cursor-not-allowed"
                 )}
               >
                 {!timerRunning ? (
                   <>
-                    <Play size={20} /> START
+                    <Play size={20} /> Start
                   </>
                 ) : timerPaused ? (
                   <>
-                    <Play size={20} /> RESUME
+                    <Play size={20} /> Resume
                   </>
                 ) : (
                   <>
-                    <Pause size={20} /> PAUSE
+                    <Pause size={20} /> Pause
                   </>
                 )}
               </button>
               {timerRunning && (
                 <button
                   onClick={stopTimer}
-                  className="mt-2 w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 font-black text-sm rounded-lg uppercase tracking-wide transition-all py-2.5 flex items-center justify-center gap-2 border border-red-500/20"
+                  className="mt-2 w-full bg-danger/10 hover:bg-danger/20 text-danger font-black text-sm rounded-full transition-all py-2.5 flex items-center justify-center gap-2 border border-danger/20"
                 >
-                  <Square size={14} /> STOP & SAVE
+                  <Square size={14} /> Stop & save
                 </button>
               )}
               {(saveError || loadError) && (
-                <p className="mt-2 w-full rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-center font-mono text-[11px] uppercase tracking-widest text-red-400">
+                <p className="mt-2 w-full rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-center font-mono text-[11px] uppercase tracking-widest text-danger">
                   {saveError || loadError}
                 </p>
               )}
@@ -651,7 +663,7 @@ export default function SessionsPage() {
                   return (
                     <>
                       <svg viewBox="0 0 300 300" className="h-auto w-full max-w-[320px] -rotate-90" aria-hidden>
-                        <circle cx="150" cy="150" r={R} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
+                        <circle cx="150" cy="150" r={R} fill="none" stroke="var(--color-muted)" strokeWidth="6" />
                         <motion.circle
                           cx="150"
                           cy="150"
@@ -670,20 +682,20 @@ export default function SessionsPage() {
                         <p
                           className={cn(
                             "font-mono text-4xl font-extrabold tabular-nums sm:text-6xl",
-                            pomoActive ? PHASE_META[pomo.phase].text : "text-white"
+                            pomoActive ? PHASE_META[pomo.phase].text : "text-fg"
                           )}
                         >
                           {formatClock(pomo.seconds)}
                         </p>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
-                          {pomoActive ? `● ${PHASE_META[pomo.phase].label}` : pomo.paused ? "PAUSED" : "READY"}
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-fg">
+                          {pomoActive ? `● ${PHASE_META[pomo.phase].label}` : pomo.paused ? "Paused" : "Ready"}
                         </p>
-                        <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-widest tabular-nums text-zinc-500">
-                          {pomo.cycles} CYCLE{pomo.cycles === 1 ? "" : "S"} • {formatClock(pomo.workSeconds)} FOCUSED
+                        <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-widest tabular-nums text-muted-fg">
+                          {pomo.cycles} cycle{pomo.cycles === 1 ? "" : "s"} • {formatClock(pomo.workSeconds)} focused
                         </p>
                         {cyclesBeforeLongBreak > 0 && longBreakMin > 0 && (
-                          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-600">
-                            LONG BREAK IN {cyclesBeforeLongBreak - (pomo.cycles % cyclesBeforeLongBreak)} CYCLE{cyclesBeforeLongBreak - (pomo.cycles % cyclesBeforeLongBreak) === 1 ? "" : "S"}
+                          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-fg">
+                            Long break in {cyclesBeforeLongBreak - (pomo.cycles % cyclesBeforeLongBreak)} cycle{cyclesBeforeLongBreak - (pomo.cycles % cyclesBeforeLongBreak) === 1 ? "" : "s"}
                           </p>
                         )}
                       </div>
@@ -694,19 +706,19 @@ export default function SessionsPage() {
               <button
                 onClick={!pomo.running ? startPomodoro : pomo.togglePause}
                 {...magneticHandlers(0.18)}
-                className="mt-6 w-full bg-yellow-400 hover:bg-yellow-300 text-zinc-950 font-black text-lg rounded-lg shadow uppercase tracking-wide transition-all py-3 flex items-center justify-center gap-2"
+                className="mt-6 w-full bg-accent hover:opacity-90 text-accent-fg font-black text-lg rounded-full transition-all py-3 flex items-center justify-center gap-2"
               >
                 {!pomo.running ? (
                   <>
-                    <Play size={20} /> START
+                    <Play size={20} /> Start
                   </>
                 ) : pomo.paused ? (
                   <>
-                    <Play size={20} /> RESUME
+                    <Play size={20} /> Resume
                   </>
                 ) : (
                   <>
-                    <Pause size={20} /> PAUSE
+                    <Pause size={20} /> Pause
                   </>
                 )}
               </button>
@@ -714,15 +726,15 @@ export default function SessionsPage() {
                 <div className="mt-2 grid w-full grid-cols-2 gap-2">
                   <button
                     onClick={pomo.skip}
-                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-black text-sm rounded-lg uppercase tracking-wide transition-all py-2.5 flex items-center justify-center gap-2 border border-zinc-700"
+                    className="w-full bg-glass hover:bg-glass-hover text-muted-fg hover:text-fg font-black text-sm rounded-full transition-all py-2.5 flex items-center justify-center gap-2 border border-glass-border"
                   >
-                    <SkipForward size={14} /> SKIP
+                    <SkipForward size={14} /> Skip
                   </button>
                   <button
                     onClick={stopPomodoro}
-                    className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 font-black text-sm rounded-lg uppercase tracking-wide transition-all py-2.5 flex items-center justify-center gap-2 border border-red-500/20"
+                    className="w-full bg-danger/10 hover:bg-danger/20 text-danger font-black text-sm rounded-full transition-all py-2.5 flex items-center justify-center gap-2 border border-danger/20"
                   >
-                    <Square size={14} /> STOP & SAVE
+                    <Square size={14} /> Stop & save
                   </button>
                 </div>
               )}
@@ -735,8 +747,8 @@ export default function SessionsPage() {
           subject, duration, date, type; total reflects the filter. */}
       <div>
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <h2 className="text-3xl font-bold uppercase tracking-tighter">
-            HISTORY
+          <h2 className="text-3xl font-bold tracking-tighter">
+            History
           </h2>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label="History range">
@@ -751,7 +763,7 @@ export default function SessionsPage() {
                   onClick={() => setHistoryRange(key)}
                   aria-pressed={historyRange === key}
                   className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${
-                    historyRange === key ? "bg-accent text-white" : "text-muted-fg hover:text-fg"
+                    historyRange === key ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-fg"
                   }`}
                 >
                   {label}
@@ -773,16 +785,16 @@ export default function SessionsPage() {
             </select>
             {filteredSessions.length > 0 && (
               <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-muted-fg">
-                <span>{filteredSessions.length} SESSIONS</span>
+                <span>{filteredSessions.length} sessions</span>
                 <span>
-                  {formatDuration(filteredSessions.reduce((acc, s) => acc + s.durationMin, 0))} TOTAL
+                  {formatDuration(filteredSessions.reduce((acc, s) => acc + s.durationMin, 0))} total
                 </span>
               </div>
             )}
           </div>
         </div>
         {!loaded ? (
-          <div className="border-2 border-border divide-y-2 divide-border">
+          <div className="divide-y divide-border rounded-2xl border border-border">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between p-6">
                 <div className="flex items-center gap-4">
@@ -799,42 +811,42 @@ export default function SessionsPage() {
         ) : filteredSessions.length === 0 ? (
           <EmptyState
             icon={<Timer size={48} />}
-            title="NO SESSIONS IN VIEW"
-            description="NO SESSIONS MATCH THIS FILTER — TRY A WIDER RANGE."
+            title="No sessions in view"
+            description="No sessions match this filter — try a wider range."
           />
         ) : (
-          <div className="border-2 border-border divide-y-2 divide-border">
+          <div className="divide-y divide-border rounded-2xl border border-border">
             {filteredSessions.map((session) => (
-              <div key={session.id} className="group flex items-center justify-between p-6 transition-colors hover:border-accent hover:bg-muted/30">
-                <div className="flex items-center gap-4">
+              <div key={session.id} className="group flex items-center justify-between gap-3 p-6 transition-colors hover:bg-muted/30">
+                <div className="flex min-w-0 items-center gap-4">
                   {session.subject && (
                     <div
-                      className="h-3 w-3"
+                      className="h-3 w-3 shrink-0 rounded-full"
                       style={{ backgroundColor: session.subject.color }}
                     />
                   )}
-                  <div>
-                    <p className="font-bold uppercase tracking-tight">
+                  <div className="min-w-0">
+                    <p className="truncate font-bold tracking-tight">
                       {session.title}
                     </p>
                     <p className="text-xs text-muted-fg uppercase tracking-widest">
-                      {session.subject?.name ?? "GENERAL"} •{" "}
+                      {session.subject?.name ?? "General"} •{" "}
                       {formatDate(session.startedAt)}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex shrink-0 items-center gap-4">
                   <Badge variant={session.completed ? "success" : "default"}>
-                    {session.completed ? "DONE" : "PARTIAL"}
+                    {session.completed ? "Done" : "Partial"}
                   </Badge>
-                  <span className="flex items-center gap-2 text-xs text-muted-fg uppercase tracking-widest">
+                  <span className="hidden items-center gap-2 text-xs text-muted-fg uppercase tracking-widest sm:flex">
                     <Clock size={12} />
                     {formatDuration(session.durationMin)}
                   </span>
                   <button
                     onClick={() => handleDeleteSession(session.id)}
                     aria-label="Delete session"
-                    className="p-2.5 text-muted-fg transition-colors hover:bg-danger hover:text-on-color"
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -844,6 +856,27 @@ export default function SessionsPage() {
           </div>
         )}
       </div>
+
+      {/* Shared delete confirmation (preset or history session) */}
+      <Modal
+        open={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        title={deleteConfirm?.kind === "preset" ? "Delete preset" : "Delete session"}
+      >
+        <div className="space-y-6">
+          <p className="text-sm text-muted-fg">
+            Delete “{deleteConfirm?.label}”? This cannot be undone.
+          </p>
+          <div className="flex justify-end gap-4 pt-2">
+            <Button variant="ghost" onClick={() => setDeleteConfirm(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={confirmDelete}>
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
