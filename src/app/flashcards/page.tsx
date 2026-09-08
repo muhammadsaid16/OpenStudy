@@ -950,7 +950,7 @@ function FlashcardsContent() {
           {!selectedBundle && (
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Topic</label>
-              <SubjectTopicSelect subjects={subjects} value={selectedTopicId} onChange={setSelectedTopicId} />
+              <SubjectTopicSelect subjects={subjects} value={selectedTopicId} onChange={setSelectedTopicId} onSubjectsChange={setSubjects} />
             </div>
           )}
           {selectedBundle && (
