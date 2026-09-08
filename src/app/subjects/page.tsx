@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import { Plus, Trash2, BookOpen, Pencil, Layers, FileText, ExternalLink, Link2, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Card, Button, Modal, Input, EmptyState, Skeleton } from "@/components/ui";
+import { formatDuration, formatRelative } from "@/lib/utils";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import {
@@ -204,7 +205,20 @@ export default function SubjectsPage() {
         color,
         icon,
       });
-      setSubjects((prev) => [{ ...subject, _count: { topics: 0, flashcards: 0, studySessions: 0 } }, ...prev]);
+      setSubjects((prev) => [
+        {
+          ...subject,
+          _count: {
+            topics: 0,
+            flashcards: 0,
+            studySessions: 0,
+            minutes: 0,
+            lastStudiedAt: null,
+            mastered: 0,
+          },
+        },
+        ...prev,
+      ]);
       setModalOpen(false);
       setName("");
       setDescription("");
@@ -358,10 +372,41 @@ export default function SubjectsPage() {
                     </button>
                   </div>
                 </div>
-              <div className="mt-6 flex gap-6 text-xs font-bold uppercase tracking-widest text-muted-fg">
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-1 text-xs font-bold uppercase tracking-widest text-muted-fg">
                 <span>{topicCounts[subject.id] ?? subject._count.topics} TOPICS</span>
                 <span>{subject._count.flashcards} CARDS</span>
-                <span>{subject._count.studySessions} SESSIONS</span>
+                <span>{formatDuration(subject._count.minutes ?? 0)}</span>
+              </div>
+
+              {/* Spec §2: mastery progress + last studied — discoverable on
+                  the card, not behind a click into the subject */}
+              <div className="mt-4">
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+                  <span>Mastery</span>
+                  <span className="font-mono tabular-nums">
+                    {subject._count.flashcards > 0
+                      ? `${Math.round(((subject._count.mastered ?? 0) / subject._count.flashcards) * 100)}%`
+                      : "—"}
+                  </span>
+                </div>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${
+                        subject._count.flashcards > 0
+                          ? ((subject._count.mastered ?? 0) / subject._count.flashcards) * 100
+                          : 0
+                      }%`,
+                      backgroundColor: subject.color || "var(--color-accent)",
+                    }}
+                  />
+                </div>
+                <p className="mt-2 text-[10px] uppercase tracking-widest text-muted-fg">
+                  {subject._count.lastStudiedAt
+                    ? `LAST STUDIED ${formatRelative(subject._count.lastStudiedAt)}`
+                    : "NOT STUDIED YET"}
+                </p>
               </div>
 
               <button

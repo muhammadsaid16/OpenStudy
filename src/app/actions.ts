@@ -77,12 +77,28 @@ async function noteTagsInclude(noteId: string) {
 }
 
 async function subjectCounts(subjectId: string) {
-  const [topics, flashcards, studySessions] = await Promise.all([
+  const [topics, flashcards, studySessions, sessionRecs, cardRecs] = await Promise.all([
     db.topics.where("subjectId").equals(subjectId).count(),
     db.flashcards.where("subjectId").equals(subjectId).count(),
     db.studySessions.where("subjectId").equals(subjectId).count(),
+    db.studySessions.where("subjectId").equals(subjectId).toArray(),
+    db.flashcards.where("subjectId").equals(subjectId).toArray(),
   ]);
-  return { topics, flashcards, studySessions };
+  return {
+    topics,
+    flashcards,
+    studySessions,
+    // Spec §2: rich subject cards — study time, last studied, mastery %.
+    minutes: sessionRecs.reduce((a, s) => a + (s.durationMin ?? 0), 0),
+    lastStudiedAt: sessionRecs.length
+      ? sessionRecs.reduce<Date | null>(
+          (latest, s) =>
+            !latest || new Date(s.startedAt) > latest ? new Date(s.startedAt) : latest,
+          null
+        )
+      : null,
+    mastered: cardRecs.filter((c) => (c.intervalDays ?? 0) >= 21).length,
+  };
 }
 
 async function topicCounts(topicId: string) {

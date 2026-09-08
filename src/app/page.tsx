@@ -10,6 +10,8 @@ import { FocusZone } from "@/components/focus-zone";
 import { DailyProgress } from "@/components/daily-progress";
 import { WeeklyAnalytics } from "@/components/weekly-analytics";
 import { DeadlineList } from "@/components/deadline-list";
+import { ContinueStudying } from "@/components/continue-studying";
+import { Upcoming } from "@/components/upcoming";
 import { PageLoader } from "@/components/page-loader";
 import { StatsHeatmap } from "@/components/stats-heatmap";
 import { StatsStreakBadge } from "@/components/stats-streak-badge";
@@ -39,12 +41,15 @@ export default function DashboardPage() {
   const [today, setToday] = useState<Today | null>(null);
   const [goalCounts, setGoalCounts] = useState<{ active: number; total: number } | null>(null);
   const [reviewLogs, setReviewLogs] = useState<ReviewLogRec[]>([]);
+  // Spec §1: full goal list for the UPCOMING card (dueDate + subject).
+  const [goals, setGoals] = useState<Awaited<ReturnType<typeof getGoals>>>([]);
 
   useEffect(() => {
     getDashboardStats().then(setStats);
     getWeeklyAnalytics().then(setWeekly);
     getTodayProgress().then(setToday);
     getAllReviewLogs().then(setReviewLogs);
+    getGoals().then(setGoals);
     getGoals().then((goals) =>
       setGoalCounts({
         active: goals.filter((g) => g.status === "in_progress").length,
@@ -86,7 +91,39 @@ export default function DashboardPage() {
               <FocusZone />
             </motion.div>
             <motion.div variants={item}>
+              {/* Spec §1: resume path for the most recent session */}
+              <ContinueStudying
+                target={
+                  stats.recentSessions.length > 0
+                    ? {
+                        title:
+                          stats.recentSessions[0].title ||
+                          stats.recentSessions[0].subject?.name ||
+                          "Last session",
+                        subjectName: stats.recentSessions[0].subject?.name ?? null,
+                        subjectColor: stats.recentSessions[0].subject?.color ?? null,
+                        minutes: stats.recentSessions[0].durationMin,
+                        when: "recent",
+                      }
+                    : null
+                }
+              />
+            </motion.div>
+            <motion.div variants={item}>
               <DeadlineList deadlines={weekly?.deadlines ?? []} />
+            </motion.div>
+            <motion.div variants={item}>
+              {/* Spec §1 UPCOMING: goal due dates */}
+              <Upcoming
+                items={goals.map((g) => ({
+                  id: g.id,
+                  title: g.title,
+                  dueDate: g.dueDate ?? new Date(0),
+                  status: g.status,
+                  subjectName: null,
+                  subjectColor: null,
+                }))}
+              />
             </motion.div>
             {stats.subjectBreakdown.length > 0 && (
               <motion.div variants={item}>

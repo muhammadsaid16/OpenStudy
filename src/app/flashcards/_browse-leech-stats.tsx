@@ -1,0 +1,375 @@
+"use client";
+
+// ─── Flashcards — BROWSE / LEECHES / STATS modes ─────────────────
+// Extracted from the monolith (browse ~1172-1380, leeches ~1383-1418,
+// stats ~1421-1472). Pure view components; state stays in the parent.
+
+import {
+  Search, CheckSquare, Square, Trash2, Tag, ArrowRight, Pencil,
+  AlertTriangle,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Button, EmptyState, Skeleton, Skeleton as Sk } from "@/components/ui";
+import { cn } from "@/lib/utils";
+import { spotlightProps } from "@/lib/interactions";
+import { Markdown } from "@/components/markdown";
+import { getCardStatus } from "@/lib/card-status";
+
+export interface BrowseCard {
+  id: string;
+  front: string;
+  back: string;
+  description?: string | null;
+  choices?: string[] | null;
+  tags?: { tag: { id: string; name: string } }[] | null;
+  bundle?: { id: string; name: string; color?: string | null } | null;
+  topic?: { name: string; subject?: { name?: string } | null } | null;
+  reviewCount: number;
+  nextReview: Date | string;
+}
+
+export interface BundleLike {
+  id: string;
+  name: string;
+  description?: string | null;
+  color?: string | null;
+  _count: { flashcards: number };
+}
+
+// ─── BROWSE ────────────────────────────────────────────────────────
+export interface BrowseModeProps<C extends BrowseCard> {
+  browseScope: "cards" | "bundles";
+  onScopeChange: (s: "cards" | "bundles") => void;
+  browseQuery: string;
+  onQueryChange: (q: string) => void;
+  browseLoaded: boolean;
+  browseFilteredCards: C[];
+  bundles: BundleLike[];
+  browseSelected: Set<string>;
+  browseFlipped: Set<string>;
+  allBrowseSelected: boolean;
+  nowMs: number;
+  onSelectToggle: (id: string) => void;
+  onSelectAllToggle: () => void;
+  onFlipToggle: (id: string) => void;
+  onOpenBundle: (id: string) => void;
+  onEditCard: (card: C) => void;
+  onDeleteCard: (card: C) => void;
+  onBatchDelete: () => void;
+  onBatchTag: () => void;
+  onBatchMove: () => void;
+  cardKindOf: (c: C) => string;
+}
+
+export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
+  const router = useRouter();
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
+          <input
+            placeholder={p.browseScope === "bundles" ? "SEARCH BUNDLES..." : "SEARCH ALL CARDS..."}
+            value={p.browseQuery}
+            onChange={(e) => p.onQueryChange(e.target.value)}
+            className="h-10 w-full border-2 border-border bg-bg pl-10 pr-3 text-sm font-bold uppercase tracking-tight text-fg placeholder:text-muted focus:outline-none"
+          />
+        </div>
+        <select
+          value={p.browseScope}
+          onChange={(e) => p.onScopeChange(e.target.value as "cards" | "bundles")}
+          aria-label="Search scope: cards or bundles"
+          className="h-10 border-2 border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-fg focus:outline-none"
+        >
+          <option value="cards" className="bg-bg text-fg">SEARCH CARDS</option>
+          <option value="bundles" className="bg-bg text-fg">SEARCH BUNDLES</option>
+        </select>
+      </div>
+
+      {/* Batch toolbar */}
+      {p.browseScope === "cards" && p.browseLoaded && p.browseFilteredCards.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 border-2 border-border bg-bg p-3">
+          <button
+            onClick={p.onSelectAllToggle}
+            className="flex items-center gap-2 border-2 border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-fg"
+          >
+            {p.allBrowseSelected ? <CheckSquare size={14} /> : <Square size={14} />}
+            {p.allBrowseSelected ? "DESELECT ALL" : "SELECT ALL"}
+          </button>
+          {p.browseSelected.size > 0 && (
+            <>
+              <span className="text-xs font-bold uppercase tracking-widest text-accent">
+                {p.browseSelected.size} SELECTED
+              </span>
+              <button
+                onClick={p.onBatchDelete}
+                className="flex items-center gap-2 border-2 border-danger px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-danger transition-colors hover:bg-danger hover:text-on-color"
+              >
+                <Trash2 size={14} /> DELETE
+              </button>
+              <button
+                onClick={p.onBatchTag}
+                className="flex items-center gap-2 border-2 border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent"
+              >
+                <Tag size={14} /> TAG
+              </button>
+              <button
+                onClick={p.onBatchMove}
+                className="flex items-center gap-2 border-2 border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent"
+              >
+                <ArrowRight size={14} /> MOVE
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {!p.browseLoaded ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Sk key={i} className="h-48 w-full" />
+          ))}
+        </div>
+      ) : p.browseScope === "bundles" ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {p.bundles.map((bundle) => (
+            <button
+              key={bundle.id}
+              onClick={() => p.onOpenBundle(bundle.id)}
+              {...spotlightProps()}
+              className="spotlight-card group relative flex h-48 w-full flex-col justify-between rounded-2xl border border-zinc-800 bg-zinc-900/80 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-yellow-400/50 hover:bg-zinc-900 hover:shadow-[0_14px_35px_-15px_rgba(0,0,0,0.7)]"
+              style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
+            >
+              <div
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-black transition-transform duration-200 group-hover:scale-110"
+                style={{
+                  backgroundColor: `${bundle.color || "#DFE104"}1f`,
+                  color: bundle.color || "#DFE104",
+                  boxShadow: `inset 0 0 0 1px ${(bundle.color || "#DFE104")}3d`,
+                }}
+              >
+                {bundle.name.charAt(0)}
+              </div>
+              <div className="mt-3 min-w-0">
+                <h3 className="truncate text-lg font-bold text-white transition-colors group-hover:text-yellow-400">
+                  {bundle.name}
+                </h3>
+                {bundle.description && (
+                  <p className="mt-1 line-clamp-2 text-xs text-zinc-400">{bundle.description}</p>
+                )}
+              </div>
+              <div className="flex items-center justify-between">
+                <span
+                  className="rounded-full px-2.5 py-1 font-mono text-xs"
+                  style={{ backgroundColor: `${bundle.color || "#DFE104"}14`, color: bundle.color || "#DFE104" }}
+                >
+                  {bundle._count.flashcards} CARD{bundle._count.flashcards !== 1 ? "S" : ""}
+                </span>
+                <span className="text-xs font-bold text-yellow-400 group-hover:underline">Open →</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {p.browseFilteredCards.map((card) => {
+            const flipped = p.browseFlipped.has(card.id);
+            const selected = p.browseSelected.has(card.id);
+            const status = getCardStatus(card, p.nowMs);
+            return (
+              <div
+                key={card.id}
+                className={cn(
+                  "group relative flex min-h-[200px] flex-col overflow-hidden rounded-2xl border-2 p-5 transition-all duration-200",
+                  selected
+                    ? "border-accent bg-accent/5"
+                    : flipped
+                      ? "border-accent bg-accent text-accent-fg shadow-[0_14px_40px_-12px_rgba(250,204,21,0.3)] -translate-y-0.5"
+                      : "border-border bg-bg shadow-sm hover:-translate-y-1 hover:border-fg hover:shadow-lg"
+                )}
+              >
+                <div className="mb-3 flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); p.onSelectToggle(card.id); }}
+                      className="text-muted-fg hover:text-accent"
+                      aria-label={selected ? "Deselect card" : "Select card"}
+                    >
+                      {selected ? <CheckSquare size={14} className="text-accent" /> : <Square size={14} />}
+                    </button>
+                    <span className={cn("h-2 w-2 rounded-full", status.dot)} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{status.label}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); p.onEditCard(card); }}
+                      aria-label="Edit card"
+                      title="Edit"
+                      className="p-1.5 text-muted-fg transition-colors hover:bg-accent hover:text-accent-fg"
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); p.onDeleteCard(card); }}
+                      aria-label="Delete card"
+                      title="Delete"
+                      className="p-1.5 text-muted-fg transition-colors hover:bg-danger hover:text-on-color"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+                <div
+                  className="flex flex-1 cursor-pointer items-center justify-center text-center"
+                  onClick={() => p.onFlipToggle(card.id)}
+                >
+                  <div>
+                    <span className={cn("mb-2 inline-block text-[10px] font-bold uppercase tracking-widest", flipped ? "text-accent-fg/70" : "text-muted-fg")}>
+                      {flipped ? "ANSWER" : "QUESTION"}
+                    </span>
+                    <div className="text-center text-lg font-bold uppercase tracking-tight leading-relaxed">
+                      {flipped ? <Markdown content={card.back} align="center" /> : card.front}
+                    </div>
+                  </div>
+                </div>
+                {card.description && (
+                  <p className={cn("mt-2 text-xs leading-relaxed tracking-tight", flipped ? "text-accent-fg/70" : "text-zinc-400")}>
+                    {card.description}
+                  </p>
+                )}
+                {card.tags && card.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {card.tags.map(({ tag }) => (
+                      <span key={tag.id} className="bg-muted px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-fg">
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-fg">
+                  {card.bundle ? (
+                    <span className="flex items-center gap-1">
+                      <span className="h-2 w-2" style={{ backgroundColor: card.bundle.color ?? undefined }} />
+                      {card.bundle.name}
+                    </span>
+                  ) : card.topic ? (
+                    <span>{card.topic.subject?.name ?? "GENERAL"} › {card.topic.name}</span>
+                  ) : <span />}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── LEECHES ───────────────────────────────────────────────────────
+export interface LeechCard {
+  id: string;
+  front: string;
+  consecutiveAgain?: number;
+  bundle?: { name?: string } | null;
+}
+
+export interface LeechesModeProps {
+  leechLoaded: boolean;
+  leechCards: LeechCard[];
+  onUnleech: (id: string) => void;
+}
+
+export function LeechesMode(p: LeechesModeProps) {
+  return (
+    <div className="space-y-6">
+      <div className="border-2 border-danger bg-danger/5 p-4">
+        <p className="text-sm font-bold uppercase tracking-widest text-danger">
+          <AlertTriangle size={14} className="mr-2 inline" />
+          LEECH PROTECTION
+        </p>
+        <p className="mt-1 text-xs text-muted-fg uppercase tracking-widest">
+          CARDS WITH 5+ CONSECUTIVE &quot;AGAIN&quot; ANSWERS ARE FLAGGED HERE. CONSIDER REWRITING, SPLITTING, OR ADDING HINTS.
+        </p>
+      </div>
+      {!p.leechLoaded ? (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+        </div>
+      ) : p.leechCards.length === 0 ? (
+        <EmptyState icon={<AlertTriangle size={48} />} title="NO LEECHES" description="NO CARDS HAVE BEEN FLAGGED YET. KEEP STUDYING!" />
+      ) : (
+        <div className="space-y-3">
+          {p.leechCards.map((card) => (
+            <div key={card.id} className="flex items-center justify-between border-2 border-border bg-bg p-4">
+              <div className="flex-1">
+                <p className="text-sm font-bold uppercase tracking-tight">{card.front}</p>
+                <p className="text-xs text-muted-fg uppercase tracking-widest">
+                  {card.bundle?.name ?? "NO BUNDLE"} • {card.consecutiveAgain}× AGAIN
+                </p>
+              </div>
+              <Button size="sm" variant="secondary" onClick={() => p.onUnleech(card.id)}>
+                UN-LEECH
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── STATS ─────────────────────────────────────────────────────────
+export interface HeatEntry { date: string; count: number }
+
+export interface StatsModeProps {
+  streak: number;
+  reviewsToday: number;
+  leechCount: number;
+  heatmap: HeatEntry[];
+}
+
+export function StatsMode(p: StatsModeProps) {
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-3 gap-4">
+        <div className="border-2 border-border bg-bg p-6 text-center">
+          <p className="text-4xl font-bold uppercase tracking-tighter text-accent">{p.streak}</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">DAY STREAK</p>
+        </div>
+        <div className="border-2 border-border bg-bg p-6 text-center">
+          <p className="text-4xl font-bold uppercase tracking-tighter">{p.reviewsToday}</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">REVIEWS TODAY</p>
+        </div>
+        <div className="border-2 border-border bg-bg p-6 text-center">
+          <p className="text-4xl font-bold uppercase tracking-tighter text-success">{p.leechCount}</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">LEECHES</p>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-bold uppercase tracking-tighter">ACTIVITY (LAST 90 DAYS)</h3>
+        <div className="flex flex-wrap gap-1">
+          {Array.from({ length: 90 }).map((_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - (89 - i));
+            const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+            const entry = p.heatmap.find((h) => h.date === dateStr);
+            const count = entry?.count ?? 0;
+            const intensity = count === 0 ? "bg-muted" : count < 5 ? "bg-accent/30" : count < 15 ? "bg-accent/60" : "bg-accent";
+            return (
+              <div key={i} className={`h-3 w-3 ${intensity}`} title={`${dateStr}: ${count} reviews`} />
+            );
+          })}
+        </div>
+        <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-fg">
+          <span>LESS</span>
+          <div className="h-3 w-3 bg-muted" />
+          <div className="h-3 w-3 bg-accent/30" />
+          <div className="h-3 w-3 bg-accent/60" />
+          <div className="h-3 w-3 bg-accent" />
+          <span>MORE</span>
+        </div>
+      </div>
+    </div>
+  );
+}

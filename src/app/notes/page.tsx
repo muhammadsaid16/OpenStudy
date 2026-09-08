@@ -10,6 +10,7 @@ import { getAllNotes, getSubjects, createNote, deleteNote, updateNote, getBundle
 import { SubjectTopicSelect } from "@/components/subject-topic-select";
 import { TagInput } from "@/components/tag-input";
 import { Markdown } from "@/components/markdown";
+import { formatRelative } from "@/lib/utils";
 import { NoteAiImportButton } from "@/components/note-ai-import-button";
 import { showUndo } from "@/components/undo-toast";
 import { spotlightProps } from "@/lib/interactions";
@@ -321,8 +322,12 @@ function NotesContent() {
                     <span className="px-1 text-[10px] font-bold text-zinc-500">+{note.tags.length - 3}</span>
                   )}
                 </div>
-                <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-accent transition-colors">
-                  STUDY →
+                {/* Spec §4: note metadata shows freshness, not just tags */}
+                <span
+                  className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-zinc-500 transition-colors"
+                  title={`Updated ${new Date(note.updatedAt).toLocaleString()}`}
+                >
+                  {formatRelative(new Date(note.updatedAt))}
                 </span>
               </div>
 
