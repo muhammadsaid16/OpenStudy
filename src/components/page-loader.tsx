@@ -19,12 +19,17 @@ export type LoaderVariant =
   | "cards";    // bundles/[id]/cards
 
 function LoaderBar({ label }: { label: string }) {
+  // Spec (global): loading labels are implementation-style text —
+  // "LOADING DASHBOARD_" exposed internals. Skeletons stay visual only;
+  // a visually-hidden status keeps screen readers informed.
   return (
     <div className="mb-10" role="status" aria-label={`Loading ${label}`}>
+      <span className="sr-only" aria-hidden={false}>
+        Loading {label}…
+      </span>
       <div className="mb-3 flex items-center justify-between">
         <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
-          LOADING {label}
-          <span className="animate-pulse">_</span>
+          {label.toUpperCase()}
         </p>
         <p className="font-mono text-xs uppercase tracking-widest text-muted-fg">
           OPENSTUDY

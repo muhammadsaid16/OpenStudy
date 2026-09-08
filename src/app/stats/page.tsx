@@ -10,8 +10,9 @@ import { StatsHeatmap } from "@/components/stats-heatmap";
 import { RetentionCurve } from "@/components/retention-curve";
 import { HardestCardsTable } from "@/components/hardest-cards-table";
 import { ForecastCard, BundleMasteryTable } from "@/components/stats-forecast-mastery";
-import { getAllReviewLogs, getBundles, getFlashcards, getStudySessions } from "@/app/actions";
+import { getAllReviewLogs, getBundles, getFlashcards, getStudySessions, getSubjects } from "@/app/actions";
 import { computeStreak } from "@/lib/stats";
+import { formatDuration } from "@/lib/utils";
 import type { BundleRec, FlashcardRec, ReviewLogRec, StudySessionRec } from "@/lib/db";
 import { Flame, Layers, Clock, Trophy, AlertTriangle, Activity, Timer } from "lucide-react";
 
@@ -100,6 +101,8 @@ export default function StatsPage() {
   const [bundles, setBundles] = useState<BundleRec[] | null>(null);
   const [cards, setCards] = useState<FlashcardRec[] | null>(null);
   const [sessions, setSessions] = useState<StudySessionRec[] | null>(null);
+  // id -> name, for resolving subject names in the insights cards.
+  const [subjectNames, setSubjectNames] = useState<Map<string, string>>(new Map());
   const [period, setPeriod] = useState<Period>("365");
   // wall clock — captured once in the mount effect (react-hooks/purity bans Date.now() in render, even inside useMemo)
   const [nowMs, setNowMs] = useState(0);
@@ -131,14 +134,15 @@ export default function StatsPage() {
   useEffect(() => {
     let cancelled = false;
     const now = Date.now(); // impure call is legal in effect scope, not render
-    Promise.all([getAllReviewLogs(), getBundles(), getFlashcards(), getStudySessions()]).then(
-      ([r, b, c, s]) => {
+    Promise.all([getAllReviewLogs(), getBundles(), getFlashcards(), getStudySessions(), getSubjects()]).then(
+      ([r, b, c, s, subs]) => {
         if (cancelled) return;
         setNowMs(now);
         setReviews(r);
         setBundles(b);
         setCards(c as unknown as FlashcardRec[]);
         setSessions(s as unknown as StudySessionRec[]);
+        setSubjectNames(new Map(subs.map((x) => [x.id, x.name])));
       }
     ).catch(() => {
       // Storage failure: unblock the loader; charts render empty — but the
@@ -166,6 +170,46 @@ export default function StatsPage() {
   const streak = computeStreak(reviews);
   const mastered = cards.filter(c => (c.intervalDays ?? 0) >= 21).length;
   const leeches = cards.filter(c => c.isLeech).length;
+
+  // Spec §7 actionable insights — derived from the FULL session list.
+  // Best weekday by total focus minutes; most-studied subject by minutes.
+  const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const bestDay = (() => {
+    if (sessions.length === 0) return null;
+    const byDay = new Array(7).fill(0);
+    for (const s of sessions) byDay[new Date(s.startedAt).getDay()] += s.durationMin ?? 0;
+    const idx = byDay.indexOf(Math.max(...byDay));
+    if (byDay[idx] === 0) return null;
+    const mins = byDay[idx];
+    return {
+      label: WEEKDAYS[idx],
+      label2: mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60 ? `${mins % 60}m` : ""}`.trim() : `${mins}m`,
+    };
+  })();
+  const topSubject = (() => {
+    if (sessions.length === 0) return null;
+    const bySubject = new Map<string, number>();
+    for (const s of sessions) {
+      const key = s.subjectId ?? "none";
+      bySubject.set(key, (bySubject.get(key) ?? 0) + (s.durationMin ?? 0));
+    }
+    let topKey: string | null = null;
+    let topMin = 0;
+    for (const [k, m] of bySubject) {
+      if (m > topMin) {
+        topKey = k;
+        topMin = m;
+      }
+    }
+    if (!topKey || topMin === 0) return null;
+    return {
+      name:
+        topKey === "none"
+          ? "General sessions"
+          : subjectNames.get(topKey) ?? "A subject",
+      minutes: topMin,
+    };
+  })();
 
   const daily = buildDailyBars(reviews, 30);
   const hourly = buildHourly(reviews);
@@ -226,6 +270,32 @@ export default function StatsPage() {
             <div className="text-[11px] text-muted-fg">{k.sub}</div>
           </Card>
         ))}
+      </div>
+
+      {/* Actionable insights (spec §7): not vanity metrics — "best day"
+          and "most studied subject" tell the user when/what actually
+          works, derived from real session + review data. */}
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Card className="!p-5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">Best study day</p>
+          <p className="mt-1 font-display text-xl font-bold tracking-tight">
+            {bestDay ? `${bestDay.label} — ${bestDay.label2}` : "No data yet"}
+          </p>
+          <p className="mt-1 text-xs text-muted-fg">
+            {bestDay ? `Most focused weekday across ${sessions.length} sessions.` : "Start a session to find yours."}
+          </p>
+        </Card>
+        <Card className="!p-5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">Most studied subject</p>
+          <p className="mt-1 font-display text-xl font-bold tracking-tight">
+            {topSubject ? topSubject.name : "No data yet"}
+          </p>
+          <p className="mt-1 text-xs text-muted-fg">
+            {topSubject
+              ? `${formatDuration(topSubject.minutes)} focused — keep the streak on it.`
+              : "Your subjects appear here as you study."}
+          </p>
+        </Card>
       </div>
 
       {/* Row: 30d bars + hourly */}

@@ -74,6 +74,10 @@ export default function SessionsPage() {
   const [presetName, setPresetName] = useState("");
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
 
+  // Spec §5 history filters: Today | 7 days | 30 days | All (+ subject).
+  const [historyRange, setHistoryRange] = useState<"today" | "7d" | "30d" | "all">("all");
+  const [historySubject, setHistorySubject] = useState<string>("all");
+
   const [, startTransition] = useTransition();
 
   useEffect(() => {
@@ -260,6 +264,22 @@ export default function SessionsPage() {
   };
 
   const totalMinutes = sessions.reduce((acc, s) => acc + s.durationMin, 0);
+
+  // Spec §5: derive the visible history rows from range + subject filters.
+  // today = calendar day; 7d/30d = rolling window on startedAt.
+  const filteredSessions = sessions.filter((s) => {
+    if (historySubject !== "all" && s.subject?.id !== historySubject) return false;
+    if (historyRange === "all") return true;
+    const started = new Date(s.startedAt).getTime();
+    const now = Date.now();
+    if (historyRange === "today") {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return started >= d.getTime();
+    }
+    const days = historyRange === "7d" ? 7 : 30;
+    return started >= now - days * 86_400_000;
+  });
 
   const pomoActive = pomo.active;
 
@@ -711,18 +731,55 @@ export default function SessionsPage() {
         </div>
       </div>
 
-      {/* Session History */}
+      {/* Session History — spec §5: filterable (range + subject), rows show
+          subject, duration, date, type; total reflects the filter. */}
       <div>
-        <div className="mb-6 flex items-end justify-between">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <h2 className="text-3xl font-bold uppercase tracking-tighter">
             HISTORY
           </h2>
-          {sessions.length > 0 && (
-            <div className="flex gap-6 text-xs font-bold uppercase tracking-widest text-muted-fg">
-              <span>{sessions.length} SESSIONS</span>
-              <span>{formatDuration(totalMinutes)} TOTAL</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label="History range">
+              {([
+                ["today", "Today"],
+                ["7d", "7 days"],
+                ["30d", "30 days"],
+                ["all", "All"],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setHistoryRange(key)}
+                  aria-pressed={historyRange === key}
+                  className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                    historyRange === key ? "bg-accent text-white" : "text-muted-fg hover:text-fg"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-          )}
+            <select
+              aria-label="Filter by subject"
+              value={historySubject}
+              onChange={(e) => setHistorySubject(e.target.value)}
+              className="glass-inset cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg outline-none"
+            >
+              <option value="all">All subjects</option>
+              {subjects.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+            {filteredSessions.length > 0 && (
+              <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-muted-fg">
+                <span>{filteredSessions.length} SESSIONS</span>
+                <span>
+                  {formatDuration(filteredSessions.reduce((acc, s) => acc + s.durationMin, 0))} TOTAL
+                </span>
+              </div>
+            )}
+          </div>
         </div>
         {!loaded ? (
           <div className="border-2 border-border divide-y-2 divide-border">
@@ -739,15 +796,15 @@ export default function SessionsPage() {
               </div>
             ))}
           </div>
-        ) : sessions.length === 0 ? (
+        ) : filteredSessions.length === 0 ? (
           <EmptyState
             icon={<Timer size={48} />}
-            title="NO SESSIONS YET"
-            description="START YOUR FIRST STUDY SESSION WITH THE TIMER ABOVE."
+            title="NO SESSIONS IN VIEW"
+            description="NO SESSIONS MATCH THIS FILTER — TRY A WIDER RANGE."
           />
         ) : (
           <div className="border-2 border-border divide-y-2 divide-border">
-            {sessions.map((session) => (
+            {filteredSessions.map((session) => (
               <div key={session.id} className="group flex items-center justify-between p-6 transition-colors hover:border-accent hover:bg-muted/30">
                 <div className="flex items-center gap-4">
                   {session.subject && (

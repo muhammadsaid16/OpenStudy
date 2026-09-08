@@ -30,23 +30,29 @@ const navItems = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-// Nav groups (audit §5): LEARN / TRACK / SYSTEM — scannable sections
-// instead of an undifferentiated 8-item list (Hick's law relief).
+// Nav groups — spec mental model: LEARN (content) / FOCUS (time) /
+// INSIGHTS (reflection) / SYSTEM. Replaces the previous flat list;
+// scannable sections instead of 8 undifferentiated items.
 const navGroups: { heading: string; items: typeof navItems }[] = [
   {
     heading: "Learn",
     items: [
-      { href: "/", label: "Dashboard", icon: LayoutDashboard },
       { href: "/subjects", label: "Subjects", icon: BookOpen },
       { href: "/flashcards", label: "Flashcards", icon: Brain },
       { href: "/notes", label: "Notes", icon: StickyNote },
     ],
   },
   {
-    heading: "Track",
+    heading: "Focus",
     items: [
       { href: "/sessions", label: "Sessions", icon: Timer },
       { href: "/goals", label: "Goals", icon: Target },
+    ],
+  },
+  {
+    heading: "Insights",
+    items: [
+      { href: "/", label: "Dashboard", icon: LayoutDashboard },
       { href: "/stats", label: "Stats", icon: BarChart3 },
     ],
   },
