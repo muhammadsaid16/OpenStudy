@@ -59,7 +59,7 @@ export function SubjectIconPicker({
               aria-label={`Icon: ${name}`}
               aria-pressed={active}
               className={cn(
-                "flex aspect-square items-center justify-center rounded-lg border-2 transition-all",
+                "flex aspect-square items-center justify-center rounded-xl border transition-all",
                 active
                   ? "border-accent bg-accent-soft text-accent"
                   : "border-border bg-bg text-muted-fg hover:border-fg hover:text-fg"

@@ -140,7 +140,7 @@ export function AiImportModal({
         <select
           value={targetBundleId}
           onChange={(e) => setTargetBundleId(e.target.value)}
-          className="w-full rounded-xl border-2 border-border bg-bg px-3 py-2 text-sm font-bold text-fg focus:border-accent focus:outline-none"
+          className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm font-bold text-fg focus:border-accent focus:outline-none"
           aria-label="Destination bundle"
         >
           {availableBundles.map((b) => (
@@ -151,7 +151,7 @@ export function AiImportModal({
         </select>
       ) : (
         <p className="text-sm text-warning">
-          NO BUNDLES YET — CREATE ONE IN /bundles FIRST.
+          No bundles yet — create one in /bundles first.
         </p>
       )}
     </div>
@@ -176,7 +176,7 @@ export function AiImportModal({
         value={pasted}
         onChange={(e) => { setPasted(e.target.value); if (phase === "error") setPhase("idle"); }}
         placeholder={`[\n  { "front": "What is 2+2?", "back": "4", "description": "Optional hint" },\n  { "front": "...", "back": "..." }\n]`}
-        className="w-full min-h-[200px] resize-y rounded-xl border-2 border-border bg-bg p-3 font-mono text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:border-accent focus:outline-none"
+        className="w-full min-h-[200px] resize-y rounded-xl border border-border bg-bg p-3 font-mono text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:border-accent focus:outline-none"
         spellCheck={false}
         autoComplete="off"
         aria-label="Paste NotebookLM JSON output"

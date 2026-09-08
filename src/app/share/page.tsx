@@ -58,25 +58,25 @@ export default function SharePage() {
 
   return (
     <div className="mx-auto max-w-xl p-8 lg:p-12">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">SHARED DECK</p>
-      <h1 className="mt-1 text-3xl font-bold uppercase lg:text-5xl">{bundle.name}</h1>
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">Shared deck</p>
+      <h1 className="mt-1 text-3xl font-bold lg:text-5xl">{bundle.name}</h1>
       {bundle.description && <p className="mt-2 text-sm text-muted-fg">{bundle.description}</p>}
-      <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">{bundle.cards.length} CARDS</p>
-      <div className="mt-6 space-y-px border-2 border-border">
+      <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">{bundle.cards.length} cards</p>
+      <div className="mt-6 divide-y divide-border overflow-hidden rounded-2xl border border-border">
         {bundle.cards.slice(0, 5).map((c, i) => (
           <div key={i} className="bg-bg p-3">
-            <p className="truncate text-sm font-bold uppercase">{c.front}</p>
+            <p className="truncate text-sm font-bold">{c.front}</p>
             <p className="truncate text-xs text-muted-fg">{c.back}</p>
           </div>
         ))}
         {bundle.cards.length > 5 && (
-          <p className="bg-bg p-3 text-xs uppercase tracking-widest text-muted-fg">+ {bundle.cards.length - 5} MORE</p>
+          <p className="bg-bg p-3 text-xs uppercase tracking-widest text-muted-fg">+ {bundle.cards.length - 5} more</p>
         )}
       </div>
-      {error !== "" && <p className="mt-3 text-xs font-bold uppercase tracking-widest text-red-500">{error}</p>}
+      {error !== "" && <p className="mt-3 text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
       <div className="mt-6 flex gap-2">
-        <Button disabled={busy} onClick={doImport}>{busy ? "IMPORTING…" : `IMPORT ${bundle.cards.length} CARDS`}</Button>
-        <Button variant="secondary" onClick={() => router.push("/bundles")}>CANCEL</Button>
+        <Button disabled={busy} onClick={doImport}>{busy ? "Importing…" : `Import ${bundle.cards.length} cards`}</Button>
+        <Button variant="secondary" onClick={() => router.push("/bundles")}>Cancel</Button>
       </div>
     </div>
   );

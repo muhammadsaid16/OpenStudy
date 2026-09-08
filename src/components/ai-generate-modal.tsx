@@ -300,7 +300,7 @@ export function AiGenerateModal({
   const inputStep = (
     <div className="space-y-4">
       {/* Mode switcher (text vs image) */}
-      <div className="flex gap-1 rounded-xl border-2 border-border bg-bg p-1">
+      <div className="flex gap-1 rounded-xl border border-border bg-bg p-1">
         <button
           type="button"
           onClick={() => { if (phase !== "generating" && phase !== "saving") setMode("text"); }}
@@ -345,7 +345,7 @@ export function AiGenerateModal({
           <select
             value={bundleId}
             onChange={(e) => setBundleId(e.target.value)}
-            className="w-full rounded-xl border-2 border-border bg-bg px-3 py-2 text-sm font-bold text-fg focus:border-accent focus:outline-none"
+            className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm font-bold text-fg focus:border-accent focus:outline-none"
             aria-label="Destination bundle"
           >
             {bundles.map((b) => (
@@ -356,7 +356,7 @@ export function AiGenerateModal({
           </select>
         ) : (
           <p className="text-sm text-warning">
-            NO BUNDLES YET — CREATE ONE IN /bundles FIRST.
+            No bundles yet — create one in /bundles first.
           </p>
         )}
       </div>
@@ -391,7 +391,7 @@ export function AiGenerateModal({
             placeholder={
               "Paste lesson notes, a chapter, a transcript — anything teachable.\n\nTip: ⌘/Ctrl + Enter to generate."
             }
-            className="w-full min-h-[260px] resize-y rounded-xl border-2 border-border bg-bg p-3 text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:border-accent focus:outline-none"
+            className="w-full min-h-[260px] resize-y rounded-xl border border-border bg-bg p-3 text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:border-accent focus:outline-none"
             spellCheck={false}
             autoComplete="off"
             aria-label="Source text for AI card generation"
@@ -419,7 +419,7 @@ export function AiGenerateModal({
           />
           {imagePreview ? (
             <div className="space-y-2">
-              <div className="relative overflow-hidden rounded-xl border-2 border-border bg-bg">
+              <div className="relative overflow-hidden rounded-xl border border-border bg-bg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imagePreview}
@@ -443,7 +443,7 @@ export function AiGenerateModal({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-bg px-4 py-12 text-muted-fg transition-colors hover:border-accent hover:text-fg"
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-bg px-4 py-12 text-muted-fg transition-colors hover:border-accent hover:text-fg"
             >
               <Upload size={28} />
               <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
@@ -585,7 +585,7 @@ export function AiGenerateModal({
           return (
             <li
               key={i}
-              className={`group rounded-xl border-2 p-3 transition-colors ${
+              className={`group rounded-xl border p-3 transition-colors ${
                 off
                   ? "border-border bg-bg/30 opacity-50"
                   : "border-border bg-bg hover:border-accent/40"
@@ -597,7 +597,7 @@ export function AiGenerateModal({
                   onClick={() => toggleReject(i)}
                   aria-pressed={!off}
                   aria-label={off ? "Include this card" : "Exclude this card"}
-                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors ${
                     off
                       ? "border-border bg-bg text-muted-fg"
                       : "border-accent bg-accent text-accent-fg"

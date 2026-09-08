@@ -13,7 +13,7 @@ interface TagInputProps {
 /**
  * Multi-tag input: type + Enter or comma to add a chip,
  * click the × on a chip to remove it. Matches the ONF dark spec
- * (bg-zinc-800 text-yellow-400 pill badges).
+ * (accent-soft pill badges).
  */
 export function TagInput({ tags, onChange, placeholder, label }: TagInputProps) {
   const [draft, setDraft] = useState("");
@@ -40,18 +40,18 @@ export function TagInput({ tags, onChange, placeholder, label }: TagInputProps) 
       {label && (
         <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{label}</label>
       )}
-      <div className="flex flex-wrap items-center gap-2 rounded-md border border-zinc-700 bg-zinc-950 px-3 py-3 focus-within:border-yellow-400 transition-colors">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border glass-inset px-3 py-3 focus-within:border-accent transition-colors">
         {tags.map((t) => (
           <span
             key={t}
-            className="inline-flex items-center gap-1 rounded bg-zinc-800 px-2 py-1 text-xs font-bold text-yellow-400"
+            className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-1 text-xs font-bold text-accent"
           >
             {t}
             <button
               type="button"
               onClick={() => removeTag(t)}
               aria-label={`Remove ${t}`}
-              className="text-zinc-500 hover:text-fg"
+              className="rounded-full p-0.5 text-muted-fg transition-colors hover:text-fg"
             >
               <X size={12} />
             </button>
@@ -69,8 +69,8 @@ export function TagInput({ tags, onChange, placeholder, label }: TagInputProps) 
             }
           }}
           onBlur={commit}
-          placeholder={placeholder ?? "ADD TAG, PRESS ENTER"}
-          className="min-w-[120px] flex-1 bg-transparent text-sm text-white placeholder:text-zinc-600 outline-none"
+          placeholder={placeholder ?? "Add tag, press Enter"}
+          className="min-w-[120px] flex-1 bg-transparent text-sm text-fg placeholder:text-muted-fg/60 outline-none"
         />
       </div>
     </div>

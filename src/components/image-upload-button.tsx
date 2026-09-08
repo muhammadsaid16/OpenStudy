@@ -50,7 +50,7 @@ export function ImageUploadButton({
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="inline-flex items-center gap-1.5 border-2 border-border px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent"
+        className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent"
       >
         <ImagePlus size={12} />
         {label}

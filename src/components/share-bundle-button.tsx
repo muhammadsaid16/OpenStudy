@@ -78,23 +78,23 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
         <Share2 size={16} />
         SHARE
       </Button>
-      <Modal open={open} onClose={() => setOpen(false)} title="SHARE BUNDLE">
+      <Modal open={open} onClose={() => setOpen(false)} title="Share bundle">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-widest text-muted-fg">
-            ANYONE WITH THE LINK OR FILE CAN IMPORT “{bundleName.toUpperCase()}” INTO THEIR LIBRARY.
+            Anyone with the link or file can import “{bundleName}” into their library.
           </p>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="secondary" disabled={busy} onClick={makeLink}>{busy ? "…" : "COPY LINK"}</Button>
-            <Button variant="secondary" disabled={busy} onClick={download}>{busy ? "…" : "SAVE FILE"}</Button>
+            <Button variant="secondary" disabled={busy} onClick={makeLink}>{busy ? "…" : "Copy link"}</Button>
+            <Button variant="secondary" disabled={busy} onClick={download}>{busy ? "…" : "Save file"}</Button>
           </div>
           {link && (
-            <button type="button" onClick={copy} className="w-full break-all rounded-lg border-2 border-accent bg-accent/10 p-3 text-left text-xs">
+            <button type="button" onClick={copy} className="w-full break-all rounded-xl border border-accent bg-accent/10 p-3 text-left text-xs">
               {link}
-              <span className="mt-1 block font-bold uppercase tracking-widest">{copied ? "COPIED ✓" : "TAP TO COPY"}</span>
+              <span className="mt-1 block font-bold uppercase tracking-widest">{copied ? "Copied ✓" : "Tap to copy"}</span>
             </button>
           )}
-          {tooBig && <p className="text-xs uppercase tracking-widest text-amber-500">TOO BIG FOR A LINK — USE SAVE FILE INSTEAD.</p>}
-          {error !== "" && <p className="text-xs font-bold uppercase tracking-widest text-red-500">{error}</p>}
+          {tooBig && <p className="text-xs uppercase tracking-widest text-warning">Too big for a link — use save file instead.</p>}
+          {error !== "" && <p className="text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
         </div>
       </Modal>
     </>

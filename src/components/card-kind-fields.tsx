@@ -27,7 +27,7 @@ export function CardKindFields({
             type="button"
             onClick={() => onKindChange(k)}
             className={cn(
-              "border-2 px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors",
+              "rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors",
               kind === k ? "border-accent bg-accent/10 text-accent" : "border-border text-muted-fg hover:border-fg"
             )}
           >
@@ -44,9 +44,9 @@ export function CardKindFields({
         <textarea
           value={choicesText}
           onChange={(e) => onChoicesTextChange(e.target.value)}
-          placeholder={"WRONG OPTIONS, ONE PER LINE (MIN 2).\nTHE BACK FIELD IS THE CORRECT ANSWER."}
+          placeholder={"Wrong options, one per line (min 2).\nThe back field is the correct answer."}
           rows={3}
-          className="w-full border-2 border-border bg-bg px-3 py-2 text-sm font-bold uppercase tracking-tight text-fg placeholder:text-muted focus:border-accent focus:outline-none"
+          className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm font-bold tracking-tight text-fg placeholder:text-muted-fg/60 focus:border-accent focus:outline-none"
         />
       )}
     </div>

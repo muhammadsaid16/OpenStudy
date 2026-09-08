@@ -7,7 +7,7 @@ export const metadata = { title: "Offline — OpenStudy" };
 export default function OfflinePage() {
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center p-8 text-center">
-      <div className="mb-6 border-2 border-border bg-card px-6 py-3">
+      <div className="mb-6 rounded-2xl border border-border bg-bg px-6 py-3">
         <span className="text-4xl lg:text-6xl font-black tracking-tighter text-fg">
           OFFLINE
         </span>

@@ -308,26 +308,6 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("skeleton rounded-xl", className)} />;
 }
 
-// ─── Massive Number ───────────────────────────────────────────────
-interface MassiveNumberProps {
-  value: string | number;
-  label: string;
-  className?: string;
-}
-
-export function MassiveNumber({ value, label, className }: MassiveNumberProps) {
-  return (
-    <div className={cn("text-center", className)}>
-      <p className="font-display text-6xl font-bold tracking-tighter text-muted lg:text-8xl">
-        {value}
-      </p>
-      <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">
-        {label}
-      </p>
-    </div>
-  );
-}
-
 // ─── RingProgress (anime.js-driven SVG progress ring) ─────────────
 // Animates stroke-dashoffset on mount / value change via anime.js.
 // Pure data-viz: no state, no re-render churn.

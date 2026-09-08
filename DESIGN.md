@@ -100,6 +100,12 @@ Line-height 1.5 body / 1.05 display. Headings use `-0.03em` tracking; NO
 uppercase body text (legacy system uppercased everything — reserved now for
 eyebrows/badges only).
 
+> **Known exception (Phase 8):** page display headings (`SUBJECTS`,
+> `FLASHCARDS`, … via `RevealHeading`) stay all-caps app-wide. They are
+> set in Space Grotesk display size, not body text, and changing one page
+> alone would break cross-page consistency. Source strings elsewhere are
+> normal-case with eyebrow styling applied via CSS.
+
 ---
 
 ## 4. Surface System (Glass + Neumorphic depth)

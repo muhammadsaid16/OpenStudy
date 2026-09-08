@@ -94,9 +94,9 @@ export function BulkActionBar({
   return (
     <>
       <div className="fixed inset-x-0 bottom-6 z-40 flex justify-center px-4 pointer-events-none">
-        <div className="pointer-events-auto flex flex-wrap items-center gap-2 rounded-full border-2 border-accent/60 bg-bg-raised px-4 py-2 shadow-2xl backdrop-blur-md">
+        <div className="pointer-events-auto flex flex-wrap items-center gap-2 rounded-full border border-accent/60 bg-bg-raised px-4 py-2 shadow-2xl backdrop-blur-md">
           <span className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
-            {ids.length} SELECTED
+           {ids.length} selected
           </span>
           <span className="h-4 w-px bg-border" />
           <Button size="sm" variant="secondary" onClick={() => setTagOpen(true)} disabled={busy}>
@@ -153,7 +153,7 @@ export function BulkActionBar({
           <select
             value={effectiveMoveTarget}
             onChange={(e) => setMoveTarget(e.target.value)}
-            className="w-full rounded-xl border-2 border-border bg-bg px-3 py-2 text-sm text-fg focus:border-accent focus:outline-none"
+            className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-fg focus:border-accent focus:outline-none"
           >
             {otherBundles.map((b) => (
               <option key={b.id} value={b.id} className="bg-bg text-fg">{b.name}</option>

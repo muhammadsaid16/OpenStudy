@@ -80,10 +80,10 @@ export function SubjectTopicSelect({
             type="button"
             disabled={creating}
             onClick={() => resolve(selectedSubject, topicName)}
-            className="inline-flex shrink-0 items-center gap-2 border-2 border-border bg-bg px-4 text-xs font-bold uppercase tracking-tighter text-fg transition-all hover:bg-accent hover:text-accent-fg disabled:opacity-50"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-bg px-4 text-xs font-bold uppercase tracking-tighter text-fg transition-all hover:bg-accent hover:text-accent-fg disabled:opacity-50"
           >
             <Plus size={14} />
-            {creating ? "..." : "USE"}
+            {creating ? "…" : "Use"}
           </button>
         </div>
       )}

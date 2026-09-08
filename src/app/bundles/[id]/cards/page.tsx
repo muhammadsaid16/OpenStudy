@@ -33,17 +33,7 @@ import { cn } from "@/lib/utils";
 import type { BundleRec, CardKind } from "@/lib/db";
 import { cardKind, cleanChoices } from "@/lib/card-kinds";
 import { CardKindFields } from "@/components/card-kind-fields";
-
-type CardStatus = { label: string; dot: string };
-
-function getCardStatus(card: { reviewCount: number; nextReview: Date | string }, nowMs: number): CardStatus {
-  const rc = card.reviewCount;
-  const isDue = new Date(card.nextReview).getTime() <= nowMs;
-  if (rc === 0) return { label: "NEW", dot: "bg-gray-400" };
-  if (isDue) return { label: "DUE", dot: "bg-danger" };
-  if (rc <= 3) return { label: "LEARNING", dot: "bg-warning" };
-  return { label: "MATURE", dot: "bg-success" };
-}
+import { getCardStatus } from "@/lib/card-status";
 
 type CardTag = { tag: { id: string; name: string } };
 
@@ -194,7 +184,7 @@ export default function BundleCardsPage() {
       setLoaded(false);
       await load();
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message.toUpperCase().slice(0, 140) : "COULD NOT CREATE CARD.");
+      setCreateError(err instanceof Error ? err.message.slice(0, 140) : "Could not create card.");
     } finally {
       setCreating(false);
     }
@@ -217,7 +207,7 @@ export default function BundleCardsPage() {
       setLoaded(false);
       await load();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message.toUpperCase().slice(0, 140) : "COULD NOT SAVE CARD.");
+      setEditError(err instanceof Error ? err.message.slice(0, 140) : "Could not save card.");
     } finally {
       setSaving(false);
     }
@@ -242,30 +232,30 @@ export default function BundleCardsPage() {
       const text = await file.text();
       const parsed = parseCardsFile(text);
       if (!parsed.length) {
-        alert("NO VALID CARDS FOUND IN FILE");
+        alert("No valid cards found in file");
         return;
       }
       const res = await importCardsIntoBundle(bundleId, parsed);
-      alert(`IMPORTED ${res.count} CARDS`);
+      alert(`Imported ${res.count} cards`);
       setLoaded(false);
       await load();
     } catch (e) {
       console.error(e);
-      alert("IMPORT FAILED: INVALID FILE");
+      alert("Import failed: invalid file");
     } finally {
       setImporting(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-bg px-4 py-10 sm:px-8">
+    <div className="min-h-screen bg-bg px-4 py-10 sm:px-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/bundles")}
-              className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-border text-muted-fg transition-colors hover:border-fg hover:text-fg"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-muted-fg transition-colors hover:border-fg hover:text-fg"
               aria-label="Back to bundles"
             >
               <ArrowLeft size={18} />
@@ -286,7 +276,7 @@ export default function BundleCardsPage() {
               />
               {bundleTopicLabel && (
                 <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-muted-fg">
-                  TOPIC: {bundleTopicLabel}
+                  Topic: {bundleTopicLabel}
                 </p>
               )}
             </div>
@@ -309,21 +299,21 @@ export default function BundleCardsPage() {
                   setTimeout(() => URL.revokeObjectURL(url), 1000);
                 } catch (e) {
                   console.error("Export failed", e);
-                  alert("EXPORT FAILED — SEE CONSOLE");
+                  alert("Export failed — see console");
                 }
               }}
-              className="flex h-10 items-center gap-2 border-2 border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-fg hover:text-fg"
+              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-fg hover:text-fg"
             >
               <Download size={14} />
-              EXPORT
+              Export
             </button>
             <button
               onClick={() => document.getElementById("csv-import")?.click()}
               disabled={importing}
-              className="flex h-10 items-center gap-2 border-2 border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-fg hover:text-fg disabled:opacity-50"
+              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-fg hover:text-fg disabled:opacity-50"
             >
               <Upload size={14} />
-              {importing ? "IMPORTING..." : "IMPORT CSV"}
+              {importing ? "Importing..." : "Import CSV"}
             </button>
             <input
               id="csv-import"
@@ -355,10 +345,10 @@ export default function BundleCardsPage() {
                   setTimeout(() => setCopied(false), 2000);
                 }
               }}
-              className="flex h-10 items-center gap-2 border-2 border-yellow-400/60 bg-yellow-400/10 px-3 text-xs font-bold uppercase tracking-widest text-yellow-400 transition-colors hover:border-yellow-400 hover:bg-yellow-400/20"
+              className="flex h-10 items-center gap-2 rounded-full border border-accent/60 bg-accent-soft px-3 text-xs font-bold uppercase tracking-widest text-accent transition-colors hover:border-accent"
             >
               {copied ? <Check size={14} /> : <Link2 size={14} />}
-              {copied ? "COPIED!" : "SHARE BUNDLE"}
+              {copied ? "Copied!" : "Share bundle"}
             </button>
             <ShareBundleButton bundleId={bundleId} bundleName={bundleName} />
             <Button onClick={() => setCreateOpen(true)}>
@@ -376,29 +366,29 @@ export default function BundleCardsPage() {
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg"
             />
             <input
-              placeholder="SEARCH CARDS..."
+              placeholder="Search cards..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-full border-2 border-border bg-bg pl-10 pr-3 text-sm font-bold uppercase tracking-tight text-fg placeholder:text-muted focus:outline-none"
+              className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:border-accent"
             />
           </div>
           <select
             value={filterTag}
             onChange={(e) => setFilterTag(e.target.value)}
             aria-label="Filter cards by tag"
-            className="h-10 border-2 border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-fg focus:outline-none"
+            className="h-10 rounded-xl border border-border bg-bg px-3 text-sm text-fg focus:outline-none focus:border-accent"
           >
             <option value="all" className="bg-bg text-fg">
-              ALL TAGS
+              All tags
             </option>
             {allTags.map((t) => (
               <option key={t} value={t} className="bg-bg text-fg">
-                {t.toUpperCase()}
+                {t}
               </option>
             ))}
           </select>
           {loaded && filteredCards.length > 0 && (
-            <label className="flex h-10 cursor-pointer items-center gap-2 border-2 border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-fg">
+            <label className="flex h-10 cursor-pointer items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-fg">
               <input
                 type="checkbox"
                 aria-label="Select all visible cards"
@@ -416,7 +406,7 @@ export default function BundleCardsPage() {
                 }}
                 className="h-4 w-4 cursor-pointer accent-accent"
               />
-              SELECT ALL
+              Select all
             </label>
           )}
         </div>
@@ -431,11 +421,11 @@ export default function BundleCardsPage() {
         ) : filteredCards.length === 0 ? (
           <EmptyState
             icon={<GalleryHorizontalEnd size={48} />}
-            title={cards.length === 0 ? "NO CARDS YET" : "NO CARDS FOUND"}
+            title={cards.length === 0 ? "No cards yet" : "No cards found"}
             description={
               cards.length === 0
-                ? "ADD YOUR FIRST FLASHCARD TO THIS BUNDLE."
-                : "TRY A DIFFERENT SEARCH OR FILTER."
+                ? "Add your first flashcard to this bundle."
+                : "Try a different search or filter."
             }
           />
         ) : (
@@ -448,7 +438,7 @@ export default function BundleCardsPage() {
                 <div
                   key={card.id}
                   className={cn(
-                    "group relative flex min-h-[200px] flex-col border-2 p-5 transition-all duration-200",
+                    "group relative flex min-h-[200px] flex-col rounded-2xl border p-5 transition-all duration-200",
                     isSelected
                       ? "border-accent bg-accent/5 ring-1 ring-accent/30"
                       : flipped
@@ -492,14 +482,14 @@ export default function BundleCardsPage() {
                           setEditTags(card.tags.map((t) => t.tag.name));
                         }}
                         aria-label="Edit"
-                        className="p-2.5 text-muted-fg transition-colors hover:bg-accent hover:text-accent-fg"
+                        className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
                       >
                         <Pencil size={13} />
                       </button>
                       <button
                         onClick={() => setDeleteTarget(card)}
                         aria-label="Delete"
-                        className="p-2.5 text-muted-fg transition-colors hover:bg-danger hover:text-on-color"
+                        className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -516,10 +506,10 @@ export default function BundleCardsPage() {
                           flipped ? "text-accent-fg/70" : "text-muted-fg"
                         )}
                       >
-                        {flipped ? "ANSWER" : "QUESTION"}
-                        {cardKind(card) !== "basic" && ` • ${cardKind(card).toUpperCase()}`}
+                        {flipped ? "Answer" : "Question"}
+                        {cardKind(card) !== "basic" && ` • ${cardKind(card)}`}
                       </span>
-                      <p className="text-lg font-bold uppercase tracking-tight leading-relaxed">
+                      <p className="text-lg font-bold tracking-tight leading-relaxed">
                         {flipped ? card.back : card.front}
                       </p>
                       {card.description && (
@@ -539,7 +529,7 @@ export default function BundleCardsPage() {
                       {card.tags.map((t) => (
                         <span
                           key={t.tag.id}
-                          className="bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg"
+                          className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg"
                         >
                           {t.tag.name}
                         </span>
@@ -547,7 +537,7 @@ export default function BundleCardsPage() {
                     </div>
                   )}
                   <p className="mt-2 text-center text-[10px] uppercase tracking-widest text-muted-fg">
-                    CLICK TO FLIP • {card.reviewCount} REVIEWS
+                    Click to flip • {card.reviewCount} reviews
                   </p>
                 </div>
               );
@@ -564,85 +554,85 @@ export default function BundleCardsPage() {
       />
 
       {/* Create Modal */}
-      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="NEW CARD">
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="New card">
         <div className="space-y-6">
           <Input
-            label="QUESTION (FRONT)"
-            placeholder="E.G. WHAT IS SM-2?"
+            label="Question (front)"
+            placeholder="e.g. What is SM-2?"
             value={front}
             onChange={(e) => setFront(e.target.value)}
           />
           <Input
-            label="ANSWER (BACK)"
-            placeholder="E.G. A SPACED REPETITION ALGORITHM."
+            label="Answer (back)"
+            placeholder="e.g. A spaced repetition algorithm."
             value={back}
             onChange={(e) => setBack(e.target.value)}
           />
           <Input
-            label="DESCRIPTION (OPTIONAL)"
-            placeholder="OPTIONAL HINT OR CONTEXT SHOWN WITH THE CARD"
+            label="Description (optional)"
+            placeholder="Optional hint or context shown with the card"
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
           />
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-              TAGS
+              Tags
             </label>
             <TagInput tags={createTags} onChange={setCreateTags} />
           </div>
           <CardKindFields kind={createKind} onKindChange={setCreateKind} choicesText={createChoicesText} onChoicesTextChange={setCreateChoicesText} />
-          {createError && <p className="text-[10px] font-bold uppercase tracking-widest text-red-500">{createError}</p>}
+          {createError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{createError}</p>}
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setCreateOpen(false)}>
-              CANCEL
+              Cancel
             </Button>
             <Button
               onClick={handleCreate}
               disabled={creating || !front.trim() || !back.trim()}
             >
-              {creating ? "CREATING..." : "CREATE"}
+              {creating ? "Creating..." : "Create"}
             </Button>
           </div>
         </div>
       </Modal>
 
       {/* Edit Modal */}
-      <Modal open={!!editCard} onClose={() => setEditCard(null)} title="EDIT CARD">
+      <Modal open={!!editCard} onClose={() => setEditCard(null)} title="Edit card">
         {editCard && (
           <div className="space-y-6">
             <Input
-              label="QUESTION (FRONT)"
+              label="Question (front)"
               value={editFront}
               onChange={(e) => setEditFront(e.target.value)}
             />
             <Input
-              label="ANSWER (BACK)"
+              label="Answer (back)"
               value={editBack}
               onChange={(e) => setEditBack(e.target.value)}
             />
             <Input
-              label="DESCRIPTION (OPTIONAL)"
-              placeholder="OPTIONAL HINT OR CONTEXT SHOWN WITH THE CARD"
+              label="Description (optional)"
+              placeholder="Optional hint or context shown with the card"
               value={editDesc}
               onChange={(e) => setEditDesc(e.target.value)}
             />
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-                TAGS
+                Tags
               </label>
               <TagInput tags={editTags} onChange={setEditTags} />
             </div>
             <CardKindFields kind={editKind} onKindChange={setEditKind} choicesText={editChoicesText} onChoicesTextChange={setEditChoicesText} />
-            {editError && <p className="text-[10px] font-bold uppercase tracking-widest text-red-500">{editError}</p>}
+            {editError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{editError}</p>}
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="ghost" onClick={() => setEditCard(null)}>
-                CANCEL
+                Cancel
               </Button>
               <Button
                 onClick={handleEditSave}
                 disabled={saving || !editFront.trim() || !editBack.trim()}
               >
-                {saving ? "SAVING..." : "SAVE"}
+                {saving ? "Saving..." : "Save"}
               </Button>
             </div>
           </div>
@@ -653,24 +643,24 @@ export default function BundleCardsPage() {
       <Modal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="DELETE CARD"
+        title="Delete card"
       >
         {deleteTarget && (
           <div className="space-y-6">
             <p className="text-sm text-muted-fg">
-              DELETE THIS CARD? THIS CANNOT BE UNDONE.
+              Delete this card? This cannot be undone.
             </p>
             <div className="flex justify-end gap-4 pt-2">
               <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
-                CANCEL
+                Cancel
               </Button>
               <Button variant="danger" onClick={handleDelete} disabled={deleting}>
-                DELETE
+                Delete
               </Button>
             </div>
           </div>
         )}
       </Modal>
-    </main>
+    </div>
   );
 }
