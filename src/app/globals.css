@@ -603,6 +603,33 @@ p.font-mono,
   }
 }
 
+/* ─── Global keyboard focus ring ──────────────────────────────────
+   WCAG 2.4.7: every interactive element gets a visible focus
+   indicator in the active theme's accent. Applies to ALL focusable
+   elements (buttons, links, selects, custom controls) without
+   needing per-component focus-visible classes. Mouse users never
+   see it (:focus-visible only fires for keyboard/AT navigation). */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+:focus-visible:where(a, button) {
+  outline-offset: 2px;
+}
+
+/* ─── Expanded hit area for small visual controls ────────────────
+   Pattern: keep the visual size, grow the tap target to 44px.
+   Used by theme dots etc. Padding pushes the clickable area out;
+   negative margin cancels the layout shift so spacing is unchanged. */
+.hit-target {
+  padding: 12px;
+  margin: -12px;
+  box-sizing: content-box;
+  width: 20px;
+  height: 20px;
+}
+
 [data-reduced-motion="true"] *,
 [data-reduced-motion="true"] *::before,
 [data-reduced-motion="true"] *::after {

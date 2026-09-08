@@ -9,7 +9,7 @@ import {
   Brain,
   StickyNote,
   Timer,
-  Target,
+  BarChart3,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ const navItems = [
   { href: "/flashcards", label: "CARDS", icon: Brain },
   { href: "/notes", label: "NOTES", icon: StickyNote },
   { href: "/sessions", label: "SESSIONS", icon: Timer },
-  { href: "/goals", label: "GOALS", icon: Target },
+  { href: "/stats", label: "STATS", icon: BarChart3 },
   { href: "/settings", label: "MORE", icon: Settings },
 ];
 

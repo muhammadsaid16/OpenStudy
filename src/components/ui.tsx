@@ -185,6 +185,70 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
     () => true,
     () => false
   );
+  // Focus-trap refs: dialog shell (for programmatic focus fallback) and
+  // the element that had focus when the modal opened (restored on close).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  // Autofocus first focusable on open, remember the trigger, restore on close.
+  useEffect(() => {
+    if (!open) return;
+    restoreFocusRef.current = document.activeElement as HTMLElement | null;
+    // Focus first field/button inside the dialog after the portal mounts.
+    // rAF: the portal content isn't in the DOM yet during this effect pass.
+    const raf = requestAnimationFrame(() => {
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusables = dialog.querySelectorAll<HTMLElement>(
+        'input, textarea, select, button, [href], [tabindex]:not([tabindex="-1"])'
+      );
+      (focusables[0] ?? dialog).focus();
+    });
+    return () => {
+      cancelAnimationFrame(raf);
+      // Heuristic #9 (error recovery): return the user exactly where they
+      // were — the trigger keeps its place in the tab order.
+      restoreFocusRef.current?.focus?.();
+    };
+  }, [open]);
+
+  // Escape closes (universal close affordance, WCAG 2.1.2) + Tab trap.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+      if (e.key === "Tab") {
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+        const focusables = Array.from(
+          dialog.querySelectorAll<HTMLElement>(
+            'input, textarea, select, button, [href], [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hasAttribute("disabled"));
+        if (focusables.length === 0) {
+          e.preventDefault();
+          return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+        if (e.shiftKey && (active === first || !dialog.contains(active))) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (active === last || !dialog.contains(active))) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [open, onClose]);
+
   if (!open || !mounted || typeof document === "undefined") return null;
 
   return createPortal(
@@ -193,7 +257,14 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         className="absolute inset-0 bg-black/70 backdrop-blur-md animate-[rise_0.2s_ease-out]"
         onClick={onClose}
       />
-      <div className="modal-pop rise-in relative w-full max-w-md rounded-3xl border border-glass-border bg-bg-raised p-6 shadow-2xl ring-1 ring-white/5">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        tabIndex={-1}
+        className="modal-pop rise-in relative w-full max-w-md rounded-3xl border border-glass-border bg-bg-raised p-6 shadow-2xl ring-1 ring-white/5"
+      >
         <div className="mb-5 flex items-center justify-between">
           <h2 className="font-display text-xl font-bold tracking-tight">{title}</h2>
           <button

@@ -123,7 +123,24 @@ export function FocusZone() {
         // Stamp the true start so day-bucketing in weekly analytics/streaks
         // attributes a midnight-crossing session to the day it began.
         startedAt: new Date(snap.startedAt),
-      }).catch(() => {});
+      }).catch(() => {
+        // Silent loss of a completed focus session is the worst failure mode
+        // (user blame-shifts to the app's reliability). Say it, once, with
+        // a path to recovery — the data may still be retryable manually.
+        showUndo({
+          message: "SESSION COMPLETED — COULDN'T SAVE",
+          undo: () => {
+            createStudySession({
+              subjectId: snap.subjectId || undefined,
+              title,
+              durationMin: duration,
+              completed: true,
+              startedAt: new Date(snap.startedAt),
+            }).catch(() => {});
+          },
+          duration: 8000,
+        });
+      });
     } else {
       // Previously this was a silent no-op — now the user is told.
       showUndo({

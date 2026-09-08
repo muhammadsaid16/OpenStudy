@@ -103,6 +103,9 @@ export default function StatsPage() {
   const [period, setPeriod] = useState<Period>("365");
   // wall clock — captured once in the mount effect (react-hooks/purity bans Date.now() in render, even inside useMemo)
   const [nowMs, setNowMs] = useState(0);
+  // Set when the storage read itself failed — distinguishes "no data yet"
+  // from "couldn't load your data" (Heuristic #1, see catch below).
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const filteredReviews = useMemo(() => {
     if (!reviews) return [] as ReviewLogRec[];
@@ -138,8 +141,11 @@ export default function StatsPage() {
         setSessions(s as unknown as StudySessionRec[]);
       }
     ).catch(() => {
-      // Storage failure: unblock the loader; charts render empty.
+      // Storage failure: unblock the loader; charts render empty — but the
+      // user must be able to tell "no data" apart from "couldn't load data"
+      // (Heuristic #1). Retry offers recovery instead of silent emptiness.
       if (!cancelled) {
+        setLoadFailed(true);
         setNowMs(now);
         setReviews([]);
         setBundles([]);
@@ -167,6 +173,22 @@ export default function StatsPage() {
 
   return (
     <div className="p-6 lg:p-10">
+      {loadFailed && (
+        <div
+          role="alert"
+          className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-warning/40 bg-warning/10 px-5 py-3"
+        >
+          <p className="text-sm font-semibold text-fg">
+            Couldn&apos;t load your stats — showing empty charts. Your data is still saved locally.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-full bg-warning/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-fg transition-colors hover:bg-warning/30"
+          >
+            Retry
+          </button>
+        </div>
+      )}
       {/* header */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>

@@ -89,7 +89,11 @@ export function UndoToastHost() {
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-[100] -translate-x-1/2">
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed bottom-6 left-1/2 z-[100] -translate-x-1/2"
+    >
       <div className="flex items-center gap-4 border-2 border-border bg-bg px-5 py-3 shadow-2xl animate-[rise_0.2s_ease-out]">
         <span className="text-xs font-bold uppercase tracking-widest text-muted-fg">
           {current.message}

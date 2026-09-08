@@ -123,14 +123,21 @@ export function Sidebar() {
                   title={t.title}
                   aria-label={`Use ${t.title} theme`}
                   aria-pressed={theme === t.id}
-                  className={cn(
-                    "h-5 w-5 rounded-full border-2 transition-transform hover:scale-110",
-                    theme === t.id
-                      ? "border-accent ring-2 ring-accent/30"
-                      : "border-transparent"
-                  )}
+                  // 20px visual, 44px hit area (WCAG 2.5.8 + HIG): padding
+                  // expands the target while negative margin keeps the dots
+                  // visually spaced as before.
+                  className="hit-target h-5 w-5 rounded-full border-2 transition-transform hover:scale-110"
                   style={{ backgroundColor: t.color }}
-                />
+                >
+                  <span
+                    className={cn(
+                      "block h-full w-full rounded-full border-2 transition-transform",
+                      theme === t.id
+                        ? "border-accent ring-2 ring-accent/30"
+                        : "border-transparent"
+                    )}
+                  />
+                </button>
               ))}
             </div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
