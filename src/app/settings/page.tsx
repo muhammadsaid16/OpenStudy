@@ -40,21 +40,21 @@ function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between border-2 border-border bg-bg p-5 text-left transition-colors hover:border-fg"
+      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-border bg-bg p-5 text-left transition-colors hover:border-fg"
     >
       <div>
-        <p className="text-sm font-bold uppercase tracking-tight text-fg">{label}</p>
-        <p className="mt-1 text-xs text-muted-fg uppercase tracking-widest">{description}</p>
+        <p className="text-sm font-bold tracking-tight text-fg">{label}</p>
+        <p className="mt-1 text-xs text-muted-fg">{description}</p>
       </div>
       <span
         className={cn(
-          "relative h-6 w-11 shrink-0 border-2 transition-colors",
+          "relative h-6 w-11 shrink-0 rounded-full border transition-colors",
           checked ? "border-accent bg-accent" : "border-border bg-muted"
         )}
       >
         <span
           className={cn(
-            "absolute top-0.5 h-4 w-4 bg-fg transition-all",
+            "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all",
             checked ? "left-[22px]" : "left-0.5"
           )}
         />
@@ -89,7 +89,7 @@ export default function SettingsPage() {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
       console.error("Export failed", e);
-      alert("EXPORT FAILED — SEE CONSOLE");
+      alert("Export failed — see console");
     } finally {
       setExportStatus("idle");
     }
@@ -146,14 +146,14 @@ export default function SettingsPage() {
                 aria-pressed={active}
                 aria-label={`Use ${t.name} theme`}
                 className={cn(
-                  "group flex flex-col gap-3 border-2 p-3 transition-all",
+                  "group flex flex-col gap-3 rounded-2xl border p-3 transition-all",
                   active ? "border-accent" : "border-border hover:border-fg"
                 )}
                 style={{ background: t.bg }}
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className="h-8 w-8 rounded-full border-2"
+                    className="h-8 w-8 rounded-full border"
                     style={{ background: t.accent, borderColor: t.fg }}
                   />
                   {active && (
@@ -192,7 +192,7 @@ export default function SettingsPage() {
       <section className="mt-12 max-w-2xl space-y-4">
         <h2 className="mb-4 text-lg font-bold tracking-tight text-fg">Data</h2>
         <div className="space-y-3">
-          <div className="border-2 border-border bg-bg p-5">
+          <div className="rounded-2xl border border-border bg-bg p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-bold tracking-tight text-fg">Export your data</p>
@@ -204,7 +204,7 @@ export default function SettingsPage() {
               </Button>
             </div>
           </div>
-          <div className="border-2 border-border bg-bg p-5">
+          <div className="rounded-2xl border border-border bg-bg p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-bold tracking-tight text-fg">Import backup</p>

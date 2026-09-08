@@ -240,29 +240,24 @@ export default function StatsPage() {
           <ScrambleSubtitle text="RETENTION, FORECAST, AND PER-BUNDLE MASTERY" className="mt-2 text-sm text-muted-fg uppercase tracking-widest" />
         </div>
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex rounded-full border border-border bg-bg-raised/60 p-1">
+          <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label="Period">
             {PERIODS.map(p => (
-              <button key={p.key} onClick={() => setPeriod(p.key)} className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${period === p.key ? "bg-accent text-white" : "text-muted-fg hover:text-fg"}`}>{p.label}</button>
+              <button key={p.key} onClick={() => setPeriod(p.key)} aria-pressed={period === p.key} className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${period === p.key ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-fg"}`}>{p.label}</button>
             ))}
           </div>
           <StatsStreakBadge reviews={reviews} />
         </div>
       </div>
-      <div className="sm:hidden mb-6 flex rounded-full border border-border bg-bg-raised/60 p-1 w-fit">
-        {PERIODS.map(p => (
-          <button key={p.key} onClick={() => setPeriod(p.key)} className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${period === p.key ? "bg-accent text-white" : "text-muted-fg hover:text-fg"}`}>{p.label}</button>
-        ))}
-      </div>
 
       {/* KPI strip */}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-6">
         {[
-          { icon: Layers, label: "TOTAL REVIEWS", value: totalReviews.toLocaleString(), sub: `${avgPerDay}/day`, color: "var(--color-accent)" },
-          { icon: Trophy, label: "ACCURACY", value: `${acc}%`, sub: `${reviews.filter(r => (r.quality ?? 0) >= 3).length} correct`, color: "var(--color-grow)" },
-          { icon: Timer, label: "STUDY TIME", value: `${totalHours}h`, sub: `${sessions.length} sessions`, color: "var(--color-flow)" },
-          { icon: Flame, label: "STREAK", value: `${streak} days`, sub: streak === 0 ? "start today" : "keep it up", color: "var(--color-accent)" },
-          { icon: Activity, label: "MASTERED", value: `${mastered}`, sub: `${cards.length} cards`, color: "var(--color-grow)" },
-          { icon: AlertTriangle, label: "DUE / LEECHES", value: `${dueNow}`, sub: `${leeches} leeches`, color: dueNow > 20 ? "var(--color-danger)" : "var(--color-warning)" },
+          { icon: Layers, label: "Total reviews", value: totalReviews.toLocaleString(), sub: `${avgPerDay}/day`, color: "var(--color-accent)" },
+          { icon: Trophy, label: "Accuracy", value: `${acc}%`, sub: `${reviews.filter(r => (r.quality ?? 0) >= 3).length} correct`, color: "var(--color-grow)" },
+          { icon: Timer, label: "Study time", value: `${totalHours}h`, sub: `${sessions.length} sessions`, color: "var(--color-flow)" },
+          { icon: Flame, label: "Streak", value: `${streak} days`, sub: streak === 0 ? "start today" : "keep it up", color: "var(--color-accent)" },
+          { icon: Activity, label: "Mastered", value: `${mastered}`, sub: `${cards.length} cards`, color: "var(--color-grow)" },
+          { icon: AlertTriangle, label: "Due / leeches", value: `${dueNow}`, sub: `${leeches} leeches`, color: dueNow > 20 ? "var(--color-danger)" : "var(--color-warning)" },
         ].map(k => (
           <Card key={k.label} className="!p-4 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg"><k.icon size={12} style={{ color: k.color }} /> {k.label}</div>
@@ -310,7 +305,7 @@ export default function StatsPage() {
           </div>
           {daily.every((d) => d.count === 0) ? (
             <div className="flex h-[110px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20">
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">NO ACTIVITY YET</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">No activity yet</p>
               <p className="mt-1 text-[11px] text-muted-fg">Start reviewing to see your activity</p>
             </div>
           ) : (
@@ -335,7 +330,7 @@ export default function StatsPage() {
             <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-fg">Weekly velocity — last 12 weeks</p>
             {weekly.every((w) => w.count === 0) ? (
               <div className="flex h-16 items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 text-xs font-bold uppercase tracking-widest text-muted-fg">
-                NO WEEKLY DATA YET
+                No weekly data yet
               </div>
             ) : (
               <Bars data={weekly.map(w=>w.count)} color="var(--color-flow)" h={64} />
@@ -402,7 +397,7 @@ export default function StatsPage() {
       <Card className="mt-6 !p-5">
         <div className="flex items-center gap-2 mb-1">
           <p className="font-semibold tracking-tight">Hardest cards</p>
-          {leeches > 0 && <span className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">{leeches} leeches</span>}
+          {leeches > 0 && <span className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-on-color">{leeches} leeches</span>}
         </div>
         <p className="mb-3 text-[11px] uppercase tracking-widest text-muted-fg">Lowest accuracy (min. 3 reviews) · filtered by period</p>
         <HardestCardsTable reviews={filteredReviews} cards={cards} bundles={bundles} />

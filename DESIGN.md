@@ -79,8 +79,8 @@ Dark themes carry `color-scheme: dark`; LIGHT/AURORA-LIGHT flip to light.
 | `arctic` | `#07111E` | `#38BDF8` sky | `#99F6E4` | Ice blue-teal |
 | `sandstone` | `#151210` | `#E8B45C` gold | `#A5B48C` | Warm library paper |
 | `mono` | `#09090B` | `#FFFFFF` white | `#A1A1AA` | Pure grayscale focus |
-| `light` | `#F1F5F9` | `#DC2626` red-600 | `#0891B2` | Clean daylight |
-| `paper` | `#FAF7F2` | `#C2410C` burnt orange | `#0F766E` | Warm cream study desk |
+| `light` | `#F1F5F9` | `#B91C1C` red-700 | `#0891B2` | Clean daylight |
+| `paper` | `#FAF7F2` | `#9A3412` burnt sienna | `#0F766E` | Warm cream study desk |
 
 ★ = shipped default. Legacy names (`onyx→mono`, `void→midnight`, etc.) map in
 the theme-init script so existing localStorage prefs keep working.
