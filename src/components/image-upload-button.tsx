@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { ImagePlus } from "lucide-react";
+import { showToast } from "@/components/toast";
 
 /**
  * Image upload button for flashcard front/back fields.
@@ -10,7 +11,7 @@ import { ImagePlus } from "lucide-react";
  */
 export function ImageUploadButton({
   onImage,
-  label = "ADD IMAGE",
+  label = "Add image",
 }: {
   onImage: (markdownImage: string) => void;
   label?: string;
@@ -23,13 +24,13 @@ export function ImageUploadButton({
 
     // Only accept image files
     if (!file.type.startsWith("image/")) {
-      alert("PLEASE SELECT AN IMAGE FILE");
+      showToast("Please select an image file", "warning");
       return;
     }
 
     // Max 2MB to keep card content manageable
     if (file.size > 2 * 1024 * 1024) {
-      alert("IMAGE TOO LARGE — MAX 2MB");
+      showToast("Image too large — max 2MB", "warning");
       return;
     }
 

@@ -29,6 +29,7 @@ import {
 } from "@/app/actions";
 import { parseCardsFile } from "@/lib/parsers/cards";
 import { ShareBundleButton } from "@/components/share-bundle-button";
+import { showToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
 import type { BundleRec, CardKind } from "@/lib/db";
 import { cardKind, cleanChoices } from "@/lib/card-kinds";
@@ -232,16 +233,16 @@ export default function BundleCardsPage() {
       const text = await file.text();
       const parsed = parseCardsFile(text);
       if (!parsed.length) {
-        alert("No valid cards found in file");
+        showToast("No valid cards found in file", "warning");
         return;
       }
       const res = await importCardsIntoBundle(bundleId, parsed);
-      alert(`Imported ${res.count} cards`);
+      showToast(`Imported ${res.count} cards`, "success");
       setLoaded(false);
       await load();
     } catch (e) {
       console.error(e);
-      alert("Import failed: invalid file");
+      showToast("Import failed: invalid file", "danger");
     } finally {
       setImporting(false);
     }
@@ -299,7 +300,7 @@ export default function BundleCardsPage() {
                   setTimeout(() => URL.revokeObjectURL(url), 1000);
                 } catch (e) {
                   console.error("Export failed", e);
-                  alert("Export failed — see console");
+                  showToast("Export failed — see console", "danger");
                 }
               }}
               className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-fg hover:text-fg"

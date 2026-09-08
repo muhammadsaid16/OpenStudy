@@ -3,6 +3,7 @@ import "./globals.css";
 import { Sidebar } from "@/components/sidebar";
 import { BottomNav } from "@/components/bottom-nav";
 import { UndoToastHost } from "@/components/undo-toast";
+import { ToastHost } from "@/components/toast";
 import { ThemeEffects } from "@/components/theme-effects";
 import { SwRegister } from "@/components/sw-register";
 import { PageTransition } from "@/components/page-transition";
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         <BottomNav />
         <UndoToastHost />
+        <ToastHost />
         <CommandPalette />
         <ThemeEffects />
         <SwRegister />

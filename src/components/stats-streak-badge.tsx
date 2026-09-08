@@ -22,7 +22,7 @@ export function StatsStreakBadge({
       >
         <Flame size={14} className="text-muted-fg" />
         <span className="font-mono text-xs font-bold uppercase tracking-widest text-muted-fg">
-          START A STREAK
+          Start a streak
         </span>
       </div>
     );
@@ -35,8 +35,8 @@ export function StatsStreakBadge({
       )}
     >
       <Flame size={14} className="text-accent" />
-      <span className="font-mono text-xs font-bold uppercase tracking-widest text-white">
-        {streak} DAY STREAK
+      <span className="font-mono text-xs font-bold uppercase tracking-widest text-accent-fg">
+        {streak} day streak
       </span>
     </div>
   );

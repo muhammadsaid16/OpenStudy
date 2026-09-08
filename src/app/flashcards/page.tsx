@@ -7,6 +7,7 @@ import { Button, EmptyState, Modal, Input, Skeleton } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import { showUndo } from "@/components/undo-toast";
+import { showToast } from "@/components/toast";
 import {
   getDueFlashcards,
   getSubjects,
@@ -745,7 +746,7 @@ function FlashcardsContent() {
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
                   } catch (e) {
                     console.error("Export failed", e);
-                    alert("Export failed — see console");
+                    showToast("Export failed — see console", "danger");
                   }
                 }}
                 className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg"
@@ -776,11 +777,11 @@ function FlashcardsContent() {
                     if (!cards.length) throw new Error("No valid cards found");
                     const res = await importBundleCards(selectedBundle, cards);
                     if (res.count === 0) throw new Error("No valid cards found");
-                    alert(`Imported ${res.count} cards`);
+                    showToast(`Imported ${res.count} cards`, "success");
                     await reloadCards();
                   } catch (err) {
                     console.error("Import failed", err);
-                    alert("Import failed: invalid file");
+                    showToast("Import failed: invalid file", "danger");
                   }
                   e.target.value = "";
                 }}

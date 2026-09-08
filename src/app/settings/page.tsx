@@ -7,6 +7,7 @@ import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { exportAllData, importAllData } from "@/app/actions";
+import { showToast } from "@/components/toast";
 import { Download, Upload, Check, AlertTriangle } from "lucide-react";
 
 const THEMES: { id: ThemeName; name: string; bg: string; accent: string; fg: string }[] = [
@@ -89,7 +90,7 @@ export default function SettingsPage() {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
       console.error("Export failed", e);
-      alert("Export failed — see console");
+      showToast("Export failed — see console", "danger");
     } finally {
       setExportStatus("idle");
     }

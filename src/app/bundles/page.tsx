@@ -8,6 +8,7 @@ import { Button, Modal, Input, EmptyState, Skeleton } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import { showUndo } from "@/components/undo-toast";
+import { showToast } from "@/components/toast";
 import { getBundles, createBundle, updateBundle, deleteBundle, importCardsIntoBundle } from "@/app/actions";
 import { parseSharedBundle } from "@/lib/share";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
@@ -75,7 +76,7 @@ export default function BundlesPage() {
       setNewColor("#DFE104");
     } catch (e) {
       console.error("Failed to create bundle:", e);
-      alert("Failed to create bundle. Check console for details.");
+      showToast("Failed to create bundle. Check console for details.", "danger");
     }
   };
 
@@ -162,7 +163,7 @@ export default function BundlesPage() {
                 })));
                 router.push("/bundles/" + created.id + "/cards");
               } catch {
-                alert("Import failed: not a valid share file.");
+                showToast("Import failed: not a valid share file.", "danger");
               }
             }}
           />
