@@ -17,6 +17,13 @@ export function TopBar({ dueCards }: { dueCards: number }) {
   const [now, setNow] = useState<Date | null>(null);
   const [q, setQ] = useState("");
   const router = useRouter();
+  // OS-aware shortcut hint (audit §7): ⌘K on Apple, Ctrl K elsewhere.
+  // Determined once after mount (SSR-safe: renders "Ctrl K" on server,
+  // corrects to ⌘K on the client before paint in practice).
+  const [isMac, setIsMac] = useState(false);
+  useEffect(() => {
+    setIsMac(navigator.platform.toLowerCase().includes("mac"));
+  }, []);
 
   useEffect(() => {
     // rAF defers the first tick past the effect's sync phase — silences
@@ -63,8 +70,9 @@ export function TopBar({ dueCards }: { dueCards: number }) {
         </h1>
       </div>
 
-      {/* Global search */}
-      <label className="glass-inset relative hidden h-11 w-72 items-center rounded-full sm:flex">
+      {/* Global search (audit §7): wider, names what it searches, and the
+          kbd hint matches the user's OS instead of hardcoding ⌘K. */}
+      <label className="glass-inset relative hidden h-11 w-full max-w-md items-center rounded-full sm:flex lg:w-96">
         <Search size={15} aria-hidden className="absolute left-4 text-muted-fg" />
         <input
           id="global-search"
@@ -78,11 +86,11 @@ export function TopBar({ dueCards }: { dueCards: number }) {
               router.push(`/flashcards?mode=browse&q=${encodeURIComponent(q.trim())}`);
             }
           }}
-          placeholder="Search cards, notes…"
+          placeholder="Search notes, cards, subjects…"
           className="w-full bg-transparent pl-10 pr-14 text-sm text-fg placeholder:text-muted-fg/60 outline-none"
         />
         <kbd className="absolute right-4 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-fg">
-          ⌘K
+          {isMac ? "⌘K" : "Ctrl K"}
         </kbd>
       </label>
     </div>

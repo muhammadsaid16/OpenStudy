@@ -26,8 +26,8 @@
   --color-fg: #E7EDF7;            /* primary text */
   --color-muted-fg: #94A3B8;      /* secondary text */
   --color-border: rgba(255, 255, 255, 0.08);
-  --color-accent: #FF5E57;        /* hot signal — coral */
-  --color-accent-soft: rgba(255, 94, 87, 0.14);
+  --color-accent: #FF7A72;        /* signal coral — softened (audit) */
+  --color-accent-soft: rgba(255, 122, 114, 0.14);
   --color-accent-fg: #1A0505;
   --color-flow: #00E5FF;          /* progress & flow — cyan */
   --color-grow: #10B981;          /* growth / streaks — mint */
@@ -243,8 +243,8 @@
   --color-fg: #E7EDF7;
   --color-muted-fg: #94A3B8;
   --color-border: rgba(255, 255, 255, 0.08);
-  --color-accent: #FF5E57;
-  --color-accent-soft: rgba(255, 94, 87, 0.14);
+  --color-accent: #FF7A72;
+  --color-accent-soft: rgba(255, 122, 114, 0.14);
   --color-accent-fg: #1A0505;
   --color-flow: #00E5FF;
   --color-grow: #10B981;

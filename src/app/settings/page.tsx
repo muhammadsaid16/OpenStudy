@@ -10,7 +10,7 @@ import { exportAllData, importAllData } from "@/app/actions";
 import { Download, Upload, Check, AlertTriangle } from "lucide-react";
 
 const THEMES: { id: ThemeName; name: string; bg: string; accent: string; fg: string }[] = [
-  { id: "aurora", name: "Aurora", bg: "#0B0F17", accent: "#FF5E57", fg: "#E7EDF7" },
+  { id: "aurora", name: "Aurora", bg: "#0B0F17", accent: "#FF7A72", fg: "#E7EDF7" },
   { id: "midnight", name: "Midnight", bg: "#030712", accent: "#60A5FA", fg: "#E4EDFF" },
   { id: "nebula", name: "Nebula", bg: "#0D0716", accent: "#C084FC", fg: "#F2E9FF" },
   { id: "matrix", name: "Matrix", bg: "#02100B", accent: "#34D399", fg: "#E4FFF1" },

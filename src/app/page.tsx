@@ -186,23 +186,68 @@ export default function DashboardPage() {
             </motion.div>
             <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               {[
-                { label: "Subjects", value: stats.totalSubjects, icon: BookOpen },
-                { label: "Topics", value: stats.totalTopics, icon: Layers },
-                { label: "Cards", value: stats.totalFlashcards, icon: Brain },
-                { label: "Study time", value: formatDuration(stats.totalMinutes), icon: Clock },
-              ].map((s) => (
-                <Card key={s.label} hover className="flex flex-col gap-3 p-5 !p-5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
-                    <s.icon size={17} aria-hidden />
-                  </span>
-                  <span className="font-mono text-xl font-bold tabular-nums leading-none lg:text-2xl">
-                    {typeof s.value === "number" ? <CountUp value={s.value} /> : s.value}
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-                    {s.label}
-                  </span>
-                </Card>
-              ))}
+                {
+                  label: "Subjects",
+                  value: stats.totalSubjects,
+                  icon: BookOpen,
+                  // Empty state = next action (audit 3.1): each stat card
+                  // becomes a step in the setup checklist, not a dead zero.
+                  emptyCta: "+ Add subject",
+                  emptyHref: "/subjects",
+                },
+                {
+                  label: "Topics",
+                  value: stats.totalTopics,
+                  icon: Layers,
+                  emptyCta: "Create a topic",
+                  emptyHref: "/subjects",
+                },
+                {
+                  label: "Cards",
+                  value: stats.totalFlashcards,
+                  icon: Brain,
+                  emptyCta: "Make flashcards",
+                  emptyHref: "/flashcards",
+                },
+                {
+                  label: "Study time",
+                  value: stats.totalMinutes > 0 ? formatDuration(stats.totalMinutes) : "0m",
+                  icon: Clock,
+                  // Value is a string once non-zero; show CTA only when truly empty.
+                  emptyCta: "Start studying →",
+                  emptyHref: "/sessions",
+                },
+              ].map((s) => {
+                const isEmpty =
+                  typeof s.value === "number" ? s.value === 0 : s.value === "0m";
+                return isEmpty ? (
+                  <Link key={s.label} href={s.emptyHref}>
+                    <Card hover className="flex h-full flex-col gap-3 p-5 !p-5">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
+                        <s.icon size={17} aria-hidden />
+                      </span>
+                      <span className="font-mono text-xl font-bold tabular-nums leading-none lg:text-2xl">
+                        0
+                      </span>
+                      <span className="text-xs font-bold tracking-tight text-accent">
+                        {s.emptyCta}
+                      </span>
+                    </Card>
+                  </Link>
+                ) : (
+                  <Card key={s.label} hover className="flex h-full flex-col gap-3 p-5 !p-5">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
+                      <s.icon size={17} aria-hidden />
+                    </span>
+                    <span className="font-mono text-xl font-bold tabular-nums leading-none lg:text-2xl">
+                      {typeof s.value === "number" ? <CountUp value={s.value} /> : s.value}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+                      {s.label}
+                    </span>
+                  </Card>
+                );
+              })}
             </motion.div>
             <motion.div variants={item}>
               {weekly && <WeeklyAnalytics data={weekly.weekDays} />}
@@ -222,7 +267,7 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
             <motion.div variants={item}>
-              <Link href="/goals" aria-label="Open goals board">
+                            <Link href="/goals" aria-label="Open goals board">
                 <Card hover className="flex flex-wrap items-center justify-between gap-4 !p-5">
                   <div className="flex items-center gap-3">
                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">

@@ -48,6 +48,36 @@ export function WeeklyAnalytics({ data }: { data: WeekDay[] }) {
   const fmtH = (m: number) =>
     m >= 60 ? `${Math.floor(m / 60)}h ${m % 60 ? `${m % 60}m` : ""}`.trim() : `${m}m`;
 
+  // Empty state (audit §1): an all-zero week renders as an invitation,
+  // not a row of dead bars. Keeps the card useful even before first use.
+  if (totalMin === 0) {
+    return (
+      <div className="glass rounded-3xl p-6" role="img" aria-label="No study sessions this week">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
+          This Week
+        </p>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-flow/10 text-flow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M3 3v18h18" />
+              <path d="m19 9-5 5-4-4-3 3" />
+            </svg>
+          </div>
+          <p className="text-sm font-semibold tracking-tight">No study sessions yet</p>
+          <p className="mt-1 max-w-xs text-xs text-muted-fg">
+            Start your first focus session to see your weekly activity here.
+          </p>
+          <a
+            href="/sessions"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-bold text-accent-fg transition-transform hover:scale-105"
+          >
+            Start a session →
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="glass rounded-3xl p-6" role="img"
       aria-label={`Weekly study: ${fmtH(totalMin)} total across 7 days`}>

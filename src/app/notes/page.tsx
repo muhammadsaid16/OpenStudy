@@ -231,7 +231,7 @@ function NotesContent() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredNotes.map((note) => {
-            const accent = note.topic?.subject?.color || "#FF5E57";
+            const accent = note.topic?.subject?.color || "#FF7A72";
             const isPinned = note.isPinned;
             return (
             <div

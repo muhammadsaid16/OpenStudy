@@ -25,7 +25,7 @@ interface TilePalette {
 }
 
 const TILE_PALETTES: Partial<Record<ThemeName, TilePalette>> = {
-  aurora:    { canvas: "#0B0F17", surface: "#1F293D", border: "rgba(255,255,255,0.08)", borderStrong: "rgba(255,255,255,0.18)", accent: "#FF5E57", accentDark: "#C43D37", accentFg: "#1A0505", fg: "#E7EDF7", mutedFg: "#94A3B8" },
+  aurora:    { canvas: "#0B0F17", surface: "#1F293D", border: "rgba(255,255,255,0.08)", borderStrong: "rgba(255,255,255,0.18)", accent: "#FF7A72", accentDark: "#D14F49", accentFg: "#1A0505", fg: "#E7EDF7", mutedFg: "#94A3B8" },
   midnight:  { canvas: "#030712", surface: "#16233B", border: "rgba(147,180,255,0.10)", borderStrong: "rgba(147,180,255,0.22)", accent: "#60A5FA", accentDark: "#1D4ED8", accentFg: "#030A1A", fg: "#E4EDFF", mutedFg: "#8CA3C7" },
   nebula:    { canvas: "#0D0716", surface: "#241738", border: "rgba(192,132,252,0.12)", borderStrong: "rgba(192,132,252,0.25)", accent: "#C084FC", accentDark: "#7E22CE", accentFg: "#150A26", fg: "#F2E9FF", mutedFg: "#A794C4" },
   matrix:    { canvas: "#02100B", surface: "#06281A", border: "rgba(52,211,153,0.12)", borderStrong: "rgba(52,211,153,0.25)", accent: "#34D399", accentDark: "#047857", accentFg: "#02120A", fg: "#E4FFF1", mutedFg: "#7FBFA2" },

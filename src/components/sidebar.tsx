@@ -15,9 +15,10 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useAppStore, type ThemeName } from "@/lib/store";
+import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
+// Flat list kept for typing; navGroups above drives the render.
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/subjects", label: "Subjects", icon: BookOpen },
@@ -29,20 +30,34 @@ const navItems = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-const THEME_DOTS: { id: ThemeName; color: string; title: string }[] = [
-  { id: "aurora", color: "#FF5E57", title: "Aurora" },
-  { id: "midnight", color: "#60A5FA", title: "Midnight" },
-  { id: "nebula", color: "#C084FC", title: "Nebula" },
-  { id: "matrix", color: "#34D399", title: "Matrix" },
-  { id: "ember", color: "#FB923C", title: "Ember" },
-  { id: "rosewood", color: "#FB7185", title: "Rosewood" },
-  { id: "cyberpunk", color: "#FCEE0A", title: "Cyberpunk" },
-  { id: "arctic", color: "#38BDF8", title: "Arctic" },
-  { id: "sandstone", color: "#E8B45C", title: "Sandstone" },
-  { id: "mono", color: "#FFFFFF", title: "Mono" },
-  { id: "light", color: "#B91C1C", title: "Light" },
-  { id: "paper", color: "#9A3412", title: "Paper" },
+// Nav groups (audit §5): LEARN / TRACK / SYSTEM — scannable sections
+// instead of an undifferentiated 8-item list (Hick's law relief).
+const navGroups: { heading: string; items: typeof navItems }[] = [
+  {
+    heading: "Learn",
+    items: [
+      { href: "/", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/subjects", label: "Subjects", icon: BookOpen },
+      { href: "/flashcards", label: "Flashcards", icon: Brain },
+      { href: "/notes", label: "Notes", icon: StickyNote },
+    ],
+  },
+  {
+    heading: "Track",
+    items: [
+      { href: "/sessions", label: "Sessions", icon: Timer },
+      { href: "/goals", label: "Goals", icon: Target },
+      { href: "/stats", label: "Stats", icon: BarChart3 },
+    ],
+  },
+  {
+    heading: "System",
+    items: [{ href: "/settings", label: "Settings", icon: Settings }],
+  },
 ];
+
+// Full theme picker lives in Settings (src/app/settings/page.tsx) — the
+// sidebar exposes only Dark/Light + an "All →" link (audit §6).
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -76,88 +91,94 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
-          return (
-            <Link
-              key={href}
-              href={href}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "group relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium tracking-tight transition-colors duration-200",
-                isActive
-                  ? "bg-accent-soft text-accent"
-                  : "text-muted-fg hover:bg-glass hover:text-fg",
-                !sidebarOpen && "justify-center px-0"
-              )}
-            >
-              {isActive && (
-                <motion.span
-                  layoutId="sidebar-pill"
-                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                  className="absolute inset-0 rounded-xl bg-accent-soft"
-                />
-              )}
-              <span className="relative z-10 flex items-center gap-3">
-                <Icon size={18} aria-hidden />
-                {sidebarOpen && <span>{label}</span>}
-              </span>
-            </Link>
-          );
-        })}
+      <nav className="flex-1 space-y-5 overflow-y-auto p-3" aria-label="Main">
+        {navGroups.map((group) => (
+          <div key={group.heading}>
+            {sidebarOpen && (
+              <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-fg/70">
+                {group.heading}
+              </p>
+            )}
+            <div className="space-y-1">
+              {group.items.map(({ href, label, icon: Icon }) => {
+                const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "group relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium tracking-tight transition-colors duration-200",
+                      isActive
+                        ? "bg-accent-soft text-accent"
+                        : "text-muted-fg hover:bg-glass hover:text-fg",
+                      !sidebarOpen && "justify-center px-0"
+                    )}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="sidebar-pill"
+                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                        className="absolute inset-0 rounded-xl bg-accent-soft"
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-3">
+                      <Icon size={18} aria-hidden />
+                      {sidebarOpen && <span>{label}</span>}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Theme dots + footer */}
+      {/* Appearance (audit §6): 2 quick modes + link to full picker in
+          Settings. The 12-dot showcase read as a design-system demo, not
+          an app control; full picker stays in Settings for power users. */}
       <div className="border-t border-border p-4">
         {sidebarOpen ? (
           <>
-            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-              Theme
-            </p>
-            <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Theme picker">
-              {THEME_DOTS.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setTheme(t.id)}
-                  title={t.title}
-                  aria-label={`Use ${t.title} theme`}
-                  aria-pressed={theme === t.id}
-                  // 20px visual, 44px hit area (WCAG 2.5.8 + HIG): padding
-                  // expands the target while negative margin keeps the dots
-                  // visually spaced as before.
-                  className="hit-target h-5 w-5 rounded-full border-2 transition-transform hover:scale-110"
-                  style={{ backgroundColor: t.color }}
-                >
-                  <span
-                    className={cn(
-                      "block h-full w-full rounded-full border-2 transition-transform",
-                      theme === t.id
-                        ? "border-accent ring-2 ring-accent/30"
-                        : "border-transparent"
-                    )}
-                  />
-                </button>
-              ))}
+            <div className="mb-1.5 flex items-center justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+                Appearance
+              </p>
+              <Link
+                href="/settings"
+                aria-label="All themes in Settings"
+                className="text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-accent"
+              >
+                All →
+              </Link>
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+            <div className="flex gap-2" role="group" aria-label="Appearance">
+              <button
+                onClick={() => setTheme(theme === "aurora" ? "light" : "aurora")}
+                aria-pressed={theme === "light"}
+                className="hit-target flex flex-1 items-center justify-center gap-2 rounded-xl border border-glass-border bg-glass px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-fg"
+              >
+                <span
+                  className="h-3.5 w-3.5 rounded-full border border-border"
+                  style={{ backgroundColor: theme === "light" ? "#F1F5F9" : "#0B0F17" }}
+                  aria-hidden
+                />
+                {theme === "light" ? "Light" : "Dark"}
+              </button>
+            </div>
+            <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
               v2.0 · Aurora Glass
             </p>
           </>
         ) : (
-          /* collapsed rail: single dot cycles themes */
+          /* collapsed rail: toggle dark/light */
           <button
-            onClick={() => {
-              const idx = THEME_DOTS.findIndex((t) => t.id === theme);
-              setTheme(THEME_DOTS[(idx + 1) % THEME_DOTS.length].id);
-            }}
-            aria-label={`Current theme ${theme} — click to cycle`}
-            className="mx-auto block h-6 w-6 rounded-full border-2 border-border transition-transform hover:scale-110"
-            style={{
-              backgroundColor:
-                THEME_DOTS.find((t) => t.id === theme)?.color ?? "var(--color-accent)",
-            }}
-          />
+            onClick={() => setTheme(theme === "aurora" ? "light" : "aurora")}
+            aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+            className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl border border-glass-border text-muted-fg transition-colors hover:text-accent"
+          >
+            {theme === "light" ? "☀" : "☾"}
+          </button>
         )}
       </div>
     </aside>

@@ -106,7 +106,7 @@ export default function NotePage() {
     );
   }
 
-  const accent = note.topic?.subject?.color || "#FF5E57";
+  const accent = note.topic?.subject?.color || "#FF7A72";
 
   return (
     <div className="min-h-screen bg-bg">

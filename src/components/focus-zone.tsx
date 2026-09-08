@@ -169,7 +169,8 @@ export function FocusZone() {
 
   return (
     <div className="glass relative overflow-hidden rounded-3xl p-8">
-      {/* Header row */}
+      {/* Header row — timer name + compact soundscape (secondary control,
+          audit §2: one primary action, everything else recedes) */}
       <div className="mb-6 flex items-center justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
@@ -177,19 +178,18 @@ export function FocusZone() {
           </p>
           <h2 className="font-display text-xl font-bold tracking-tight">Pomodoro</h2>
         </div>
-        <div className="flex items-center gap-2 rounded-full bg-muted/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+        <button
+          onClick={() => {
+            const next = SOUNDSCAPES[(SOUNDSCAPES.indexOf(soundscapeName) + 1) % SOUNDSCAPES.length];
+            pickSoundscape(next);
+          }}
+          title={`Soundscape: ${soundscapeName} — click to change`}
+          aria-label={`Soundscape: ${soundscapeName}. Click to change`}
+          className="flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-fg"
+        >
           <Music size={12} aria-hidden />
-          <select
-            aria-label="Soundscape"
-            value={soundscapeName}
-            onChange={(e) => pickSoundscape(e.target.value as SoundscapeName)}
-            className="cursor-pointer appearance-none bg-transparent text-[10px] font-bold uppercase tracking-widest outline-none"
-          >
-            {SOUNDSCAPES.map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-        </div>
+          {soundscapeName}
+        </button>
       </div>
 
       {/* Timer ring */}
@@ -276,8 +276,9 @@ export function FocusZone() {
         )}
       </div>
 
-      {/* Presets — built-in + saved custom techniques */}
-      <div className="flex flex-wrap justify-center gap-2">
+      {/* Secondary row: presets + remind-me share one line (audit §2 —
+          primary action (START) is the only solo control) */}
+      <div className="flex flex-wrap items-center justify-center gap-2">
         {BUILTIN_PRESETS.map((p) => {
           const isActive =
             workMin === p.workMin &&
@@ -290,6 +291,8 @@ export function FocusZone() {
               onClick={() => applyBuiltin(p)}
               disabled={pomo.running}
               aria-pressed={isActive}
+              // audit §3: label stays compact, tooltip explains the scheme
+              title={`${p.workMin} min focus / ${p.breakMin} min break — long break ${p.longBreakMin}m every ${p.cyclesBeforeLongBreak} cycles`}
               className={cn(
                 "rounded-full border px-4 py-1.5 text-xs font-bold tracking-wide transition-colors disabled:opacity-40",
                 isActive
@@ -322,9 +325,7 @@ export function FocusZone() {
             {p.name}
           </button>
         ))}
-      </div>
-
-      <div className="mt-4 flex justify-center">
+        <span className="mx-1 hidden h-4 w-px bg-border sm:block" aria-hidden />
         <RemindMeControl dueCount={dueCount} />
       </div>
 

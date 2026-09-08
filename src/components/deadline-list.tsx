@@ -44,9 +44,17 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
         <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
           Deadlines
         </p>
-        <p className="mt-6 mb-2 text-center text-sm text-muted-fg">
-          Nothing due — your queue is clear. ✦
-        </p>
+        <div className="flex flex-col items-center py-6 text-center">
+          <p className="text-sm text-muted-fg">Nothing due — your queue is clear. ✦</p>
+          {/* audit §9: empty card still offers the next action instead of
+              dead-ending the section */}
+          <Link
+            href="/flashcards"
+            className="mt-3 text-xs font-bold tracking-tight text-accent transition-opacity hover:opacity-80"
+          >
+            Review cards ahead →
+          </Link>
+        </div>
       </div>
     );
   }
