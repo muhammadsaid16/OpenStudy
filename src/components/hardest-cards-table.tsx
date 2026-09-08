@@ -98,7 +98,7 @@ export function HardestCardsTable({
         </table>
       </div>
 
-      <Modal open={confirmId !== null} onClose={() => setConfirmId(null)} title="RESET CARD PROGRESS">
+      <Modal open={confirmId !== null} onClose={() => setConfirmId(null)} title="Reset card progress">
         <div className="space-y-4">
           <div className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
             <AlertTriangle size={14} className="shrink-0 mt-0.5" />
@@ -113,10 +113,10 @@ export function HardestCardsTable({
           </p>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" size="sm" onClick={() => setConfirmId(null)}>
-              CANCEL
+              Cancel
             </Button>
             <Button size="sm" onClick={() => confirmId && doReset(confirmId)} disabled={busy}>
-              {busy ? "RESETTING…" : "RESET"}
+              {busy ? "Resetting…" : "Reset"}
             </Button>
           </div>
         </div>

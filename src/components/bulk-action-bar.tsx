@@ -124,7 +124,7 @@ export function BulkActionBar({
       </div>
 
       {/* TAG modal */}
-      <Modal open={tagOpen} onClose={() => setTagOpen(false)} title="TAG CARDS">
+      <Modal open={tagOpen} onClose={() => setTagOpen(false)} title="Tag cards">
         <div className="space-y-4">
           <p className="text-sm text-muted-fg">
             Comma-separated tags. <span className="font-bold text-fg">{ids.length}</span> cards selected.
@@ -138,14 +138,14 @@ export function BulkActionBar({
           <div className="flex justify-end gap-2">
             <Button variant="secondary" size="sm" onClick={() => setTagOpen(false)}>CANCEL</Button>
             <Button size="sm" onClick={doTag} disabled={busy || !tagInput.trim()}>
-              {busy ? "TAGGING…" : "APPLY"}
+              {busy ? "Tagging…" : "Apply"}
             </Button>
           </div>
         </div>
       </Modal>
 
       {/* MOVE modal */}
-      <Modal open={moveOpen} onClose={() => setMoveOpen(false)} title="MOVE CARDS">
+      <Modal open={moveOpen} onClose={() => setMoveOpen(false)} title="Move cards">
         <div className="space-y-4">
           <p className="text-sm text-muted-fg">
             Move <span className="font-bold text-fg">{ids.length}</span> cards to another bundle.
@@ -165,22 +165,22 @@ export function BulkActionBar({
           <div className="flex justify-end gap-2">
             <Button variant="secondary" size="sm" onClick={() => setMoveOpen(false)}>CANCEL</Button>
             <Button size="sm" onClick={doMove} disabled={busy || !effectiveMoveTarget}>
-              {busy ? "MOVING…" : "MOVE"}
+              {busy ? "Moving…" : "Move"}
             </Button>
           </div>
         </div>
       </Modal>
 
       {/* DELETE confirm */}
-      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title="DELETE CARDS">
+      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title="Delete cards">
         <div className="space-y-4">
           <p className="text-sm text-fg">
             Delete <span className="font-bold text-danger">{ids.length}</span> cards? This cannot be undone.
           </p>
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setDeleteOpen(false)}>CANCEL</Button>
+            <Button variant="secondary" size="sm" onClick={() => setDeleteOpen(false)}>Cancel</Button>
             <Button variant="danger" size="sm" onClick={doDelete} disabled={busy}>
-              {busy ? "DELETING…" : "DELETE"}
+              {busy ? "Deleting…" : "Delete"}
             </Button>
           </div>
         </div>

@@ -121,10 +121,10 @@ export function AiImportModal({
       <div className="flex flex-wrap gap-2 pt-1">
         <Button size="sm" variant="secondary" onClick={copyPrompt}>
           {copied ? <Check size={14} /> : <Clipboard size={14} />}
-          {copied ? "COPIED" : "COPY PROMPT"}
+          {copied ? "Copied" : "Copy prompt"}
         </Button>
         <Button size="sm" variant="secondary" onClick={openNotebookLM}>
-          <ExternalLink size={14} /> OPEN NOTEBOOKLM
+          <ExternalLink size={14} /> Open NotebookLM
         </Button>
       </div>
     </div>
@@ -170,7 +170,7 @@ export function AiImportModal({
   const pasteStep = (
     <div className="space-y-2">
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-        {kind === "note" ? "STEP 03" : "STEP 02"} — PASTE THE JSON BELOW
+        {kind === "note" ? "Step 03" : "Step 02"} — paste the JSON below
       </p>
       <textarea
         value={pasted}
@@ -185,12 +185,12 @@ export function AiImportModal({
         <span className="text-muted-fg">
           {pasted.trim() ? (
             detectedCount > 0 ? (
-              <>DETECTED · <span className="font-bold text-fg">{detectedCount}</span> CARD{detectedCount !== 1 ? "S" : ""}</>
+              <>Detected · <span className="font-bold text-fg">{detectedCount}</span> card{detectedCount !== 1 ? "s" : ""}</>
             ) : (
-              <span className="text-warning">UNREADABLE JSON — CHECK FORMAT</span>
+              <span className="text-warning">Unreadable JSON — check format</span>
             )
           ) : (
-            "PASTE THE JSON HERE"
+            "Paste the JSON here"
           )}
         </span>
         {pasted && (

@@ -36,7 +36,7 @@ type Phase =
 
 const MAX_CHARS = 8_000;
 const MIN_CHARS = 20;
-const GEN_STAGES = ["READING SOURCE", "EXTRACTING CONCEPTS", "WRITING CARDS"] as const;
+const GEN_STAGES = ["Reading source", "Extracting concepts", "Writing cards"] as const;
 
 interface ApiSuccess {
   ok: true;
@@ -398,10 +398,10 @@ export function AiGenerateModal({
           />
           <p className="text-[11px] text-muted-fg leading-relaxed">
             {sourceLen < MIN_CHARS
-              ? `NEED ${MIN_CHARS - sourceLen} MORE CHARACTERS`
+              ? `Need ${MIN_CHARS - sourceLen} more characters`
               : sourceLen > MAX_CHARS
-              ? "OVER LIMIT — SPLIT INTO SMALLER CHUNKS"
-              : "READY · PRESS GENERATE OR USE ⌘/CTRL + ENTER"}
+              ? "Over limit — split into smaller chunks"
+              : "Ready · press Generate or use ⌘/Ctrl + Enter"}
           </p>
         </div>
       ) : (
@@ -456,8 +456,8 @@ export function AiGenerateModal({
           )}
           <p className="text-[11px] text-muted-fg leading-relaxed">
             {imageValid
-              ? "READY · PRESS ANALYZE TO EXTRACT CARDS"
-              : "PHOTO OF NOTES, A TEXTBOOK PAGE, A SLIDE, OR A WHITEBOARD"}
+              ? "Ready · press Analyze to extract cards"
+              : "photo of notes, a textbook page, a slide, or a whiteboard"}
           </p>
         </div>
       )}
@@ -488,7 +488,7 @@ export function AiGenerateModal({
           }
         >
           {mode === "image" ? <ImageIcon size={14} /> : <Wand2 size={14} />}
-          {mode === "image" ? "ANALYZE IMAGE" : "GENERATE CARDS"}
+          {mode === "image" ? "Analyze image" : "Generate cards"}
         </Button>
       </div>
     </div>
@@ -551,7 +551,7 @@ export function AiGenerateModal({
               }}
               className="flex items-center gap-1 text-accent hover:underline"
             >
-              <RefreshCw size={11} /> TRY AGAIN
+              <RefreshCw size={11} /> Try again
             </button>
           </div>
           {/* Kind breakdown */}
@@ -695,7 +695,7 @@ export function AiGenerateModal({
   );
 
   return (
-    <Modal open={open} onClose={close} title="AI CARDS">
+    <Modal open={open} onClose={close} title="AI cards">
       <div className="space-y-4">
         {phase === "input" && inputStep}
         {phase === "generating" && generatingStep}

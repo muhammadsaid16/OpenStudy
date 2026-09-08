@@ -300,9 +300,9 @@ export default function SessionsPage() {
     <div className="p-8 lg:p-12">
       {/* Header */}
       <div className="mb-10">
-        <RevealHeading text="SESSIONS" className="text-5xl lg:text-8xl" />
+        <RevealHeading text="Sessions" className="text-5xl lg:text-8xl" />
         <ScrambleSubtitle
-          text="TRACK YOUR STUDY TIME AND PROGRESS"
+          text="Track your study time and progress"
           className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
         />
       </div>

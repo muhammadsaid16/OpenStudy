@@ -128,7 +128,7 @@ export function FocusZone() {
         // (user blame-shifts to the app's reliability). Say it, once, with
         // a path to recovery — the data may still be retryable manually.
         showUndo({
-          message: "SESSION COMPLETED — COULDN'T SAVE",
+          message: "Session completed — couldn't save",
           undo: () => {
             createStudySession({
               subjectId: snap.subjectId || undefined,
@@ -144,7 +144,7 @@ export function FocusZone() {
     } else {
       // Previously this was a silent no-op — now the user is told.
       showUndo({
-        message: "SESSION TOO SHORT — NOT LOGGED",
+        message: "Session too short — not logged",
         undo: () => {},
         duration: 2500,
       });

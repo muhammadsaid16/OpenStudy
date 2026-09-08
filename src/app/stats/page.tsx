@@ -236,8 +236,8 @@ export default function StatsPage() {
       {/* header */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <RevealHeading text="STATS" className="text-4xl lg:text-6xl" />
-          <ScrambleSubtitle text="RETENTION, FORECAST, AND PER-BUNDLE MASTERY" className="mt-2 text-sm text-muted-fg uppercase tracking-widest" />
+          <RevealHeading text="Stats" className="text-4xl lg:text-6xl" />
+          <ScrambleSubtitle text="Retention, forecast, and per-bundle mastery" className="mt-2 text-sm text-muted-fg uppercase tracking-widest" />
         </div>
         <div className="flex items-center gap-3">
           <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label="Period">

@@ -128,9 +128,9 @@ export default function BundlesPage() {
       <div className="mb-8">
         <div className="flex items-end justify-between">
           <div>
-            <RevealHeading text="BUNDLES" className="text-4xl lg:text-6xl" />
+            <RevealHeading text="Bundles" className="text-4xl lg:text-6xl" />
             <ScrambleSubtitle
-              text="FLASHCARD DECKS FOR YOUR STUDY MATERIAL"
+              text="Flashcard decks for your study material"
               className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>

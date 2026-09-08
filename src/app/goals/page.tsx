@@ -205,9 +205,9 @@ export default function GoalsPage() {
       <div className="mb-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <RevealHeading text="GOALS" className="text-5xl lg:text-8xl" />
+            <RevealHeading text="Goals" className="text-5xl lg:text-8xl" />
             <ScrambleSubtitle
-              text="LONG-TERM VISION, TRACKED LIKE A KANBAN"
+              text="Long-term vision, tracked like a kanban"
               className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>

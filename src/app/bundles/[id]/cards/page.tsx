@@ -272,7 +272,7 @@ export default function BundleCardsPage() {
                 </p>
               </div>
               <RevealHeading
-                text={bundleName || "BUNDLE"}
+                text={bundleName || "Bundle"}
                 className="text-2xl font-bold uppercase tracking-tight text-fg"
               />
               {bundleTopicLabel && (

@@ -6,10 +6,10 @@ import type { BundleRec, FlashcardRec } from "@/lib/db";
 export function ForecastCard({ cards }: { cards: FlashcardRec[] }) {
   const f = useMemo(() => forecastDue(cards), [cards]);
   const stats = [
-    { label: "TODAY", value: f.dueToday, color: f.dueToday > 0 ? "text-accent" : "text-muted-fg" },
-    { label: "TOMORROW", value: f.dueTomorrow - f.dueToday, color: "text-fg" },
-    { label: "THIS WEEK", value: f.dueThisWeek - f.dueTomorrow, color: "text-fg" },
-    { label: "THIS MONTH", value: f.dueThisMonth - f.dueThisWeek, color: "text-fg" },
+    { label: "Today", value: f.dueToday, color: f.dueToday > 0 ? "text-accent" : "text-muted-fg" },
+    { label: "Tomorrow", value: f.dueTomorrow - f.dueToday, color: "text-fg" },
+    { label: "This week", value: f.dueThisWeek - f.dueTomorrow, color: "text-fg" },
+    { label: "This month", value: f.dueThisMonth - f.dueThisWeek, color: "text-fg" },
   ];
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

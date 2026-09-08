@@ -353,15 +353,15 @@ function KanbanBody() {
 }
 
 const LABELS: Record<LoaderVariant, string> = {
-  generic: "OPENSTUDY",
-  dashboard: "DASHBOARD",
-  grid: "PAGE",
-  grid4: "BUNDLES",
-  flashcards: "FLASHCARDS",
-  sessions: "SESSIONS",
-  settings: "SETTINGS",
-  kanban: "GOALS",
-  cards: "CARDS",
+  generic: "OpenStudy",
+  dashboard: "Dashboard",
+  grid: "Page",
+  grid4: "Bundles",
+  flashcards: "Flashcards",
+  sessions: "Sessions",
+  settings: "Settings",
+  kanban: "Goals",
+  cards: "Cards",
 };
 
 export function PageLoader({

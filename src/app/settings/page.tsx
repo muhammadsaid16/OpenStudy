@@ -125,9 +125,9 @@ export default function SettingsPage() {
   return (
     <div className="p-8 lg:p-12">
       <div className="mb-8">
-        <RevealHeading text="SETTINGS" className="text-4xl lg:text-6xl" />
+        <RevealHeading text="Settings" className="text-4xl lg:text-6xl" />
         <ScrambleSubtitle
-          text="APPEARANCE & PREFERENCES"
+          text="Appearance & preferences"
           className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
         />
       </div>

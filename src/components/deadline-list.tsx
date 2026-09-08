@@ -32,9 +32,9 @@ const URGENCY_STYLE: Record<Urgency, string> = {
 };
 
 const URGENCY_LABEL: Record<Urgency, string> = {
-  high: "HIGH",
-  medium: "MED",
-  low: "LOW",
+  high: "High",
+  medium: "Med",
+  low: "Low",
 };
 
 export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {

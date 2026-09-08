@@ -37,19 +37,19 @@ export function CommandPalette() {
       ]);
       const out: Entry[] = [];
       for (const s of subjects)
-        out.push({ id: "s" + s.id, group: "SUBJECTS", title: s.name, sub: "", href: "/subjects/" + s.id });
+        out.push({ id: "s" + s.id, group: "Subjects", title: s.name, sub: "", href: "/subjects/" + s.id });
       for (const b of bundles ?? [])
-        out.push({ id: "b" + b.id, group: "BUNDLES", title: b.name, sub: (b as { description?: string }).description ?? "", href: "/bundles/" + b.id + "/cards" });
+        out.push({ id: "b" + b.id, group: "Bundles", title: b.name, sub: (b as { description?: string }).description ?? "", href: "/bundles/" + b.id + "/cards" });
       for (const c of (cards ?? []).slice(0, 1500)) {
         const k = cardKind(c as { kind?: string | null });
         const front = k === "cloze" ? maskCloze(c.front) : c.front;
         out.push({
-          id: "c" + c.id, group: "CARDS", title: front.slice(0, 90), sub: k === "basic" ? c.back.slice(0, 90) : k.toUpperCase(),
+          id: "c" + c.id, group: "Cards", title: front.slice(0, 90), sub: k === "basic" ? c.back.slice(0, 90) : k.toUpperCase(),
           href: c.bundleId ? "/bundles/" + c.bundleId + "/cards" : "/flashcards",
         });
       }
       for (const n of (notes ?? []).slice(0, 500))
-        out.push({ id: "n" + n.id, group: "NOTES", title: n.title, sub: "", href: "/notes/" + n.id });
+        out.push({ id: "n" + n.id, group: "Notes", title: n.title, sub: "", href: "/notes/" + n.id });
       setIndex(out);
     } catch { setIndex([]); }
   }, []);
@@ -91,7 +91,7 @@ export function CommandPalette() {
     const needle = q.trim().toLowerCase();
     const pool = needle ? all.filter((e) => hay(e).includes(needle)) : all;
     const out: Entry[] = [];
-    for (const g of ["CARDS", "BUNDLES", "SUBJECTS", "NOTES"])
+    for (const g of ["Cards", "Bundles", "Subjects", "Notes"])
       for (const e of pool) {
         if (e.group !== g) continue;
         if (out.filter((x) => x.group === g).length >= PER_GROUP) continue;

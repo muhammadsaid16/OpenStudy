@@ -162,9 +162,9 @@ function NotesContent() {
       <div className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <RevealHeading text="NOTES" className="text-5xl lg:text-8xl" />
+            <RevealHeading text="Notes" className="text-5xl lg:text-8xl" />
             <ScrambleSubtitle
-              text="YOUR STUDY NOTES AND REFERENCE MATERIAL"
+              text="Your study notes and reference material"
               className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>

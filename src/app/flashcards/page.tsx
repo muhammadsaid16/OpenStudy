@@ -656,9 +656,9 @@ function FlashcardsContent() {
     <div className="p-8 lg:p-12">
       {/* Header */}
       <div className="mb-6">
-        <RevealHeading text="FLASHCARDS" className="text-4xl lg:text-6xl" />
+        <RevealHeading text="Flashcards" className="text-4xl lg:text-6xl" />
         <ScrambleSubtitle
-          text="SPACED REPETITION REVIEW SYSTEM"
+          text="Spaced repetition review system"
           className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
         />
       </div>

@@ -272,9 +272,9 @@ export default function SubjectsPage() {
       <div className="mb-16">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <RevealHeading text="SUBJECTS" className="text-5xl lg:text-8xl" />
+            <RevealHeading text="Subjects" className="text-5xl lg:text-8xl" />
             <ScrambleSubtitle
-              text="ORGANIZE YOUR LEARNING TOPICS"
+              text="Organize your learning topics"
               className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>
