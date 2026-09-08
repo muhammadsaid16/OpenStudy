@@ -173,6 +173,8 @@ export default function SubjectsPage() {
       );
       setLoaded(true);
     });
+    // Load bundles once so the empty state can surface unlinked decks.
+    getBundles().then((b) => setAllBundles(b as Bundle[])).catch(() => {});
   }, []);
 
   // Keyboard shortcuts
@@ -308,17 +310,49 @@ export default function SubjectsPage() {
           ))}
         </div>
       ) : subjects.length === 0 ? (
-        <EmptyState
-          icon={<BookOpen size={48} />}
-          title="No subjects yet"
-          description="Create your first subject to start organizing your studies."
-          action={
-            <Button onClick={() => setModalOpen(true)}>
-              <Plus size={16} />
-              Create subject
-            </Button>
-          }
-        />
+        <div className="space-y-8">
+          <EmptyState
+            icon={<BookOpen size={48} />}
+            title="No subjects yet"
+            description="Subjects organize your curriculum — topics live under them, and cards/notes live under topics. Flashcard bundles work standalone too."
+            action={
+              <Button onClick={() => setModalOpen(true)}>
+                <Plus size={16} />
+                Create subject
+              </Button>
+            }
+          />
+          {/* Bridge the two hierarchies: unlinked bundles (created on
+              /flashcards without a topic) are surfaced here with one-tap
+              linking, so Subjects never looks dead while /flashcards has
+              content. */}
+          {allBundles.filter((b) => !b.topicId).length > 0 && (
+            <div className="glass rounded-2xl p-5">
+              <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-fg">
+                <Layers size={14} /> Unlinked bundles ({allBundles.filter((b) => !b.topicId).length})
+              </p>
+              <p className="mb-4 text-sm text-muted-fg">
+                These decks exist on the Flashcards page but aren't filed under any subject/topic yet.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {allBundles.filter((b) => !b.topicId).map((b) => (
+                  <button
+                    key={b.id}
+                    onClick={() => {
+                      setManageTopicsFor(null);
+                      router.push(`/bundles/${b.id}/cards`);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-bold hover:border-accent hover:text-accent"
+                    style={{ borderColor: b.color || undefined, color: b.color || undefined }}
+                    title="Open bundle cards"
+                  >
+                    <Layers size={12} /> {b.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {subjects.map((subject) => (
