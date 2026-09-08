@@ -29,6 +29,7 @@ export default function NotePage() {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const [editTags, setEditTags] = useState<string[]>([]);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([getAllNotes(), getBundles()]).then(([notes, b]) => {
@@ -64,12 +65,13 @@ export default function NotePage() {
   };
 
   const handleDelete = async () => {
-    if (!note || !confirm("DELETE THIS NOTE?")) return;
+    if (!note) return;
     const snapshot = note;
     await deleteNote(note.id);
+    setDeleteOpen(false);
     router.push("/notes");
     showUndo({
-      message: `NOTE "${snapshot.title}" DELETED`,
+      message: `Note "${snapshot.title}" deleted`,
       undo: async () => {
         const { createNote } = await import("@/app/actions");
         if (!snapshot.topicId) return;
@@ -97,16 +99,16 @@ export default function NotePage() {
     return (
       <div className="p-8 lg:p-12 max-w-4xl mx-auto text-center">
         <StickyNote size={48} className="mx-auto mb-4 text-muted-fg" />
-        <h2 className="text-2xl font-bold uppercase tracking-tight">NOTE NOT FOUND</h2>
-        <p className="mt-2 text-sm text-muted-fg uppercase tracking-widest">This note may have been deleted.</p>
+        <h2 className="text-2xl font-bold tracking-tight">Note not found</h2>
+        <p className="mt-2 text-sm text-muted-fg">This note may have been deleted.</p>
         <Button className="mt-6" onClick={() => router.push("/notes")}>
-          <ArrowLeft size={16} /> BACK TO NOTES
+          <ArrowLeft size={16} /> Back to notes
         </Button>
       </div>
     );
   }
 
-  const accent = note.topic?.subject?.color || "#FF7A72";
+  const accent = note.topic?.subject?.color || "var(--color-accent)";
 
   return (
     <div className="min-h-screen bg-bg">
@@ -116,55 +118,58 @@ export default function NotePage() {
           onClick={() => router.push("/notes")}
           className="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg transition-colors"
         >
-          <ArrowLeft size={14} /> BACK TO NOTES
+          <ArrowLeft size={14} /> Back to notes
         </button>
 
         {/* Header */}
         <div
-          className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-8 backdrop-blur-xl"
-          style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${accent}10, transparent 60%)` }}
+          className="glass rounded-3xl p-8"
+          style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, color-mix(in srgb, ${accent} 6%, transparent), transparent 60%)` }}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               {note.topic && (
-                <p className="mb-3 flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+                <p className="mb-3 flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-fg">
                   <span
                     className="inline-block rounded-full px-2.5 py-1 text-[10px]"
-                    style={{ backgroundColor: `${accent}1f`, color: accent, boxShadow: `inset 0 0 0 1px ${accent}40` }}
+                    style={{ backgroundColor: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 25%, transparent)` }}
                   >
-                    {note.topic.subject?.name || "GENERAL"}
+                    {note.topic.subject?.name || "General"}
                   </span>
-                  <span className="text-zinc-600">›</span>
+                  <span aria-hidden>›</span>
                   <span>{note.topic.name}</span>
-                  {note.isPinned && <span className="ml-1 inline-flex items-center gap-1 text-accent"><Pin size={10} /> PINNED</span>}
+                  {note.isPinned && <span className="ml-1 inline-flex items-center gap-1 text-accent"><Pin size={10} /> Pinned</span>}
                 </p>
               )}
-              <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-white lg:text-4xl">
+              <h1 className="font-display text-3xl font-bold tracking-tight text-fg lg:text-4xl">
                 {note.title}
               </h1>
-              <p className="mt-3 flex items-center gap-2 text-xs text-zinc-500">
+              <p className="mt-3 flex items-center gap-2 text-xs text-muted-fg">
                 <Calendar size={12} /> {new Date(note.updatedAt).toLocaleDateString()} · {note.tags.length} tags
               </p>
             </div>
             <div className="flex shrink-0 gap-1">
               <button
                 onClick={handleTogglePin}
-                className={`p-2.5 rounded-xl border transition-colors ${note.isPinned ? "border-accent bg-accent text-accent-fg" : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700"}`}
+                className={`rounded-full p-2.5 transition-colors ${note.isPinned ? "bg-accent text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent"}`}
                 title={note.isPinned ? "Unpin" : "Pin"}
+                aria-label={note.isPinned ? "Unpin note" : "Pin note"}
               >
                 <Pin size={16} />
               </button>
               <button
                 onClick={openEdit}
-                className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+                className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
                 title="Edit"
+                aria-label="Edit note"
               >
                 <Pencil size={16} />
               </button>
               <button
-                onClick={handleDelete}
-                className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-red-400 hover:border-red-400/30 transition-colors"
+                onClick={() => setDeleteOpen(true)}
+                className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
                 title="Delete"
+                aria-label="Delete note"
               >
                 <Trash2 size={16} />
               </button>
@@ -174,7 +179,7 @@ export default function NotePage() {
           {note.tags.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-1.5">
               {note.tags.map(({ tag }) => (
-                <span key={tag.id} className="rounded-full bg-zinc-800 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                <span key={tag.id} className="rounded-full bg-muted px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
                   {tag.name}
                 </span>
               ))}
@@ -183,7 +188,7 @@ export default function NotePage() {
         </div>
 
         {/* Content */}
-        <div className="mt-8 rounded-3xl border border-zinc-800 bg-zinc-900/40 p-8 backdrop-blur">
+        <div className="glass mt-8 rounded-3xl p-8">
           {note.content ? (
             <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:font-bold prose-headings:tracking-tight">
               <Markdown content={note.content} />
@@ -193,23 +198,23 @@ export default function NotePage() {
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft text-accent">
                 <StickyNote size={28} />
               </div>
-              <p className="text-sm font-bold uppercase tracking-widest">NO CONTENT YET</p>
+              <p className="text-sm font-bold uppercase tracking-widest">No content yet</p>
               <p className="mt-1 text-xs text-muted-fg">Edit this note to add study material</p>
               <Button size="sm" className="mt-6" onClick={openEdit}>
-                <Pencil size={14} /> EDIT NOTE
+                <Pencil size={14} /> Edit note
               </Button>
             </div>
           )}
         </div>
 
         {/* Actions */}
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
-          <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500">
-            <BookOpen size={14} /> STUDY MODE — READ, THEN IMPORT TO FLASHCARDS
+        <div className="glass mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl p-4">
+          <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-fg">
+            <BookOpen size={14} /> Study mode — read, then import to flashcards
           </p>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={openEdit}>
-              <Pencil size={14} /> EDIT
+              <Pencil size={14} /> Edit
             </Button>
             <NoteAiImportButton noteId={note.id} noteTitle={note.title} availableBundles={bundles} />
           </div>
@@ -218,16 +223,29 @@ export default function NotePage() {
         {/* Related */}
         <div className="mt-8 flex justify-center">
           <Link href="/notes" className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent transition-colors">
-            ← BACK TO ALL NOTES
+            ← Back to all notes
           </Link>
         </div>
       </div>
 
+      {/* Delete confirmation */}
+      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title="Delete note">
+        <div className="space-y-6">
+          <p className="text-sm text-muted-fg">
+            Delete “{note.title}”? You can undo this right after.
+          </p>
+          <div className="flex justify-end gap-4 pt-2">
+            <Button variant="ghost" onClick={() => setDeleteOpen(false)}>Cancel</Button>
+            <Button variant="danger" onClick={handleDelete}>Delete</Button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Edit Modal */}
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="EDIT NOTE">
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit note">
         <div className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">TITLE</label>
+            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Title</label>
             <input
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
@@ -235,7 +253,7 @@ export default function NotePage() {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">CONTENT</label>
+            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Content</label>
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
@@ -243,10 +261,10 @@ export default function NotePage() {
               className="glass-inset flex w-full rounded-xl px-4 py-3 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 border-border focus:outline-none resize-none"
             />
           </div>
-          <TagInput label="TAGS" tags={editTags} onChange={setEditTags} />
+          <TagInput label="Tags" tags={editTags} onChange={setEditTags} />
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setEditOpen(false)}>CANCEL</Button>
-            <Button onClick={handleEditSave} disabled={!editTitle.trim()}>SAVE</Button>
+            <Button variant="ghost" onClick={() => setEditOpen(false)}>Cancel</Button>
+            <Button onClick={handleEditSave} disabled={!editTitle.trim()}>Save</Button>
           </div>
         </div>
       </Modal>

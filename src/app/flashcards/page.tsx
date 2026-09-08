@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react";
-import { Brain, Zap, Plus, Pencil, Trash2, Layers, BarChart3, AlertTriangle, Timer, Download, Upload, Wifi, WifiOff, Search, CheckSquare, Square, Tag, ArrowRight, Volume2, VolumeX } from "lucide-react";
+import { Brain, Plus, Pencil, Layers, BarChart3, AlertTriangle, Download, Upload, Wifi, WifiOff, Search } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Button, Badge, EmptyState, Modal, Input, Skeleton } from "@/components/ui";
+import { Button, EmptyState, Modal, Input, Skeleton } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
-import { Markdown } from "@/components/markdown";
 import { showUndo } from "@/components/undo-toast";
 import {
   getDueFlashcards,
@@ -41,7 +40,6 @@ import { SubjectTopicSelect } from "@/components/subject-topic-select";
 import { cn } from "@/lib/utils";
 import { filterDueCards } from "@/lib/review-queue";
 import { cardKind, cleanChoices, maskCloze, shuffled, type CardKind } from "@/lib/card-kinds";
-import { spotlightProps } from "@/lib/interactions";
 import { motion } from "framer-motion";
 import { parseCardsFile } from "@/lib/parsers/cards";
 import { db as offlineDb, cacheBundles, cacheFlashcards, getCachedBundleCards } from "@/lib/db";
@@ -53,26 +51,12 @@ import { ImageUploadButton } from "@/components/image-upload-button";
 import { AiImportButton } from "@/components/ai-import-button";
 import { AiGenerateButton } from "@/components/ai-generate-button";
 import { CardKindFields } from "@/components/card-kind-fields";
+import { RATING_BUTTONS } from "@/lib/card-status";
 
 type Flashcard = Awaited<ReturnType<typeof getDueFlashcards>>[number];
 type ManagedFlashcard = Awaited<ReturnType<typeof getAllFlashcards>>[number];
 type Bundle = Awaited<ReturnType<typeof getBundles>>[number];
 type Subject = { id: string; name: string; color: string };
-
-const ratingButtons = [
-  { value: 0, label: "DIDN'T REMEMBER", shortLabel: "AGAIN", color: "border-danger bg-danger/10 text-danger hover:bg-danger hover:text-on-color" },
-  { value: 3, label: "REMEMBERED WITH DIFFICULTY", shortLabel: "HARD", color: "border-warning bg-warning/10 text-warning hover:bg-warning hover:text-on-color" },
-  { value: 5, label: "REMEMBERED EASILY", shortLabel: "EASY", color: "border-success bg-success/10 text-success hover:bg-success hover:text-on-color" },
-];
-
-function getCardStatus(card: { reviewCount: number; nextReview: Date | string }, nowMs: number) {
-  const rc = card.reviewCount;
-  const isDue = new Date(card.nextReview).getTime() <= nowMs;
-  if (rc === 0) return { label: "NEW", dot: "bg-gray-400" };
-  if (isDue) return { label: "DUE", dot: "bg-danger" };
-  if (rc <= 3) return { label: "LEARNING", dot: "bg-warning" };
-  return { label: "MATURE", dot: "bg-success" };
-}
 
 function FlashcardsContent() {
   const searchParams = useSearchParams();
@@ -459,8 +443,8 @@ function FlashcardsContent() {
       }
       if (isFlipped) {
         const idx = Number(e.key) - 1;
-        if (idx >= 0 && idx < ratingButtons.length) {
-          handleReview(ratingButtons[idx].value);
+        if (idx >= 0 && idx < RATING_BUTTONS.length) {
+          handleReview(RATING_BUTTONS[idx].value);
         }
       }
     };
@@ -512,7 +496,7 @@ function FlashcardsContent() {
   const handleCreate = async () => {
     if (!front.trim() || !back.trim()) return;
     if (!selectedBundle && !selectedTopicId) {
-      setCreateError("SELECT A TOPIC TO FILE THIS CARD UNDER.");
+      setCreateError("Select a topic to file this card under.");
       return;
     }
     setCreateError("");
@@ -535,7 +519,7 @@ function FlashcardsContent() {
       setSelectedTopicId("");
       await loadDueCards();
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message.toUpperCase().slice(0, 140) : "COULD NOT CREATE CARD.");
+      setCreateError(err instanceof Error ? err.message.slice(0, 140) : "Could not create card.");
     } finally {
       setCreating(false);
     }
@@ -558,7 +542,7 @@ function FlashcardsContent() {
       // Refresh browse list so the edited card shows new text immediately
       if (browseLoaded) await loadBrowseAll();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message.toUpperCase().slice(0, 140) : "COULD NOT SAVE CARD.");
+      setEditError(err instanceof Error ? err.message.slice(0, 140) : "Could not save card.");
     } finally {
       setSaving(false);
     }
@@ -582,7 +566,7 @@ function FlashcardsContent() {
       await loadDueCards();
       if (browseLoaded) await loadBrowseAll();
       showUndo({
-        message: `CARD DELETED`,
+        message: `Card deleted`,
         undo: async () => {
           // Restore the exact card (same id, SM-2 state, tags, links) —
           // recreating it fresh would silently reset its scheduling.
@@ -679,7 +663,7 @@ function FlashcardsContent() {
       </div>
 
       {/* Toolbar */}
-      <div className="mb-8 space-y-4 border-b-2 border-border pb-4">
+      <div className="mb-8 space-y-4 border-b border-border pb-4">
         {/* Row 1 — Primary: bundle context + main action */}
         <div className="flex flex-wrap items-center gap-3">
           <select
@@ -692,7 +676,7 @@ function FlashcardsContent() {
             aria-label="Select bundle to study"
             className="flex h-10 items-center gap-2 rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold uppercase tracking-tight text-fg backdrop-blur-md focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-bg text-fg">ALL BUNDLES</option>
+            <option value="" className="bg-bg text-fg">All bundles</option>
             {bundles.map((b) => (
               <option key={b.id} value={b.id} className="bg-bg text-fg">{b.name} ({b._count.flashcards})</option>
             ))}
@@ -700,7 +684,7 @@ function FlashcardsContent() {
           {selectedBundle && (
             <Button onClick={() => setModalOpen(true)}>
               <Plus size={16} />
-              ADD CARD
+              Add card
             </Button>
           )}
           {selectedBundle && (() => {
@@ -722,7 +706,7 @@ function FlashcardsContent() {
             onClick={() => router.push("/bundles")}
             className="ml-auto py-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
           >
-            MANAGE BUNDLES →
+            Manage bundles →
           </button>
         </div>
 
@@ -742,7 +726,7 @@ function FlashcardsContent() {
                 className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg"
                 title="Edit bundle"
               >
-                <Pencil size={14} className="inline" /> EDIT
+                <Pencil size={14} className="inline" /> Edit
               </button>
               <button
                 onClick={async () => {
@@ -761,20 +745,20 @@ function FlashcardsContent() {
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
                   } catch (e) {
                     console.error("Export failed", e);
-                    alert("EXPORT FAILED — SEE CONSOLE");
+                    alert("Export failed — see console");
                   }
                 }}
                 className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg"
                 title="Export bundle as JSON"
               >
-                <Download size={14} className="inline" /> EXPORT
+                <Download size={14} className="inline" /> Export
               </button>
               <button
                 onClick={() => document.getElementById("import-file")?.click()}
                 className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg"
                 title="Import cards from JSON/CSV/Anki file"
               >
-                <Upload size={14} className="inline" /> IMPORT
+                <Upload size={14} className="inline" /> Import
               </button>
               <input
                 id="import-file"
@@ -792,11 +776,11 @@ function FlashcardsContent() {
                     if (!cards.length) throw new Error("No valid cards found");
                     const res = await importBundleCards(selectedBundle, cards);
                     if (res.count === 0) throw new Error("No valid cards found");
-                    alert(`IMPORTED ${res.count} CARDS`);
+                    alert(`Imported ${res.count} cards`);
                     await reloadCards();
                   } catch (err) {
                     console.error("Import failed", err);
-                    alert("IMPORT FAILED: INVALID FILE");
+                    alert("Import failed: invalid file");
                   }
                   e.target.value = "";
                 }}
@@ -811,11 +795,11 @@ function FlashcardsContent() {
             )}
           >
             {online ? <Wifi size={11} className={pending > 0 ? "animate-pulse" : ""} /> : <WifiOff size={11} />}
-            {online ? (pending > 0 ? `SYNCING ${pending}` : "ONLINE") : `OFFLINE (${pending} QUEUED)`}
+            {online ? (pending > 0 ? `Syncing ${pending}` : "Online") : `Offline (${pending} queued)`}
           </div>
 
           {/* Mode tabs — sliding accent underline */}
-          <div className="flex gap-1 overflow-x-auto rounded-xl border-2 border-border bg-muted/40 p-1">
+          <div className="flex gap-1 overflow-x-auto rounded-xl border border-border bg-muted/40 p-1">
             {(["review", "browse", "leeches", "stats"] as const).map((m) => (
               <button
                 key={m}
@@ -837,7 +821,7 @@ function FlashcardsContent() {
                   {m === "browse" && <Search size={14} className="mr-1 inline" />}
                   {m === "leeches" && <AlertTriangle size={14} className="mr-1 inline" />}
                   {m === "stats" && <BarChart3 size={14} className="mr-1 inline" />}
-                  {m.toUpperCase()}
+                  {m}
                 </span>
               </button>
             ))}
@@ -960,90 +944,90 @@ function FlashcardsContent() {
       )}
 
       {/* ═══════════════ CREATE MODAL ═══════════════ */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="NEW FLASHCARD">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New flashcard">
         <div className="space-y-6">
           {!selectedBundle && (
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">TOPIC</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Topic</label>
               <SubjectTopicSelect subjects={subjects} value={selectedTopicId} onChange={setSelectedTopicId} />
             </div>
           )}
           {selectedBundle && (
-            <div className="inline-flex items-center gap-2 border border-accent/50 bg-accent/5 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent">
+            <div className="inline-flex items-center gap-2 rounded-full border border-accent/50 bg-accent/5 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent">
               <Layers size={12} />
-              <span>BUNDLE</span>
+              <span>Bundle</span>
               <span className="h-3 w-px bg-accent/40" />
-              <span>{bundles.find((b) => b.id === selectedBundle)?.name?.toUpperCase()}</span>
+              <span>{bundles.find((b) => b.id === selectedBundle)?.name}</span>
             </div>
           )}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">FRONT (QUESTION)</label>
-              <ImageUploadButton onImage={(md) => setFront((prev) => prev ? `${prev} ${md}` : md)} label="IMAGE" />
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Front (question)</label>
+              <ImageUploadButton onImage={(md) => setFront((prev) => prev ? `${prev} ${md}` : md)} label="Image" />
             </div>
-            <Input placeholder="E.G. WHAT IS KINETIC ENERGY?" value={front} onChange={(e) => setFront(e.target.value)}
+            <Input placeholder="e.g. What is kinetic energy?" value={front} onChange={(e) => setFront(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
             />
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">BACK (ANSWER)</label>
-              <ImageUploadButton onImage={(md) => setBack((prev) => prev ? `${prev} ${md}` : md)} label="IMAGE" />
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Back (answer)</label>
+              <ImageUploadButton onImage={(md) => setBack((prev) => prev ? `${prev} ${md}` : md)} label="Image" />
             </div>
-            <Input placeholder="E.G. ENERGY OF MOTION" value={back} onChange={(e) => setBack(e.target.value)}
+            <Input placeholder="e.g. Energy of motion" value={back} onChange={(e) => setBack(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">DESCRIPTION (OPTIONAL)</label>
-            <Input placeholder="OPTIONAL HINT OR CONTEXT SHOWN WITH THE CARD" value={desc} onChange={(e) => setDesc(e.target.value)}
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Description (optional)</label>
+            <Input placeholder="Optional hint or context shown with the card" value={desc} onChange={(e) => setDesc(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
             />
           </div>
           <CardKindFields kind={kind} onKindChange={setKind} choicesText={choicesText} onChoicesTextChange={setChoicesText} />
-          <p className="text-[10px] text-muted-fg uppercase tracking-widest">⌘/CTRL + ENTER TO SAVE</p>
+          <p className="text-[10px] text-muted-fg uppercase tracking-widest">⌘/Ctrl + Enter to save</p>
           {createError && <p className="text-[10px] font-bold uppercase tracking-widest text-red-500">{createError}</p>}
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setModalOpen(false)}>CANCEL</Button>
+            <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={creating || !front.trim() || !back.trim()}>
-              {creating ? "CREATING..." : "CREATE"}
+              {creating ? "Creating..." : "Create"}
             </Button>
           </div>
         </div>
       </Modal>
 
       {/* ═══════════════ EDIT MODAL ═══════════════ */}
-      <Modal open={!!editCard} onClose={() => setEditCard(null)} title="EDIT FLASHCARD">
+      <Modal open={!!editCard} onClose={() => setEditCard(null)} title="Edit flashcard">
         {editCard && (
           <div className="space-y-6">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">FRONT (QUESTION)</label>
-                <ImageUploadButton onImage={(md) => setEditFront((prev) => prev ? `${prev} ${md}` : md)} label="IMAGE" />
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Front (question)</label>
+                <ImageUploadButton onImage={(md) => setEditFront((prev) => prev ? `${prev} ${md}` : md)} label="Image" />
               </div>
               <Input value={editFront} onChange={(e) => setEditFront(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">BACK (ANSWER)</label>
-                <ImageUploadButton onImage={(md) => setEditBack((prev) => prev ? `${prev} ${md}` : md)} label="IMAGE" />
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Back (answer)</label>
+                <ImageUploadButton onImage={(md) => setEditBack((prev) => prev ? `${prev} ${md}` : md)} label="Image" />
               </div>
               <Input value={editBack} onChange={(e) => setEditBack(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">DESCRIPTION (OPTIONAL)</label>
-              <Input placeholder="OPTIONAL HINT OR CONTEXT SHOWN WITH THE CARD" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Description (optional)</label>
+              <Input placeholder="Optional hint or context shown with the card" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">TAGS</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Tags</label>
               <TagInput tags={editTags} onChange={setEditTags} />
             </div>
             <CardKindFields kind={editKind} onKindChange={setEditKind} choicesText={editChoicesText} onChoicesTextChange={setEditChoicesText} />
             {editError && <p className="text-[10px] font-bold uppercase tracking-widest text-red-500">{editError}</p>}
             <div className="flex justify-end gap-4 pt-4">
-              <Button variant="ghost" onClick={() => setEditCard(null)}>CANCEL</Button>
+              <Button variant="ghost" onClick={() => setEditCard(null)}>Cancel</Button>
               <Button onClick={handleEditSave} disabled={saving || !editFront.trim() || !editBack.trim()}>
-                {saving ? "SAVING..." : "SAVE"}
+                {saving ? "Saving..." : "Save"}
               </Button>
             </div>
           </div>
@@ -1051,18 +1035,18 @@ function FlashcardsContent() {
       </Modal>
 
       {/* ═══════════════ DELETE MODAL ═══════════════ */}
-      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="DELETE FLASHCARD">
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete flashcard">
         {deleteTarget && (
           <div className="space-y-6">
-            <p className="text-sm text-muted-fg">ARE YOU SURE? THIS CANNOT BE UNDONE.</p>
-            <div className="border-2 border-border bg-muted/20 p-4">
-              <p className="text-sm font-bold uppercase tracking-tight">{deleteTarget.front}</p>
+            <p className="text-sm text-muted-fg">Are you sure? This cannot be undone.</p>
+            <div className="rounded-2xl border border-border bg-muted/20 p-4">
+              <p className="text-sm font-bold tracking-tight">{deleteTarget.front}</p>
               <p className="mt-1 text-xs text-muted-fg">{deleteTarget.back}</p>
             </div>
             <div className="flex justify-end gap-4 pt-2">
-              <Button variant="ghost" onClick={() => setDeleteTarget(null)}>CANCEL</Button>
+              <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDelete} disabled={deleting}>
-                {deleting ? "DELETING..." : "DELETE"}
+                {deleting ? "Deleting..." : "Delete"}
               </Button>
             </div>
           </div>
@@ -1070,27 +1054,21 @@ function FlashcardsContent() {
       </Modal>
 
       {/* ═══════════════ EDIT BUNDLE MODAL ═══════════════ */}
-      <Modal open={editBundleOpen} onClose={() => setEditBundleOpen(false)} title="EDIT BUNDLE">
+      <Modal open={editBundleOpen} onClose={() => setEditBundleOpen(false)} title="Edit bundle">
         <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">NAME</label>
-            <input
-              value={editBundleName}
-              onChange={(e) => setEditBundleName(e.target.value)}
-              className="h-10 w-full border-2 border-border bg-bg px-3 text-sm font-bold uppercase tracking-tight text-fg focus:outline-none"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">DESCRIPTION (OPTIONAL)</label>
-            <input
-              value={editBundleDesc}
-              onChange={(e) => setEditBundleDesc(e.target.value)}
-              className="h-10 w-full border-2 border-border bg-bg px-3 text-sm font-bold uppercase tracking-tight text-fg focus:outline-none"
-            />
-          </div>
+          <Input
+            label="Name"
+            value={editBundleName}
+            onChange={(e) => setEditBundleName(e.target.value)}
+          />
+          <Input
+            label="Description (optional)"
+            value={editBundleDesc}
+            onChange={(e) => setEditBundleDesc(e.target.value)}
+          />
           <BundleColorPicker value={editBundleColor} onChange={setEditBundleColor} />
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setEditBundleOpen(false)}>CANCEL</Button>
+            <Button variant="ghost" onClick={() => setEditBundleOpen(false)}>Cancel</Button>
             <Button
               onClick={async () => {
                 if (!selectedBundle || !editBundleName.trim()) return;
@@ -1111,50 +1089,50 @@ function FlashcardsContent() {
               }}
               disabled={savingBundle}
             >
-              {savingBundle ? "SAVING..." : "SAVE"}
+              {savingBundle ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>
       </Modal>
 
       {/* ═══════════════ BATCH TAG MODAL ═══════════════ */}
-      <Modal open={batchTagModalOpen} onClose={() => setBatchTagModalOpen(false)} title="BATCH TAG CARDS">
+      <Modal open={batchTagModalOpen} onClose={() => setBatchTagModalOpen(false)} title="Batch tag cards">
         <div className="space-y-6">
-          <p className="text-sm text-muted-fg">ADD TAGS TO {browseSelected.size} SELECTED CARD{browseSelected.size !== 1 ? "S" : ""}.</p>
+          <p className="text-sm text-muted-fg">Add tags to {browseSelected.size} selected card{browseSelected.size !== 1 ? "s" : ""}.</p>
           <Input
-            label="TAGS (COMMA-SEPARATED)"
-            placeholder="E.G. VERBS, GRAMMAR, EXAM"
+            label="Tags (comma-separated)"
+            placeholder="e.g. verbs, grammar, exam"
             value={batchTagInput}
             onChange={(e) => setBatchTagInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleBatchTag(); }}
           />
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setBatchTagModalOpen(false)}>CANCEL</Button>
-            <Button onClick={handleBatchTag} disabled={!batchTagInput.trim()}>APPLY TAGS</Button>
+            <Button variant="ghost" onClick={() => setBatchTagModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleBatchTag} disabled={!batchTagInput.trim()}>Apply tags</Button>
           </div>
         </div>
       </Modal>
 
       {/* ═══════════════ BATCH MOVE MODAL ═══════════════ */}
-      <Modal open={batchMoveModalOpen} onClose={() => setBatchMoveModalOpen(false)} title="BATCH MOVE CARDS">
+      <Modal open={batchMoveModalOpen} onClose={() => setBatchMoveModalOpen(false)} title="Batch move cards">
         <div className="space-y-6">
-          <p className="text-sm text-muted-fg">MOVE {browseSelected.size} SELECTED CARD{browseSelected.size !== 1 ? "S" : ""} TO A BUNDLE.</p>
+          <p className="text-sm text-muted-fg">Move {browseSelected.size} selected card{browseSelected.size !== 1 ? "s" : ""} to a bundle.</p>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">TARGET BUNDLE</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Target bundle</label>
             <select
               value={batchMoveTarget}
               onChange={(e) => setBatchMoveTarget(e.target.value)}
-              className="h-10 w-full border-2 border-border bg-bg px-3 text-sm font-bold uppercase tracking-tight text-fg focus:outline-none"
+              className="h-10 w-full rounded-xl border border-border bg-bg px-3 text-sm text-fg focus:outline-none focus:border-accent"
             >
-              <option value="" className="bg-bg text-fg">NO BUNDLE (UNASSIGNED)</option>
+              <option value="" className="bg-bg text-fg">No bundle (unassigned)</option>
               {bundles.map((b) => (
                 <option key={b.id} value={b.id} className="bg-bg text-fg">{b.name}</option>
               ))}
             </select>
           </div>
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setBatchMoveModalOpen(false)}>CANCEL</Button>
-            <Button onClick={handleBatchMove}>MOVE CARDS</Button>
+            <Button variant="ghost" onClick={() => setBatchMoveModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleBatchMove}>Move cards</Button>
           </div>
         </div>
       </Modal>

@@ -5,7 +5,7 @@
 // bundle overview, session run (flip card, MCQ, sprint, ratings),
 // completion screen. All state stays in the parent; this is pure view.
 
-import { Layers, Plus, Brain, Zap, Timer, BadgeCheck } from "lucide-react";
+import { Layers, Plus, Brain, Zap, Timer } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button, EmptyState, Badge, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -70,17 +70,17 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
     return (
       <div className="space-y-8">
         <p className="text-sm text-muted-fg uppercase tracking-widest">
-          SELECT A BUNDLE TO START REVIEWING
+          Select a bundle to start reviewing
         </p>
         {p.bundles.length === 0 ? (
           <EmptyState
             icon={<Layers size={48} />}
-            title="NO BUNDLES YET"
-            description="CREATE YOUR FIRST BUNDLE TO ORGANIZE FLASHCARDS."
+            title="No bundles yet"
+            description="Create your first bundle to organize flashcards."
             action={
               <Button onClick={() => p.onOpenCreate()}>
                 <Plus size={16} />
-                CREATE BUNDLE
+                Create bundle
               </Button>
             }
           />
@@ -91,7 +91,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                 key={bundle.id}
                 onClick={() => p.onSelectBundle(bundle.id)}
                 {...spotlightProps()}
-                className="spotlight-card group relative flex h-48 w-full flex-col justify-between rounded-2xl border border-zinc-800 bg-zinc-900/80 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-yellow-400/50 hover:bg-zinc-900 hover:shadow-[0_14px_35px_-15px_rgba(0,0,0,0.7)] text-left"
+                className="spotlight-card group relative flex h-48 w-full flex-col justify-between rounded-2xl glass p-5 transition-all duration-200 hover:-translate-y-0.5 text-left"
                 style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
               >
                 <div
@@ -105,11 +105,11 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                   {bundle.name.charAt(0)}
                 </div>
                 <div className="mt-3 min-w-0">
-                  <h3 className="truncate text-lg font-bold text-white transition-colors group-hover:text-yellow-400">
+                  <h3 className="truncate text-lg font-bold text-fg transition-colors group-hover:text-accent">
                     {bundle.name}
                   </h3>
                   {bundle.description && (
-                    <p className="mt-1 line-clamp-2 text-xs text-zinc-400">{bundle.description}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-fg">{bundle.description}</p>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
@@ -117,9 +117,9 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                     className="rounded-full px-2.5 py-1 font-mono text-xs"
                     style={{ backgroundColor: `${bundle.color || "#DFE104"}14`, color: bundle.color || "#DFE104" }}
                   >
-                    {bundle._count.flashcards} CARD{bundle._count.flashcards !== 1 ? "S" : ""}
+                    {bundle._count.flashcards} card{bundle._count.flashcards !== 1 ? "s" : ""}
                   </span>
-                  <span className="text-xs font-bold text-yellow-400 group-hover:underline">Open →</span>
+                  <span className="text-xs font-bold text-accent group-hover:underline">Open →</span>
                 </div>
               </button>
             ))}
@@ -142,12 +142,12 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
     return (
       <EmptyState
         icon={<Brain size={48} />}
-        title="NO CARDS YET"
-        description="CREATE YOUR FIRST FLASHCARD TO START STUDYING."
+        title="No cards yet"
+        description="Create your first flashcard to start studying."
         action={
           <Button onClick={() => p.onOpenCreate()}>
             <Plus size={16} />
-            CREATE FIRST CARD
+            Create first card
           </Button>
         }
       />
@@ -157,17 +157,17 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
   if (p.totalDue === 0 && p.completedCount > 0) {
     return (
       <div className="mx-auto max-w-2xl space-y-6 text-center">
-        <div className="border-2 border-success bg-success/5 p-8">
+        <div className="rounded-2xl border border-success bg-success/5 p-8">
           <Zap size={48} className="mx-auto mb-4 text-success" />
-          <p className="text-2xl font-bold uppercase tracking-tight">SESSION COMPLETE!</p>
+          <p className="text-2xl font-bold uppercase tracking-tight">Session complete!</p>
           <p className="mt-2 text-sm text-muted-fg uppercase tracking-widest">
-            YOU REVIEWED {p.totalReviewed} CARD{p.totalReviewed !== 1 ? "S" : ""} THIS SESSION
+            You reviewed {p.totalReviewed} card{p.totalReviewed !== 1 ? "s" : ""} this session
           </p>
         </div>
         <div className="flex justify-center gap-4">
-          <Button onClick={p.onStudyAgain}>STUDY AGAIN</Button>
+          <Button onClick={p.onStudyAgain}>Study again</Button>
           <Button variant="secondary" onClick={p.onBackToBundles}>
-            BACK TO BUNDLES
+            Back to bundles
           </Button>
         </div>
       </div>
@@ -178,19 +178,19 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
     <div className="mx-auto max-w-2xl space-y-6">
       {/* Session stats bar */}
       <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
-        <span>{p.completedCount} REVIEWED • {p.totalReviewed} TOTAL</span>
+        <span>{p.completedCount} reviewed • {p.totalReviewed} total</span>
         <div className="flex gap-3">
           {p.learningQueueLength > 0 && (
-            <Badge variant="warning">RELEARNING × {p.learningQueueLength}</Badge>
+            <Badge variant="warning">Relearning × {p.learningQueueLength}</Badge>
           )}
-          <Badge variant="success"><Zap size={12} className="mr-1" />{p.totalDue} IN QUEUE</Badge>
+          <Badge variant="success"><Zap size={12} className="mr-1" />{p.totalDue} in queue</Badge>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-muted">
+      <div className="h-1 rounded-full bg-muted">
         <div
-          className="h-full bg-accent transition-all duration-500"
+          className="h-full rounded-full bg-accent transition-all duration-500"
           style={{ width: `${(p.completedCount / Math.max(p.totalDue + p.completedCount, 1)) * 100}%` }}
         />
       </div>
@@ -200,18 +200,18 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
         <button
           onClick={p.onToggleSprint}
           className={cn(
-            "flex items-center gap-2 border-2 px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors",
+            "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors",
             p.sprintMode ? "border-accent bg-accent text-accent-fg" : "border-border text-muted-fg hover:border-fg"
           )}
         >
           <Timer size={14} />
-          SPEED SPRINT
+          Speed sprint
         </button>
         {p.sprintMode && p.isFlipped && (
           <div className="flex items-center gap-2">
-            <div className="h-2 w-24 bg-muted">
+            <div className="h-2 w-24 rounded-full bg-muted">
               <div
-                className="h-full bg-danger transition-all duration-1000"
+                className="h-full rounded-full bg-danger transition-all duration-1000"
                 style={{ width: `${(p.sprintTimer / 5) * 100}%` }}
               />
             </div>
@@ -230,14 +230,14 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
         >
           <div className="flip-card relative min-h-[440px] sm:min-h-[500px]" data-flipped={p.isFlipped}>
             {/* FRONT — QUESTION */}
-            <div className="flip-face absolute inset-0 flex flex-col overflow-hidden rounded-2xl border-2 border-border bg-zinc-900/60 shadow-[0_18px_50px_-12px_rgba(0,0,0,0.8)]">
+            <div className="flip-face absolute inset-0 flex flex-col overflow-hidden rounded-2xl border border-border bg-bg-raised">
               <span className="absolute inset-x-6 top-0 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent" />
               <div className="flex items-center justify-between px-7 pt-5">
                 <div className="flex items-center gap-2">
-                  <Badge>QUESTION</Badge>
+                  <Badge>Question</Badge>
                   {p.activeCard && p.cardKindOf(p.activeCard) !== "basic" && p.activeCard && (
                     <Badge className="border-accent/50 bg-accent/10 text-accent">
-                      {p.cardKindOf(p.activeCard).toUpperCase()}
+                      {p.cardKindOf(p.activeCard)}
                     </Badge>
                   )}
                 </div>
@@ -279,10 +279,10 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
               <div className="flex flex-1 flex-col items-center justify-center px-10 pb-4 text-center">
                 {p.activeCard?.topic && (
                   <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-muted-fg/70">
-                    {p.activeCard.topic.subject?.name ?? "GENERAL"} › {p.activeCard.topic.name}
+                    {p.activeCard.topic.subject?.name ?? "General"} › {p.activeCard.topic.name}
                   </p>
                 )}
-                <div className="text-3xl font-bold uppercase leading-relaxed tracking-tight sm:text-4xl">
+                <div className="text-3xl font-bold leading-relaxed tracking-tight sm:text-4xl">
                   {p.activeCard &&
                     (p.cardKindOf(p.activeCard) === "cloze"
                       ? p.maskCloze(p.activeCard.front)
@@ -298,7 +298,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                           e.stopPropagation();
                           p.onPickChoice(opt);
                         }}
-                        className="border-2 border-border bg-bg/60 px-4 py-2.5 text-sm font-bold uppercase tracking-tight text-fg transition-colors hover:border-accent hover:text-accent"
+                        className="rounded-xl border border-border bg-bg/60 px-4 py-2.5 text-sm font-bold tracking-tight text-fg transition-colors hover:border-accent hover:text-accent"
                       >
                         {opt}
                       </button>
@@ -309,17 +309,17 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
               <div className="flex items-center justify-between border-t border-border/60 px-7 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
                 <span className="font-mono">#{p.activeCard.id.slice(-4)}</span>
                 <span className="flex animate-pulse items-center gap-1.5">
-                  CLICK OR PRESS SPACE TO REVEAL
+                  Click or press Space to reveal
                   <Zap size={11} />
                 </span>
               </div>
             </div>
 
             {/* BACK — ANSWER */}
-            <div className="flip-face flip-back absolute inset-0 flex flex-col overflow-hidden rounded-2xl border-2 border-accent bg-accent shadow-[0_18px_50px_-12px_rgba(250,204,21,0.25)]">
+            <div className="flip-face flip-back absolute inset-0 flex flex-col overflow-hidden rounded-2xl border border-accent bg-accent">
               <span className="absolute inset-x-6 top-0 h-0.5 bg-gradient-to-r from-transparent via-accent-fg/60 to-transparent" />
               <div className="flex items-center justify-between px-7 pt-5">
-                <Badge className="bg-accent-fg/15 text-accent-fg">ANSWER</Badge>
+                <Badge className="bg-accent-fg/15 text-accent-fg">Answer</Badge>
                 {p.ttsSupported && (
                   <button
                     type="button"
@@ -345,18 +345,18 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                 {p.pickedChoice !== null && p.cardKindOf(p.activeCard) === "choice" && (
                   <p
                     className={cn(
-                      "mb-4 border-2 px-3 py-1.5 text-xs font-bold uppercase tracking-widest",
+                      "mb-4 rounded-xl border px-3 py-1.5 text-xs font-bold uppercase tracking-widest",
                       p.pickedChoice === p.activeCard.back
                         ? "border-success/60 bg-success/10 text-success"
                         : "border-danger/60 bg-danger/10 text-danger"
                     )}
                   >
                     {p.pickedChoice === p.activeCard.back
-                      ? "✓ CORRECT"
-                      : `✗ YOU PICKED: ${p.pickedChoice.toUpperCase().slice(0, 60)}`}
+                      ? "✓ Correct"
+                      : `✗ You picked: ${p.pickedChoice.slice(0, 60)}`}
                   </p>
                 )}
-                <div className="[&_p]:text-accent-fg [&_li]:text-accent-fg text-3xl font-bold uppercase leading-relaxed tracking-tight text-accent-fg sm:text-4xl [&_.md-p]:text-accent-fg">
+                <div className="[&_p]:text-accent-fg [&_li]:text-accent-fg text-3xl font-bold leading-relaxed tracking-tight text-accent-fg sm:text-4xl [&_.md-p]:text-accent-fg">
                   <Markdown content={p.activeCard.back} align="center" />
                 </div>
                 {p.activeCard.description && (
@@ -367,7 +367,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
               </div>
               <div className="flex items-center justify-between border-t border-accent-fg/15 px-7 py-3.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg/70">
                 <span className="font-mono">#{p.activeCard.id.slice(-4)}</span>
-                <span>RATE IT BELOW</span>
+                <span>Rate it below</span>
               </div>
             </div>
           </div>
@@ -377,17 +377,17 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
       {/* Show Answer button */}
       {!p.isFlipped && p.activeCard && (
         <Button className="w-full" onClick={() => p.onFlipTo(true)}>
-          SHOW ANSWER
+          Show answer
         </Button>
       )}
 
       {/* Rating buttons */}
       {p.isFlipped && (
-        <div className="grid grid-cols-3 gap-px bg-border">
+        <div className="grid grid-cols-3 gap-3">
           {RATING_BUTTONS.map((q, idx) => (
             <button
               key={q.value}
-              className={cn("bg-bg p-5 text-center transition-all duration-200 active:scale-95", q.color)}
+              className={cn("rounded-2xl border bg-bg p-5 text-center transition-all duration-200 active:scale-95", q.color)}
               onClick={() => p.onRate(q.value)}
               disabled={p.reviewing}
             >
@@ -399,7 +399,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
       )}
 
       <p className="text-center text-xs text-muted-fg uppercase tracking-widest">
-        SPACE: FLIP • 1-3: RATE
+        Space: flip • 1-3: rate
       </p>
     </div>
   );
