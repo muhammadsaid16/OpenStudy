@@ -53,6 +53,7 @@ export interface ReviewModeProps<C extends ReviewCard> {
   // callbacks
   onSelectBundle: (id: string) => void;
   onOpenCreate: () => void;
+  onOpenBundleCreate: () => void;
   onFlip: () => void;
   onFlipTo: (v: boolean) => void;
   onPickChoice: (opt: string) => void;
@@ -78,7 +79,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
             title="No bundles yet"
             description="Create your first bundle to organize flashcards."
             action={
-              <Button onClick={() => p.onOpenCreate()}>
+              <Button onClick={() => p.onOpenBundleCreate()}>
                 <Plus size={16} />
                 Create bundle
               </Button>

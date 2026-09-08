@@ -25,6 +25,7 @@ import {
   getStreak,
   getAllReviewLogs,
   createBundleFlashcard,
+  createBundle,
   exportBundle,
   importBundleCards,
   editBundleFromFlashcards,
@@ -38,6 +39,7 @@ import {
 import { ReviewMode } from "./_review-mode";
 import { BrowseMode, LeechesMode, StatsMode } from "./_browse-leech-stats";
 import { SubjectTopicSelect } from "@/components/subject-topic-select";
+import { SubjectTopicMenu } from "@/components/subject-topic-menu";
 import { cn } from "@/lib/utils";
 import { filterDueCards } from "@/lib/review-queue";
 import { cardKind, cleanChoices, maskCloze, shuffled, type CardKind } from "@/lib/card-kinds";
@@ -169,6 +171,38 @@ function FlashcardsContent() {
   const [choicesText, setChoicesText] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+
+  // ─── Create Bundle modal ────────────────────────────────────
+  const [bundleCreateOpen, setBundleCreateOpen] = useState(false);
+  const [newBundleName, setNewBundleName] = useState("");
+  const [newBundleDesc, setNewBundleDesc] = useState("");
+  const [newBundleColor, setNewBundleColor] = useState("#DFE104");
+  const [newBundleSubjectId, setNewBundleSubjectId] = useState("");
+  const [newBundleTopicId, setNewBundleTopicId] = useState("");
+  const [creatingBundle, setCreatingBundle] = useState(false);
+
+  const handleCreateBundle = async () => {
+    const name = newBundleName.trim();
+    if (!name || creatingBundle) return;
+    setCreatingBundle(true);
+    try {
+      const b = await createBundle({ name, description: newBundleDesc.trim() || undefined, color: newBundleColor, topicId: newBundleTopicId || null });
+      setBundleCreateOpen(false);
+      setNewBundleName("");
+      setNewBundleDesc("");
+      setNewBundleColor("#DFE104");
+      setNewBundleSubjectId("");
+      setNewBundleTopicId("");
+      const fresh = await getBundles();
+      setBundles(fresh);
+      if (b?.id) setSelectedBundle(b.id);
+    } catch (e) {
+      console.error("Failed to create bundle", e);
+      showToast("Couldn't create bundle — try again", "danger");
+    } finally {
+      setCreatingBundle(false);
+    }
+  };
 
   // ─── Edit/Delete modal ──────────────────────────────────────
   const [editCard, setEditCard] = useState<ManagedFlashcard | null>(null);
@@ -857,6 +891,7 @@ function FlashcardsContent() {
           choiceOptions={choiceOptions}
           onSelectBundle={(id) => setSelectedBundle(id)}
           onOpenCreate={() => setModalOpen(true)}
+          onOpenBundleCreate={() => setBundleCreateOpen(true)}
           onFlip={() => setIsFlipped((f) => !f)}
           onFlipTo={(v) => setIsFlipped(v)}
           onPickChoice={(opt) => {
@@ -1091,6 +1126,52 @@ function FlashcardsContent() {
               disabled={savingBundle}
             >
               {savingBundle ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ═══════════════ CREATE BUNDLE MODAL ═══════════════ */}
+      <Modal open={bundleCreateOpen} onClose={() => setBundleCreateOpen(false)} title="New bundle">
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Name</label>
+            <Input
+              autoFocus
+              placeholder="e.g. Biology — Chapter 1"
+              value={newBundleName}
+              onChange={(e) => setNewBundleName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleCreateBundle(); }}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Description (optional)</label>
+            <Input
+              placeholder="What's inside this deck?"
+              value={newBundleDesc}
+              onChange={(e) => setNewBundleDesc(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Color</label>
+            <BundleColorPicker value={newBundleColor} onChange={setNewBundleColor} />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Subject & topic (optional)</label>
+            <SubjectTopicMenu
+              subjects={subjects}
+              subjectId={newBundleSubjectId}
+              topicId={newBundleTopicId}
+              onSubjectChange={setNewBundleSubjectId}
+              onTopicChange={setNewBundleTopicId}
+              subjectOptional
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button variant="secondary" onClick={() => setBundleCreateOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateBundle} disabled={!newBundleName.trim() || creatingBundle}>
+              <Plus size={16} />
+              {creatingBundle ? "Creating…" : "Create bundle"}
             </Button>
           </div>
         </div>

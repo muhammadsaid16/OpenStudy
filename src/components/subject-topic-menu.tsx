@@ -22,6 +22,7 @@ export function SubjectTopicMenu({
   subjectLabel = "Subject",
   topicLabel = "Topic",
   compact = false,
+  subjectOptional = false,
 }: {
   subjects: Subject[];
   subjectId: string;
@@ -31,6 +32,8 @@ export function SubjectTopicMenu({
   subjectLabel?: string;
   topicLabel?: string;
   compact?: boolean;
+  /** When true: subject may stay empty and topic empty = "No topic". */
+  subjectOptional?: boolean;
 }) {
   const [topics, setTopics] = useState<{ id: string; name: string }[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -80,7 +83,11 @@ export function SubjectTopicMenu({
           className={selectCls}
         >
           <option value="" className="bg-bg text-fg">
-            {subjectLabel === "Subject" ? "General" : `All ${subjectLabel.toLowerCase()}s`}
+            {subjectOptional
+              ? "No subject"
+              : subjectLabel === "Subject"
+              ? "General"
+              : `All ${subjectLabel.toLowerCase()}s`}
           </option>
           {subjects.map((s) => (
             <option key={s.id} value={s.id} className="bg-bg text-fg">
@@ -109,6 +116,8 @@ export function SubjectTopicMenu({
               ? `Pick a ${subjectLabel.toLowerCase()} first`
               : topics && topics.length === 0
               ? "No topics yet"
+              : subjectOptional
+              ? "No topic"
               : `All ${topicLabel.toLowerCase()}s`}
           </option>
           {(topics ?? []).map((t) => (

@@ -9,7 +9,8 @@ import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import { showUndo } from "@/components/undo-toast";
 import { showToast } from "@/components/toast";
-import { getBundles, createBundle, updateBundle, deleteBundle, importCardsIntoBundle } from "@/app/actions";
+import { SubjectTopicMenu } from "@/components/subject-topic-menu";
+import { getBundles, createBundle, updateBundle, deleteBundle, importCardsIntoBundle, getSubjects } from "@/app/actions";
 import { parseSharedBundle } from "@/lib/share";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
 import { spotlightProps } from "@/lib/interactions";
@@ -27,6 +28,9 @@ export default function BundlesPage() {
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [newColor, setNewColor] = useState("#DFE104");
+  const [newSubjectId, setNewSubjectId] = useState("");
+  const [newTopicId, setNewTopicId] = useState("");
+  const [subjects, setSubjects] = useState<{ id: string; name: string; color: string }[]>([]);
 
   // Edit modal
   const [editBundle, setEditBundle] = useState<Bundle | null>(null);
@@ -43,6 +47,7 @@ export default function BundlesPage() {
       setBundles(b);
       setLoaded(true);
     });
+    getSubjects().then((s) => setSubjects(s)).catch(() => {});
   }, []);
 
   // Keyboard shortcuts
@@ -68,12 +73,14 @@ export default function BundlesPage() {
   const handleCreate = async () => {
     if (!newName.trim()) return;
     try {
-      const bundle = await createBundle({ name: newName.trim(), description: newDesc.trim() || undefined, color: newColor });
+      const bundle = await createBundle({ name: newName.trim(), description: newDesc.trim() || undefined, color: newColor, topicId: newTopicId || null });
       setBundles((prev) => [{ ...(bundle as unknown as Bundle), topic: (bundle as unknown as { topic?: unknown }).topic ?? null, _count: { flashcards: 0 } } as unknown as Bundle, ...prev]);
       setCreateOpen(false);
       setNewName("");
       setNewDesc("");
       setNewColor("#DFE104");
+      setNewSubjectId("");
+      setNewTopicId("");
     } catch (e) {
       console.error("Failed to create bundle:", e);
       showToast("Failed to create bundle. Check console for details.", "danger");
@@ -337,6 +344,17 @@ export default function BundlesPage() {
           <Input label="Bundle name" placeholder="e.g. IELTS vocabulary" value={newName} onChange={(e) => setNewName(e.target.value)} />
           <Input label="Description (optional)" placeholder="Brief description..." value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
           <BundleColorPicker value={newColor} onChange={setNewColor} />
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Subject & topic (optional)</label>
+            <SubjectTopicMenu
+              subjects={subjects}
+              subjectId={newSubjectId}
+              topicId={newTopicId}
+              onSubjectChange={setNewSubjectId}
+              onTopicChange={setNewTopicId}
+              subjectOptional
+            />
+          </div>
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={loading || !newName.trim()}>

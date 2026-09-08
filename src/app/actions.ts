@@ -213,6 +213,10 @@ export async function deleteTopic(id: string) {
     await db.reviewLogs.where("flashcardId").equals(c.id).delete();
   }
   await db.flashcards.where("topicId").equals(id).delete();
+  // Detach everywhere the topic was referenced — no orphan links:
+  // sessions keep the record, drop the topicId; bundles keep their cards,
+  // drop topicId + denormalized subjectId. Goals link to subjects (not
+  // topics) so they stay valid.
   await db.studySessions.where("topicId").equals(id).modify({ topicId: null });
   // Unlink bundles that were owned by this topic — keep the bundle/cards, just detach
   await db.bundles.where("topicId").equals(id).modify({ topicId: null, subjectId: null, updatedAt: new Date() });
