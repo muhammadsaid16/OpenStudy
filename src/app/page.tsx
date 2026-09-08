@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Brain, Clock, Layers, Sparkles, StickyNote, Target, Zap } from "lucide-react";
+import { BookOpen, Brain, Clock, Layers, Sparkles, Target, Zap } from "lucide-react";
 import Link from "next/link";
 import { Card, CountUp, StudyAllDueButton } from "@/components/dashboard-parts";
 import { TopBar } from "@/components/topbar";
@@ -49,13 +49,14 @@ export default function DashboardPage() {
     getWeeklyAnalytics().then(setWeekly);
     getTodayProgress().then(setToday);
     getAllReviewLogs().then(setReviewLogs);
-    getGoals().then(setGoals);
-    getGoals().then((goals) =>
+    // Single fetch: the full list feeds UPCOMING, counts derive from it.
+    getGoals().then((g) => {
+      setGoals(g);
       setGoalCounts({
-        active: goals.filter((g) => g.status === "in_progress").length,
-        total: goals.length,
-      })
-    );
+        active: g.filter((x) => x.status === "in_progress").length,
+        total: g.length,
+      });
+    });
   }, []);
 
   if (!stats) {
@@ -259,7 +260,7 @@ export default function DashboardPage() {
                   typeof s.value === "number" ? s.value === 0 : s.value === "0m";
                 return isEmpty ? (
                   <Link key={s.label} href={s.emptyHref}>
-                    <Card hover className="flex h-full flex-col gap-3 p-5 !p-5">
+                    <Card hover className="flex h-full flex-col gap-3 p-5">
                       <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
                         <s.icon size={17} aria-hidden />
                       </span>
@@ -304,7 +305,7 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
             <motion.div variants={item}>
-                            <Link href="/goals" aria-label="Open goals board">
+              <Link href="/goals" aria-label="Open goals board">
                 <Card hover className="flex flex-wrap items-center justify-between gap-4 !p-5">
                   <div className="flex items-center gap-3">
                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
@@ -333,6 +334,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-// keep unused imports honest
-void StickyNote;

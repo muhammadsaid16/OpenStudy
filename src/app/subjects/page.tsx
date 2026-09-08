@@ -58,6 +58,7 @@ export default function SubjectsPage() {
   const [editTopicId, setEditTopicId] = useState<string | null>(null);
   const [editTopicName, setEditTopicName] = useState("");
   const [deleteTopicId, setDeleteTopicId] = useState<string | null>(null);
+  const [deleteSubjectId, setDeleteSubjectId] = useState<string | null>(null);
   const [topicSearch, setTopicSearch] = useState("");
 
   // Per-topic stats: notes / cards / linked bundles
@@ -189,6 +190,7 @@ export default function SubjectsPage() {
         setEditSubject(null);
         setManageTopicsFor(null);
         setDeleteTopicId(null);
+        setDeleteSubjectId(null);
         setLinkTopicId(null);
       }
     };
@@ -226,11 +228,13 @@ export default function SubjectsPage() {
     });
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm("DELETE THIS SUBJECT AND ALL ITS DATA?")) return;
+  const handleDelete = () => {
+    if (!deleteSubjectId) return;
+    const id = deleteSubjectId;
     startTransition(async () => {
       await deleteSubject(id);
       setSubjects((prev) => prev.filter((s) => s.id !== id));
+      setDeleteSubjectId(null);
     });
   };
 
@@ -277,16 +281,16 @@ export default function SubjectsPage() {
           {!(loaded && subjects.length === 0) && (
             <Button onClick={() => setModalOpen(true)}>
               <Plus size={16} />
-              NEW SUBJECT
+              New subject
             </Button>
           )}
         </div>
       </div>
 
       {!loaded ? (
-        <div className="grid gap-px bg-border md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="border-2 border-border bg-bg p-6">
+           <div key={i} className="glass rounded-2xl p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
                   <Skeleton className="h-16 w-16" />
@@ -306,17 +310,17 @@ export default function SubjectsPage() {
       ) : subjects.length === 0 ? (
         <EmptyState
           icon={<BookOpen size={48} />}
-          title="NO SUBJECTS YET"
-          description="CREATE YOUR FIRST SUBJECT TO START ORGANIZING YOUR STUDIES."
+          title="No subjects yet"
+          description="Create your first subject to start organizing your studies."
           action={
             <Button onClick={() => setModalOpen(true)}>
               <Plus size={16} />
-              CREATE SUBJECT
+              Create subject
             </Button>
           }
         />
       ) : (
-        <div className="grid gap-px bg-border md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {subjects.map((subject) => (
             <Card
               key={subject.id}
@@ -327,7 +331,7 @@ export default function SubjectsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div
-                      className="flex h-16 w-16 shrink-0 items-center justify-center text-2xl font-bold uppercase transition-colors duration-200 bg-[var(--chip)] text-[var(--chip-text)] group-hover:bg-black group-hover:text-[var(--color-accent)] hover:bg-black hover:text-[var(--color-accent)]"
+                      className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-2xl font-bold transition-transform duration-200 group-hover:scale-105 bg-[var(--chip)] text-[var(--chip-text)]"
                       style={{
                         ["--chip" as string]: subject.color || "#DFE104",
                         ["--chip-text" as string]: readableOn(subject.color || "#DFE104"),
@@ -339,11 +343,11 @@ export default function SubjectsPage() {
                       })()}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="truncate text-xl font-bold uppercase tracking-tight">
+                      <h3 className="truncate text-xl font-bold tracking-tight">
                         {subject.name}
                       </h3>
                       {subject.description && (
-                        <p className="mt-1 text-xs text-muted-fg uppercase tracking-widest line-clamp-1">
+                        <p className="mt-1 text-xs text-muted-fg line-clamp-1">
                           {subject.description}
                         </p>
                       )}
@@ -356,17 +360,17 @@ export default function SubjectsPage() {
                         openEditSubject(subject);
                       }}
                       aria-label="Edit subject"
-                      className="p-2 text-muted-fg border border-border transition-all hover:border-accent hover:bg-accent hover:text-accent-fg"
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
                     >
                       <Pencil size={16} />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(subject.id);
+                        setDeleteSubjectId(subject.id);
                       }}
                       aria-label="Delete subject"
-                      className="p-2 text-muted-fg border border-border transition-all hover:border-danger hover:bg-danger hover:text-on-color"
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -404,8 +408,8 @@ export default function SubjectsPage() {
                 </div>
                 <p className="mt-2 text-[10px] uppercase tracking-widest text-muted-fg">
                   {subject._count.lastStudiedAt
-                    ? `LAST STUDIED ${formatRelative(subject._count.lastStudiedAt)}`
-                    : "NOT STUDIED YET"}
+                    ? `Last studied ${formatRelative(subject._count.lastStudiedAt)}`
+                    : "Not studied yet"}
                 </p>
               </div>
 
@@ -416,24 +420,45 @@ export default function SubjectsPage() {
                 }}
                 className="mt-4 inline-flex items-center py-2 text-xs font-bold uppercase tracking-widest text-accent transition-colors hover:underline"
               >
-                MANAGE TOPICS
+                Manage topics
               </button>
             </Card>
           ))}
         </div>
       )}
 
+      {/* Delete Subject Confirmation (replaces native confirm()) */}
+      <Modal
+        open={!!deleteSubjectId}
+        onClose={() => setDeleteSubjectId(null)}
+        title="Delete subject"
+      >
+        <div className="space-y-6">
+          <p className="text-sm text-muted-fg">
+            Delete this subject and all of its topics, notes, and cards? This cannot be undone.
+          </p>
+          <div className="flex justify-end gap-4 pt-2">
+            <Button variant="ghost" onClick={() => setDeleteSubjectId(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleDelete}>
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Topic Management Modal — now USABLE */}
       <Modal
         open={!!manageTopicsFor}
         onClose={() => setManageTopicsFor(null)}
-        title={`TOPICS · ${manageSubjectsName.toUpperCase()}`}
+        title={`Topics · ${manageSubjectsName}`}
       >
         <div className="space-y-4">
           {/* Add */}
           <div className="flex gap-2">
             <Input
-              placeholder="NEW TOPIC NAME..."
+              placeholder="New topic name..."
               value={newTopicName}
               onChange={(e) => setNewTopicName(e.target.value)}
               onKeyDown={(e) => {
@@ -444,7 +469,7 @@ export default function SubjectsPage() {
               }}
             />
             <Button size="sm" onClick={handleAddTopic} disabled={!newTopicName.trim()}>
-              ADD
+              Add
             </Button>
           </div>
 
@@ -453,10 +478,10 @@ export default function SubjectsPage() {
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
               <input
-                placeholder="SEARCH TOPICS..."
+                placeholder="Search topics..."
                 value={topicSearch}
                 onChange={(e) => setTopicSearch(e.target.value)}
-                className="h-9 w-full border border-border bg-bg pl-8 pr-3 text-xs font-bold uppercase tracking-widest placeholder:text-muted-fg/60 focus:outline-none focus:border-accent"
+                className="h-10 w-full rounded-xl border border-border bg-bg pl-8 pr-3 text-sm font-medium tracking-tight placeholder:text-muted-fg/60 focus:outline-none focus:border-accent"
               />
             </div>
           )}
@@ -471,11 +496,11 @@ export default function SubjectsPage() {
           ) : managedTopics.length === 0 ? (
             <EmptyState
               icon={<BookOpen size={40} />}
-              title="NO TOPICS YET"
-              description="ADD YOUR FIRST TOPIC ABOVE — THEN CREATE A BUNDLE FOR IT TO START MAKING CARDS."
+              title="No topics yet"
+              description="Add your first topic above — then create a bundle for it to start making cards."
             />
           ) : filteredTopics.length === 0 ? (
-            <EmptyState icon={<Search size={40} />} title="NO MATCH" description="TRY A DIFFERENT SEARCH." />
+            <EmptyState icon={<Search size={40} />} title="No match" description="Try a different search." />
           ) : (
             <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
               {filteredTopics.map((topic) => {
@@ -485,7 +510,7 @@ export default function SubjectsPage() {
                 return (
                 <div
                   key={topic.id}
-                  className="border-2 border-border bg-bg p-3"
+                  className="glass rounded-2xl p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     {editTopicId === topic.id ? (
@@ -503,14 +528,14 @@ export default function SubjectsPage() {
                       />
                     ) : (
                       <div className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-bold uppercase tracking-tight">
+                        <span className="block truncate text-sm font-bold tracking-tight">
                           {topic.name}
                         </span>
                         {stats && (
                           <span className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-                            <span className="inline-flex items-center gap-1"><FileText size={10} /> {stats.notes} NOTES</span>
-                            <span className="inline-flex items-center gap-1"><Layers size={10} /> {stats.cards} CARDS</span>
-                            <span className="inline-flex items-center gap-1"><BookOpen size={10} /> {bundles.length} BUNDLES</span>
+                            <span className="inline-flex items-center gap-1"><FileText size={10} /> {stats.notes} notes</span>
+                            <span className="inline-flex items-center gap-1"><Layers size={10} /> {stats.cards} cards</span>
+                            <span className="inline-flex items-center gap-1"><BookOpen size={10} /> {bundles.length} bundles</span>
                           </span>
                         )}
                         {bundles.length > 0 && (
@@ -568,9 +593,9 @@ export default function SubjectsPage() {
                           setManageTopicsFor(null);
                           router.push(`/notes?topic=${topic.id}`);
                         }}
-                        className="inline-flex items-center gap-1 border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-fg hover:text-fg"
+                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-fg hover:text-fg"
                       >
-                        <FileText size={12} /> NOTES
+                        <FileText size={12} /> Notes
                       </button>
                       {bundles.length > 0 ? (
                         <button
@@ -578,24 +603,24 @@ export default function SubjectsPage() {
                             setManageTopicsFor(null);
                             router.push(`/bundles/${bundles[0].id}/cards`);
                           }}
-                          className="inline-flex items-center gap-1 border border-accent bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg hover:opacity-90"
+                          className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg hover:opacity-90"
                         >
-                          <Layers size={12} /> CARDS ({bundles[0]._count.flashcards}) <ExternalLink size={10} />
+                          <Layers size={12} /> Cards ({bundles[0]._count.flashcards}) <ExternalLink size={10} />
                         </button>
                       ) : (
                         <button
                           onClick={() => handleCreateBundleFromTopic(topic.id)}
                           disabled={isPending}
-                          className="inline-flex items-center gap-1 border border-accent bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg hover:opacity-90 disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg hover:opacity-90 disabled:opacity-50"
                         >
-                          <Plus size={12} /> NEW BUNDLE
+                          <Plus size={12} /> New bundle
                         </button>
                       )}
                       <button
                         onClick={() => setLinkTopicId(linkTopicId === topic.id ? null : topic.id)}
-                        className="inline-flex items-center gap-1 border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent"
+                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent"
                       >
-                        <Link2 size={12} /> LINK
+                        <Link2 size={12} /> Link
                       </button>
                       {bundles.length > 1 && (
                         <button
@@ -603,10 +628,10 @@ export default function SubjectsPage() {
                             setManageTopicsFor(null);
                             router.push(`/flashcards?topic=${topic.id}`);
                           }}
-                          className="inline-flex items-center gap-1 border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-fg hover:text-fg"
+                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-fg hover:text-fg"
                           title="Study all bundles for this topic"
                         >
-                          STUDY ALL →
+                          Study all →
                         </button>
                       )}
                     </div>
@@ -618,15 +643,15 @@ export default function SubjectsPage() {
                       <select
                         value={linkBundleId}
                         onChange={(e) => setLinkBundleId(e.target.value)}
-                        className="h-9 flex-1 border border-border bg-bg px-2 text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-accent"
+                        className="h-9 flex-1 rounded-xl border border-border bg-bg px-2 text-xs focus:outline-none focus:border-accent"
                       >
-                        <option value="">SELECT BUNDLE...</option>
+                        <option value="">Select bundle...</option>
                         {unlinkedBundles.map((b) => (
                           <option key={b.id} value={b.id}>{b.name} ({b._count.flashcards} cards)</option>
                         ))}
                       </select>
-                      <Button size="sm" disabled={!linkBundleId} onClick={handleLinkBundle}>LINK</Button>
-                      <Button size="sm" variant="ghost" onClick={() => setLinkTopicId(null)}>CANCEL</Button>
+                      <Button size="sm" disabled={!linkBundleId} onClick={handleLinkBundle}>Link</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setLinkTopicId(null)}>Cancel</Button>
                     </div>
                   )}
                 </div>
@@ -634,7 +659,7 @@ export default function SubjectsPage() {
             </div>
           )}
           <p className="text-center text-[10px] uppercase tracking-widest text-muted-fg">
-            TIP — EACH TOPIC CAN HAVE ITS OWN BUNDLE. CARDS IN THAT BUNDLE STAY LINKED TO THE TOPIC.
+            Tip — each topic can have its own bundle. Cards in that bundle stay linked to the topic.
           </p>
         </div>
       </Modal>
@@ -643,19 +668,19 @@ export default function SubjectsPage() {
       <Modal
         open={!!deleteTopicId}
         onClose={() => setDeleteTopicId(null)}
-        title="DELETE TOPIC"
+        title="Delete topic"
       >
         {deleteTopicId && (
           <div className="space-y-6">
             <p className="text-sm text-muted-fg">
-              DELETE THIS TOPIC? ITS FLASHCARDS AND NOTES WILL BE MOVED TO NO TOPIC OR REMOVED. LINKED BUNDLES WILL BE UNLINKED (NOT DELETED). THIS CANNOT BE UNDONE.
+              Delete this topic? Its flashcards and notes will be moved to no topic or removed. Linked bundles will be unlinked (not deleted). This cannot be undone.
             </p>
             <div className="flex justify-end gap-4 pt-2">
               <Button variant="ghost" onClick={() => setDeleteTopicId(null)}>
-                CANCEL
+                Cancel
               </Button>
               <Button variant="danger" onClick={() => handleDeleteTopic(deleteTopicId)}>
-                DELETE
+                Delete
               </Button>
             </div>
           </div>
@@ -663,17 +688,17 @@ export default function SubjectsPage() {
       </Modal>
 
       {/* Create Modal */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="NEW SUBJECT">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New subject">
         <div className="space-y-6">
           <Input
-            label="SUBJECT NAME"
-            placeholder="E.G. LINEAR ALGEBRA"
+            label="Subject name"
+            placeholder="e.g. Linear Algebra"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
           <Input
-            label="DESCRIPTION (OPTIONAL)"
-            placeholder="BRIEF DESCRIPTION..."
+            label="Description (optional)"
+            placeholder="Brief description..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -681,28 +706,28 @@ export default function SubjectsPage() {
           <SubjectIconPicker value={icon} onChange={setIcon} />
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setModalOpen(false)}>
-              CANCEL
+              Cancel
             </Button>
             <Button onClick={handleCreate} disabled={isPending || !name.trim()}>
-              {isPending ? "CREATING..." : "CREATE"}
+              {isPending ? "Creating..." : "Create"}
             </Button>
           </div>
         </div>
       </Modal>
 
       {/* Edit Subject Modal */}
-      <Modal open={!!editSubject} onClose={() => setEditSubject(null)} title="EDIT SUBJECT">
+      <Modal open={!!editSubject} onClose={() => setEditSubject(null)} title="Edit subject">
         {editSubject && (
           <div className="space-y-6">
             <Input
-              label="SUBJECT NAME"
-              placeholder="E.G. LINEAR ALGEBRA"
+              label="Subject name"
+              placeholder="e.g. Linear Algebra"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
             />
             <Input
-              label="DESCRIPTION (OPTIONAL)"
-              placeholder="BRIEF DESCRIPTION..."
+              label="Description (optional)"
+              placeholder="Brief description..."
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
             />
@@ -710,10 +735,10 @@ export default function SubjectsPage() {
             <SubjectIconPicker value={editIcon} onChange={setEditIcon} />
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="ghost" onClick={() => setEditSubject(null)}>
-                CANCEL
+                Cancel
               </Button>
               <Button onClick={handleEditSave} disabled={isPending || !editName.trim()}>
-                {isPending ? "SAVING..." : "SAVE"}
+                {isPending ? "Saving..." : "Save"}
               </Button>
             </div>
           </div>
