@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { Modal, Input, Textarea, Button } from "@/components/ui";
 import { createGoal, updateGoal } from "@/app/actions";
+import { SubjectTopicMenu } from "@/components/subject-topic-menu";
 import type { GoalRec, GoalHorizon, GoalRepeat, SubjectRec } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import { Rocket, ListTodo, Repeat } from "lucide-react";
@@ -75,6 +76,7 @@ function GoalForm({
   const [dueDate, setDueDate] = useState(toDateInputValue(goal?.dueDate));
   const [repeat, setRepeat] = useState<GoalRepeat | null>(goal?.repeat ?? null);
   const [subjectId, setSubjectId] = useState<string>(goal?.subjectId ?? "");
+  const [topicId, setTopicId] = useState("");
   const [color, setColor] = useState<string | null>(goal?.color ?? null);
   const [saving, setSaving] = useState(false);
 
@@ -205,36 +207,31 @@ function GoalForm({
           )}
         </div>
 
-        {/* Due date + subject */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">
-              Due date
-            </label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="glass-inset flex h-12 w-full rounded-xl border-border px-4 py-2 text-base font-medium tracking-tight text-fg transition-colors duration-200 focus:outline-none"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">
-              Subject
-            </label>
-            <select
-              value={subjectId}
-              onChange={(e) => setSubjectId(e.target.value)}
-              className="glass-inset flex h-12 w-full rounded-xl border-border px-4 py-2 text-base font-medium tracking-tight text-fg transition-colors duration-200 focus:outline-none"
-            >
-              <option value="">No subject</option>
-              {subjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Due date */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">
+            Due date
+          </label>
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="glass-inset flex h-12 w-full rounded-xl border-border px-4 py-2 text-base font-medium tracking-tight text-fg transition-colors duration-200 focus:outline-none"
+          />
+        </div>
+
+        {/* Subject + topic context */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">
+            Subject
+          </label>
+          <SubjectTopicMenu
+            subjects={subjects}
+            subjectId={subjectId}
+            topicId={topicId}
+            onSubjectChange={setSubjectId}
+            onTopicChange={setTopicId}
+          />
         </div>
 
         {/* Color swatches */}

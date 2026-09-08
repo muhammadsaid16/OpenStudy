@@ -5,6 +5,7 @@ import { Plus, Check } from "lucide-react";
 import { Input } from "@/components/ui";
 import { createTopic, createSubject, getSubjects, getTopics } from "@/app/actions";
 import { showToast } from "@/components/toast";
+import { SubjectTopicMenu } from "@/components/subject-topic-menu";
 
 type Subject = { id: string; name: string; color: string };
 type Topic = { id: string; name: string; _count?: { flashcards: number } };
@@ -226,12 +227,15 @@ export function SubjectTopicSelect({
     );
   }
 
-  // ── Default: subject select + optional topic name ─────────────
+  // ── Default: subject select + topic menu of that subject ──────
   return (
     <div className="space-y-3">
       <select
         value={selectedSubject}
-        onChange={(e) => setSelectedSubject(e.target.value)}
+        onChange={(e) => {
+          setSelectedSubject(e.target.value);
+          setTopics(null); // menu below reloads for the new subject
+        }}
         aria-label="Select a subject"
         className="flex h-12 w-full border-b border-border bg-bg px-0 py-2 text-lg font-bold uppercase tracking-tight text-fg focus:outline-none"
       >
@@ -246,9 +250,21 @@ export function SubjectTopicSelect({
       </select>
 
       {selectedSubject && (
+        <SubjectTopicMenu
+          subjects={subjects}
+          subjectId={selectedSubject}
+          topicId={value}
+          onSubjectChange={setSelectedSubject}
+          onTopicChange={(tid: string) => {
+            if (tid) resolve(selectedSubject, "", tid);
+          }}
+        />
+      )}
+
+      {selectedSubject && (
         <div className="flex gap-2">
           <Input
-            placeholder="Topic name (optional)"
+            placeholder="…or type a new topic name"
             value={topicName}
             onChange={(e) => setTopicName(e.target.value)}
             onKeyDown={(e) => {

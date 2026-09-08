@@ -8,6 +8,7 @@ import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import GravityFall from "@/components/originkit/ui/falling-text";
 import { magneticHandlers } from "@/lib/interactions";
+import { SubjectTopicMenu } from "@/components/subject-topic-menu";
 import { motion, AnimatePresence } from "framer-motion";
 import { getStudySessions, createStudySession, deleteStudySession, getSubjects, getPomoPresets, createPomoPreset, deletePomoPreset } from "@/app/actions";
 import { formatDuration, formatDate } from "@/lib/utils";
@@ -63,6 +64,7 @@ export default function SessionsPage() {
 
   // ── Shared session fields ──────────────────────────────────────
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
+  const [selectedTopicId, setSelectedTopicId] = useState("");
   const [sessionTitle, setSessionTitle] = useState("");
   const [saveError, setSaveError] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -148,6 +150,7 @@ export default function SessionsPage() {
       try {
         const session = await createStudySession({
           subjectId: selectedSubjectId || undefined,
+          topicId: selectedTopicId || undefined,
           title,
           durationMin: duration,
           completed: true,
@@ -356,26 +359,13 @@ export default function SessionsPage() {
               className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:border-accent border border-transparent focus:border-accent"
             />
           </div>
-          <div>
-            <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
-              Subject (optional)
-            </label>
-            <select
-              value={selectedSubjectId}
-              onChange={(e) => setSelectedSubjectId(e.target.value)}
-              disabled={anyRunning}
-              className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg transition-colors outline-none disabled:opacity-50 appearance-none focus:border-accent border border-transparent"
-            >
-              <option value="" className="bg-bg text-fg">
-                General
-              </option>
-              {subjects.map((s) => (
-                <option key={s.id} value={s.id} className="bg-bg text-fg">
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SubjectTopicMenu
+            subjects={subjects}
+            subjectId={selectedSubjectId}
+            topicId={selectedTopicId}
+            onSubjectChange={setSelectedSubjectId}
+            onTopicChange={setSelectedTopicId}
+          />
 
           {/* Pomodoro settings — custom technique builder */}
           {mode === "pomodoro" && (
