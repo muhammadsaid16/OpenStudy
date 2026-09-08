@@ -118,7 +118,7 @@ export function CommandPalette() {
   let lastGroup = "";
   return (
     <div role="dialog" aria-label="Global search" className="fixed inset-0 z-[90] flex items-start justify-center bg-black/60 p-4 pt-[12vh]" onClick={() => setOpen(false)}>
-      <div className="w-full max-w-xl overflow-hidden rounded-xl border-2 border-border bg-bg shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-bg shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <input
           ref={inputRef}
           value={q}

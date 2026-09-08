@@ -72,7 +72,7 @@ function GenericBody() {
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="flex flex-col items-center justify-center gap-4 border-2 border-border bg-bg py-12"
+            className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-bg py-12"
           >
             <Skeleton className="h-8 w-8" />
             <Skeleton className="h-10 w-20" />
@@ -80,7 +80,7 @@ function GenericBody() {
           </div>
         ))}
       </div>
-      <div className="divide-y-2 divide-border border-2 border-border">
+      <div className="divide-y divide-border rounded-2xl border border-border">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex items-center justify-between p-6">
             <div className="space-y-2">
@@ -113,7 +113,7 @@ function DashboardBody() {
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="flex flex-col items-center justify-center border-2 border-border bg-bg py-12"
+            className="flex flex-col items-center justify-center rounded-2xl border border-border bg-bg py-12"
           >
             <Skeleton className="mb-4 h-6 w-6" />
             <Skeleton className="h-12 w-20" />
@@ -130,7 +130,7 @@ function DashboardBody() {
       </div>
       {/* recent sessions */}
       <Skeleton className="mb-6 h-7 w-48" />
-      <div className="divide-y-2 divide-border border-2 border-border">
+      <div className="divide-y divide-border rounded-2xl border border-border">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex items-center justify-between p-6">
             <div className="flex items-center gap-4">
@@ -164,7 +164,7 @@ function GridBody({ cols4 = false }: { cols4?: boolean }) {
           className={cn(
             cols4
               ? "flex h-48 flex-col justify-between border border-border bg-muted p-5"
-              : "border-2 border-border bg-bg p-6"
+              : "rounded-2xl border border-border bg-bg p-6"
           )}
         >
           {cols4 ? (
@@ -222,7 +222,7 @@ function SessionsBody() {
     <>
       <div className="mb-12 grid grid-cols-1 gap-6 lg:grid-cols-5">
         {/* form panel */}
-        <div className="space-y-4 border-2 border-border bg-bg p-6 lg:col-span-3">
+        <div className="space-y-4 rounded-2xl border border-border bg-bg p-6 lg:col-span-3">
           <Skeleton className="h-5 w-32" />
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
@@ -230,13 +230,13 @@ function SessionsBody() {
           <Skeleton className="h-12 w-full" />
         </div>
         {/* timer panel */}
-        <div className="flex flex-col items-center justify-center gap-6 border-2 border-border bg-bg p-6 lg:col-span-2">
+        <div className="flex flex-col items-center justify-center gap-6 rounded-2xl border border-border bg-bg p-6 lg:col-span-2">
           <Skeleton className="h-16 w-40" />
           <Skeleton className="h-12 w-full" />
         </div>
       </div>
       {/* history */}
-      <div className="divide-y-2 divide-border border-2 border-border">
+      <div className="divide-y divide-border rounded-2xl border border-border">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="flex items-center justify-between p-6">
             <div className="space-y-2">
@@ -266,7 +266,7 @@ function SettingsBody() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center justify-between border-2 border-border bg-bg p-5"
+            className="flex items-center justify-between rounded-2xl border border-border bg-bg p-5"
           >
             <div className="space-y-2">
               <Skeleton className="h-4 w-40" />
@@ -290,7 +290,7 @@ function CardsBody() {
         </div>
         <Skeleton className="h-10 w-28" />
       </div>
-      <div className="divide-y-2 divide-border border-2 border-border">
+      <div className="divide-y divide-border rounded-2xl border border-border">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="flex items-center justify-between p-5">
             <div className="space-y-2">

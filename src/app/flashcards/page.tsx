@@ -986,7 +986,7 @@ function FlashcardsContent() {
           </div>
           <CardKindFields kind={kind} onKindChange={setKind} choicesText={choicesText} onChoicesTextChange={setChoicesText} />
           <p className="text-[10px] text-muted-fg uppercase tracking-widest">⌘/Ctrl + Enter to save</p>
-          {createError && <p className="text-[10px] font-bold uppercase tracking-widest text-red-500">{createError}</p>}
+          {createError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{createError}</p>}
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>
             <Button onClick={handleCreate} disabled={creating || !front.trim() || !back.trim()}>
@@ -1023,7 +1023,7 @@ function FlashcardsContent() {
               <TagInput tags={editTags} onChange={setEditTags} />
             </div>
             <CardKindFields kind={editKind} onKindChange={setEditKind} choicesText={editChoicesText} onChoicesTextChange={setEditChoicesText} />
-            {editError && <p className="text-[10px] font-bold uppercase tracking-widest text-red-500">{editError}</p>}
+            {editError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{editError}</p>}
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="ghost" onClick={() => setEditCard(null)}>Cancel</Button>
               <Button onClick={handleEditSave} disabled={saving || !editFront.trim() || !editBack.trim()}>
