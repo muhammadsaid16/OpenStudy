@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
-  BookOpen,
-  Brain,
+  Library,
   StickyNote,
   Timer,
   Target,
@@ -15,19 +14,24 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// All 8 primary routes — parity with the desktop Sidebar. Inactive tabs
-// are icon-only (with aria-labels) so 8 destinations fit a 360px viewport;
+// 7 primary routes — Library merges Subjects + Flashcards + Bundles
+// (one hierarchy: Subject → Topic → Deck → Cards). Inactive tabs
+// are icon-only (with aria-labels) so 7 destinations fit a 360px viewport;
 // the active tab grows to reveal its label.
 const navItems = [
   { href: "/", label: "Home", icon: LayoutDashboard },
-  { href: "/subjects", label: "Subjects", icon: BookOpen },
-  { href: "/flashcards", label: "Cards", icon: Brain },
+  { href: "/subjects", label: "Library", icon: Library },
   { href: "/notes", label: "Notes", icon: StickyNote },
   { href: "/sessions", label: "Sessions", icon: Timer },
   { href: "/goals", label: "Goals", icon: Target },
   { href: "/stats", label: "Stats", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
+
+function isLibraryActive(pathname: string, href: string) {
+  if (href !== "/subjects") return pathname === href || (href !== "/" && pathname.startsWith(href));
+  return pathname === "/subjects" || pathname.startsWith("/subjects") || pathname.startsWith("/flashcards") || pathname.startsWith("/bundles");
+}
 
 // Mobile-only bottom navigation. Hidden on md+ (desktop uses Sidebar).
 // Active indicator is a framer-motion shared-layout pill: it physically
@@ -39,8 +43,7 @@ export function BottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 flex h-16 border-t border-border bg-bg md:hidden pb-[env(safe-area-inset-bottom)]">
       {navItems.map(({ href, label, icon: Icon }) => {
-        const isActive =
-          pathname === href || (href !== "/" && pathname.startsWith(href));
+        const isActive = isLibraryActive(pathname, href);
         return (
           <Link
             key={href}

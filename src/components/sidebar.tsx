@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
-  BookOpen,
-  Brain,
+  Library,
   StickyNote,
   Timer,
   Target,
@@ -23,8 +22,7 @@ import { cn } from "@/lib/utils";
 // Flat list kept for typing; navGroups above drives the render.
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/subjects", label: "Subjects", icon: BookOpen },
-  { href: "/flashcards", label: "Flashcards", icon: Brain },
+  { href: "/subjects", label: "Library", icon: Library },
   { href: "/notes", label: "Notes", icon: StickyNote },
   { href: "/sessions", label: "Sessions", icon: Timer },
   { href: "/goals", label: "Goals", icon: Target },
@@ -33,14 +31,14 @@ const navItems = [
 ];
 
 // Nav groups — spec mental model: LEARN (content) / FOCUS (time) /
-// INSIGHTS (reflection) / SYSTEM. Replaces the previous flat list;
-// scannable sections instead of 8 undifferentiated items.
+// INSIGHTS (reflection) / SYSTEM. Library merges Subjects + Flashcards +
+// Bundles (one hierarchy: Subject → Topic → Deck → Cards). This fixes the
+// duplicate "two pages for same purpose" reported on /subjects vs /flashcards.
 const navGroups: { heading: string; items: typeof navItems }[] = [
   {
     heading: "Learn",
     items: [
-      { href: "/subjects", label: "Subjects", icon: BookOpen },
-      { href: "/flashcards", label: "Flashcards", icon: Brain },
+      { href: "/subjects", label: "Library", icon: Library },
       { href: "/notes", label: "Notes", icon: StickyNote },
     ],
   },
@@ -63,6 +61,12 @@ const navGroups: { heading: string; items: typeof navItems }[] = [
     items: [{ href: "/settings", label: "Settings", icon: Settings }],
   },
 ];
+
+function isLibraryActive(pathname: string, href: string) {
+  if (href !== "/subjects") return pathname === href || (href !== "/" && pathname.startsWith(href));
+  // Library is active for its canonical route + legacy deck routes that now redirect to it
+  return pathname === "/subjects" || pathname.startsWith("/subjects") || pathname.startsWith("/flashcards") || pathname.startsWith("/bundles");
+}
 
 // Full theme picker lives in Settings (src/app/settings/page.tsx) — the
 // sidebar exposes only Dark/Light + an "All →" link (audit §6).
@@ -109,7 +113,7 @@ export function Sidebar() {
             )}
             <div className="space-y-1">
               {group.items.map(({ href, label, icon: Icon }) => {
-                const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+                const isActive = isLibraryActive(pathname, href);
                 return (
                   <Link
                     key={href}

@@ -20,7 +20,13 @@ import {
   getBundlesByTopic,
   createBundleFromTopic,
   linkBundleToTopic,
+  createBundle,
+  importCardsIntoBundle,
+  getAllDueFlashcards,
 } from "@/app/actions";
+import { SubjectTopicMenu } from "@/components/subject-topic-menu";
+import { parseSharedBundle } from "@/lib/share";
+import { showToast } from "@/components/toast";
 import { db } from "@/lib/db";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
 import { SubjectIconPicker, SUBJECT_ICONS } from "@/components/subject-icon-picker";
@@ -68,6 +74,19 @@ export default function SubjectsPage() {
   const [linkBundleId, setLinkBundleId] = useState("");
 
   const [topicCounts, setTopicCounts] = useState<Record<string, number>>({});
+  const [activeTab, setActiveTab] = useState<"subjects" | "decks" | "study">("subjects");
+
+  // Decks tab state (merged from /bundles)
+  const [deckCreateOpen, setDeckCreateOpen] = useState(false);
+  const [deckName, setDeckName] = useState("");
+  const [deckDesc, setDeckDesc] = useState("");
+  const [deckColor, setDeckColor] = useState("#DFE104");
+  const [deckSubjectId, setDeckSubjectId] = useState("");
+  const [deckTopicId, setDeckTopicId] = useState("");
+  const [dueCount, setDueCount] = useState<number | null>(null);
+
+  // Keep deckTopicId in sync via SubjectTopicMenu denormalization (handled in action)
+
 
   const refreshTopicStats = async (subjectId: string, topicIds: string[]) => {
     const [bundles] = await Promise.all([getBundles()]);
@@ -165,6 +184,34 @@ export default function SubjectsPage() {
     });
   };
 
+  const handleCreateDeck = () => {
+    if (!deckName.trim()) return;
+    startTransition(async () => {
+      try {
+        await createBundle({ name: deckName.trim(), description: deckDesc.trim() || undefined, color: deckColor, topicId: deckTopicId || null });
+        setDeckCreateOpen(false);
+        setDeckName("");
+        setDeckDesc("");
+        setDeckColor("#DFE104");
+        setDeckSubjectId("");
+        setDeckTopicId("");
+        const bundles = await getBundles();
+        setAllBundles(bundles as Bundle[]);
+      } catch (e) {
+        console.error("Failed to create deck", e);
+        showToast("Failed to create deck", "danger");
+      }
+    });
+  };
+
+  // Load due count lazily for Study tab
+  const loadDueCount = async () => {
+    try {
+      const due = await getAllDueFlashcards();
+      setDueCount(Array.isArray(due) ? due.length : 0);
+    } catch { setDueCount(0); }
+  };
+
   useEffect(() => {
     getSubjects().then((s) => {
       setSubjects(s);
@@ -176,6 +223,10 @@ export default function SubjectsPage() {
     // Load bundles once so the empty state can surface unlinked decks.
     getBundles().then((b) => setAllBundles(b as Bundle[])).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (activeTab === "study" && dueCount === null) loadDueCount();
+  }, [activeTab, dueCount]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -270,25 +321,73 @@ export default function SubjectsPage() {
 
   return (
     <div className="p-8 lg:p-12">
-      {/* Header */}
-      <div className="mb-16">
+      {/* Header — Library merges Subjects + Flashcards + Bundles */}
+      <div className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <RevealHeading text="Subjects" className="text-5xl lg:text-8xl" />
+            <RevealHeading text="Library" className="text-5xl lg:text-8xl" />
             <ScrambleSubtitle
-              text="Organize your learning topics"
+              text="Subjects → Topics → Decks → Cards — one hierarchy"
               className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>
-          {!(loaded && subjects.length === 0) && (
+          {activeTab === "subjects" && !(loaded && subjects.length === 0) && (
             <Button onClick={() => setModalOpen(true)}>
               <Plus size={16} />
               New subject
             </Button>
           )}
+          {activeTab === "decks" && !(loaded && allBundles.length === 0) && (
+            <div className="flex gap-2">
+              <input id="lib-share-import" type="file" accept=".json,application/json" className="hidden" onChange={async (e) => {
+                const f = e.target.files?.[0]; (e.target as HTMLInputElement).value = "";
+                if (!f) return;
+                try {
+                  const shared = parseSharedBundle(JSON.parse(await f.text()));
+                  const created = await createBundle({ name: shared.name, description: shared.description });
+                  await importCardsIntoBundle(created.id, shared.cards.map((c: any) => ({ front: c.front, back: c.back, description: c.description, tags: c.tags, kind: c.kind, choices: c.choices })));
+                  const bundles = await getBundles();
+                  setAllBundles(bundles as Bundle[]);
+                  showToast(`Imported ${shared.cards.length} cards into ${shared.name}`, "success");
+                } catch { showToast("Import failed: not a valid share file.", "danger"); }
+              }} />
+              <Button variant="secondary" onClick={() => document.getElementById("lib-share-import")?.click()}>Import share</Button>
+              <Button onClick={() => setDeckCreateOpen(true)}>
+                <Plus size={16} />
+                New deck
+              </Button>
+            </div>
+          )}
+        </div>
+        {/* Tabs */}
+        <div className="mt-8 flex gap-2 border-b border-border">
+          {[
+            { id: "subjects", label: "Subjects", count: loaded ? subjects.length : undefined },
+            { id: "decks", label: "Decks", count: loaded ? allBundles.length : undefined },
+            { id: "study", label: "Study", count: dueCount ?? undefined },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              aria-current={activeTab === tab.id ? "page" : undefined}
+              className={`relative -mb-px border-b-2 px-4 py-2.5 text-sm font-bold tracking-tight transition-colors ${
+                activeTab === tab.id
+                  ? "border-accent text-accent"
+                  : "border-transparent text-muted-fg hover:text-fg hover:border-muted-fg/30"
+              }`}
+            >
+              {tab.label}
+              {tab.count !== undefined && (
+                <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-mono ${activeTab === tab.id ? "bg-accent-soft text-accent" : "bg-muted text-muted-fg"}`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
+      {activeTab === "subjects" && <>
       {!loaded ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -460,8 +559,111 @@ export default function SubjectsPage() {
           ))}
         </div>
       )}
+        </>}
 
-      {/* Delete Subject Confirmation (replaces native confirm()) */}
+      {activeTab === "decks" && (
+        <>
+          {!loaded ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="glass rounded-2xl p-6">
+                  <Skeleton className="h-12 w-12 mb-4" />
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+              ))}
+            </div>
+          ) : allBundles.length === 0 ? (
+            <EmptyState
+              icon={<Layers size={48} />}
+              title="No decks yet"
+              description="Decks are flashcard collections. Create one standalone or from a topic."
+              action={
+                <Button onClick={() => setDeckCreateOpen(true)}>
+                  <Plus size={16} />
+                  Create deck
+                </Button>
+              }
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+              {allBundles.map((bundle) => (
+                <button
+                  key={bundle.id}
+                  onClick={() => router.push(`/bundles/${bundle.id}/cards`)}
+                  className="group relative flex h-64 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-left transition-all duration-200 hover:-translate-y-1"
+                  style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div
+                      className="flex h-11 w-11 items-center justify-center rounded-xl text-lg font-black transition-transform duration-200 group-hover:scale-110"
+                      style={{ backgroundColor: bundle.color || "#DFE104", color: readableOn(bundle.color || "#DFE104") }}
+                    >
+                      {bundle.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="rounded-full bg-bg-raised px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+                      {bundle._count.flashcards} cards
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="truncate text-lg font-bold tracking-tight">{bundle.name}</h3>
+                    {bundle.description && <p className="mt-1 line-clamp-2 text-xs text-muted-fg">{bundle.description}</p>}
+                    {(bundle as any).topic && (
+                      <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+                        {(bundle as any).topic.subject?.name ? `${(bundle as any).topic.subject.name} › ` : ""}{(bundle as any).topic.name}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {activeTab === "study" && (
+        <div className="space-y-6">
+          <div className="glass rounded-2xl p-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold tracking-tight">Spaced repetition</h3>
+                <p className="mt-1 text-sm text-muted-fg">
+                  {dueCount === null ? "Loading…" : dueCount === 0 ? "All caught up — no cards due." : `${dueCount} cards due for review.`}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => setActiveTab("decks")}>Browse decks</Button>
+                <Button onClick={() => { if ((dueCount ?? 0) > 0 && allBundles.length > 0) router.push(`/bundles/${allBundles[0].id}/cards`); else showToast(dueCount === 0 ? "No cards due" : "Create a deck first", "info"); }}>
+                  Study now
+                </Button>
+              </div>
+            </div>
+            {allBundles.length > 0 && (
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {allBundles.slice(0, 6).map((b) => (
+                  <button
+                    key={b.id}
+                    onClick={() => router.push(`/bundles/${b.id}/cards`)}
+                    className="flex items-center justify-between rounded-xl border border-border bg-bg-raised/60 px-4 py-3 text-left transition-colors hover:border-accent"
+                  >
+                    <span className="truncate text-sm font-bold">{b.name}</span>
+                    <span className="ml-2 shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-mono">{b._count.flashcards}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="glass rounded-2xl p-6">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-fg">How it works</h4>
+            <p className="mt-2 text-sm leading-relaxed text-muted-fg">
+              Library merges the old Subjects + Flashcards/Bundles hierarchies: Subject → Topic → Deck → Cards is now one path. Create a subject, add topics, then create a deck inside a topic — or create a standalone deck and link it later. All cards live in decks and stay reviewable via Study.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Subject Confirmation
+ (replaces native confirm()) */}
       <Modal
         open={!!deleteSubjectId}
         onClose={() => setDeleteSubjectId(null)}
@@ -660,7 +862,7 @@ export default function SubjectsPage() {
                         <button
                           onClick={() => {
                             setManageTopicsFor(null);
-                            router.push(`/flashcards?topic=${topic.id}`);
+                            router.push(`/bundles/${bundles[0].id}/cards`);
                           }}
                           className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-fg hover:text-fg"
                           title="Study all bundles for this topic"
@@ -745,6 +947,23 @@ export default function SubjectsPage() {
             <Button onClick={handleCreate} disabled={isPending || !name.trim()}>
               {isPending ? "Creating..." : "Create"}
             </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Deck Create Modal (Library → Decks) */}
+      <Modal open={deckCreateOpen} onClose={() => setDeckCreateOpen(false)} title="New deck">
+        <div className="space-y-6">
+          <Input label="Deck name" placeholder="e.g. Biology — Chapter 1" value={deckName} onChange={(e) => setDeckName(e.target.value)} />
+          <Input label="Description (optional)" placeholder="Brief description..." value={deckDesc} onChange={(e) => setDeckDesc(e.target.value)} />
+          <BundleColorPicker value={deckColor} onChange={setDeckColor} />
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Subject & topic (optional)</label>
+            <SubjectTopicMenu subjects={subjects.map(s => ({ id: s.id, name: s.name, color: s.color }))} subjectId={deckSubjectId} topicId={deckTopicId} onSubjectChange={setDeckSubjectId} onTopicChange={setDeckTopicId} subjectOptional />
+          </div>
+          <div className="flex justify-end gap-4 pt-4">
+            <Button variant="ghost" onClick={() => setDeckCreateOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateDeck} disabled={!deckName.trim()}>{deckName.trim() ? "Create" : "Create"}</Button>
           </div>
         </div>
       </Modal>

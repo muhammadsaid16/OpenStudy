@@ -205,7 +205,7 @@ export default function BundlesPage() {
           {bundles.map((bundle) => (
             <Link
               key={bundle.id}
-              href={`/flashcards?bundle=${bundle.id}`}
+              href={`/bundles/${bundle.id}/cards`}
               {...spotlightProps()}
               className="spotlight-card group relative flex h-72 w-full max-w-xs flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-left transition-all duration-200 hover:-translate-y-1"
               style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
@@ -249,7 +249,7 @@ export default function BundlesPage() {
                     onClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
-                      router.push(`/flashcards?bundle=${bundle.id}&mode=gallery`);
+                      router.push(`/bundles/${bundle.id}/cards`);
                     }}
                     aria-label="Manage cards"
                     title="Manage cards"
