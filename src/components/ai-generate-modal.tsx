@@ -308,7 +308,7 @@ export function AiGenerateModal({
           className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
             mode === "text"
               ? "bg-accent text-accent-fg"
-              : "text-muted-fg hover:text-fg disabled:opacity-50"
+              : "text-muted-fg hover:text-accent disabled:opacity-50"
           }`}
           aria-pressed={mode === "text"}
         >
@@ -321,7 +321,7 @@ export function AiGenerateModal({
           className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
             mode === "image"
               ? "bg-accent text-accent-fg"
-              : "text-muted-fg hover:text-fg disabled:opacity-50"
+              : "text-muted-fg hover:text-accent disabled:opacity-50"
           }`}
           aria-pressed={mode === "image"}
         >
@@ -429,7 +429,7 @@ export function AiGenerateModal({
                 <button
                   type="button"
                   onClick={clearImage}
-                  className="absolute right-2 top-2 rounded-full border border-border bg-bg/90 p-1 text-muted-fg hover:text-fg"
+                  className="absolute right-2 top-2 rounded-full border border-border bg-bg/90 p-1 text-muted-fg hover:text-accent hover:bg-accent-soft"
                   aria-label="Remove image"
                 >
                   <X size={14} />
@@ -443,7 +443,7 @@ export function AiGenerateModal({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-bg px-4 py-12 text-muted-fg transition-colors hover:border-accent hover:text-fg"
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-bg px-4 py-12 text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
             >
               <Upload size={28} />
               <span className="font-mono text-[10px] font-bold uppercase tracking-widest">

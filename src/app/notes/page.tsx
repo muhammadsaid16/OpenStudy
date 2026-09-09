@@ -262,21 +262,21 @@ function NotesContent() {
                     onClick={() => router.push("/notes/" + note.id)}
                     aria-label="Study note"
                     title="Study"
-                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-fg"
+                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-accent"
                   >
                     <Eye size={14} />
                   </button>
                   <button
                     onClick={() => openEdit(note)}
                     aria-label="Edit"
-                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-fg"
+                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-accent"
                   >
                     <Pencil size={14} />
                   </button>
                   <button
                     onClick={() => handleTogglePin(note.id, note.isPinned)}
                     aria-label={isPinned ? "Unpin" : "Pin"}
-                    className={`rounded-full p-2.5 transition-colors ${isPinned ? "text-accent" : "text-muted-fg hover:text-fg"}`}
+                    className={`rounded-full p-2.5 transition-colors ${isPinned ? "text-accent" : "text-muted-fg hover:text-accent"}`}
                   >
                     <Pin size={14} />
                   </button>

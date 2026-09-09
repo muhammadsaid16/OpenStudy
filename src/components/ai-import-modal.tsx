@@ -197,7 +197,7 @@ export function AiImportModal({
           <button
             type="button"
             onClick={() => setPasted("")}
-            className="text-muted-fg hover:text-fg"
+            className="text-muted-fg hover:text-accent"
           >
             CLEAR
           </button>

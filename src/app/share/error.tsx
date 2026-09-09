@@ -51,7 +51,7 @@ export default function RouteError({
         </button>
         <a
           href="/"
-          className="inline-flex items-center gap-2 rounded-full border border-glass-border bg-glass px-5 py-2.5 text-sm font-bold text-fg transition-colors hover:bg-glass-hover"
+          className="inline-flex items-center gap-2 rounded-full border border-glass-border bg-glass px-5 py-2.5 text-sm font-bold text-fg transition-colors hover:bg-accent-soft"
         >
           <Home size={14} aria-hidden />
           Dashboard

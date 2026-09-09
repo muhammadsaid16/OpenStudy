@@ -185,7 +185,7 @@ export function FocusZone() {
           }}
           title={`Soundscape: ${soundscapeName} — click to change`}
           aria-label={`Soundscape: ${soundscapeName}. Click to change`}
-          className="flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-fg"
+          className="flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-accent"
         >
           <Music size={12} aria-hidden />
           {soundscapeName}
@@ -261,7 +261,7 @@ export function FocusZone() {
             <button
               onClick={pomo.skip}
               aria-label="Skip phase"
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg backdrop-blur-md transition-transform hover:scale-105 hover:text-fg active:scale-95"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg backdrop-blur-md transition-transform hover:scale-105 hover:text-accent active:scale-95"
             >
               <SkipForward size={18} />
             </button>
@@ -297,7 +297,7 @@ export function FocusZone() {
                 "rounded-full border px-4 py-1.5 text-xs font-bold tracking-wide transition-colors disabled:opacity-40",
                 isActive
                   ? "border-accent/50 bg-accent-soft text-accent"
-                  : "border-glass-border bg-glass text-muted-fg hover:text-fg"
+                  : "border-glass-border bg-glass text-muted-fg hover:text-accent"
               )}
             >
               {p.label}
@@ -319,7 +319,7 @@ export function FocusZone() {
               "rounded-full border px-4 py-1.5 text-xs font-bold tracking-wide transition-colors disabled:opacity-40",
               activePresetId === p.id
                 ? "border-accent/50 bg-accent-soft text-accent"
-                : "border-glass-border bg-glass text-muted-fg hover:text-fg"
+                : "border-glass-border bg-glass text-muted-fg hover:text-accent"
             )}
           >
             {p.name}

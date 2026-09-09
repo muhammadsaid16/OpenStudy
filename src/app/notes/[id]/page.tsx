@@ -116,7 +116,7 @@ export default function NotePage() {
         {/* Back */}
         <button
           onClick={() => router.push("/notes")}
-          className="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg transition-colors"
+          className="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent transition-colors"
         >
           <ArrowLeft size={14} /> Back to notes
         </button>

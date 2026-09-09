@@ -91,7 +91,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
         <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-bg p-3">
           <button
             onClick={p.onSelectAllToggle}
-            className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-fg"
+            className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent"
           >
             {p.allBrowseSelected ? <CheckSquare size={14} /> : <Square size={14} />}
             {p.allBrowseSelected ? "Deselect all" : "Select all"}
@@ -109,13 +109,13 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
               </button>
               <button
                 onClick={p.onBatchTag}
-                className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent"
+                className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
               >
                 <Tag size={14} /> Tag
               </button>
               <button
                 onClick={p.onBatchMove}
-                className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent"
+                className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
               >
                 <ArrowRight size={14} /> Move
               </button>
@@ -185,7 +185,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                     ? "border-accent bg-accent/5"
                     : flipped
                       ? "border-accent bg-accent text-accent-fg shadow-[0_14px_40px_-12px_var(--color-accent-soft)] -translate-y-0.5"
-                      : "border-border bg-bg shadow-sm hover:-translate-y-1 hover:border-fg hover:shadow-lg"
+                      : "border-border bg-bg shadow-sm hover:-translate-y-1 hover:border-accent hover:shadow-lg"
                 )}
               >
                 <div className="mb-3 flex items-start justify-between gap-2">

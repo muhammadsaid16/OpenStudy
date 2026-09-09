@@ -758,7 +758,7 @@ function FlashcardsContent() {
                   setEditBundleColor(b.color || "#DFE104");
                   setEditBundleOpen(true);
                 }}
-                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg"
+                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
                 title="Edit bundle"
               >
                 <Pencil size={14} className="inline" /> Edit
@@ -783,14 +783,14 @@ function FlashcardsContent() {
                     showToast("Export failed — see console", "danger");
                   }
                 }}
-                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg"
+                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
                 title="Export bundle as JSON"
               >
                 <Download size={14} className="inline" /> Export
               </button>
               <button
                 onClick={() => document.getElementById("import-file")?.click()}
-                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg"
+                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
                 title="Import cards from JSON/CSV/Anki file"
               >
                 <Upload size={14} className="inline" /> Import
@@ -841,7 +841,7 @@ function FlashcardsContent() {
                 onClick={() => { setMode(m); setIsFlipped(false); }}
                 className={cn(
                   "relative shrink-0 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors",
-                  mode === m ? "text-accent-fg" : "text-muted-fg hover:text-fg"
+                  mode === m ? "text-accent-fg" : "text-muted-fg hover:text-accent"
                 )}
               >
                 {mode === m && (

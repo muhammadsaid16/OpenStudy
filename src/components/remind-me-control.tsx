@@ -71,7 +71,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
           <button
             type="button"
             onClick={() => setRemindAt(null)}
-            className="text-success hover:text-fg"
+            className="text-success hover:text-accent"
             aria-label="Dismiss"
           >
             <X size={11} />
@@ -88,7 +88,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
         <button
           type="button"
           onClick={cancel_}
-          className="text-accent-fg hover:text-fg"
+          className="text-accent-fg hover:text-accent"
           aria-label="Cancel reminder"
         >
           <X size={11} />

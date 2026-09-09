@@ -259,7 +259,7 @@ export default function GoalsPage() {
               onClick={() => setFilter(id)}
               className={cn(
                 "relative flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition-colors",
-                filter === id ? "text-accent-fg" : "text-muted-fg hover:text-fg"
+                filter === id ? "text-accent-fg" : "text-muted-fg hover:text-accent"
               )}
             >
               {filter === id && (
@@ -484,7 +484,7 @@ export default function GoalsPage() {
                                     }}
                                     className={cn(
                                       "shrink-0 transition-colors",
-                                      m.done ? "text-flow" : "text-muted-fg hover:text-fg"
+                                      m.done ? "text-flow" : "text-muted-fg hover:text-accent"
                                     )}
                                   >
                                     {m.done ? <CheckSquare size={14} /> : <Square size={14} />}

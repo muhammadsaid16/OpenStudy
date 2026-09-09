@@ -41,7 +41,7 @@ function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-border bg-bg p-5 text-left transition-colors hover:border-fg"
+      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-border bg-bg p-5 text-left transition-colors hover:border-accent"
     >
       <div>
         <p className="text-sm font-bold tracking-tight text-fg">{label}</p>
@@ -148,7 +148,7 @@ export default function SettingsPage() {
                 aria-label={`Use ${t.name} theme`}
                 className={cn(
                   "group flex flex-col gap-3 rounded-2xl border p-3 transition-all",
-                  active ? "border-accent" : "border-border hover:border-fg"
+                  active ? "border-accent" : "border-border hover:border-accent"
                 )}
                 style={{ background: t.bg }}
               >

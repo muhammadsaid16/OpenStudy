@@ -155,7 +155,7 @@ function GoalForm({
                 onClick={() => setHorizon(id)}
                 className={cn(
                   "relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors",
-                  horizon === id ? "text-accent-fg" : "text-muted-fg hover:text-fg"
+                  horizon === id ? "text-accent-fg" : "text-muted-fg hover:text-accent"
                 )}
               >
                 {horizon === id && (
@@ -190,7 +190,7 @@ function GoalForm({
                 onClick={() => setRepeat(id)}
                 className={cn(
                   "relative flex flex-1 items-center justify-center rounded-full px-2 py-2 text-xs font-bold transition-colors",
-                  repeat === id ? "text-accent-fg" : "text-muted-fg hover:text-fg"
+                  repeat === id ? "text-accent-fg" : "text-muted-fg hover:text-accent"
                 )}
               >
                 {repeat === id && (

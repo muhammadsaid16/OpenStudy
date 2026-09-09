@@ -28,7 +28,7 @@ export function CardKindFields({
             onClick={() => onKindChange(k)}
             className={cn(
               "rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors",
-              kind === k ? "border-accent bg-accent/10 text-accent" : "border-border text-muted-fg hover:border-fg"
+              kind === k ? "border-accent bg-accent/10 text-accent" : "border-border text-muted-fg hover:border-accent"
             )}
           >
             {k}

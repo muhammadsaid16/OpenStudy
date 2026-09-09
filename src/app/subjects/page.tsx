@@ -433,7 +433,7 @@ export default function SubjectsPage() {
               className={`relative -mb-px border-b-2 px-4 py-2.5 text-sm font-bold tracking-tight transition-colors ${
                 activeTab === tab.id
                   ? "border-accent text-accent"
-                  : "border-transparent text-muted-fg hover:text-fg hover:border-muted-fg/30"
+                  : "border-transparent text-muted-fg hover:text-accent hover:border-muted-fg/30"
               }`}
             >
               {tab.label}
@@ -501,7 +501,7 @@ export default function SubjectsPage() {
                       setManageTopicsFor(null);
                       router.push(`/bundles/${b.id}/cards`);
                     }}
-                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-bold hover:border-accent hover:text-accent"
+                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-bold hover:border-accent hover:text-accent hover:bg-accent-soft"
                     style={{ borderColor: b.color || undefined, color: b.color || undefined }}
                     title="Open bundle cards"
                   >
@@ -899,7 +899,7 @@ export default function SubjectsPage() {
                                   setManageTopicsFor(null);
                                   router.push(`/bundles/${b.id}/cards`);
                                 }}
-                                className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest hover:border-accent hover:text-accent"
+                                className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest hover:border-accent hover:text-accent hover:bg-accent-soft"
                                 style={{ borderColor: b.color || manageSubjectColor, color: b.color || manageSubjectColor }}
                                 title="Manage bundle cards"
                               >
@@ -970,7 +970,7 @@ export default function SubjectsPage() {
                       )}
                       <button
                         onClick={() => setLinkTopicId(linkTopicId === topic.id ? null : topic.id)}
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent"
+                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
                       >
                         <Link2 size={12} /> Link
                       </button>

@@ -36,7 +36,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           {
             "bg-accent text-accent-fg hover:shadow-[0_0_32px_-8px_var(--color-accent)]":
               variant === "primary",
-            "border border-glass-border bg-glass text-fg backdrop-blur-md hover:bg-glass-hover hover:border-fg/20":
+            "border border-glass-border bg-glass text-fg backdrop-blur-md hover:bg-accent-soft hover:border-accent/20":
               variant === "secondary",
             "text-muted-fg hover:text-accent":
               variant === "ghost",

@@ -88,7 +88,7 @@ export function ToastHost() {
             <button
               onClick={() => dismiss(t.id)}
               aria-label="Dismiss"
-              className="text-muted-fg transition-colors hover:text-fg"
+              className="text-muted-fg transition-colors hover:text-accent"
             >
               ✕
             </button>

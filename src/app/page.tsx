@@ -171,7 +171,7 @@ export default function DashboardPage() {
                   {stats.recentSessions.map((session) => (
                     <div
                       key={session.id}
-                      className="group flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-glass-hover"
+                      className="group flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-accent-soft"
                     >
                       <div className="flex min-w-0 items-center gap-3">
                         <span

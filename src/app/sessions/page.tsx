@@ -324,7 +324,7 @@ export default function SessionsPage() {
             disabled={anyRunning && mode !== m.id}
             className={cn(
               "relative flex items-center rounded-full px-5 py-2 text-xs font-black uppercase tracking-widest transition-colors",
-              mode === m.id ? "text-accent-fg" : "text-muted-fg hover:text-fg",
+              mode === m.id ? "text-accent-fg" : "text-muted-fg hover:text-accent",
               anyRunning && mode !== m.id && "opacity-40 cursor-not-allowed"
             )}
           >
@@ -392,7 +392,7 @@ export default function SessionsPage() {
                           "px-4 py-2 rounded-full border text-xs font-black uppercase tracking-widest transition-colors",
                           isActive
                             ? "border-accent bg-accent-soft text-accent"
-                            : "border-border bg-bg text-muted-fg hover:border-fg hover:text-fg",
+                            : "border-border bg-bg text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft",
                           pomo.running && "opacity-50 cursor-not-allowed"
                         )}
                       >
@@ -408,7 +408,7 @@ export default function SessionsPage() {
                         "group inline-flex items-center overflow-hidden rounded-full border text-xs font-black uppercase tracking-widest transition-colors",
                         activePresetId === p.id
                           ? "border-accent bg-accent-soft text-accent"
-                          : "border-border bg-bg text-muted-fg hover:border-fg hover:text-fg",
+                          : "border-border bg-bg text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft",
                         pomo.running && "opacity-50"
                       )}
                     >
@@ -716,7 +716,7 @@ export default function SessionsPage() {
                 <div className="mt-2 grid w-full grid-cols-2 gap-2">
                   <button
                     onClick={pomo.skip}
-                    className="w-full bg-glass hover:bg-glass-hover text-muted-fg hover:text-fg font-black text-sm rounded-full transition-all py-2.5 flex items-center justify-center gap-2 border border-glass-border"
+                    className="w-full bg-glass hover:bg-accent-soft text-muted-fg hover:text-accent font-black text-sm rounded-full transition-all py-2.5 flex items-center justify-center gap-2 border border-glass-border"
                   >
                     <SkipForward size={14} /> Skip
                   </button>
@@ -753,7 +753,7 @@ export default function SessionsPage() {
                   onClick={() => setHistoryRange(key)}
                   aria-pressed={historyRange === key}
                   className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${
-                    historyRange === key ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-fg"
+                    historyRange === key ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"
                   }`}
                 >
                   {label}

@@ -168,7 +168,7 @@ export function Sidebar() {
               <button
                 onClick={() => setTheme("light")}
                 aria-pressed={theme === "light"}
-                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${theme === "light" ? "text-accent-fg" : "text-muted-fg hover:text-fg"}`}
+                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${theme === "light" ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
               >
                 {theme === "light" && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
                 <span className="relative flex items-center gap-1.5"><Sun size={13} aria-hidden /> Light</span>
@@ -176,7 +176,7 @@ export function Sidebar() {
               <button
                 onClick={() => setTheme("aurora")}
                 aria-pressed={theme === "aurora"}
-                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${theme === "aurora" ? "text-accent-fg" : "text-muted-fg hover:text-fg"}`}
+                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${theme === "aurora" ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
               >
                 {theme === "aurora" && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
                 <span className="relative flex items-center gap-1.5"><Moon size={13} aria-hidden /> Dark</span>

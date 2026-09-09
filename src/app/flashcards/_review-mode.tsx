@@ -202,7 +202,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
           onClick={p.onToggleSprint}
           className={cn(
             "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors",
-            p.sprintMode ? "border-accent bg-accent text-accent-fg" : "border-border text-muted-fg hover:border-fg"
+            p.sprintMode ? "border-accent bg-accent text-accent-fg" : "border-border text-muted-fg hover:border-accent"
           )}
         >
           <Timer size={14} />
@@ -260,7 +260,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                               : card.front
                           );
                       }}
-                      className="flex h-7 w-7 items-center justify-center rounded-full border border-border/70 text-muted-fg transition-colors hover:border-accent/50 hover:text-accent"
+                      className="flex h-7 w-7 items-center justify-center rounded-full border border-border/70 text-muted-fg transition-colors hover:border-accent/50 hover:text-accent hover:bg-accent-soft"
                     >
                       {p.speaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
                     </button>
@@ -299,7 +299,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                           e.stopPropagation();
                           p.onPickChoice(opt);
                         }}
-                        className="rounded-xl border border-border bg-bg/60 px-4 py-2.5 text-sm font-bold tracking-tight text-fg transition-colors hover:border-accent hover:text-accent"
+                        className="rounded-xl border border-border bg-bg/60 px-4 py-2.5 text-sm font-bold tracking-tight text-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
                       >
                         {opt}
                       </button>
