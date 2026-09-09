@@ -22,24 +22,32 @@ export function showUndo(action: UndoAction) {
 
 export function UndoToastHost() {
   const [current, setCurrent] = useState<UndoAction | null>(null);
+  const [exiting, setExiting] = useState(false);
+
+  const remove = useCallback(() => {
+    setCurrent(null);
+    setExiting(false);
+  }, []);
 
   const dismiss = useCallback(() => {
-    setCurrent(null);
-  }, []);
+    setExiting(true);
+    setTimeout(() => remove(), 200);
+  }, [remove]);
 
   useEffect(() => {
     const onAction = (action: UndoAction) => {
       const duration = action.duration ?? 5000;
       activeCommitTimer = setTimeout(async () => {
         activeCommitTimer = null;
-        try { await action.onCommit?.(); } finally { setCurrent(null); }
+        try { await action.onCommit?.(); } finally { setExiting(true); setTimeout(() => remove(), 200); }
       }, duration);
       setCurrent(action);
+      setExiting(false);
       (action as UndoAction & { __timer?: ReturnType<typeof setTimeout> }).__timer = activeCommitTimer;
     };
     listeners.push(onAction);
     return () => { listeners = listeners.filter((l) => l !== onAction); };
-  }, []);
+  }, [remove]);
 
   if (!current) return null;
 
@@ -48,7 +56,8 @@ export function UndoToastHost() {
   const handleUndo = () => {
     if (activeCommitTimer !== null) { clearTimeout(activeCommitTimer); activeCommitTimer = null; }
     if (timer) clearTimeout(timer);
-    Promise.resolve(current.undo()).finally(dismiss);
+    setExiting(true);
+    Promise.resolve(current.undo()).finally(() => setTimeout(() => remove(), 200));
   };
 
   const handleDismiss = () => { dismiss(); };
@@ -59,7 +68,7 @@ export function UndoToastHost() {
       aria-live="polite"
       className="pointer-events-none fixed bottom-6 left-1/2 z-[100] flex -translate-x-1/2 flex-col items-center gap-2"
     >
-      <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-border bg-bg px-5 py-3 shadow-2xl animate-[rise_0.2s_ease-out]">
+      <div className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-border bg-bg px-5 py-3 shadow-2xl ${exiting ? "animate-[fall_0.2s_ease-in_forwards]" : "animate-[rise_0.2s_ease-out]"}`}>
         <span className="text-xs font-bold tracking-wide text-fg">
           {current.message}
         </span>
