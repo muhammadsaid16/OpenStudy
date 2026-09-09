@@ -164,18 +164,22 @@ export function Sidebar() {
                 All →
               </Link>
             </div>
-            <div className="flex gap-2" role="group" aria-label="Appearance">
+            <div className="inline-flex w-full rounded-full border border-glass-border bg-glass p-1" role="group" aria-label="Theme">
               <button
-                onClick={() => setTheme(theme === "aurora" ? "light" : "aurora")}
+                onClick={() => setTheme("light")}
                 aria-pressed={theme === "light"}
-                className="hit-target flex flex-1 items-center justify-center gap-2 rounded-xl border border-glass-border bg-glass px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-fg"
+                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${theme === "light" ? "text-accent-fg" : "text-muted-fg hover:text-fg"}`}
               >
-                <span
-                  className="h-3.5 w-3.5 rounded-full border border-border"
-                  style={{ backgroundColor: theme === "light" ? "#F1F5F9" : "#0B0F17" }}
-                  aria-hidden
-                />
-                {theme === "light" ? "Light" : "Dark"}
+                {theme === "light" && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
+                <span className="relative flex items-center gap-1.5"><Sun size={13} aria-hidden /> Light</span>
+              </button>
+              <button
+                onClick={() => setTheme("aurora")}
+                aria-pressed={theme === "aurora"}
+                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${theme === "aurora" ? "text-accent-fg" : "text-muted-fg hover:text-fg"}`}
+              >
+                {theme === "aurora" && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
+                <span className="relative flex items-center gap-1.5"><Moon size={13} aria-hidden /> Dark</span>
               </button>
             </div>
             <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-muted-fg">

@@ -228,6 +228,21 @@ export default function SubjectsPage() {
       setReviewIndex(0);
       setIsFlipped(false);
       setIsReviewing(true);
+      setActiveTab("study");
+    } catch { showToast("Failed to load cards", "danger"); }
+  };
+
+  const startReviewForBundle = async (bundleId: string) => {
+    try {
+      const due = await getAllDueFlashcards();
+      const all = Array.isArray(due) ? due : [];
+      const list = all.filter((c: any) => c.bundleId === bundleId);
+      if (list.length === 0) { showToast("No cards due in this deck", "info"); return; }
+      setReviewQueue(list);
+      setReviewIndex(0);
+      setIsFlipped(false);
+      setIsReviewing(true);
+      setActiveTab("study");
     } catch { showToast("Failed to load cards", "danger"); }
   };
 
@@ -376,12 +391,6 @@ export default function SubjectsPage() {
               className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>
-          {dueCount !== null && dueCount > 0 && (
-            <Button onClick={() => { setActiveTab("study"); startReview(); }} className="animate-[pulse-border_2s_ease-in-out_infinite]">
-              <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-              Start Review ({dueCount})
-            </Button>
-          )}
           {activeTab === "subjects" && !(loaded && subjects.length === 0) && (
             <Button onClick={() => setModalOpen(true)}>
               <Plus size={16} />
@@ -639,33 +648,41 @@ export default function SubjectsPage() {
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
               {allBundles.map((bundle) => (
-                <button
+                <div
                   key={bundle.id}
-                  onClick={() => router.push(`/bundles/${bundle.id}/cards`)}
-                  className="group relative flex h-64 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-left transition-all duration-200 hover:-translate-y-1"
+                  className="group relative flex h-64 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 transition-all duration-200 hover:-translate-y-1"
                   style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
                 >
-                  <div className="flex items-start justify-between">
-                    <div
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-lg font-black transition-transform duration-200 group-hover:scale-110"
-                      style={{ backgroundColor: bundle.color || "#DFE104", color: readableOn(bundle.color || "#DFE104") }}
-                    >
-                      {bundle.name.charAt(0).toUpperCase()}
+                  <button onClick={() => router.push(`/bundles/${bundle.id}/cards`)} className="flex flex-1 flex-col justify-between text-left w-full">
+                    <div className="flex items-start justify-between w-full">
+                      <div
+                        className="flex h-11 w-11 items-center justify-center rounded-xl text-lg font-black transition-transform duration-200 group-hover:scale-110"
+                        style={{ backgroundColor: bundle.color || "#DFE104", color: readableOn(bundle.color || "#DFE104") }}
+                      >
+                        {bundle.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="rounded-full bg-bg-raised px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+                        {bundle._count.flashcards} cards
+                      </span>
                     </div>
-                    <span className="rounded-full bg-bg-raised px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-                      {bundle._count.flashcards} cards
-                    </span>
+                    <div className="mt-auto">
+                      <h3 className="truncate text-lg font-bold tracking-tight">{bundle.name}</h3>
+                      {bundle.description && <p className="mt-1 line-clamp-2 text-xs text-muted-fg">{bundle.description}</p>}
+                      {(bundle as any).topic && (
+                        <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+                          {(bundle as any).topic.subject?.name ? `${(bundle as any).topic.subject.name} › ` : ""}{(bundle as any).topic.name}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                  <div className="mt-4 flex gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => router.push(`/bundles/${bundle.id}/cards`)} className="flex-1">Open</Button>
+                    <Button size="sm" onClick={() => startReviewForBundle(bundle.id)} className="flex-1 gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-accent-fg animate-pulse" aria-hidden />
+                      Review
+                    </Button>
                   </div>
-                  <div>
-                    <h3 className="truncate text-lg font-bold tracking-tight">{bundle.name}</h3>
-                    {bundle.description && <p className="mt-1 line-clamp-2 text-xs text-muted-fg">{bundle.description}</p>}
-                    {(bundle as any).topic && (
-                      <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-                        {(bundle as any).topic.subject?.name ? `${(bundle as any).topic.subject.name} › ` : ""}{(bundle as any).topic.name}
-                      </p>
-                    )}
-                  </div>
-                </button>
+                </div>
               ))}
             </div>
           )}
@@ -728,23 +745,25 @@ export default function SubjectsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="secondary" onClick={() => setActiveTab("decks")}>Browse decks</Button>
-                    <Button onClick={startReview} disabled={dueCount === 0 || dueCount === null}>
-                      Start Review {dueCount ? `(${dueCount})` : ""}
-                    </Button>
                   </div>
                 </div>
                 {allBundles.length > 0 && (
                   <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {allBundles.slice(0, 6).map((b) => (
-                      <button
-                        key={b.id}
-                        onClick={() => router.push(`/bundles/${b.id}/cards`)}
-                        className="flex items-center justify-between rounded-xl border border-border bg-bg-raised/60 px-4 py-3 text-left transition-colors hover:border-accent"
-                      >
-                        <span className="truncate text-sm font-bold">{b.name}</span>
-                        <span className="ml-2 shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-mono">{b._count.flashcards}</span>
-                      </button>
-                    ))}
+                  <div
+                    key={b.id}
+                    className="flex items-center justify-between rounded-xl border border-border bg-bg-raised/60 px-3 py-2"
+                  >
+                    <button onClick={() => router.push(`/bundles/${b.id}/cards`)} className="flex-1 flex items-center justify-between text-left min-w-0">
+                      <span className="truncate text-sm font-bold">{b.name}</span>
+                      <span className="ml-2 shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-mono">{b._count.flashcards}</span>
+                    </button>
+                    <Button size="sm" onClick={() => startReviewForBundle(b.id)} className="ml-3 shrink-0 gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-accent-fg animate-pulse" aria-hidden />
+                      Review
+                    </Button>
+                  </div>
+                ))}
                   </div>
                 )}
               </div>
