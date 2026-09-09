@@ -588,9 +588,9 @@ export default function BundleCardsPage() {
                         className="h-4 w-4 cursor-pointer accent-accent"
                       />
                       <span
-                        className={cn("h-2 w-2 rounded-full", status.dot)}
+                        className={cn("h-2 w-2 rounded-full", flipped ? "bg-accent-fg/80" : status.dot)}
                       />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+                      <span className={cn("text-[10px] font-bold uppercase tracking-widest", flipped ? "text-accent-fg/70" : "text-muted-fg")}>
                         {status.label}
                       </span>
                     </div>
@@ -606,14 +606,14 @@ export default function BundleCardsPage() {
                           setEditTags(card.tags.map((t) => t.tag.name));
                         }}
                         aria-label="Edit"
-                        className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
+                        className={cn("rounded-full p-2.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent")}
                       >
                         <Pencil size={13} />
                       </button>
                       <button
                         onClick={() => setDeleteTarget(card)}
                         aria-label="Delete"
-                        className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
+                        className={cn("rounded-full p-2.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-danger/10 hover:text-danger")}
                       >
                         <Trash2 size={13} />
                       </button>
@@ -653,14 +653,14 @@ export default function BundleCardsPage() {
                       {card.tags.map((t) => (
                         <span
                           key={t.tag.id}
-                          className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg"
+                          className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest", flipped ? "bg-accent-fg/15 text-accent-fg" : "bg-muted text-muted-fg")}
                         >
                           {t.tag.name}
                         </span>
                       ))}
                     </div>
                   )}
-                  <p className="mt-2 text-center text-[10px] uppercase tracking-widest text-muted-fg">
+                  <p className={cn("mt-2 text-center text-[10px] uppercase tracking-widest", flipped ? "text-accent-fg/60" : "text-muted-fg")}>
                     Click to flip • {card.reviewCount} reviews
                   </p>
                 </div>

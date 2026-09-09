@@ -197,15 +197,15 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                     >
                       {selected ? <CheckSquare size={14} className="text-accent" /> : <Square size={14} />}
                     </button>
-                    <span className={cn("h-2 w-2 rounded-full", status.dot)} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{status.label}</span>
+                    <span className={cn("h-2 w-2 rounded-full", flipped ? "bg-accent-fg/80" : status.dot)} />
+                    <span className={cn("text-[10px] font-bold uppercase tracking-widest", flipped ? "text-accent-fg/70" : "text-muted-fg")}>{status.label}</span>
                   </div>
                   <div className="flex gap-1">
                     <button
                       onClick={(e) => { e.stopPropagation(); p.onEditCard(card); }}
                       aria-label="Edit card"
                       title="Edit"
-                      className="rounded-full p-1.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
+                      className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent")}
                     >
                       <Pencil size={13} />
                     </button>
@@ -213,7 +213,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                       onClick={(e) => { e.stopPropagation(); p.onDeleteCard(card); }}
                       aria-label="Delete card"
                       title="Delete"
-                      className="rounded-full p-1.5 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
+                      className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-danger/10 hover:text-danger")}
                     >
                       <Trash2 size={13} />
                     </button>
@@ -240,13 +240,13 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                 {card.tags && card.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {card.tags.map(({ tag }) => (
-                      <span key={tag.id} className="bg-muted px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-muted-fg">
+                      <span key={tag.id} className={cn("px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest", flipped ? "bg-accent-fg/15 text-accent-fg" : "bg-muted text-muted-fg")}>
                         {tag.name}
                       </span>
                     ))}
                   </div>
                 )}
-                <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-fg">
+                <div className={cn("mt-2 flex items-center justify-between text-[10px] uppercase tracking-widest", flipped ? "text-accent-fg/60" : "text-muted-fg")}>
                   {card.bundle ? (
                     <span className="flex items-center gap-1">
                       <span className="h-2 w-2 rounded-full" style={{ backgroundColor: card.bundle.color ?? undefined }} />
