@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 /**
- * Lightweight app toast. Same module-scope pub/sub pattern as undo-toast:
- * `showToast` is callable from anywhere (event handlers, async callbacks)
- * without a context provider; `ToastHost` (mounted once in layout) renders.
- *
- * Tone → intent color, no raw hex; neutral surface stays token-driven so
- * all 12 themes render correctly.
+ * Unified app toast — single design system for all notifications.
+ * Mounted once in layout (ToastHost). `showToast` is callable from anywhere.
+ * Visual: glass card, rounded-2xl, border-border, bg-bg, shadow-2xl, rise animation,
+ * text-xs font-bold tracking-wide (not uppercase), tone → text color.
+ * Auto-dismiss 3500ms, max 3 stacked, pointer-events layered.
  */
 
 export type ToastTone = "info" | "success" | "danger" | "warning";
@@ -36,20 +35,26 @@ export function showToast(message: string, tone: ToastTone = "info") {
 
 export function ToastHost() {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const timers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   const dismiss = useCallback((id: number) => {
+    const tm = timers.current.get(id);
+    if (tm) { clearTimeout(tm); timers.current.delete(id); }
     setToasts((ts) => ts.filter((t) => t.id !== id));
   }, []);
 
   useEffect(() => {
     const onToast = (t: Toast) => {
-      setToasts((ts) => [...ts.slice(-2), t]); // max 3 visible
+      setToasts((ts) => [...ts.slice(-2), t]);
+      const tm = setTimeout(() => dismiss(t.id), 3500);
+      timers.current.set(t.id, tm);
     };
     listeners.push(onToast);
     return () => {
       listeners = listeners.filter((l) => l !== onToast);
+      timers.current.forEach((tm) => clearTimeout(tm));
     };
-  }, []);
+  }, [dismiss]);
 
   if (toasts.length === 0) return null;
 
