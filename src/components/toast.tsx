@@ -46,7 +46,7 @@ export function ToastHost() {
   useEffect(() => {
     const onToast = (t: Toast) => {
       setToasts((ts) => [...ts.slice(-2), t]);
-      const tm = setTimeout(() => dismiss(t.id), 3500);
+      const tm = setTimeout(() => dismiss(t.id), 5000);
       timers.current.set(t.id, tm);
     };
     listeners.push(onToast);
