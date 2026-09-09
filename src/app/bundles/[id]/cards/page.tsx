@@ -98,6 +98,7 @@ export default function BundleCardsPage() {
 
   // Import
   const [importing, setImporting] = useState(false);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [reviewQueue, setReviewQueue] = useState<Card[]>([]);
   const [reviewIndex, setReviewIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -293,6 +294,7 @@ export default function BundleCardsPage() {
   };
 
   const exportAsCsv = async () => {
+    setExportMenuOpen(false);
     try {
       const all = await getBundleCards(bundleId);
       const header = ["front","back","description","kind","choices","tags"];
@@ -314,6 +316,19 @@ export default function BundleCardsPage() {
       const safeName = (bundleName || "bundle").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-") || "bundle";
       a.href = url; a.download = `${safeName}.csv`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) { console.error("Export CSV failed", e); showToast("Export failed", "danger"); }
+  };
+
+  const exportAsJson = async () => {
+    setExportMenuOpen(false);
+    try {
+      const json = await exportBundle(bundleId);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const rawName = bundleName || "bundle";
+      const safeName = rawName.replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-") || "bundle";
+      a.href = url; a.download = `${safeName}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) { console.error("Export failed", e); showToast("Export failed — see console", "danger"); }
   };
 
   return (
@@ -351,38 +366,28 @@ export default function BundleCardsPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={async () => {
-                try {
-                  const json = await exportBundle(bundleId);
-                  const blob = new Blob([json], { type: "application/json" });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  const rawName = bundleName || "bundle";
-                  const safeName = rawName.replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-") || "bundle";
-                  a.href = url;
-                  a.download = `${safeName}.json`;
-                  document.body.appendChild(a);
-                  a.click();
-                  a.remove();
-                  setTimeout(() => URL.revokeObjectURL(url), 1000);
-                } catch (e) {
-                  console.error("Export failed", e);
-                  showToast("Export failed — see console", "danger");
-                }
-              }}
-              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
-            >
-              <Download size={14} />
-              Export JSON
-            </button>
-            <button
-              onClick={exportAsCsv}
-              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
-            >
-              <Download size={14} />
-              Export CSV
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setExportMenuOpen((o) => !o)}
+                className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+              >
+                <Download size={14} />
+                Export
+              </button>
+              {exportMenuOpen && (
+                <>
+                  <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label="Close export menu" />
+                  <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg shadow-2xl z-20">
+                  <button onClick={exportAsJson} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                    <Download size={14} /> JSON
+                  </button>
+                  <button onClick={exportAsCsv} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left border-t border-border">
+                    <Download size={14} /> CSV
+                  </button>
+                </div>
+                </>
+              )}
+            </div>
             <button
               onClick={() => document.getElementById("csv-import")?.click()}
               disabled={importing}
