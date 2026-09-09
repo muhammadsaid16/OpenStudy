@@ -23,8 +23,10 @@ import {
   createBundle,
   importCardsIntoBundle,
   getAllDueFlashcards,
+  reviewFlashcardWithLog,
 } from "@/app/actions";
 import { SubjectTopicMenu } from "@/components/subject-topic-menu";
+import { RATING_BUTTONS } from "@/lib/card-status";
 import { parseSharedBundle } from "@/lib/share";
 import { showToast } from "@/components/toast";
 import { db } from "@/lib/db";
@@ -84,6 +86,11 @@ export default function SubjectsPage() {
   const [deckSubjectId, setDeckSubjectId] = useState("");
   const [deckTopicId, setDeckTopicId] = useState("");
   const [dueCount, setDueCount] = useState<number | null>(null);
+  const [reviewQueue, setReviewQueue] = useState<any[]>([]);
+  const [reviewIndex, setReviewIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
 
   // Keep deckTopicId in sync via SubjectTopicMenu denormalization (handled in action)
 
@@ -212,6 +219,44 @@ export default function SubjectsPage() {
     } catch { setDueCount(0); }
   };
 
+  const startReview = async () => {
+    try {
+      const due = await getAllDueFlashcards();
+      const list = Array.isArray(due) ? due : [];
+      if (list.length === 0) { showToast("No cards due", "info"); return; }
+      setReviewQueue(list);
+      setReviewIndex(0);
+      setIsFlipped(false);
+      setIsReviewing(true);
+    } catch { showToast("Failed to load cards", "danger"); }
+  };
+
+  const handleRate = async (quality: number) => {
+    if (reviewing || reviewIndex >= reviewQueue.length) return;
+    const card = reviewQueue[reviewIndex];
+    setReviewing(true);
+    try {
+      await reviewFlashcardWithLog(card.id, quality);
+      const next = reviewIndex + 1;
+      if (next >= reviewQueue.length) {
+        setIsReviewing(false);
+        setReviewQueue([]);
+        setReviewIndex(0);
+        setIsFlipped(false);
+        showToast(`Reviewed ${reviewQueue.length} cards`, "success");
+        loadDueCount();
+        const bundles = await getBundles();
+        setAllBundles(bundles as Bundle[]);
+      } else {
+        setReviewIndex(next);
+        setIsFlipped(false);
+      }
+    } catch (e) {
+      console.error("review failed", e);
+      showToast("Failed to save rating", "danger");
+    } finally { setReviewing(false); }
+  };
+
   useEffect(() => {
     getSubjects().then((s) => {
       setSubjects(s);
@@ -225,8 +270,8 @@ export default function SubjectsPage() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === "study" && dueCount === null) loadDueCount();
-  }, [activeTab, dueCount]);
+    loadDueCount();
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -331,6 +376,12 @@ export default function SubjectsPage() {
               className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>
+          {dueCount !== null && dueCount > 0 && (
+            <Button onClick={() => { setActiveTab("study"); startReview(); }} className="animate-[pulse-border_2s_ease-in-out_infinite]">
+              <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+              Start Review ({dueCount})
+            </Button>
+          )}
           {activeTab === "subjects" && !(loaded && subjects.length === 0) && (
             <Button onClick={() => setModalOpen(true)}>
               <Plus size={16} />
@@ -622,44 +673,90 @@ export default function SubjectsPage() {
       )}
 
       {activeTab === "study" && (
-        <div className="space-y-6">
-          <div className="glass rounded-2xl p-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-bold tracking-tight">Spaced repetition</h3>
-                <p className="mt-1 text-sm text-muted-fg">
-                  {dueCount === null ? "Loading…" : dueCount === 0 ? "All caught up — no cards due." : `${dueCount} cards due for review.`}
+        <>
+          {isReviewing && reviewQueue.length > 0 ? (
+            <div className="mx-auto max-w-2xl space-y-6">
+              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
+                <span>{reviewIndex + 1} / {reviewQueue.length}</span>
+                <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-fg hover:text-fg">Exit</button>
+              </div>
+              <div className="w-full h-1.5 overflow-hidden rounded-full bg-muted">
+                <div className="h-full bg-accent transition-all" style={{ width: `${((reviewIndex) / reviewQueue.length) * 100}%`}} />
+              </div>
+              {(() => {
+                const card = reviewQueue[reviewIndex];
+                if (!card) return null;
+                return (
+                  <div className="glass rounded-3xl p-8 min-h-[280px] flex flex-col">
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-fg mb-3">
+                      {(card as any).topic?.subject?.name ? `${(card as any).topic.subject.name} › ${(card as any).topic.name}` : (card as any).topic?.name || "General"}
+                    </p>
+                    <div className="flex-1 flex flex-col justify-center text-center">
+                      <p className="text-xl font-bold tracking-tight leading-relaxed">{isFlipped ? card.back : card.front}</p>
+                      {isFlipped && (card as any).description && <p className="mt-3 text-sm text-muted-fg">{(card as any).description}</p>}
+                    </div>
+                    {!isFlipped ? (
+                      <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">Show answer</Button>
+                    ) : (
+                      <div className="mt-6 grid grid-cols-3 gap-2">
+                        {RATING_BUTTONS.map((btn) => (
+                          <button
+                            key={btn.value}
+                            onClick={() => handleRate(btn.value)}
+                            disabled={reviewing}
+                            className={`rounded-xl border px-3 py-3 text-sm font-bold transition-colors disabled:opacity-50 ${btn.color}`}
+                          >
+                            <span className="block text-xs uppercase tracking-widest">{btn.shortLabel}</span>
+                            <span className="block text-[10px] font-normal normal-case opacity-70">{btn.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="glass rounded-2xl p-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold tracking-tight">Spaced repetition</h3>
+                    <p className="mt-1 text-sm text-muted-fg">
+                      {dueCount === null ? "Loading…" : dueCount === 0 ? "All caught up — no cards due." : `${dueCount} cards due for review.`}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="secondary" onClick={() => setActiveTab("decks")}>Browse decks</Button>
+                    <Button onClick={startReview} disabled={dueCount === 0 || dueCount === null}>
+                      Start Review {dueCount ? `(${dueCount})` : ""}
+                    </Button>
+                  </div>
+                </div>
+                {allBundles.length > 0 && (
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {allBundles.slice(0, 6).map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => router.push(`/bundles/${b.id}/cards`)}
+                        className="flex items-center justify-between rounded-xl border border-border bg-bg-raised/60 px-4 py-3 text-left transition-colors hover:border-accent"
+                      >
+                        <span className="truncate text-sm font-bold">{b.name}</span>
+                        <span className="ml-2 shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-mono">{b._count.flashcards}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="glass rounded-2xl p-6">
+                <h4 className="text-xs font-bold uppercase tracking-widest text-muted-fg">How it works</h4>
+                <p className="mt-2 text-sm leading-relaxed text-muted-fg">
+                  Library merges the old Subjects + Flashcards/Bundles hierarchies: Subject → Topic → Deck → Cards is now one path. Create a subject, add topics, then create a deck inside a topic — or create a standalone deck and link it later. All cards live in decks and stay reviewable via Study.
                 </p>
               </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" onClick={() => setActiveTab("decks")}>Browse decks</Button>
-                <Button onClick={() => { if ((dueCount ?? 0) > 0 && allBundles.length > 0) router.push(`/bundles/${allBundles[0].id}/cards`); else showToast(dueCount === 0 ? "No cards due" : "Create a deck first", "info"); }}>
-                  Study now
-                </Button>
-              </div>
             </div>
-            {allBundles.length > 0 && (
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {allBundles.slice(0, 6).map((b) => (
-                  <button
-                    key={b.id}
-                    onClick={() => router.push(`/bundles/${b.id}/cards`)}
-                    className="flex items-center justify-between rounded-xl border border-border bg-bg-raised/60 px-4 py-3 text-left transition-colors hover:border-accent"
-                  >
-                    <span className="truncate text-sm font-bold">{b.name}</span>
-                    <span className="ml-2 shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-mono">{b._count.flashcards}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="glass rounded-2xl p-6">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-fg">How it works</h4>
-            <p className="mt-2 text-sm leading-relaxed text-muted-fg">
-              Library merges the old Subjects + Flashcards/Bundles hierarchies: Subject → Topic → Deck → Cards is now one path. Create a subject, add topics, then create a deck inside a topic — or create a standalone deck and link it later. All cards live in decks and stay reviewable via Study.
-            </p>
-          </div>
-        </div>
+          )}
+        </>
       )}
 
       {/* Delete Subject Confirmation
