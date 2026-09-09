@@ -695,7 +695,7 @@ export default function SubjectsPage() {
             <div className="mx-auto max-w-2xl space-y-6">
               <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
                 <span>{reviewIndex + 1} / {reviewQueue.length}</span>
-                <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-fg hover:text-fg">Exit</button>
+                <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">Exit</button>
               </div>
               <div className="w-full h-1.5 overflow-hidden rounded-full bg-muted">
                 <div className="h-full bg-accent transition-all" style={{ width: `${((reviewIndex) / reviewQueue.length) * 100}%`}} />
@@ -945,7 +945,7 @@ export default function SubjectsPage() {
                           setManageTopicsFor(null);
                           router.push(`/notes?topic=${topic.id}`);
                         }}
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-fg hover:text-fg"
+                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
                       >
                         <FileText size={12} /> Notes
                       </button>
@@ -980,7 +980,7 @@ export default function SubjectsPage() {
                             setManageTopicsFor(null);
                             router.push(`/bundles/${bundles[0].id}/cards`);
                           }}
-                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-fg hover:text-fg"
+                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
                           title="Study all bundles for this topic"
                         >
                           Study all →

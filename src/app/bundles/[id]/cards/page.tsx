@@ -26,6 +26,8 @@ import {
   getBundles,
   importCardsIntoBundle,
   exportBundle,
+  getAllDueFlashcards,
+  reviewFlashcardWithLog,
 } from "@/app/actions";
 import { parseCardsFile } from "@/lib/parsers/cards";
 import { ShareBundleButton } from "@/components/share-bundle-button";
@@ -34,7 +36,7 @@ import { cn } from "@/lib/utils";
 import type { BundleRec, CardKind } from "@/lib/db";
 import { cardKind, cleanChoices } from "@/lib/card-kinds";
 import { CardKindFields } from "@/components/card-kind-fields";
-import { getCardStatus } from "@/lib/card-status";
+import { getCardStatus, RATING_BUTTONS } from "@/lib/card-status";
 
 type CardTag = { tag: { id: string; name: string } };
 
@@ -96,6 +98,11 @@ export default function BundleCardsPage() {
 
   // Import
   const [importing, setImporting] = useState(false);
+  const [reviewQueue, setReviewQueue] = useState<Card[]>([]);
+  const [reviewIndex, setReviewIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
 
   const load = useCallback(async () => {
     const [bundleCards, bundles] = await Promise.all([
@@ -248,6 +255,67 @@ export default function BundleCardsPage() {
     }
   };
 
+  const startReview = async () => {
+    try {
+      const allDue = await getAllDueFlashcards();
+      const list = (Array.isArray(allDue) ? allDue : []).filter((c: any) => c.bundleId === bundleId) as unknown as Card[];
+      if (list.length === 0) { showToast("No cards due in this deck", "info"); return; }
+      setReviewQueue(list);
+      setReviewIndex(0);
+      setIsFlipped(false);
+      setIsReviewing(true);
+    } catch { showToast("Failed to load cards", "danger"); }
+  };
+
+  const handleRate = async (quality: number) => {
+    if (reviewing || reviewIndex >= reviewQueue.length) return;
+    const card = reviewQueue[reviewIndex];
+    setReviewing(true);
+    try {
+      await reviewFlashcardWithLog(card.id, quality);
+      const next = reviewIndex + 1;
+      if (next >= reviewQueue.length) {
+        setIsReviewing(false);
+        setReviewQueue([]);
+        setReviewIndex(0);
+        setIsFlipped(false);
+        showToast(`Reviewed ${reviewQueue.length} cards`, "success");
+        setLoaded(false);
+        await load();
+      } else {
+        setReviewIndex(next);
+        setIsFlipped(false);
+      }
+    } catch (e) {
+      console.error("review failed", e);
+      showToast("Failed to save rating", "danger");
+    } finally { setReviewing(false); }
+  };
+
+  const exportAsCsv = async () => {
+    try {
+      const all = await getBundleCards(bundleId);
+      const header = ["front","back","description","kind","choices","tags"];
+      const rows = (all as any[]).map((c) => {
+        const esc = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+        return [
+          esc(c.front),
+          esc(c.back),
+          esc(c.description ?? ""),
+          esc(c.kind ?? "basic"),
+          esc((c.choices ?? []).join("|")),
+          esc((c.tags ?? []).map((t: any) => t.tag?.name ?? t.name ?? "").join(",")),
+        ].join(",");
+      });
+      const csv = [header.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const safeName = (bundleName || "bundle").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-") || "bundle";
+      a.href = url; a.download = `${safeName}.csv`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) { console.error("Export CSV failed", e); showToast("Export failed", "danger"); }
+  };
+
   return (
     <div className="min-h-screen bg-bg px-4 py-10 sm:px-8">
       <div className="mx-auto max-w-6xl">
@@ -256,7 +324,7 @@ export default function BundleCardsPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/bundles")}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-muted-fg transition-colors hover:border-fg hover:text-fg"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
               aria-label="Back to bundles"
             >
               <ArrowLeft size={18} />
@@ -303,23 +371,30 @@ export default function BundleCardsPage() {
                   showToast("Export failed — see console", "danger");
                 }
               }}
-              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-fg hover:text-fg"
+              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
             >
               <Download size={14} />
-              Export
+              Export JSON
+            </button>
+            <button
+              onClick={exportAsCsv}
+              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+            >
+              <Download size={14} />
+              Export CSV
             </button>
             <button
               onClick={() => document.getElementById("csv-import")?.click()}
               disabled={importing}
-              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-fg hover:text-fg disabled:opacity-50"
+              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft disabled:opacity-50"
             >
               <Upload size={14} />
-              {importing ? "Importing..." : "Import CSV"}
+              {importing ? "Importing..." : "Import"}
             </button>
             <input
               id="csv-import"
               type="file"
-              accept=".csv,.tsv,.txt,.json,text/csv"
+              accept=".json,.csv,.tsv,.txt,application/json,text/csv"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
@@ -327,6 +402,13 @@ export default function BundleCardsPage() {
                 e.target.value = "";
               }}
             />
+            <button
+              onClick={startReview}
+              className="flex h-10 items-center gap-1.5 rounded-full border border-accent bg-accent px-4 text-xs font-bold uppercase tracking-widest text-accent-fg transition-colors hover:opacity-90"
+            >
+              <span className="h-2 w-2 rounded-full bg-accent-fg animate-pulse" aria-hidden />
+              Review
+            </button>
             <button
               onClick={async () => {
                 try {
@@ -358,6 +440,42 @@ export default function BundleCardsPage() {
             </Button>
           </div>
         </div>
+
+        {isReviewing && reviewQueue.length > 0 && (
+          <div className="mb-8 mx-auto max-w-2xl space-y-4">
+            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
+              <span>{reviewIndex + 1} / {reviewQueue.length}</span>
+              <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">Exit</button>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-full bg-accent transition-all" style={{ width: `${(reviewIndex / reviewQueue.length) * 100}%` }} />
+            </div>
+            {(() => {
+              const card = reviewQueue[reviewIndex];
+              if (!card) return null;
+              return (
+                <div className="glass rounded-3xl p-8 min-h-[280px] flex flex-col">
+                  <div className="flex-1 flex flex-col justify-center text-center">
+                    <p className="text-xl font-bold tracking-tight leading-relaxed">{isFlipped ? card.back : card.front}</p>
+                    {isFlipped && (card as any).description && <p className="mt-3 text-sm text-muted-fg">{(card as any).description}</p>}
+                  </div>
+                  {!isFlipped ? (
+                    <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">Show answer</Button>
+                  ) : (
+                    <div className="mt-6 grid grid-cols-3 gap-2">
+                      {RATING_BUTTONS.map((btn) => (
+                        <button key={btn.value} onClick={() => handleRate(btn.value)} disabled={reviewing} className={`rounded-xl border px-3 py-3 text-sm font-bold transition-colors disabled:opacity-50 ${btn.color}`}>
+                          <span className="block text-xs uppercase tracking-widest">{btn.shortLabel}</span>
+                          <span className="block text-[10px] font-normal normal-case opacity-70">{btn.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Search + Tag filter */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row">
@@ -444,7 +562,7 @@ export default function BundleCardsPage() {
                       ? "border-accent bg-accent/5 ring-1 ring-accent/30"
                       : flipped
                       ? "border-accent bg-accent text-accent-fg"
-                      : "border-border bg-bg hover:border-fg"
+                      : "border-border bg-bg hover:border-accent hover:bg-accent-soft"
                   )}
                 >
                   <div className="mb-3 flex items-start justify-between gap-2">

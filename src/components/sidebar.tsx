@@ -123,7 +123,7 @@ export function Sidebar() {
                       "group relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium tracking-tight transition-colors duration-200",
                       isActive
                         ? "bg-accent-soft text-accent"
-                        : "text-muted-fg hover:bg-glass hover:text-fg",
+                        : "text-muted-fg hover:bg-accent-soft hover:text-accent",
                       !sidebarOpen && "justify-center px-0"
                     )}
                   >
