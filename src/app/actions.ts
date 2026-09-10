@@ -969,6 +969,19 @@ export async function getLeechCards(bundleId?: string) {
   );
 }
 
+// ─── Practice-mode rating: log WITHOUT mutating SM-2 ─────────
+// Practice serves not-yet-due cards; writing their review would advance/reset
+// real schedules (a +30d card practiced today got rescheduled as if reviewed).
+// Log the activity (streak/heatmap) but keep scheduling untouched.
+export async function logReviewOnly(id: string, quality: number) {
+  const q = z.number().int().min(0).max(5).parse(quality);
+  const card = await db.flashcards.get(id);
+  if (!card) throw new Error("Flashcard not found");
+  const log: ReviewLogRec = { id: uid(), flashcardId: id, quality: q, reviewedAt: new Date() };
+  await db.reviewLogs.add(log);
+  return db.flashcards.get(id);
+}
+
 export async function unLeechCard(id: string) {
   await db.flashcards.update(id, { isLeech: false, consecutiveAgain: 0, updatedAt: new Date() });
   return db.flashcards.get(id);
@@ -1009,12 +1022,15 @@ export async function getStreak() {
     reviewDates.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
   }
 
+  // Yesterday-grace (parity with lib/stats computeStreak + getTodayProgress):
+  // no review yet today → the streak is still alive if yesterday was active.
+  // Without this, the streak showed 0 every morning until the first review.
   let streak = 0;
   const checkDate = new Date(today);
-  while (true) {
-    const cd = checkDate;
-    const dateStr = `${cd.getFullYear()}-${String(cd.getMonth() + 1).padStart(2, "0")}-${String(cd.getDate()).padStart(2, "0")}`;
-    if (!reviewDates.has(dateStr)) break;
+  const keyOf = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  if (!reviewDates.has(keyOf(checkDate))) checkDate.setDate(checkDate.getDate() - 1);
+  while (reviewDates.has(keyOf(checkDate))) {
     streak++;
     checkDate.setDate(checkDate.getDate() - 1);
   }

@@ -23,6 +23,7 @@ import {
   unLeechCard,
   getHeatmapData,
   getStreak,
+  logReviewOnly,
   getAllReviewLogs,
   createBundleFlashcard,
   createBundle,
@@ -91,6 +92,7 @@ function FlashcardsContent() {
 
   // ─── Review state ───────────────────────────────────────────
   const [dueCards, setDueCards] = useState<Flashcard[]>([]);
+  const [practiceMode, setPracticeMode] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [reviewing, setReviewing] = useState(false);
@@ -286,6 +288,7 @@ function FlashcardsContent() {
     let cancelled = false;
     (async () => {
       let cards: Flashcard[] = [];
+      let practiceFlag = false; // true only when serving not-yet-due cards
       if (!selectedBundle && !allDue) {
         cards = []; // bundle-overview view — nothing to serve
       } else if (allDue) {
@@ -297,7 +300,6 @@ function FlashcardsContent() {
         const topicCards = await getFlashcards(topicParam);
         cards = (topicCards as Flashcard[]).filter((c) => new Date(c.nextReview).getTime() <= now);
       } else {
-        let practice = false;
         try {
           const now = Date.now();
           // Bundle review: serve ONLY cards whose nextReview has arrived —
@@ -306,7 +308,7 @@ function FlashcardsContent() {
           const due = all.filter((c) => new Date(c.nextReview).getTime() <= now);
           if (due.length === 0 && all.length > 0) {
             cards = shuffled(all);
-            practice = true;
+            practiceFlag = true;
           } else {
             cards = due;
           }
@@ -317,14 +319,15 @@ function FlashcardsContent() {
           const due = (cached as unknown as Flashcard[]).filter((c) => new Date(c.nextReview).getTime() <= now);
           if (due.length === 0 && (cached as unknown as Flashcard[]).length > 0) {
             cards = shuffled(cached as unknown as Flashcard[]);
-            practice = true;
+            practiceFlag = true;
           } else {
             cards = due;
           }
         }
-        if (practice && cards.length > 0) showToast("Practice mode — no cards due, showing all cards", "info");
+        if (practiceFlag && cards.length > 0) showToast("Practice mode — no cards due, showing all cards", "info");
       }
       if (cancelled) return;
+      setPracticeMode(practiceFlag);
       setDueCards(cards);
       setCurrentIndex(0);
       setIsFlipped(false);
@@ -334,6 +337,7 @@ function FlashcardsContent() {
       totalReviewedRef.current = 0;
       sessionLoggedRef.current = false;
       sessionRef.current = { reviewed: 0, correct: 0, startedAt: 0 };
+      setPracticeMode(false); // set right after from practiceFlag
     })();
     return () => { cancelled = true; };
   }, [selectedBundle, allDue, topicParam]);
@@ -420,7 +424,14 @@ function FlashcardsContent() {
       const servingFromQueue = dueCards[currentIndex] == null;
       setReviewing(true);
       try {
-        await reviewCard(activeCard.id, quality);
+        // Practice mode serves not-yet-due cards — log activity only,
+        // never advance real SM-2 schedules (a +30d card practiced early
+        // used to get rescheduled as if reviewed on time).
+        if (practiceMode) {
+          await logReviewOnly(activeCard.id, quality);
+        } else {
+          await reviewCard(activeCard.id, quality);
+        }
         // Track run stats for auto session logging
         if (sessionRef.current.reviewed === 0) sessionRef.current.startedAt = Date.now();
         sessionRef.current.reviewed += 1;
@@ -468,7 +479,7 @@ function FlashcardsContent() {
         setReviewing(false);
       }
     },
-    [activeCard, reviewing, currentIndex, dueCards, reviewCard, fetchMoreDue, triggerConfetti]
+    [activeCard, reviewing, currentIndex, dueCards, reviewCard, fetchMoreDue, triggerConfetti, practiceMode]
   );
 
   // ─── Speed Sprint timer ─────────────────────────────────────

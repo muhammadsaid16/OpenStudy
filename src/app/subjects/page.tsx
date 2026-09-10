@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useRef } from "react";
 import { Plus, Trash2, BookOpen, Pencil, Layers, FileText, ExternalLink, Link2, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Card, Button, Modal, Input, EmptyState, Skeleton } from "@/components/ui";
@@ -25,6 +25,7 @@ import {
   getAllDueFlashcards,
   getBundleCards,
   reviewFlashcardWithLog,
+  logReviewOnly,
   updateBundle,
   deleteBundle,
   exportBundle,
@@ -241,6 +242,8 @@ export default function SubjectsPage() {
   };
 
   const startReview = async () => {
+    completedThisRun.current = 0;
+    practiceRef.current = false;
     try {
       const due = await getAllDueFlashcards();
       const list = Array.isArray(due) ? due : [];
@@ -260,6 +263,7 @@ export default function SubjectsPage() {
         if (Array.isArray(cs)) all.push(...cs);
       }
       if (all.length === 0) { showToast("No cards due", "info"); return; }
+      practiceRef.current = true; // none due — serving all: practice
       setReviewQueue(shuffled(all));
       setReviewIndex(0);
       setLearningQueue([]);
@@ -271,11 +275,14 @@ export default function SubjectsPage() {
   };
 
   const startReviewForBundle = async (bundleId: string) => {
+    completedThisRun.current = 0;
+    practiceRef.current = false;
     try {
       const due = await getAllDueFlashcards();
       const all = Array.isArray(due) ? due : [];
       const list = all.filter((c: any) => c.bundleId === bundleId);
       if (list.length > 0) {
+        practiceRef.current = false;
         setReviewQueue(list);
         setReviewIndex(0);
         setLearningQueue([]);
@@ -286,6 +293,7 @@ export default function SubjectsPage() {
       }
       const allCards = (await getBundleCards(bundleId)) as any[];
       if (!allCards || allCards.length === 0) { showToast("No cards in this deck", "info"); return; }
+      practiceRef.current = true; // none due — serving all: practice
       setReviewQueue(shuffled(allCards));
       setReviewIndex(0);
       setLearningQueue([]);
@@ -296,13 +304,27 @@ export default function SubjectsPage() {
     } catch { showToast("Failed to load cards", "danger"); }
   };
 
+  // Total cards actually rated this run (main + relearning) — reviewQueue is
+  // cleared at the learning handoff, so computing the total from it afterwards
+  // undercounted (showed only the relearning cards).
+  const completedThisRun = useRef(0);
+  // Practice run: queues built from ALL cards when none are due. Ratings in
+  // this mode must not mutate SM-2 scheduling.
+  const practiceRef = useRef(false);
+
   const handleRate = async (quality: number) => {
     const activeCard: any = reviewQueue[reviewIndex] ?? learningQueue[0] ?? null;
     const servingFromLearningQueue = reviewQueue[reviewIndex] == null;
     if (reviewing || !activeCard) return;
     setReviewing(true);
     try {
-      await reviewFlashcardWithLog(activeCard.id, quality);
+      if (practiceRef.current) {
+        // Practice: log activity, never advance real schedules.
+        await logReviewOnly(activeCard.id, quality);
+      } else {
+        await reviewFlashcardWithLog(activeCard.id, quality);
+      }
+      completedThisRun.current += 1;
       if (quality < 3 && !servingFromLearningQueue) {
         setLearningQueue((prev) => [...prev, activeCard]);
       }
@@ -317,7 +339,8 @@ export default function SubjectsPage() {
           if (!hasLearning) {
             setIsReviewing(false);
             setLearningQueue([]);
-            showToast(`Reviewed ${reviewQueue.length} cards`, "success");
+            practiceRef.current = false;
+            showToast(`Reviewed ${completedThisRun.current} cards`, "success");
             loadDueCount();
             const bundles = await getBundles();
             setAllBundles(bundles as Bundle[]);
@@ -328,7 +351,8 @@ export default function SubjectsPage() {
           const next = prev.slice(1);
           if (next.length === 0) {
             setIsReviewing(false);
-            showToast(`Reviewed ${reviewQueue.length + prev.length} cards`, "success");
+            practiceRef.current = false;
+            showToast(`Reviewed ${completedThisRun.current} cards`, "success");
             loadDueCount();
             getBundles().then((bundles) => setAllBundles(bundles as Bundle[]));
           }

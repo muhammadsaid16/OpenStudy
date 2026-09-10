@@ -55,8 +55,13 @@ export function StorageGuard() {
         const json = await exportAllData();
         if (json === last) return;
         last = json;
-        // cap ~4MB to stay inside localStorage quota
-        if (json.length > 4_500_000) return;
+        // cap ~4MB to stay inside localStorage quota. If the real DB outgrew
+        // the cap, DELETE the stale mirror — restoring an old snapshot (or
+        // silently keeping one from before a big delete) is worse than none.
+        if (json.length > 4_500_000) {
+          localStorage.removeItem(AUTO_KEY);
+          return;
+        }
         localStorage.setItem(AUTO_KEY, json);
       } catch {}
     };
