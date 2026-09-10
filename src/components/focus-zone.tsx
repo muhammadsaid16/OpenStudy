@@ -340,7 +340,7 @@ export function FocusZone() {
           onChange={(e) => setTask(e.target.value)}
           placeholder="What are you working on?"
           disabled={pomo.running}
-          className="w-full rounded-lg bg-transparent text-sm font-medium text-fg placeholder:text-muted-fg/60 outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20 disabled:opacity-60"
+          className="w-full rounded-lg bg-transparent text-sm font-medium text-fg placeholder:text-muted-fg/60 outline-none disabled:opacity-60"
         />
         {subjects.length > 0 && (
           <select

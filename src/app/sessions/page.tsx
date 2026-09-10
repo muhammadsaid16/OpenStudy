@@ -356,7 +356,7 @@ export default function SessionsPage() {
               onChange={(e) => setSessionTitle(e.target.value)}
               placeholder={mode === "pomodoro" ? "Auto-named from cycles if empty" : "e.g. Reviewing chapter 5"}
               disabled={anyRunning}
-              className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 border border-border focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20"
+              className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 border border-transparent focus:outline-none"
             />
           </div>
           <SubjectTopicMenu
@@ -451,7 +451,7 @@ export default function SessionsPage() {
                     value={workMin}
                     onChange={(e) => applyConfig({ workMin: parseInt(e.target.value, 10) || 1 })}
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 border border-border focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 border border-transparent focus:outline-none"
                   />
                 </div>
                 <div>
@@ -465,7 +465,7 @@ export default function SessionsPage() {
                     value={breakMin}
                     onChange={(e) => applyConfig({ breakMin: parseInt(e.target.value, 10) || 1 })}
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 border border-border focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 border border-transparent focus:outline-none"
                   />
                 </div>
                 <div>
@@ -479,7 +479,7 @@ export default function SessionsPage() {
                     value={longBreakMin}
                     onChange={(e) => applyConfig({ longBreakMin: parseInt(e.target.value, 10) || 0 })}
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 border border-border focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 border border-transparent focus:outline-none"
                   />
                 </div>
                 <div>
@@ -495,7 +495,7 @@ export default function SessionsPage() {
                       applyConfig({ cyclesBeforeLongBreak: parseInt(e.target.value, 10) || 0 })
                     }
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 border border-border focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 border border-transparent focus:outline-none"
                   />
                 </div>
               </div>
@@ -528,7 +528,7 @@ export default function SessionsPage() {
                   placeholder="Save this setup as… (e.g. Deep work 50/10)"
                   disabled={pomo.running}
                   maxLength={50}
-                  className="glass-inset w-full rounded-xl px-4 py-2.5 text-xs text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 border border-border focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20"
+                  className="glass-inset w-full rounded-xl px-4 py-2.5 text-xs text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 border border-transparent focus:outline-none"
                 />
                 <button
                   onClick={saveCurrentAsPreset}
@@ -764,7 +764,7 @@ export default function SessionsPage() {
               aria-label="Filter by subject"
               value={historySubject}
               onChange={(e) => setHistorySubject(e.target.value)}
-              className="glass-inset cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20"
+              className="glass-inset cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg outline-none focus:outline-none"
             >
               <option value="all">All subjects</option>
               {subjects.map((s) => (

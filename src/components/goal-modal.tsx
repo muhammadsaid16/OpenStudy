@@ -216,7 +216,7 @@ function GoalForm({
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="glass-inset flex h-12 w-full rounded-xl border-border px-4 py-2 text-base font-medium tracking-tight text-fg transition-colors duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20"
+            className="glass-inset flex h-12 w-full rounded-xl border-border px-4 py-2 text-base font-medium tracking-tight text-fg transition-colors duration-200 focus:outline-none"
           />
         </div>
 
