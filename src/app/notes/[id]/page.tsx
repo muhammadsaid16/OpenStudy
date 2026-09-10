@@ -122,6 +122,15 @@ export default function NotePage() {
             <Skeleton className="mt-3 h-4 w-4/6" />
             <Skeleton className="mt-6 h-44 w-full" />
           </div>
+          {/* Explanation — mirrors glass mt-8 rounded-3xl p-8 */}
+          <div className="glass mt-8 rounded-3xl p-8">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="mt-2 h-3 w-72" />
+            <Skeleton className="mt-6 h-4 w-full" />
+            <Skeleton className="mt-3 h-4 w-full" />
+            <Skeleton className="mt-3 h-4 w-5/6" />
+            <Skeleton className="mt-6 h-24 w-full rounded-2xl" />
+          </div>
           {/* Actions — mirrors glass mt-8 rounded-2xl p-4 */}
           <div className="glass mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl p-4">
             <Skeleton className="h-3 w-48" />
