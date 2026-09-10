@@ -89,10 +89,48 @@ export default function NotePage() {
 
   if (!loaded) {
     return (
-      <div className="p-8 lg:p-12 max-w-4xl mx-auto">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-6 w-full mt-6" />
-        <Skeleton className="h-64 w-full mt-6" />
+      <div className="min-h-screen bg-bg">
+        <div className="max-w-4xl mx-auto p-8 lg:p-12">
+          {/* Back — matches mb-8 flex gap-2 text-xs */}
+          <Skeleton className="h-4 w-28 mb-8 rounded-full" />
+          {/* Header — mirrors glass rounded-3xl p-8 */}
+          <div className="glass rounded-3xl p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <Skeleton className="h-5 w-48 rounded-full" />
+                <Skeleton className="mt-3 h-8 w-[72%] lg:h-9" />
+                <Skeleton className="mt-3 h-3 w-40" />
+              </div>
+              <div className="flex shrink-0 gap-1">
+                <Skeleton className="h-9 w-9 !rounded-full" />
+                <Skeleton className="h-9 w-9 !rounded-full" />
+                <Skeleton className="h-9 w-9 !rounded-full" />
+              </div>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-1.5">
+              <Skeleton className="h-6 w-16 !rounded-full" />
+              <Skeleton className="h-6 w-20 !rounded-full" />
+              <Skeleton className="h-6 w-14 !rounded-full" />
+            </div>
+          </div>
+          {/* Content — mirrors glass mt-8 rounded-3xl p-8 */}
+          <div className="glass mt-8 rounded-3xl p-8">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="mt-3 h-4 w-full" />
+            <Skeleton className="mt-3 h-4 w-5/6" />
+            <Skeleton className="mt-3 h-4 w-4/6" />
+            <Skeleton className="mt-6 h-44 w-full" />
+          </div>
+          {/* Actions — mirrors glass mt-8 rounded-2xl p-4 */}
+          <div className="glass mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl p-4">
+            <Skeleton className="h-3 w-48" />
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-20 !rounded-full" />
+              <Skeleton className="h-9 w-28 !rounded-full" />
+              <Skeleton className="h-9 w-24 !rounded-full" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
