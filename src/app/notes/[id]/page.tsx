@@ -10,6 +10,7 @@ import { TagInput } from "@/components/tag-input";
 import { Markdown } from "@/components/markdown";
 import { NoteAiImportButton } from "@/components/note-ai-import-button";
 import { AiGenerateModal } from "@/components/ai-generate-modal";
+import { NoteExplanation } from "@/components/note-explanation";
 import { getAllNotes, updateNote, deleteNote, getBundles } from "@/app/actions";
 import { showUndo } from "@/components/undo-toast";
 import type { BundleRec } from "@/lib/db";
@@ -246,6 +247,18 @@ export default function NotePage() {
             </div>
           )}
         </div>
+
+        {/* Explanation */}
+        <NoteExplanation
+          noteId={note.id}
+          title={note.title}
+          content={note.content ?? ""}
+          explanation={(note as any).explanation ?? null}
+          explanationUpdatedAt={(note as any).explanationUpdatedAt ?? null}
+          onSaved={(next) =>
+            setNote((prev) => (prev ? ({ ...prev, explanation: next, explanationUpdatedAt: next ? new Date() : null } as any) : prev))
+          }
+        />
 
         {/* Actions */}
         <div className="glass mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl p-4">

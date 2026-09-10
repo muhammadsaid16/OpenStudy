@@ -38,6 +38,8 @@ export interface NoteRec {
   topicId: string;
   title: string;
   content: string;
+  explanation?: string | null;
+  explanationUpdatedAt?: Date | null;
   isPinned: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -205,6 +207,10 @@ class OpenStudyDB extends Dexie {
     // v5: card kinds — cloze + multiple-choice (additive index, old cards read as basic)
     this.version(5).stores({
       flashcards: "id, topicId, subjectId, bundleId, nextReview, createdAt, kind",
+    });
+    // v6: note explanation — AI-generated explanation stored alongside the lesson (additive, nullable)
+    this.version(6).stores({
+      notes: "id, topicId, updatedAt, isPinned",
     });
   }
 }

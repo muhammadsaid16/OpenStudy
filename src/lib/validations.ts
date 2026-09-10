@@ -36,6 +36,7 @@ export const noteSchema = z.object({
   topicId: z.string().min(1),
   title: z.string().min(1, "Title is required").max(200),
   content: z.string().default(""),
+  explanation: z.string().max(50_000).nullable().optional(),
   isPinned: z.boolean().default(false),
   tags: z.array(z.string().max(50)).max(10).optional(),
 });

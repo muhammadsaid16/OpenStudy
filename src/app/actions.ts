@@ -246,13 +246,14 @@ export async function createNote(data: {
   topicId: string;
   title: string;
   content?: string;
+  explanation?: string | null;
   isPinned?: boolean;
   tags?: string[];
 }) {
   const parsed = noteSchema.parse(data);
   const { tags, ...noteData } = parsed;
   const now = new Date();
-  const note: NoteRec = { id: uid(), ...noteData, createdAt: now, updatedAt: now };
+  const note: NoteRec = { id: uid(), ...noteData, explanation: (parsed as any).explanation ?? null, explanationUpdatedAt: (parsed as any).explanation ? now : null, createdAt: now, updatedAt: now } as NoteRec;
   await db.notes.add(note);
   for (const tagName of tags ?? []) {
     const tag = await upsertTag(tagName);
@@ -263,7 +264,7 @@ export async function createNote(data: {
 
 export async function updateNote(
   id: string,
-  data: { title?: string; content?: string; isPinned?: boolean; tags?: string[]; topicId?: string | null }
+  data: { title?: string; content?: string; explanation?: string | null; isPinned?: boolean; tags?: string[]; topicId?: string | null }
 ) {
   // topicId: null explicitly clears the link (Remove topic). Run that
   // path without zod so empty-string -> null doesn't trip min(1).
@@ -286,7 +287,9 @@ export async function updateNote(
   }
   const parsed = noteSchema.partial().parse(data);
   const { tags, ...noteData } = parsed;
-  await db.notes.update(id, { ...noteData, updatedAt: new Date() });
+  const patch: Record<string, unknown> = { ...noteData, updatedAt: new Date() };
+  if (noteData.explanation !== undefined) (patch as any).explanationUpdatedAt = noteData.explanation ? new Date() : null;
+  await db.notes.update(id, patch);
   if (tags) {
     await db.noteTags.where("noteId").equals(id).delete();
     for (const tagName of tags) {
