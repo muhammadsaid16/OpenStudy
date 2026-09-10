@@ -368,7 +368,7 @@ export default function SessionsPage() {
               placeholder={mode === "pomodoro" ? "Auto-named from cycles if empty" : "e.g. Reviewing chapter 5"}
               disabled={anyRunning}
               autoFocus={!anyRunning}
-              className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 !border-0 focus:outline-none"
+              className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:outline-none focus:border-accent/20"
             />
           </div>
           <SubjectTopicMenu
@@ -464,7 +464,7 @@ export default function SessionsPage() {
                     value={workMin}
                     onChange={(e) => applyConfig({ workMin: parseInt(e.target.value, 10) || 1 })}
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 !border-0 focus:outline-none"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:border-accent/20"
                   />
                 </div>
                 <div>
@@ -479,7 +479,7 @@ export default function SessionsPage() {
                     value={breakMin}
                     onChange={(e) => applyConfig({ breakMin: parseInt(e.target.value, 10) || 1 })}
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 !border-0 focus:outline-none"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:border-accent/20"
                   />
                 </div>
                 <div>
@@ -494,7 +494,7 @@ export default function SessionsPage() {
                     value={longBreakMin}
                     onChange={(e) => applyConfig({ longBreakMin: parseInt(e.target.value, 10) || 0 })}
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 !border-0 focus:outline-none"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:border-accent/20"
                   />
                 </div>
                 <div>
@@ -511,7 +511,7 @@ export default function SessionsPage() {
                       applyConfig({ cyclesBeforeLongBreak: parseInt(e.target.value, 10) || 0 })
                     }
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 !border-0 focus:outline-none"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:border-accent/20"
                   />
                 </div>
               </div>
@@ -544,7 +544,7 @@ export default function SessionsPage() {
                   placeholder="Save this setup as… (e.g. Deep work 50/10)"
                   disabled={pomo.running}
                   maxLength={50}
-                  className="glass-inset w-full rounded-xl px-4 py-2.5 text-xs text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 !border-0 focus:outline-none"
+                  className="glass-inset w-full rounded-xl px-4 py-2.5 text-xs text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:outline-none focus:border-accent/20"
                 />
                 <button
                   onClick={saveCurrentAsPreset}
