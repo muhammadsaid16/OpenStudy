@@ -14,6 +14,7 @@ import { NoteExplanation } from "@/components/note-explanation";
 import { getAllNotes, updateNote, deleteNote, getBundles } from "@/app/actions";
 import { showUndo } from "@/components/undo-toast";
 import type { BundleRec } from "@/lib/db";
+import { useLiveData } from "@/lib/use-live-data";
 
 type Note = Awaited<ReturnType<typeof getAllNotes>>[number];
 
@@ -34,15 +35,17 @@ export default function NotePage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
 
+  // Realtime: note + bundles re-fetch on ANY change (edit, tags, another tab).
+  const live = useLiveData(() => Promise.all([getAllNotes(), getBundles()]), [id]);
   useEffect(() => {
-    Promise.all([getAllNotes(), getBundles()]).then(([notes, b]) => {
-      const found = notes.find((n) => n.id === id);
-      if (!found) setNotFound(true);
-      else setNote(found as Note);
-      setBundles(b);
-      setLoaded(true);
-    });
-  }, [id]);
+    if (!live) return;
+    const [notes, b] = live;
+    const found = notes.find((n) => n.id === id);
+    if (!found) setNotFound(true);
+    else setNote(found as Note);
+    setBundles(b);
+    setLoaded(true);
+  }, [live, id]);
 
   const openEdit = () => {
     if (!note) return;

@@ -37,6 +37,7 @@ import type { BundleRec, CardKind } from "@/lib/db";
 import { cardKind, cleanChoices, shuffled } from "@/lib/card-kinds";
 import { CardKindFields } from "@/components/card-kind-fields";
 import { RATING_BUTTONS } from "@/lib/card-status";
+import { useLiveData } from "@/lib/use-live-data";
 
 type CardTag = { tag: { id: string; name: string } };
 
@@ -128,16 +129,30 @@ export default function BundleCardsPage() {
     setLoaded(true);
   }, [bundleId]);
 
+  // Realtime: deck + cards re-fetch on ANY table change (rename, edit,
+  // import, review, another tab…).
+  const live = useLiveData(async () => {
+    const [bundleCards, bundles] = await Promise.all([
+      getBundleCards(bundleId),
+      getBundles(),
+    ]);
+    return { bundleCards, bundles };
+  }, [bundleId]);
   useEffect(() => {
-    let active = true;
-    (async () => {
-      await load();
-      if (!active) return;
-    })();
-    return () => {
-      active = false;
-    };
-  }, [load]);
+    if (!live) return;
+    const { bundleCards, bundles } = live;
+    setCards(bundleCards as unknown as Card[]);
+    setAllBundles(bundles);
+    const b = bundles.find((x) => x.id === bundleId);
+    if (b) {
+      setBundleName(b.name);
+      setBundleColor(b.color || "#DFE104");
+      const t = (b as unknown as { topic?: { name: string; subject?: { name: string } | null } | null }).topic;
+      if (t) setBundleTopicLabel(`${t.subject?.name ? `${t.subject.name} › ` : ""}${t.name}`);
+      else setBundleTopicLabel(null);
+    }
+    setLoaded(true);
+  }, [live, bundleId]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

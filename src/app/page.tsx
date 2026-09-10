@@ -18,6 +18,7 @@ import { StatsStreakBadge } from "@/components/stats-streak-badge";
 import { getDashboardStats, getTodayProgress, getWeeklyAnalytics, getGoals, getAllReviewLogs } from "./actions";
 import type { ReviewLogRec } from "@/lib/db";
 import { formatDuration } from "@/lib/utils";
+import { useLiveData } from "@/lib/use-live-data";
 
 type Stats = Awaited<ReturnType<typeof getDashboardStats>>;
 type Weekly = Awaited<ReturnType<typeof getWeeklyAnalytics>>;
@@ -44,20 +45,21 @@ export default function DashboardPage() {
   // Spec §1: full goal list for the UPCOMING card (dueDate + subject).
   const [goals, setGoals] = useState<Awaited<ReturnType<typeof getGoals>>>([]);
 
+  // Realtime: one live query fan-outs to the same setState shape.
+  const live = useLiveData(
+    () => Promise.all([getDashboardStats(), getWeeklyAnalytics(), getTodayProgress(), getAllReviewLogs(), getGoals()]),
+    []
+  );
   useEffect(() => {
-    getDashboardStats().then(setStats);
-    getWeeklyAnalytics().then(setWeekly);
-    getTodayProgress().then(setToday);
-    getAllReviewLogs().then(setReviewLogs);
-    // Single fetch: the full list feeds UPCOMING, counts derive from it.
-    getGoals().then((g) => {
-      setGoals(g);
-      setGoalCounts({
-        active: g.filter((x) => x.status === "in_progress").length,
-        total: g.length,
-      });
-    });
-  }, []);
+    if (!live) return;
+    const [s, w, t, rl, g] = live;
+    setStats(s);
+    setWeekly(w);
+    setToday(t);
+    setReviewLogs(rl);
+    setGoals(g);
+    setGoalCounts({ active: g.filter((x) => x.status === "in_progress").length, total: g.length });
+  }, [live]);
 
   if (!stats) {
     return <PageLoader variant="dashboard" titleW="w-56" />;

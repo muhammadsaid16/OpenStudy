@@ -16,6 +16,7 @@ import { showUndo } from "@/components/undo-toast";
 import { showToast } from "@/components/toast";
 import { spotlightProps } from "@/lib/interactions";
 import type { BundleRec } from "@/lib/db";
+import { useLiveData } from "@/lib/use-live-data";
 
 type Note = Omit<Awaited<ReturnType<typeof getAllNotes>>[number], "topic"> & {
   topic: Awaited<ReturnType<typeof getAllNotes>>[number]["topic"] | null;
@@ -47,14 +48,16 @@ function NotesContent() {
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editTopicId, setEditTopicId] = useState("");
 
+  // Realtime: re-runs on ANY table change (same tab, other tab, import).
+  const live = useLiveData(() => Promise.all([getAllNotes(), getSubjects(), getBundles()]), []);
   useEffect(() => {
-    Promise.all([getAllNotes(), getSubjects(), getBundles()]).then(([n, s, b]) => {
-      setNotes(n);
-      setSubjects(s);
-      setBundles(b);
-      setLoaded(true);
-    });
-  }, []);
+    if (!live) return;
+    const [n, s, b] = live;
+    setNotes(n);
+    setSubjects(s);
+    setBundles(b);
+    setLoaded(true);
+  }, [live]);
 
   // Keyboard shortcuts
   useEffect(() => {

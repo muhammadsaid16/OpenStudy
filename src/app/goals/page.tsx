@@ -33,6 +33,7 @@ import { Button, Badge, Card, Modal, EmptyState, Skeleton } from "@/components/u
 import { GoalModal } from "@/components/goal-modal";
 import { showToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
+import { useLiveData } from "@/lib/use-live-data";
 import {
   Target,
   Plus,
@@ -117,18 +118,16 @@ export default function GoalsPage() {
     setLoaded(true);
   }, []);
 
+  // Realtime: goals/milestones/subjects re-fetch on ANY change.
+  const live = useLiveData(() => Promise.all([getGoals(), getAllMilestones(), getSubjects()]), []);
   useEffect(() => {
-    // .then callback — setState lives in the callback, not the effect body
-    // (React golden pattern for initial loads in this app).
-    Promise.all([getGoals(), getAllMilestones(), getSubjects()]).then(
-      ([g, m, s]) => {
-        setGoals(g);
-        setMilestones(m);
-        setSubjects(s);
-        setLoaded(true);
-      }
-    );
-  }, []);
+    if (!live) return;
+    const [g, m, s] = live;
+    setGoals(g);
+    setMilestones(m);
+    setSubjects(s);
+    setLoaded(true);
+  }, [live]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

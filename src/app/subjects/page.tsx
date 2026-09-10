@@ -38,6 +38,7 @@ import { SubjectIconPicker, SUBJECT_ICONS } from "@/components/subject-icon-pick
 import { readableOn } from "@/lib/utils";
 import { tiltHandlers } from "@/lib/interactions";
 import { shuffled } from "@/lib/card-kinds";
+import { useLiveData } from "@/lib/use-live-data";
 
 type Subject = Awaited<ReturnType<typeof getSubjects>>[number];
 type Bundle = Awaited<ReturnType<typeof getBundles>>[number];
@@ -338,21 +339,17 @@ export default function SubjectsPage() {
   const completed = reviewQueue.length > 0 ? reviewIndex : 0;
   const initialTotal = totalDue + completed;
 
+  // Realtime: subjects + bundles + due badge re-fetch on ANY table change.
+  const live = useLiveData(() => Promise.all([getSubjects(), getBundles(), getAllDueFlashcards()]), []);
   useEffect(() => {
-    getSubjects().then((s) => {
-      setSubjects(s);
-      setTopicCounts(
-        Object.fromEntries(s.map((x) => [x.id, x._count.topics]))
-      );
-      setLoaded(true);
-    });
-    // Load bundles once so the empty state can surface unlinked decks.
-    getBundles().then((b) => setAllBundles(b as Bundle[])).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    loadDueCount();
-  }, []);
+    if (!live) return;
+    const [s, b, due] = live;
+    setSubjects(s);
+    setTopicCounts(Object.fromEntries(s.map((x) => [x.id, x._count.topics])));
+    setAllBundles(b as Bundle[]);
+    setDueCount(Array.isArray(due) ? due.length : 0);
+    setLoaded(true);
+  }, [live]);
 
   // Keyboard shortcuts
   useEffect(() => {

@@ -14,6 +14,7 @@ import { getStudySessions, createStudySession, deleteStudySession, getSubjects, 
 import { formatDuration, formatDate } from "@/lib/utils";
 import { usePomodoro, phaseSeconds, BUILTIN_PRESETS, type PomoConfig } from "@/lib/pomodoro";
 import type { PomoPresetRec } from "@/lib/db";
+import { useLiveData } from "@/lib/use-live-data";
 
 type Session = Awaited<ReturnType<typeof getStudySessions>>[number];
 type Subject = Awaited<ReturnType<typeof getSubjects>>[number];
@@ -89,22 +90,16 @@ export default function SessionsPage() {
 
   const [, startTransition] = useTransition();
 
+  // Realtime: sessions/subjects/presets re-fetch on ANY table change.
+  const live = useLiveData(() => Promise.all([getStudySessions(), getSubjects(), getPomoPresets()]), []);
   useEffect(() => {
-    let cancelled = false;
-    Promise.all([getStudySessions(), getSubjects(), getPomoPresets()]).then(([s, sub, p]) => {
-      if (cancelled) return;
-      setSessions(s);
-      setSubjects(sub);
-      setPresets(p);
-      setLoaded(true);
-    }).catch(() => {
-      if (!cancelled) {
-        setLoadError("Could not load saved data — storage may be unavailable.");
-        setLoaded(true);
-      }
-    });
-    return () => { cancelled = true; };
-  }, []);
+    if (!live) return;
+    const [s, sub, p] = live;
+    setSessions(s);
+    setSubjects(sub);
+    setPresets(p);
+    setLoaded(true);
+  }, [live]);
 
   // Stopwatch interval (unchanged)
   useEffect(() => {

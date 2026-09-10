@@ -15,6 +15,7 @@ import { computeStreak } from "@/lib/stats";
 import { formatDuration } from "@/lib/utils";
 import type { BundleRec, FlashcardRec, ReviewLogRec, StudySessionRec } from "@/lib/db";
 import { Flame, Layers, Clock, Trophy, AlertTriangle, Activity, Timer } from "lucide-react";
+import { useLiveData } from "@/lib/use-live-data";
 
 type Period = "30" | "90" | "365" | "all";
 const PERIODS: { key: Period; label: string; weeks: number }[] = [
@@ -131,34 +132,21 @@ export default function StatsPage() {
 
   const weeksForHeatmap = PERIODS.find(p => p.key === period)!.weeks;
 
+  // Realtime: every chart source re-fetches on ANY table change.
+  const live = useLiveData(
+    () => Promise.all([getAllReviewLogs(), getBundles(), getFlashcards(), getStudySessions(), getSubjects()]),
+    []
+  );
   useEffect(() => {
-    let cancelled = false;
-    const now = Date.now(); // impure call is legal in effect scope, not render
-    Promise.all([getAllReviewLogs(), getBundles(), getFlashcards(), getStudySessions(), getSubjects()]).then(
-      ([r, b, c, s, subs]) => {
-        if (cancelled) return;
-        setNowMs(now);
-        setReviews(r);
-        setBundles(b);
-        setCards(c as unknown as FlashcardRec[]);
-        setSessions(s as unknown as StudySessionRec[]);
-        setSubjectNames(new Map(subs.map((x) => [x.id, x.name])));
-      }
-    ).catch(() => {
-      // Storage failure: unblock the loader; charts render empty — but the
-      // user must be able to tell "no data" apart from "couldn't load data"
-      // (Heuristic #1). Retry offers recovery instead of silent emptiness.
-      if (!cancelled) {
-        setLoadFailed(true);
-        setNowMs(now);
-        setReviews([]);
-        setBundles([]);
-        setCards([]);
-        setSessions([]);
-      }
-    });
-    return () => { cancelled = true; };
-  }, []);
+    if (!live) return;
+    const [r, b, c, s, subs] = live;
+    setNowMs(Date.now());
+    setReviews(r);
+    setBundles(b);
+    setCards(c as unknown as FlashcardRec[]);
+    setSessions(s as unknown as StudySessionRec[]);
+    setSubjectNames(new Map(subs.map((x) => [x.id, x.name])));
+  }, [live]);
 
   if (!reviews || !bundles || !cards || !sessions) {
     return <PageLoader variant="dashboard" titleW="w-48" />;

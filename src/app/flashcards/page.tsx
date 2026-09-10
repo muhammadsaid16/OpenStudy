@@ -57,6 +57,7 @@ import { AiImportButton } from "@/components/ai-import-button";
 import { AiGenerateButton } from "@/components/ai-generate-button";
 import { CardKindFields } from "@/components/card-kind-fields";
 import { RATING_BUTTONS } from "@/lib/card-status";
+import { useLiveData } from "@/lib/use-live-data";
 
 type Flashcard = Awaited<ReturnType<typeof getDueFlashcards>>[number];
 type ManagedFlashcard = Awaited<ReturnType<typeof getAllFlashcards>>[number];
@@ -259,17 +260,18 @@ function FlashcardsContent() {
     setTimeout(() => container.remove(), 2500);
   }, []);
 
-  // ─── Data loading ───────────────────────────────────────────
+  // ─── Data loading (realtime: bundles + subjects re-fetch on ANY change) ──
+  const liveLists = useLiveData(() => Promise.all([getBundles(), getSubjects()]), [bundleParam]);
   useEffect(() => {
-    Promise.all([getBundles(), getSubjects()]).then(([b, s]) => {
-      setBundles(b);
-      setSubjects(s);
-      // Cache for offline
-      cacheBundles(b.map((x) => ({ id: x.id, name: x.name, description: x.description, color: x.color, cardCount: x._count.flashcards, synced: true })));
-      setSelectedBundle(bundleParam || "");
-      setLoaded(true);
-    });
-  }, [bundleParam]);
+    if (!liveLists) return;
+    const [b, s] = liveLists;
+    setBundles(b);
+    setSubjects(s);
+    // Cache for offline
+    cacheBundles(b.map((x) => ({ id: x.id, name: x.name, description: x.description, color: x.color, cardCount: x._count.flashcards, synced: true })));
+    if (bundleParam) setSelectedBundle(bundleParam);
+    setLoaded(true);
+  }, [liveLists, bundleParam]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

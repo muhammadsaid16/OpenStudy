@@ -16,6 +16,7 @@ import { BundleColorPicker } from "@/components/bundle-color-picker";
 import { themeAccent } from "@/lib/bundle-colors";
 import { useAppStore } from "@/lib/store";
 import { spotlightProps } from "@/lib/interactions";
+import { useLiveData } from "@/lib/use-live-data";
 
 type Bundle = Awaited<ReturnType<typeof getBundles>>[number];
 
@@ -47,13 +48,15 @@ export default function BundlesPage() {
   const [shareBusy, setShareBusy] = useState<string | null>(null);
 
 
+  // Realtime: bundles + subjects re-fetch on ANY table change.
+  const live = useLiveData(() => Promise.all([getBundles(), getSubjects()]), []);
   useEffect(() => {
-    getBundles().then((b) => {
-      setBundles(b);
-      setLoaded(true);
-    });
-    getSubjects().then((s) => setSubjects(s)).catch(() => {});
-  }, []);
+    if (!live) return;
+    const [b, s] = live;
+    setBundles(b);
+    setSubjects(s);
+    setLoaded(true);
+  }, [live]);
 
   // Keyboard shortcuts
   useEffect(() => {
