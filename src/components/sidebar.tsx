@@ -76,6 +76,8 @@ export function Sidebar() {
   const theme = useAppStore((s) => s.theme);
   const setTheme = useAppStore((s) => s.setTheme);
   const { sidebarOpen, toggleSidebar } = useAppStore();
+  const isLight = theme === "light" || theme === "paper";
+  const isDark = !isLight;
 
   return (
     <aside
@@ -167,18 +169,18 @@ export function Sidebar() {
             <div className="inline-flex w-full rounded-full border border-glass-border bg-glass p-1" role="group" aria-label="Theme">
               <button
                 onClick={() => setTheme("light")}
-                aria-pressed={theme === "light"}
-                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${theme === "light" ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
+                aria-pressed={isLight}
+                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${isLight ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
               >
-                {theme === "light" && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
+                {isLight && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
                 <span className="relative flex items-center gap-1.5"><Sun size={13} aria-hidden /> Light</span>
               </button>
               <button
                 onClick={() => setTheme("aurora")}
-                aria-pressed={theme === "aurora"}
-                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${theme === "aurora" ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
+                aria-pressed={isDark}
+                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${isDark ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
               >
-                {theme === "aurora" && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
+                {isDark && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
                 <span className="relative flex items-center gap-1.5"><Moon size={13} aria-hidden /> Dark</span>
               </button>
             </div>
@@ -189,11 +191,11 @@ export function Sidebar() {
         ) : (
           /* collapsed rail: toggle dark/light */
           <button
-            onClick={() => setTheme(theme === "aurora" ? "light" : "aurora")}
-            aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+            onClick={() => setTheme(isLight ? "aurora" : "light")}
+            aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
             className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl border border-glass-border text-muted-fg transition-colors hover:text-accent"
           >
-            {theme === "light" ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
+            {isLight ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
           </button>
         )}
       </div>

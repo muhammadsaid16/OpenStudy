@@ -161,8 +161,8 @@ function NotesContent() {
       title: editTitle.trim(),
       content: editContent.trim(),
       tags: editTags,
-      ...(editTopicId ? { topicId: editTopicId } : {}),
-    });
+      topicId: editTopicId ? editTopicId : null,
+    } as any);
     const fresh = await getAllNotes();
     setNotes(fresh as Note[]);
     setEditNote(null);

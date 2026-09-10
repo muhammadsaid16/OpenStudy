@@ -626,21 +626,23 @@ export default function GoalsPage() {
                               />
                               Steps
                             </button>
-                            <div className="flex gap-1">
+                            <div className="flex gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 max-md:opacity-100">
                               {PREV_STATUS[g.status] && (
                                 <button
+                                  type="button"
                                   aria-label="Move to previous column"
                                   onClick={() => moveByButton(g, "prev")}
-                                  className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-accent"
+                                  className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                 >
                                   <ChevronLeft size={12} />
                                 </button>
                               )}
                               {NEXT_STATUS[g.status] && (
                                 <button
+                                  type="button"
                                   aria-label="Move to next column"
                                   onClick={() => moveByButton(g, "next")}
-                                  className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-accent"
+                                  className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                 >
                                   <ChevronRight size={12} />
                                 </button>
@@ -651,9 +653,13 @@ export default function GoalsPage() {
                           {/* Milestone checklist */}
                           {expanded && (
                             <div className="mt-3 space-y-1.5 border-t border-border pt-3">
-                              {ms.map((m) => (
+                              {ms.length === 0 ? (
+                                <p className="py-1 text-xs text-muted-fg">No steps yet — add one below.</p>
+                              ) : (
+                                ms.map((m) => (
                                 <div key={m.id} className="group/ms flex items-center gap-2">
                                   <button
+                                    type="button"
                                     aria-label={m.done ? "Mark step not done" : "Mark step done"}
                                     onClick={async () => {
                                       await toggleMilestone(m.id, !m.done);
@@ -675,6 +681,7 @@ export default function GoalsPage() {
                                     {m.title}
                                   </span>
                                   <button
+                                    type="button"
                                     aria-label="Delete step"
                                     onClick={async () => {
                                       await deleteMilestone(m.id);
@@ -685,10 +692,12 @@ export default function GoalsPage() {
                                     <Trash2 size={12} />
                                   </button>
                                 </div>
-                              ))}
+                              ))
+                              )}
                               <input
                                 placeholder="Add a step…"
-                                value={expanded ? newStep : ""}
+                                aria-label="Add a step"
+                                value={newStep}
                                 onChange={(e) => setNewStep(e.target.value)}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter") addStep(g.id);

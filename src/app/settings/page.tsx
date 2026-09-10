@@ -148,7 +148,7 @@ export default function SettingsPage() {
                 aria-label={`Use ${t.name} theme`}
                 className={cn(
                   "group flex flex-col gap-3 rounded-2xl border p-3 transition-all",
-                  active ? "border-accent" : "border-border hover:border-accent"
+                  active ? "border-accent ring-2 ring-accent ring-offset-1 ring-offset-bg" : "border-border hover:border-accent"
                 )}
                 style={{ background: t.bg }}
               >

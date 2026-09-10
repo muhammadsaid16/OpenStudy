@@ -86,7 +86,8 @@ export function TopBar({ dueCards }: { dueCards: number }) {
               router.push(`/flashcards?mode=browse&q=${encodeURIComponent(q.trim())}`);
             }
           }}
-          placeholder="Search notes, cards, subjects…"
+          placeholder="Search notes, cards, decks…"
+          aria-label="Search notes, cards and decks"
           className="w-full bg-transparent pl-10 pr-14 text-sm text-fg placeholder:text-muted-fg/60 outline-none"
         />
         <kbd className="absolute right-4 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-fg">

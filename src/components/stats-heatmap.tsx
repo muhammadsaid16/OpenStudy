@@ -47,6 +47,21 @@ export function StatsHeatmap({
     0
   );
 
+  if (total === 0 && reviews.length === 0) {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-fg">
+          <span>LAST {weeks} WEEKS</span>
+          <span className="font-mono font-bold text-fg">0 REVIEWS</span>
+        </div>
+        <div className="flex h-[84px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20">
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">No activity yet</p>
+          <p className="mt-1 text-[11px] text-muted-fg">Start reviewing to see your heatmap</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-fg">

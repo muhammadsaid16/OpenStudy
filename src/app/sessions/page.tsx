@@ -69,6 +69,7 @@ export default function SessionsPage() {
   const [saveError, setSaveError] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerStartedAtRef = useRef<Date | null>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   // ── Pomodoro — shared engine hook (work / break / long break) ──
   const pomo = usePomodoro();
@@ -121,6 +122,15 @@ export default function SessionsPage() {
   }, [mode, timerRunning, timerPaused]);
 
   const anyRunning = timerRunning || pomo.running;
+
+  // Auto-focus title on new session (after stop/save or idle mount)
+  useEffect(() => {
+    if (!anyRunning) {
+      // timeout lets the disabled→enabled transition settle before focusing
+      const t = setTimeout(() => titleInputRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
+  }, [anyRunning]);
 
   // ── Stopwatch handlers (unchanged) ─────────────────────────────
   const startTimer = () => {
@@ -352,10 +362,12 @@ export default function SessionsPage() {
               Session title{mode === "pomodoro" ? " (optional)" : ""}
             </label>
             <input
+              ref={titleInputRef}
               value={sessionTitle}
               onChange={(e) => setSessionTitle(e.target.value)}
               placeholder={mode === "pomodoro" ? "Auto-named from cycles if empty" : "e.g. Reviewing chapter 5"}
               disabled={anyRunning}
+              autoFocus={!anyRunning}
               className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 !border-0 focus:outline-none"
             />
           </div>
@@ -446,6 +458,7 @@ export default function SessionsPage() {
                   </label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     min={1}
                     max={180}
                     value={workMin}
@@ -460,6 +473,7 @@ export default function SessionsPage() {
                   </label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     min={1}
                     max={60}
                     value={breakMin}
@@ -474,6 +488,7 @@ export default function SessionsPage() {
                   </label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     min={0}
                     max={90}
                     value={longBreakMin}
@@ -488,6 +503,7 @@ export default function SessionsPage() {
                   </label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     min={0}
                     max={12}
                     value={cyclesBeforeLongBreak}

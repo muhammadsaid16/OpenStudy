@@ -241,9 +241,21 @@ export default function StatsPage() {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label="Period">
-            {PERIODS.map(p => (
-              <button key={p.key} onClick={() => setPeriod(p.key)} aria-pressed={period === p.key} className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${period === p.key ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"}`}>{p.label}</button>
-            ))}
+            {PERIODS.map(p => {
+              const isEmpty = reviews.length === 0 && sessions.length === 0;
+              const active = period === p.key;
+              return (
+                <button
+                  key={p.key}
+                  onClick={() => setPeriod(p.key)}
+                  aria-pressed={active}
+                  disabled={isEmpty}
+                  className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${active ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"} ${isEmpty ? "opacity-40 cursor-not-allowed hover:text-muted-fg" : ""}`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
           </div>
           <StatsStreakBadge reviews={reviews} />
         </div>

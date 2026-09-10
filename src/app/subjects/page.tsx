@@ -486,7 +486,14 @@ export default function SubjectsPage() {
           )}
         </div>
         {/* Tabs */}
-        <div className="mt-8 flex gap-2 border-b border-border">
+        <div role="tablist" aria-label="Library sections" onKeyDown={(e) => {
+          const tabs: Array<"subjects"|"decks"|"study"> = ["subjects","decks","study"];
+          const idx = tabs.indexOf(activeTab);
+          if (e.key === "ArrowRight") { e.preventDefault(); setActiveTab(tabs[(idx + 1) % tabs.length]); }
+          else if (e.key === "ArrowLeft") { e.preventDefault(); setActiveTab(tabs[(idx - 1 + tabs.length) % tabs.length]); }
+          else if (e.key === "Home") { e.preventDefault(); setActiveTab(tabs[0]); }
+          else if (e.key === "End") { e.preventDefault(); setActiveTab(tabs[tabs.length - 1]); }
+        }} className="mt-8 flex gap-2 border-b border-border">
           {[
             { id: "subjects", label: "Subjects", count: loaded ? subjects.length : undefined },
             { id: "decks", label: "Decks", count: loaded ? allBundles.length : undefined },
@@ -494,8 +501,10 @@ export default function SubjectsPage() {
           ].map((tab) => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              tabIndex={activeTab === tab.id ? 0 : -1}
               onClick={() => setActiveTab(tab.id as any)}
-              aria-current={activeTab === tab.id ? "page" : undefined}
               className={`relative -mb-px border-b-2 px-4 py-2.5 text-sm font-bold tracking-tight transition-colors ${
                 activeTab === tab.id
                   ? "border-accent text-accent"
@@ -807,7 +816,7 @@ export default function SubjectsPage() {
                     <Button variant="secondary" onClick={() => setActiveTab("decks")}>Browse decks</Button>
                   </div>
                 </div>
-                {allBundles.length > 0 && (
+                {allBundles.length > 0 ? (
                   <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {allBundles.slice(0, 6).map((b) => (
                   <div
@@ -825,6 +834,8 @@ export default function SubjectsPage() {
                   </div>
                 ))}
                   </div>
+                ) : (
+                  <p className="mt-6 text-sm text-muted-fg">No decks yet — create one in the Decks tab to start studying.</p>
                 )}
               </div>
               <div className="glass rounded-2xl p-6">

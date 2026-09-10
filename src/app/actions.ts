@@ -263,8 +263,27 @@ export async function createNote(data: {
 
 export async function updateNote(
   id: string,
-  data: { title?: string; content?: string; isPinned?: boolean; tags?: string[]; topicId?: string }
+  data: { title?: string; content?: string; isPinned?: boolean; tags?: string[]; topicId?: string | null }
 ) {
+  // topicId: null explicitly clears the link (Remove topic). Run that
+  // path without zod so empty-string -> null doesn't trip min(1).
+  if (data.topicId === null) {
+    const { topicId: _tid, tags, ...rest } = data as any;
+    const parsedRest = noteSchema.partial().omit({ topicId: true } as any).parse(rest);
+    await db.notes.update(id, { ...parsedRest, topicId: null as any, updatedAt: new Date() });
+    if (tags) {
+      await db.noteTags.where("noteId").equals(id).delete();
+      for (const tagName of tags) {
+        const tag = await upsertTag(tagName);
+        await db.noteTags.add({ noteId: id, tagId: tag.id });
+      }
+    }
+    return db.notes.get(id);
+  }
+  if (data.topicId === "") {
+    const { topicId: _tid, ...rest } = data as any;
+    return updateNote(id, { ...rest, topicId: null });
+  }
   const parsed = noteSchema.partial().parse(data);
   const { tags, ...noteData } = parsed;
   await db.notes.update(id, { ...noteData, updatedAt: new Date() });
