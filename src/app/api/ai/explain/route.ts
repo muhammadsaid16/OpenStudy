@@ -80,8 +80,8 @@ async function callGroqExplain(apiKey: string, source: string): Promise<string |
 
 export async function POST(req: Request) {
   const t0 = Date.now();
-  const geminiKey = process.env.GEMINI_API_KEY;
-  const groqKey = process.env.GROQ_API_KEY;
+  const groqKey = (process.env.GROQ_API_KEY ?? "").trim().split(/\s+/)[0].replace(/^["']|["']$/g, "");
+  const geminiKey = (process.env.GEMINI_API_KEY ?? "").trim().split(/\s+/)[0].replace(/^["']|["']$/g, "");
 
   let body: { text?: string; title?: string };
   try {
