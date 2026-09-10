@@ -54,11 +54,13 @@ interface ApiError {
 export function AiGenerateModal({
   bundles,
   defaultBundleId,
+  defaultPrompt,
   onClose,
   onCreated,
 }: {
   bundles: BundleLike[];
   defaultBundleId?: string;
+  defaultPrompt?: string;
   onClose: () => void;
   onCreated?: () => void | Promise<void>;
 }) {
@@ -66,7 +68,14 @@ export function AiGenerateModal({
   const [open, setOpen] = useState(true);
   const [mode, setMode] = useState<"text" | "image">("text");
   const [phase, setPhase] = useState<Phase>("input");
-  const [source, setSource] = useState("");
+  const [source, setSource] = useState(defaultPrompt ?? "");
+
+  useEffect(() => {
+    if (defaultPrompt && source === "" ) setSource(defaultPrompt);
+    // keep source in sync if prompt arrives late (e.g. note loads after mount)
+    if (defaultPrompt && defaultPrompt !== source && phase === "input" && source.length === 0) setSource(defaultPrompt);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultPrompt]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [bundleId, setBundleId] = useState<string>(defaultBundleId ?? bundles[0]?.id ?? "");
@@ -345,7 +354,7 @@ export function AiGenerateModal({
           <select
             value={bundleId}
             onChange={(e) => setBundleId(e.target.value)}
-            className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm font-bold text-fg focus:border-accent focus:outline-none"
+            className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm font-bold text-fg focus:outline-none"
             aria-label="Destination bundle"
           >
             {bundles.map((b) => (
@@ -391,7 +400,7 @@ export function AiGenerateModal({
             placeholder={
               "Paste lesson notes, a chapter, a transcript — anything teachable.\n\nTip: ⌘/Ctrl + Enter to generate."
             }
-            className="w-full min-h-[260px] resize-y rounded-xl border border-border bg-bg p-3 text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:border-accent focus:outline-none"
+            className="w-full min-h-[260px] resize-y rounded-xl border border-border bg-bg p-3 text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:outline-none"
             spellCheck={false}
             autoComplete="off"
             aria-label="Source text for AI card generation"

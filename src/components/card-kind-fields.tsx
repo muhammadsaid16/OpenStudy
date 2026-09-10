@@ -46,7 +46,7 @@ export function CardKindFields({
           onChange={(e) => onChoicesTextChange(e.target.value)}
           placeholder={"Wrong options, one per line (min 2).\nThe back field is the correct answer."}
           rows={3}
-          className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm font-bold tracking-tight text-fg placeholder:text-muted-fg/60 focus:border-accent focus:outline-none"
+          className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm font-bold tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
         />
       )}
     </div>

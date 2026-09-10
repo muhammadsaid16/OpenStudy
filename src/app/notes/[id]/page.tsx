@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Pencil, Trash2, Pin, StickyNote, BookOpen, Calendar } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Pin, StickyNote, BookOpen, Calendar, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button, Skeleton } from "@/components/ui";
 import { Modal } from "@/components/ui";
 import { TagInput } from "@/components/tag-input";
 import { Markdown } from "@/components/markdown";
 import { NoteAiImportButton } from "@/components/note-ai-import-button";
+import { AiGenerateModal } from "@/components/ai-generate-modal";
 import { getAllNotes, updateNote, deleteNote, getBundles } from "@/app/actions";
 import { showUndo } from "@/components/undo-toast";
 import type { BundleRec } from "@/lib/db";
@@ -30,6 +31,7 @@ export default function NotePage() {
   const [editContent, setEditContent] = useState("");
   const [editTags, setEditTags] = useState<string[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [generateOpen, setGenerateOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([getAllNotes(), getBundles()]).then(([notes, b]) => {
@@ -216,6 +218,9 @@ export default function NotePage() {
             <Button variant="secondary" onClick={openEdit}>
               <Pencil size={14} /> Edit
             </Button>
+            <Button variant="secondary" onClick={() => setGenerateOpen(true)} aria-label="Generate cards with AI" title="Generate cards with AI">
+              <Sparkles size={14} /> AI Generate
+            </Button>
             <NoteAiImportButton noteId={note.id} noteTitle={note.title} availableBundles={bundles} />
           </div>
         </div>
@@ -268,6 +273,15 @@ export default function NotePage() {
           </div>
         </div>
       </Modal>
+
+      {generateOpen && (
+        <AiGenerateModal
+          bundles={bundles}
+          defaultBundleId={bundles[0]?.id}
+          defaultPrompt={note.content ?? note.title}
+          onClose={() => setGenerateOpen(false)}
+        />
+      )}
     </div>
   );
 }

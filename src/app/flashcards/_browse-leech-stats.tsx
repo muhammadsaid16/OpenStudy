@@ -73,14 +73,14 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
             placeholder={p.browseScope === "bundles" ? "Search bundles..." : "Search all cards..."}
             value={p.browseQuery}
             onChange={(e) => p.onQueryChange(e.target.value)}
-            className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:border-accent"
+            className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
           />
         </div>
         <select
           value={p.browseScope}
           onChange={(e) => p.onScopeChange(e.target.value as "cards" | "bundles")}
           aria-label="Search scope: cards or bundles"
-          className="h-10 rounded-xl border border-border bg-bg px-3 text-xs text-fg focus:outline-none focus:border-accent"
+          className="h-10 rounded-xl border border-border bg-bg px-3 text-xs text-fg focus:outline-none"
         >
           <option value="cards" className="bg-bg text-fg">Search cards</option>
           <option value="bundles" className="bg-bg text-fg">Search bundles</option>

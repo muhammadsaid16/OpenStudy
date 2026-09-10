@@ -34,7 +34,7 @@ import { ShareBundleButton } from "@/components/share-bundle-button";
 import { showToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
 import type { BundleRec, CardKind } from "@/lib/db";
-import { cardKind, cleanChoices } from "@/lib/card-kinds";
+import { cardKind, cleanChoices, shuffled } from "@/lib/card-kinds";
 import { CardKindFields } from "@/components/card-kind-fields";
 import { RATING_BUTTONS } from "@/lib/card-status";
 
@@ -269,12 +269,23 @@ export default function BundleCardsPage() {
     try {
       const allDue = await getAllDueFlashcards();
       const list = (Array.isArray(allDue) ? allDue : []).filter((c: any) => c.bundleId === bundleId) as unknown as Card[];
-      if (list.length === 0) { showToast("No cards due in this deck", "info"); return; }
-      setReviewQueue(list);
+      if (list.length > 0) {
+        setReviewQueue(list);
+        setReviewIndex(0);
+        setLearningQueue([]);
+        setIsFlipped(false);
+        setIsReviewing(true);
+        return;
+      }
+      // No due cards — practice fallback: show all bundle cards shuffled
+      const allCards = (await getBundleCards(bundleId)) as unknown as Card[];
+      if (!allCards || allCards.length === 0) { showToast("No cards in this deck", "info"); return; }
+      setReviewQueue(shuffled(allCards));
       setReviewIndex(0);
       setLearningQueue([]);
       setIsFlipped(false);
       setIsReviewing(true);
+      showToast("Practice mode — no cards due, showing all cards", "info");
     } catch { showToast("Failed to load cards", "danger"); }
   };
 
@@ -532,14 +543,14 @@ export default function BundleCardsPage() {
               placeholder="Search cards..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:border-accent"
+              className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
             />
           </div>
           <select
             value={filterTag}
             onChange={(e) => setFilterTag(e.target.value)}
             aria-label="Filter cards by tag"
-            className="h-10 rounded-xl border border-border bg-bg px-3 text-sm text-fg focus:outline-none focus:border-accent"
+            className="h-10 rounded-xl border border-border bg-bg px-3 text-sm text-fg focus:outline-none"
           >
             <option value="all" className="bg-bg text-fg">
               All tags

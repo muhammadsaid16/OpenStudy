@@ -263,7 +263,7 @@ export async function createNote(data: {
 
 export async function updateNote(
   id: string,
-  data: { title?: string; content?: string; isPinned?: boolean; tags?: string[] }
+  data: { title?: string; content?: string; isPinned?: boolean; tags?: string[]; topicId?: string }
 ) {
   const parsed = noteSchema.partial().parse(data);
   const { tags, ...noteData } = parsed;

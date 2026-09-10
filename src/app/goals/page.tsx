@@ -7,7 +7,7 @@
 // Aurora Glass: semantic tokens only (accent/flow/grow/danger) so all
 // 12 themes apply automatically.
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   getGoals,
@@ -15,6 +15,7 @@ import {
   getSubjects,
   moveGoal,
   deleteGoal,
+  createGoal,
   createMilestone,
   toggleMilestone,
   deleteMilestone,
@@ -30,6 +31,7 @@ import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import { Button, Badge, Card, Modal, EmptyState } from "@/components/ui";
 import { GoalModal } from "@/components/goal-modal";
+import { showToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
 import {
   Target,
@@ -44,6 +46,8 @@ import {
   Square,
   ChevronRight,
   ChevronLeft,
+  Download,
+  Upload,
 } from "lucide-react";
 
 // ─── Module-constant motion config (re-render replay pitfall) ─────
@@ -101,6 +105,9 @@ export default function GoalsPage() {
   const [loaded, setLoaded] = useState(false);
   // wall clock — captured once in the mount effect (react-hooks/purity bans Date.now() in render)
   const [nowMs, setNowMs] = useState(0);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(async () => {
     const [g, m, s] = await Promise.all([getGoals(), getAllMilestones(), getSubjects()]);
@@ -199,6 +206,133 @@ export default function GoalsPage() {
 
   const subjectOf = (id?: string | null) => subjects.find((s) => s.id === id);
 
+  // ─── Export / Import ────────────────────────────────────────
+  const csvEsc = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  function splitCsvLine(line: string, delimiter: string): string[] {
+    const cells: string[] = [];
+    let cur = ""; let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"') { if (line[i+1] === '"') { cur+='"'; i++; } else inQuotes=false; } else cur+=ch;
+      } else {
+        if (ch === '"') inQuotes=true;
+        else if (ch === delimiter) { cells.push(cur); cur=""; }
+        else cur+=ch;
+      }
+    }
+    cells.push(cur);
+    return cells.map((c)=>c.trim());
+  }
+
+  const exportGoalsAsJson = async () => {
+    setExportMenuOpen(false);
+    try {
+      const [allGoals, allMs] = await Promise.all([getGoals(), getAllMilestones()]);
+      const payload = { goals: allGoals, milestones: allMs };
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "goals.json"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+      showToast(`Exported ${allGoals.length} goals`, "success");
+    } catch(e){ console.error(e); showToast("Export failed","danger"); }
+  };
+
+  const exportGoalsAsCsv = async () => {
+    setExportMenuOpen(false);
+    try {
+      const [allGoals] = await Promise.all([getGoals(), getAllMilestones()]);
+      const header = ["title","description","horizon","status","dueDate"];
+      const rows = (allGoals as any[]).map((g)=>
+        [csvEsc(g.title), csvEsc(g.description ?? ""), csvEsc(g.horizon ?? "regular"), csvEsc(g.status ?? "backlog"), csvEsc(g.dueDate ? new Date(g.dueDate).toISOString().slice(0,10) : "")].join(",")
+      );
+      const csv = [header.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "goals.csv"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+      showToast(`Exported ${rows.length} goals`, "success");
+    } catch(e){ console.error(e); showToast("Export failed","danger"); }
+  };
+
+  const handleGoalsImport = async (file: File) => {
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const trimmed = text.trim();
+      if (!trimmed) { showToast("File is empty","warning"); return; }
+      let goalItems: any[] = [];
+      let msItems: any[] = [];
+      const isJson = file.name.endsWith(".json") || trimmed.startsWith("[") || trimmed.startsWith("{");
+      if (isJson) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) goalItems = parsed;
+          else if (Array.isArray(parsed.goals)) { goalItems = parsed.goals; msItems = parsed.milestones ?? []; }
+          else if (parsed.title) goalItems = [parsed];
+          else { showToast("Invalid JSON format","danger"); return; }
+        } catch {
+          if (file.name.endsWith(".json")) { showToast("Invalid JSON file","danger"); return; }
+        }
+      }
+      if (!goalItems.length) {
+        const lines = trimmed.split("\n").map((l)=>l.replace(/\r$/,"")).filter((l)=>l.trim());
+        if (!lines.length) { showToast("No valid rows","warning"); return; }
+        const firstCells = splitCsvLine(lines[0], lines[0].includes("\t") ? "\t" : ",");
+        const lower = firstCells.map((c)=>c.toLowerCase().trim());
+        const hasHeader = lower.includes("title") || lower.includes("description") || lower.includes("horizon");
+        const headerMap: Record<string,number> = {};
+        let start=0;
+        if (hasHeader) { lower.forEach((h,i)=>{ headerMap[h]=i; }); start=1; }
+        else { headerMap["title"]=0; headerMap["description"]=1; headerMap["horizon"]=2; headerMap["status"]=3; headerMap["duedate"]=4; }
+        for (let i=start;i<lines.length;i++) {
+          const delim = lines[i].includes("\t") ? "\t" : ",";
+          const cells = splitCsvLine(lines[i], delim);
+          const get=(k:string)=>{ const idx=headerMap[k]; return idx!==undefined&&idx<cells.length?cells[idx]:""; };
+          const title=(get("title")||cells[0]||"").trim();
+          if(!title) continue;
+          goalItems.push({ title, description: get("description")||"", horizon: get("horizon")||"regular", status: get("status")||"backlog", dueDate: get("duedate")||get("due_date")||"" });
+        }
+      }
+      if (!goalItems.length && !msItems.length) { showToast("No valid goals found","warning"); return; }
+      // Map titles to created goal ids for milestone linking
+      const titleToId = new Map<string,string>();
+      let ok=0, skipped=0;
+      for (const raw of goalItems) {
+        const title=String(raw.title??raw.name??"").trim();
+        if(!title){ skipped++; continue; }
+        const horizon: GoalHorizon = raw.horizon==="long" ? "long" : "regular";
+        const dueDate = raw.dueDate ? new Date(raw.dueDate) : null;
+        const validDue = dueDate && !isNaN(dueDate.getTime()) ? dueDate : null;
+        const status: GoalStatus = raw.status==="in_progress"||raw.status==="done"||raw.status==="backlog" ? raw.status : "backlog" as GoalStatus;
+        try {
+          const g = await createGoal({ title, description: String(raw.description??"").trim()||undefined, horizon, dueDate: validDue, repeat: raw.repeat ?? null, subjectId: raw.subjectId ?? null, color: raw.color ?? null });
+          titleToId.set(title, g.id);
+          // move to status if not backlog
+          if (status !== "backlog") { try { await moveGoal(g.id, status, 999); } catch {} }
+          ok++;
+        } catch { skipped++; }
+      }
+      // Import milestones (after goals so goalIds exist)
+      let msOk=0;
+      const allMsToCreate = msItems.length ? msItems : goalItems.flatMap((g:any)=> (g.milestones??[]).map((m:any)=> ({...m, goalTitle: g.title, goalId: g.id })));
+      for (const m of allMsToCreate) {
+        const mTitle=String(m.title??m.name??"").trim();
+        if(!mTitle) continue;
+        let goalId = m.goalId ?? (m.goalTitle ? titleToId.get(String(m.goalTitle)) : undefined);
+        // fallback: if no mapping, attach to first created goal or skip
+        if(!goalId && titleToId.size) goalId = [...titleToId.values()][0];
+        if(!goalId) continue;
+        try { await createMilestone(goalId, mTitle); if(m.done) { /* milestones are created undone; leave as is */ } msOk++; } catch {}
+      }
+      await refresh();
+      if(ok) showToast(`Imported ${ok} goals${msOk?` + ${msOk} milestones`:""}${skipped?`, ${skipped} skipped`:""}`, "success");
+      else showToast("No goals imported","warning");
+    } catch(e){ console.error(e); showToast("Import failed: invalid file","danger"); }
+    finally { setImporting(false); if(importInputRef.current) importInputRef.current.value=""; }
+  };
+
   return (
     <div className="p-8 lg:p-12">
       {/* Header */}
@@ -211,15 +345,57 @@ export default function GoalsPage() {
               className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>
-          <Button
-            onClick={() => {
-              setEditingGoal(null);
-              setModalOpen(true);
-            }}
-          >
-            <Plus size={16} />
-            New goal
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <button
+                onClick={() => setExportMenuOpen((o) => !o)}
+                className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+              >
+                <Download size={14} />
+                Export
+              </button>
+              {exportMenuOpen && (
+                <>
+                  <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label="Close export menu" />
+                  <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
+                    <button onClick={exportGoalsAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                      <Download size={14} /> JSON
+                    </button>
+                    <button onClick={exportGoalsAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                      <Download size={14} /> CSV
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+            <button
+              onClick={() => importInputRef.current?.click()}
+              disabled={importing}
+              className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft disabled:opacity-50"
+            >
+              <Upload size={14} />
+              {importing ? "Importing..." : "Import"}
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".json,.csv,.tsv,.txt,application/json,text/csv"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleGoalsImport(f);
+              }}
+            />
+            <Button
+              onClick={() => {
+                setEditingGoal(null);
+                setModalOpen(true);
+              }}
+            >
+              <Plus size={16} />
+              New goal
+            </Button>
+          </div>
         </div>
       </div>
 

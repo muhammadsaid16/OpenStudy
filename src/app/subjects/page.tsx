@@ -23,6 +23,7 @@ import {
   createBundle,
   importCardsIntoBundle,
   getAllDueFlashcards,
+  getBundleCards,
   reviewFlashcardWithLog,
 } from "@/app/actions";
 import { SubjectTopicMenu } from "@/components/subject-topic-menu";
@@ -36,6 +37,7 @@ import { useAppStore } from "@/lib/store";
 import { SubjectIconPicker, SUBJECT_ICONS } from "@/components/subject-icon-picker";
 import { readableOn } from "@/lib/utils";
 import { tiltHandlers } from "@/lib/interactions";
+import { shuffled } from "@/lib/card-kinds";
 
 type Subject = Awaited<ReturnType<typeof getSubjects>>[number];
 type Bundle = Awaited<ReturnType<typeof getBundles>>[number];
@@ -230,13 +232,29 @@ export default function SubjectsPage() {
     try {
       const due = await getAllDueFlashcards();
       const list = Array.isArray(due) ? due : [];
-      if (list.length === 0) { showToast("No cards due", "info"); return; }
-      setReviewQueue(list);
+      if (list.length > 0) {
+        setReviewQueue(list);
+        setReviewIndex(0);
+        setLearningQueue([]);
+        setIsFlipped(false);
+        setIsReviewing(true);
+        setActiveTab("study");
+        return;
+      }
+      const bundles = await getBundles();
+      const all: any[] = [];
+      for (const b of (Array.isArray(bundles) ? bundles : [])) {
+        const cs = (await getBundleCards((b as any).id)) as any[];
+        if (Array.isArray(cs)) all.push(...cs);
+      }
+      if (all.length === 0) { showToast("No cards due", "info"); return; }
+      setReviewQueue(shuffled(all));
       setReviewIndex(0);
       setLearningQueue([]);
       setIsFlipped(false);
       setIsReviewing(true);
       setActiveTab("study");
+      showToast("Practice mode — no cards due, showing all cards", "info");
     } catch { showToast("Failed to load cards", "danger"); }
   };
 
@@ -245,13 +263,24 @@ export default function SubjectsPage() {
       const due = await getAllDueFlashcards();
       const all = Array.isArray(due) ? due : [];
       const list = all.filter((c: any) => c.bundleId === bundleId);
-      if (list.length === 0) { showToast("No cards due in this deck", "info"); return; }
-      setReviewQueue(list);
+      if (list.length > 0) {
+        setReviewQueue(list);
+        setReviewIndex(0);
+        setLearningQueue([]);
+        setIsFlipped(false);
+        setIsReviewing(true);
+        setActiveTab("study");
+        return;
+      }
+      const allCards = (await getBundleCards(bundleId)) as any[];
+      if (!allCards || allCards.length === 0) { showToast("No cards in this deck", "info"); return; }
+      setReviewQueue(shuffled(allCards));
       setReviewIndex(0);
       setLearningQueue([]);
       setIsFlipped(false);
       setIsReviewing(true);
       setActiveTab("study");
+      showToast("Practice mode — no cards due, showing all cards", "info");
     } catch { showToast("Failed to load cards", "danger"); }
   };
 
@@ -864,7 +893,7 @@ export default function SubjectsPage() {
                 placeholder="Search topics..."
                 value={topicSearch}
                 onChange={(e) => setTopicSearch(e.target.value)}
-                className="h-10 w-full rounded-xl border border-border bg-bg pl-8 pr-3 text-sm font-medium tracking-tight placeholder:text-muted-fg/60 focus:outline-none focus:border-accent"
+                className="h-10 w-full rounded-xl border border-border bg-bg pl-8 pr-3 text-sm font-medium tracking-tight placeholder:text-muted-fg/60 focus:outline-none"
               />
             </div>
           )}
@@ -1026,7 +1055,7 @@ export default function SubjectsPage() {
                       <select
                         value={linkBundleId}
                         onChange={(e) => setLinkBundleId(e.target.value)}
-                        className="h-9 flex-1 rounded-xl border border-border bg-bg px-2 text-xs focus:outline-none focus:border-accent"
+                        className="h-9 flex-1 rounded-xl border border-border bg-bg px-2 text-xs focus:outline-none"
                       >
                         <option value="">Select bundle...</option>
                         {unlinkedBundles.map((b) => (

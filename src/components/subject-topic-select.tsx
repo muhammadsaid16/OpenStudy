@@ -135,7 +135,7 @@ export function SubjectTopicSelect({
                 if (e.target.value) void loadTopics(e.target.value);
               }}
               aria-label="Select a subject"
-              className="flex h-10 w-full rounded-lg border border-border bg-bg px-2 text-sm font-bold text-fg focus:outline-none focus:border-accent"
+              className="flex h-10 w-full rounded-lg border border-border bg-bg px-2 text-sm font-bold text-fg focus:outline-none"
             >
               <option value="" className="bg-bg text-fg">Select a subject…</option>
               {subjects.map((s) => (

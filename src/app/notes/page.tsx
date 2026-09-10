@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useEffect, useTransition, Suspense } from "react";
-import { Plus, Trash2, Pin, StickyNote, Pencil, Eye, BookOpen, Search, X } from "lucide-react";
+import { useState, useEffect, useTransition, Suspense, useRef } from "react";
+import { Plus, Trash2, Pin, StickyNote, Pencil, Eye, BookOpen, Search, X, Download, Upload } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button, Modal, Input, EmptyState, Skeleton, Textarea } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
-import { getAllNotes, getSubjects, createNote, deleteNote, updateNote, getBundles } from "@/app/actions";
+import { getAllNotes, getSubjects, createNote, deleteNote, updateNote, getBundles, getAllTopics } from "@/app/actions";
 import { SubjectTopicSelect } from "@/components/subject-topic-select";
 import { TagInput } from "@/components/tag-input";
 import { Markdown } from "@/components/markdown";
 import { formatRelative } from "@/lib/utils";
 import { NoteAiImportButton } from "@/components/note-ai-import-button";
 import { showUndo } from "@/components/undo-toast";
+import { showToast } from "@/components/toast";
 import { spotlightProps } from "@/lib/interactions";
 import type { BundleRec } from "@/lib/db";
 
@@ -35,12 +36,16 @@ function NotesContent() {
   const [tags, setTags] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   // Edit state
   const [editNote, setEditNote] = useState<Note | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const [editTags, setEditTags] = useState<string[]>([]);
+  const [editTopicId, setEditTopicId] = useState("");
 
   useEffect(() => {
     Promise.all([getAllNotes(), getSubjects(), getBundles()]).then(([n, s, b]) => {
@@ -64,6 +69,7 @@ function NotesContent() {
       if (e.key === "Escape") {
         setModalOpen(false);
         setEditNote(null);
+        setEditTopicId("");
       }
     };
     window.addEventListener("keydown", handler);
@@ -146,14 +152,170 @@ function NotesContent() {
     setEditTitle(note.title);
     setEditContent(note.content || "");
     setEditTags(note.tags.map((t) => t.tag.name));
+    setEditTopicId(note.topicId || "");
   };
 
   const handleEditSave = async () => {
     if (!editNote || !editTitle.trim()) return;
-    await updateNote(editNote.id, { title: editTitle.trim(), content: editContent.trim(), tags: editTags });
+    await updateNote(editNote.id, {
+      title: editTitle.trim(),
+      content: editContent.trim(),
+      tags: editTags,
+      ...(editTopicId ? { topicId: editTopicId } : {}),
+    });
     const fresh = await getAllNotes();
     setNotes(fresh as Note[]);
     setEditNote(null);
+    setEditTopicId("");
+  };
+
+  // ─── Export / Import ──────────────────────────────────────────
+  const csvEsc = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+
+  function splitCsvLine(line: string, delimiter: string): string[] {
+    const cells: string[] = [];
+    let cur = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (line[i + 1] === '"') { cur += '"'; i++; } else inQuotes = false;
+        } else cur += ch;
+      } else {
+        if (ch === '"') inQuotes = true;
+        else if (ch === delimiter) { cells.push(cur); cur = ""; }
+        else cur += ch;
+      }
+    }
+    cells.push(cur);
+    return cells.map((c) => c.trim());
+  }
+
+  const exportAsJson = async () => {
+    setExportMenuOpen(false);
+    try {
+      const all = await getAllNotes();
+      const payload = (all as any[]).map((n) => ({
+        title: n.title,
+        content: n.content ?? "",
+        topicId: n.topicId,
+        tags: (n.tags ?? []).map((t: any) => t.tag?.name ?? t.name ?? ""),
+      }));
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "notes.json"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast(`Exported ${payload.length} notes`, "success");
+    } catch (e) { console.error(e); showToast("Export failed", "danger"); }
+  };
+
+  const exportAsCsv = async () => {
+    setExportMenuOpen(false);
+    try {
+      const all = await getAllNotes();
+      const header = ["title","content","topicId","tags"];
+      const rows = (all as any[]).map((n) =>
+        [csvEsc(n.title), csvEsc(n.content ?? ""), csvEsc(n.topicId ?? ""), csvEsc((n.tags ?? []).map((t: any) => t.tag?.name ?? t.name ?? "").join(";"))].join(",")
+      );
+      const csv = [header.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "notes.csv"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast(`Exported ${rows.length} notes`, "success");
+    } catch (e) { console.error(e); showToast("Export failed", "danger"); }
+  };
+
+  const handleNotesImport = async (file: File) => {
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const trimmed = text.trim();
+      if (!trimmed) { showToast("File is empty", "warning"); return; }
+      let items: any[] = [];
+      const isJson = file.name.endsWith(".json") || trimmed.startsWith("[") || trimmed.startsWith("{");
+      if (isJson) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) items = parsed;
+          else if (Array.isArray(parsed.notes)) items = parsed.notes;
+          else if (parsed.title) items = [parsed];
+          else { showToast("Invalid JSON format", "danger"); return; }
+        } catch {
+          const isJsonExt = file.name.endsWith(".json");
+          if (isJsonExt) { showToast("Invalid JSON file", "danger"); return; }
+        }
+      }
+      if (!items.length) {
+        const lines = trimmed.split("\n").map((l) => l.replace(/\r$/, "")).filter((l) => l.trim());
+        if (!lines.length) { showToast("No valid rows", "warning"); return; }
+        const firstCells = splitCsvLine(lines[0], lines[0].includes("\t") ? "\t" : ",");
+        const lower = firstCells.map((c) => c.toLowerCase().trim());
+        const hasHeader = lower.includes("title") || lower.includes("content");
+        const headerMap: Record<string, number> = {};
+        let start = 0;
+        if (hasHeader) {
+          lower.forEach((h, i) => { headerMap[h] = i; });
+          start = 1;
+        } else {
+          headerMap["title"] = 0; headerMap["content"] = 1; headerMap["topicid"] = 2; headerMap["tags"] = 3;
+        }
+        for (let i = start; i < lines.length; i++) {
+          const delim = lines[i].includes("\t") ? "\t" : ",";
+          const cells = splitCsvLine(lines[i], delim);
+          const get = (k: string) => {
+            const idx = headerMap[k];
+            return idx !== undefined && idx < cells.length ? cells[idx] : "";
+          };
+          const title = (get("title") || cells[0] || "").trim();
+          if (!title) continue;
+          items.push({
+            title,
+            content: get("content") || "",
+            topicId: get("topicid") || get("topic_id") || get("topic") || "",
+            tags: get("tags") || "",
+          });
+        }
+      }
+      if (!items.length) { showToast("No valid notes found", "warning"); return; }
+      let topicsCache: any[] | null = null;
+      const getFallbackTopicId = async (): Promise<string | null> => {
+        if (topicsCache) return topicsCache[0]?.id ?? null;
+        try { topicsCache = await getAllTopics(); } catch { topicsCache = []; }
+        return topicsCache[0]?.id ?? null;
+      };
+      let ok = 0, skipped = 0;
+      for (const raw of items) {
+        const title = String(raw.title ?? raw.name ?? "").trim();
+        if (!title) { skipped++; continue; }
+        const content = String(raw.content ?? raw.body ?? "").trim();
+        let topicId = String(raw.topicId ?? raw.topic ?? "").trim();
+        if (!topicId) {
+          const fb = await getFallbackTopicId();
+          if (!fb) { skipped++; continue; }
+          topicId = fb;
+        }
+        let tagArr: string[] = [];
+        if (Array.isArray(raw.tags)) tagArr = raw.tags.map((t: any) => String(t).trim()).filter(Boolean);
+        else if (typeof raw.tags === "string" && raw.tags.trim()) tagArr = raw.tags.split(/[;,]/).map((t: string) => t.trim()).filter(Boolean);
+        try {
+          await createNote({ topicId, title, content, tags: tagArr });
+          ok++;
+        } catch { skipped++; }
+      }
+      const fresh = await getAllNotes();
+      setNotes(fresh as Note[]);
+      if (ok) showToast(`Imported ${ok} notes${skipped ? `, ${skipped} skipped` : ""}`, "success");
+      else showToast("No notes imported", "warning");
+    } catch (e) {
+      console.error(e);
+      showToast("Import failed: invalid file", "danger");
+    } finally {
+      setImporting(false);
+      if (importInputRef.current) importInputRef.current.value = "";
+    }
   };
 
   return (
@@ -169,6 +331,46 @@ function NotesContent() {
             />
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <button
+                onClick={() => setExportMenuOpen((o) => !o)}
+                className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+              >
+                <Download size={14} />
+                Export
+              </button>
+              {exportMenuOpen && (
+                <>
+                  <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label="Close export menu" />
+                  <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
+                    <button onClick={exportAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                      <Download size={14} /> JSON
+                    </button>
+                    <button onClick={exportAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                      <Download size={14} /> CSV
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+            <button
+              onClick={() => importInputRef.current?.click()}
+              disabled={importing}
+              className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft disabled:opacity-50"
+            >
+              <Upload size={14} />
+              {importing ? "Importing..." : "Import"}
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".json,.csv,.tsv,.txt,application/json,text/csv"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleNotesImport(f);
+              }}
+            />
             {!(loaded && notes.length === 0) && (
               <Button onClick={() => setModalOpen(true)}>
                 <Plus size={16} />
@@ -186,7 +388,7 @@ function NotesContent() {
                 placeholder="Search notes..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:border-accent"
+                className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
               />
             </div>
             {topicFilter && (
@@ -353,6 +555,15 @@ function NotesContent() {
               value={selectedTopicId}
               onChange={setSelectedTopicId}
             />
+            {selectedTopicId && (
+              <button
+                type="button"
+                onClick={() => setSelectedTopicId("")}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs font-bold text-muted-fg transition-colors hover:border-danger/20 hover:bg-danger/10 hover:text-danger"
+              >
+                <X size={12} /> Remove
+              </button>
+            )}
             {!selectedTopicId && subjects.length > 0 && (
               <p className="text-[11px] uppercase tracking-widest text-warning">
                 Pick a subject above and click Use to link a topic before creating.
@@ -388,9 +599,33 @@ function NotesContent() {
       </Modal>
 
       {/* Edit Modal */}
-      <Modal open={!!editNote} onClose={() => setEditNote(null)} title="Edit note">
+      <Modal open={!!editNote} onClose={() => { setEditNote(null); setEditTopicId(""); }} title="Edit note">
         {editNote && (
           <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
+                Topic
+              </label>
+              <SubjectTopicSelect
+                subjects={subjects}
+                value={editTopicId}
+                onChange={setEditTopicId}
+              />
+              {editTopicId && (
+                <button
+                  type="button"
+                  onClick={() => setEditTopicId("")}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs font-bold text-muted-fg transition-colors hover:border-danger/20 hover:bg-danger/10 hover:text-danger"
+                >
+                  <X size={12} /> Remove
+                </button>
+              )}
+              {!editTopicId && subjects.length > 0 && (
+                <p className="text-[11px] uppercase tracking-widest text-warning">
+                  Pick a subject above and click Use to link a topic.
+                </p>
+              )}
+            </div>
             <Input
               label="Title"
               value={editTitle}
@@ -404,7 +639,7 @@ function NotesContent() {
             />
             <TagInput label="Tags" tags={editTags} onChange={setEditTags} />
             <div className="flex justify-end gap-4 pt-4">
-              <Button variant="ghost" onClick={() => setEditNote(null)}>
+              <Button variant="ghost" onClick={() => { setEditNote(null); setEditTopicId(""); }}>
                 Cancel
               </Button>
               <Button onClick={handleEditSave} disabled={!editTitle.trim()}>

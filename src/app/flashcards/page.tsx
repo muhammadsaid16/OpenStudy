@@ -295,18 +295,32 @@ function FlashcardsContent() {
         const topicCards = await getFlashcards(topicParam);
         cards = (topicCards as Flashcard[]).filter((c) => new Date(c.nextReview).getTime() <= now);
       } else {
+        let practice = false;
         try {
           const now = Date.now();
           // Bundle review: serve ONLY cards whose nextReview has arrived —
           // serving every card broke SM-2 (a +30d card was shown today).
           const all: Flashcard[] = (await getBundleCards(selectedBundle)) as Flashcard[];
-          cards = all.filter((c) => new Date(c.nextReview).getTime() <= now);
+          const due = all.filter((c) => new Date(c.nextReview).getTime() <= now);
+          if (due.length === 0 && all.length > 0) {
+            cards = shuffled(all);
+            practice = true;
+          } else {
+            cards = due;
+          }
         } catch {
           // offline fallback
           const cached = await getCachedBundleCards(selectedBundle);
           const now = Date.now();
-          cards = (cached as unknown as Flashcard[]).filter((c) => new Date(c.nextReview).getTime() <= now);
+          const due = (cached as unknown as Flashcard[]).filter((c) => new Date(c.nextReview).getTime() <= now);
+          if (due.length === 0 && (cached as unknown as Flashcard[]).length > 0) {
+            cards = shuffled(cached as unknown as Flashcard[]);
+            practice = true;
+          } else {
+            cards = due;
+          }
         }
+        if (practice && cards.length > 0) showToast("Practice mode — no cards due, showing all cards", "info");
       }
       if (cancelled) return;
       setDueCards(cards);
@@ -329,11 +343,18 @@ function FlashcardsContent() {
     } else if (topicParam) {
       cards = filterDueCards((await getFlashcards(topicParam)) as Flashcard[]);
     } else {
-      cards = selectedBundle
-        // getBundleCards returns newest-first (management order) —
-        // filterDueCards re-sorts most-overdue-first for the review queue.
-        ? filterDueCards((await getBundleCards(selectedBundle)) as Flashcard[])
-        : ((await getAllDueFlashcards()) as unknown as Flashcard[]);
+      if (selectedBundle) {
+        const all = (await getBundleCards(selectedBundle)) as Flashcard[];
+        const due = filterDueCards(all);
+        if (due.length === 0 && all.length > 0) {
+          cards = shuffled(all);
+          showToast("Practice mode — no cards due, showing all cards", "info");
+        } else {
+          cards = due;
+        }
+      } else {
+        cards = (await getAllDueFlashcards()) as unknown as Flashcard[];
+      }
     }
     setDueCards(cards);
     setCurrentIndex(0);
@@ -720,7 +741,7 @@ function FlashcardsContent() {
               setStatsLoaded(false);
             }}
             aria-label="Select bundle to study"
-            className="flex h-10 items-center gap-2 rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold uppercase tracking-tight text-fg backdrop-blur-md focus:outline-none focus:border-accent"
+            className="flex h-10 items-center gap-2 rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold uppercase tracking-tight text-fg backdrop-blur-md focus:outline-none"
           >
             <option value="" className="bg-bg text-fg">All bundles</option>
             {bundles.map((b) => (
@@ -1226,7 +1247,7 @@ function FlashcardsContent() {
             <select
               value={batchMoveTarget}
               onChange={(e) => setBatchMoveTarget(e.target.value)}
-              className="h-10 w-full rounded-xl border border-border bg-bg px-3 text-sm text-fg focus:outline-none focus:border-accent"
+              className="h-10 w-full rounded-xl border border-border bg-bg px-3 text-sm text-fg focus:outline-none"
             >
               <option value="" className="bg-bg text-fg">No bundle (unassigned)</option>
               {bundles.map((b) => (

@@ -40,7 +40,7 @@ export function TagInput({ tags, onChange, placeholder, label }: TagInputProps) 
       {label && (
         <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{label}</label>
       )}
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border glass-inset px-3 py-3 focus-within:border-accent transition-colors">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border glass-inset px-3 py-3 focus-within:outline-none transition-colors">
         {tags.map((t) => (
           <span
             key={t}

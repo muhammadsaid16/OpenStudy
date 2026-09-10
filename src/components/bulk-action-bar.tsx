@@ -153,7 +153,7 @@ export function BulkActionBar({
           <select
             value={effectiveMoveTarget}
             onChange={(e) => setMoveTarget(e.target.value)}
-            className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-fg focus:border-accent focus:outline-none"
+            className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-fg focus:outline-none"
           >
             {otherBundles.map((b) => (
               <option key={b.id} value={b.id} className="bg-bg text-fg">{b.name}</option>
