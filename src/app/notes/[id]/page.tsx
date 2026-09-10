@@ -254,7 +254,7 @@ export default function NotePage() {
             <input
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className="glass-inset flex h-12 w-full rounded-xl px-4 py-2 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 border-border focus:outline-none"
+              className="glass-inset flex h-12 w-full rounded-xl px-4 py-2 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 !border-0 focus:outline-none"
             />
           </div>
           <div className="space-y-1.5">
@@ -263,7 +263,7 @@ export default function NotePage() {
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               rows={10}
-              className="glass-inset flex w-full rounded-xl px-4 py-3 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 border-border focus:outline-none resize-none"
+              className="glass-inset flex w-full rounded-xl px-4 py-3 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 !border-0 focus:outline-none resize-none"
             />
           </div>
           <TagInput label="Tags" tags={editTags} onChange={setEditTags} />
