@@ -5,6 +5,8 @@ import { Plus, Check } from "lucide-react";
 import { Input } from "@/components/ui";
 import { createTopic, createSubject, getSubjects, getTopics } from "@/app/actions";
 import { showToast } from "@/components/toast";
+import { themeAccent } from "@/lib/bundle-colors";
+import { useAppStore } from "@/lib/store";
 import { SubjectTopicMenu } from "@/components/subject-topic-menu";
 
 type Subject = { id: string; name: string; color: string };
@@ -66,7 +68,8 @@ export function SubjectTopicSelect({
     setSubjectErr("");
     setCreating(true);
     try {
-      const s = await createSubject({ name, color: "#FF7A72", icon: "book-open" });
+      const accent = themeAccent(useAppStore.getState().theme);
+      const s = await createSubject({ name, color: accent, icon: "book-open" });
       setSelectedSubject(s.id);
       setNewSubjectName("");
       if (onSubjectsChange) {

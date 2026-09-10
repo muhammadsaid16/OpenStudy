@@ -31,6 +31,8 @@ import { parseSharedBundle } from "@/lib/share";
 import { showToast } from "@/components/toast";
 import { db } from "@/lib/db";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
+import { themeAccent } from "@/lib/bundle-colors";
+import { useAppStore } from "@/lib/store";
 import { SubjectIconPicker, SUBJECT_ICONS } from "@/components/subject-icon-picker";
 import { readableOn } from "@/lib/utils";
 import { tiltHandlers } from "@/lib/interactions";
@@ -45,7 +47,7 @@ export default function SubjectsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [color, setColor] = useState("#DFE104");
+  const [color, setColor] = useState(() => themeAccent(typeof window !== "undefined" ? (document.documentElement.getAttribute("data-theme") as string) : "aurora"));
   const [icon, setIcon] = useState("book-open");
   const [isPending, startTransition] = useTransition();
 
@@ -80,9 +82,13 @@ export default function SubjectsPage() {
 
   // Decks tab state (merged from /bundles)
   const [deckCreateOpen, setDeckCreateOpen] = useState(false);
+  const theme = useAppStore((s: { theme: string }) => s.theme);
   const [deckName, setDeckName] = useState("");
   const [deckDesc, setDeckDesc] = useState("");
-  const [deckColor, setDeckColor] = useState("#DFE104");
+  const [deckColor, setDeckColor] = useState(() => themeAccent(typeof window !== "undefined" ? (document.documentElement.getAttribute("data-theme") as string) : "aurora"));
+  // Auto-fit deck/subject color to current theme when opening create modals
+  useEffect(() => { if (deckCreateOpen) setDeckColor(themeAccent(theme)); }, [deckCreateOpen, theme]);
+  useEffect(() => { if (modalOpen) setColor(themeAccent(theme)); }, [modalOpen, theme]);
   const [deckSubjectId, setDeckSubjectId] = useState("");
   const [deckTopicId, setDeckTopicId] = useState("");
   const [dueCount, setDueCount] = useState<number | null>(null);
@@ -199,7 +205,7 @@ export default function SubjectsPage() {
         setDeckCreateOpen(false);
         setDeckName("");
         setDeckDesc("");
-        setDeckColor("#DFE104");
+        setDeckColor(themeAccent(useAppStore.getState().theme));
         setDeckSubjectId("");
         setDeckTopicId("");
         const bundles = await getBundles();

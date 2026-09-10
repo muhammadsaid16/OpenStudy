@@ -49,6 +49,8 @@ import { db as offlineDb, cacheBundles, cacheFlashcards, getCachedBundleCards } 
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useTts } from "@/hooks/use-tts";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
+import { themeAccent } from "@/lib/bundle-colors";
+import { useAppStore } from "@/lib/store";
 import { TagInput } from "@/components/tag-input";
 import { ImageUploadButton } from "@/components/image-upload-button";
 import { AiImportButton } from "@/components/ai-import-button";
@@ -176,7 +178,9 @@ function FlashcardsContent() {
   const [bundleCreateOpen, setBundleCreateOpen] = useState(false);
   const [newBundleName, setNewBundleName] = useState("");
   const [newBundleDesc, setNewBundleDesc] = useState("");
-  const [newBundleColor, setNewBundleColor] = useState("#DFE104");
+  const [newBundleColor, setNewBundleColor] = useState(() => themeAccent(typeof window !== "undefined" ? (document.documentElement.getAttribute("data-theme") as string) : "aurora"));
+  const theme = useAppStore((s: { theme: string }) => s.theme);
+  useEffect(() => { if (bundleCreateOpen) setNewBundleColor(themeAccent(theme)); }, [bundleCreateOpen, theme]);
   const [newBundleSubjectId, setNewBundleSubjectId] = useState("");
   const [newBundleTopicId, setNewBundleTopicId] = useState("");
   const [creatingBundle, setCreatingBundle] = useState(false);
@@ -190,7 +194,7 @@ function FlashcardsContent() {
       setBundleCreateOpen(false);
       setNewBundleName("");
       setNewBundleDesc("");
-      setNewBundleColor("#DFE104");
+      setNewBundleColor(themeAccent(useAppStore.getState().theme));
       setNewBundleSubjectId("");
       setNewBundleTopicId("");
       const fresh = await getBundles();

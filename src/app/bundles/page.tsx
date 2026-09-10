@@ -13,6 +13,8 @@ import { SubjectTopicMenu } from "@/components/subject-topic-menu";
 import { getBundles, createBundle, updateBundle, deleteBundle, importCardsIntoBundle, getSubjects } from "@/app/actions";
 import { parseSharedBundle } from "@/lib/share";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
+import { themeAccent } from "@/lib/bundle-colors";
+import { useAppStore } from "@/lib/store";
 import { spotlightProps } from "@/lib/interactions";
 
 type Bundle = Awaited<ReturnType<typeof getBundles>>[number];
@@ -27,7 +29,9 @@ export default function BundlesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
-  const [newColor, setNewColor] = useState("#DFE104");
+  const [newColor, setNewColor] = useState(() => themeAccent(typeof window !== "undefined" ? (document.documentElement.getAttribute("data-theme") as string) : "aurora"));
+  const theme = useAppStore((s: { theme: string }) => s.theme);
+  useEffect(() => { if (createOpen) setNewColor(themeAccent(theme)); }, [createOpen, theme]);
   const [newSubjectId, setNewSubjectId] = useState("");
   const [newTopicId, setNewTopicId] = useState("");
   const [subjects, setSubjects] = useState<{ id: string; name: string; color: string }[]>([]);
@@ -78,7 +82,7 @@ export default function BundlesPage() {
       setCreateOpen(false);
       setNewName("");
       setNewDesc("");
-      setNewColor("#DFE104");
+      setNewColor(themeAccent(useAppStore.getState().theme));
       setNewSubjectId("");
       setNewTopicId("");
     } catch (e) {
