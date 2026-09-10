@@ -613,13 +613,10 @@ p.font-mono,
    elements (buttons, links, selects, custom controls) without
    needing per-component focus-visible classes. Mouse users never
    see it (:focus-visible only fires for keyboard/AT navigation). */
+/* Focus ring disabled per user request — no outline on focus (inputs stay borderless) */
 :focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: inherit;
-}
-:focus-visible:where(a, button) {
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: none;
 }
 
 /* ─── Expanded hit area for small visual controls ────────────────
