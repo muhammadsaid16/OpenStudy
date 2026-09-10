@@ -10,6 +10,7 @@ import { PageTransition } from "@/components/page-transition";
 import { CommandPalette } from "@/components/command-palette";
 import { GlobalFocusChip } from "@/components/global-focus-chip";
 import { StorageGuard } from "@/components/storage-guard";
+import { VitalsGuard } from "@/components/vitals-guard";
 
 export const metadata: Metadata = {
   title: "OpenStudy — Learn Smarter",
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ToastHost />
         <CommandPalette />
         <ThemeEffects />
+        <VitalsGuard />
         <SwRegister />
       </body>
     </html>
