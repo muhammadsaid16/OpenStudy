@@ -9,6 +9,7 @@ import { SwRegister } from "@/components/sw-register";
 import { PageTransition } from "@/components/page-transition";
 import { CommandPalette } from "@/components/command-palette";
 import { GlobalFocusChip } from "@/components/global-focus-chip";
+import { StorageGuard } from "@/components/storage-guard";
 
 export const metadata: Metadata = {
   title: "OpenStudy — Learn Smarter",
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex h-screen overflow-hidden">
           <Sidebar />
           <main className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+            <StorageGuard />
             <PageTransition>{children}</PageTransition>
           </main>
         </div>
