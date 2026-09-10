@@ -16,7 +16,8 @@ export type LoaderVariant =
   | "sessions"
   | "settings"
   | "kanban"    // goals
-  | "cards";    // bundles/[id]/cards
+  | "cards"     // bundles/[id]/cards
+  | "stats";    // stats
 
 function LoaderBar({ label }: { label: string }) {
   // Spec (global): loading labels are implementation-style text —
@@ -280,6 +281,45 @@ function SettingsBody() {
   );
 }
 
+function StatsBody() {
+  return (
+    <>
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="glass rounded-2xl p-4">
+            <Skeleton className="h-2.5 w-16" />
+            <Skeleton className="mt-2 h-8 w-12" />
+            <Skeleton className="mt-1 h-3 w-20" />
+          </div>
+        ))}
+      </div>
+      <div className="mb-6 flex gap-2">
+        <Skeleton className="h-8 w-24 rounded-full" />
+        <Skeleton className="h-8 w-24 rounded-full" />
+        <Skeleton className="h-8 w-24 rounded-full" />
+      </div>
+      <div className="glass rounded-2xl p-6">
+        <Skeleton className="mb-4 h-4 w-32" />
+        <div className="grid grid-cols-7 gap-1">
+          {Array.from({ length: 35 }).map((_, i) => (
+            <Skeleton key={i} className="h-6 w-full rounded-md" />
+          ))}
+        </div>
+      </div>
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <div className="glass rounded-2xl p-6">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="mt-4 h-40 w-full" />
+        </div>
+        <div className="glass rounded-2xl p-6">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="mt-4 h-40 w-full" />
+        </div>
+      </div>
+    </>
+  );
+}
+
 function CardsBody() {
   return (
     <>
@@ -362,6 +402,7 @@ const LABELS: Record<LoaderVariant, string> = {
   settings: "Settings",
   kanban: "Goals",
   cards: "Cards",
+  stats: "Stats",
 };
 
 export function PageLoader({
@@ -386,6 +427,7 @@ export function PageLoader({
       {variant === "settings" && <SettingsBody />}
       {variant === "kanban" && <KanbanBody />}
       {variant === "cards" && <CardsBody />}
+      {variant === "stats" && <StatsBody />}
     </div>
   );
 }

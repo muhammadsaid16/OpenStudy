@@ -589,7 +589,15 @@ export default function BundleCardsPage() {
         {!loaded ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-[200px] w-full" />
+              <div key={i} className="glass flex min-h-[200px] flex-col rounded-2xl p-5">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="ml-auto h-3 w-12" />
+                </div>
+                <Skeleton className="mt-4 h-4 w-3/4" />
+                <Skeleton className="mt-2 h-4 w-1/2" />
+                <Skeleton className="mt-auto h-9 w-full rounded-xl" />
+              </div>
             ))}
           </div>
         ) : filteredCards.length === 0 ? (

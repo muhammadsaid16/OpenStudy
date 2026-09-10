@@ -14,7 +14,7 @@ export interface CardStatusLike {
 export function getCardStatus(card: CardStatusLike, nowMs: number) {
   const rc = card.reviewCount;
   const isDue = new Date(card.nextReview).getTime() <= nowMs;
-  if (rc === 0) return { label: "New", dot: "bg-gray-400" };
+  if (rc === 0) return { label: "New", dot: "bg-muted-fg" };
   if (isDue) return { label: "Due", dot: "bg-danger" };
   if (rc <= 3) return { label: "Learning", dot: "bg-warning" };
   return { label: "Mature", dot: "bg-success" };

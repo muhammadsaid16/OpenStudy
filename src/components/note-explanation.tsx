@@ -232,7 +232,7 @@ export function NoteExplanation({
     win.document.write(`<!doctype html><html><head><meta charset="utf-8"/><title>${esc(title)} — Explanation</title>
       <style>
         body{font-family: ui-sans-serif,system-ui,sans-serif; max-width:720px; margin:40px auto; padding:0 24px; color:#111; line-height:1.6; font-size:13px;}
-        h1{font-size:22px; margin:28px 0 12px; border-bottom:1px solid #e5e7eb; padding-bottom:8px;}
+        h1{font-size:22px; margin:28px 0 12px; border-bottom:1px solid #e5e7eb; padding-bottom:8px;} /* print doc — isolated window, not themed */
         h2{font-size:17px; margin:24px 0 10px; color:#111;}
         h3{font-size:14px; margin:18px 0 8px;}
         ul{padding-left:20px; margin:8px 0;}

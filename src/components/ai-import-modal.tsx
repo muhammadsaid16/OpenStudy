@@ -151,7 +151,7 @@ export function AiImportModal({
         </select>
       ) : (
         <p className="text-sm text-warning">
-          No bundles yet — create one in /bundles first.
+          No decks yet — create one in Library first.
         </p>
       )}
     </div>

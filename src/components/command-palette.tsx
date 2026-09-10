@@ -37,7 +37,7 @@ export function CommandPalette() {
       ]);
       const out: Entry[] = [];
       for (const s of subjects)
-        out.push({ id: "s" + s.id, group: "Subjects", title: s.name, sub: "", href: "/subjects/" + s.id });
+        out.push({ id: "s" + s.id, group: "Subjects", title: s.name, sub: "", href: "/subjects" });
       for (const b of bundles ?? [])
         out.push({ id: "b" + b.id, group: "Bundles", title: b.name, sub: (b as { description?: string }).description ?? "", href: "/bundles/" + b.id + "/cards" });
       for (const c of (cards ?? []).slice(0, 1500)) {
@@ -45,7 +45,7 @@ export function CommandPalette() {
         const front = k === "cloze" ? maskCloze(c.front) : c.front;
         out.push({
           id: "c" + c.id, group: "Cards", title: front.slice(0, 90), sub: k === "basic" ? c.back.slice(0, 90) : k.toUpperCase(),
-          href: c.bundleId ? "/bundles/" + c.bundleId + "/cards" : "/flashcards",
+          href: c.bundleId ? "/bundles/" + c.bundleId + "/cards" : "/subjects",
         });
       }
       for (const n of (notes ?? []).slice(0, 500))

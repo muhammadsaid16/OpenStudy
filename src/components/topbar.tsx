@@ -83,7 +83,7 @@ export function TopBar({ dueCards }: { dueCards: number }) {
             // browse tab (search all cards) pre-filtered with the query.
             // Previously this wrote to a store field nothing ever read.
             if (e.key === "Enter" && q.trim()) {
-              router.push(`/flashcards?mode=browse&q=${encodeURIComponent(q.trim())}`);
+              router.push(`/subjects?q=${encodeURIComponent(q.trim())}`);
             }
           }}
           placeholder="Search notes, cards, decks…"

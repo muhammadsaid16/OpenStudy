@@ -770,7 +770,7 @@ function FlashcardsContent() {
             onCreated={reloadCards}
           />
           <button
-            onClick={() => router.push("/bundles")}
+            onClick={() => router.push("/subjects")}
             className="ml-auto py-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
           >
             Manage bundles →

@@ -76,7 +76,7 @@ export default function SharePage() {
       {error !== "" && <p className="mt-3 text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
       <div className="mt-6 flex gap-2">
         <Button disabled={busy} onClick={doImport}>{busy ? "Importing…" : `Import ${bundle.cards.length} cards`}</Button>
-        <Button variant="secondary" onClick={() => router.push("/bundles")}>Cancel</Button>
+        <Button variant="secondary" onClick={() => router.push("/subjects")}>Cancel</Button>
       </div>
     </div>
   );

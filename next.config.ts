@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       { source: "/flashcards", destination: "/subjects", permanent: false },
       { source: "/flashcards/:path*", destination: "/subjects", permanent: false },
       { source: "/bundles", destination: "/subjects", permanent: false },
+      { source: "/bundles/:path*", destination: "/subjects", permanent: false },
     ];
   },
 };

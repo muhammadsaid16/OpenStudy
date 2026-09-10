@@ -29,7 +29,7 @@ import type {
 } from "@/lib/db";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
-import { Button, Badge, Card, Modal, EmptyState } from "@/components/ui";
+import { Button, Badge, Card, Modal, EmptyState, Skeleton } from "@/components/ui";
 import { GoalModal } from "@/components/goal-modal";
 import { showToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
@@ -459,7 +459,38 @@ export default function GoalsPage() {
       </div>
 
       {/* Board */}
-      {!loaded ? null : goals.length === 0 ? (
+      {!loaded ? (
+        <>
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="glass rounded-2xl p-4">
+                <Skeleton className="h-2.5 w-12" />
+                <Skeleton className="mt-2 h-8 w-10" />
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, ci) => (
+              <div key={ci} className="glass min-h-[200px] rounded-2xl p-3">
+                <div className="mb-3 flex items-center gap-2 px-1">
+                  <Skeleton className="h-2 w-2 rounded-full" />
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-4 w-6 rounded-full" />
+                </div>
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }).map((__, i) => (
+                    <div key={i} className="rounded-2xl border border-border p-4">
+                      <Skeleton className="h-3 w-16 rounded-full" />
+                      <Skeleton className="mt-2 h-4 w-3/4" />
+                      <Skeleton className="mt-2 h-3 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : goals.length === 0 ? (
         <EmptyState
           icon={<Target size={48} />}
           title="No goals yet"

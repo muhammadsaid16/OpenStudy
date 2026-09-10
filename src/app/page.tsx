@@ -245,7 +245,7 @@ export default function DashboardPage() {
                   value: stats.totalFlashcards,
                   icon: Brain,
                   emptyCta: "Make flashcards",
-                  emptyHref: "/flashcards",
+                  emptyHref: "/subjects",
                 },
                 {
                   label: "Study time",
