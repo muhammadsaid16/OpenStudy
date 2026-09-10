@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Clipboard, ClipboardCheck, ExternalLink, Trash2, Pencil, Copy, Check, Loader2, Lightbulb, AlertTriangle } from "lucide-react";
+import { Sparkles, Clipboard, ClipboardCheck, ExternalLink, Trash2, Pencil, Copy, Check, Loader2, Lightbulb, AlertTriangle, BookOpen } from "lucide-react";
 import { Button, Skeleton } from "@/components/ui";
 import { Markdown } from "@/components/markdown";
 import { updateNote } from "@/app/actions";
@@ -48,7 +48,6 @@ export function NoteExplanation({
   const [err, setErr] = useState<string | null>(null);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [copiedExp, setCopiedExp] = useState(false);
-  const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteText, setPasteText] = useState("");
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -73,7 +72,6 @@ export function NoteExplanation({
       const j = (await res.json()) as { ok: boolean; explanation?: string; error?: string; message?: string };
       if (!j.ok) {
         const msg = (j as any).message ?? "AI explanation failed.";
-        // quota / length / upstream → surface plus keep import fallback visible
         setErr(msg);
         return;
       }
@@ -81,7 +79,7 @@ export function NoteExplanation({
       await updateNote(noteId, { explanation: exp });
       onSaved(exp);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Network error. Try NotebookLM import.");
+      setErr(e instanceof Error ? e.message : "Network error. Try Option 2 — NotebookLM below.");
     } finally {
       setGenerating(false);
     }
@@ -95,7 +93,6 @@ export function NoteExplanation({
       await updateNote(noteId, { explanation: t });
       onSaved(t);
       setPasteText("");
-      setPasteOpen(false);
       setErr(null);
     } finally {
       setSaving(false);
@@ -158,10 +155,13 @@ export function NoteExplanation({
             )}
           </h2>
           <p className="mt-1 max-w-xl text-xs leading-relaxed text-muted-fg">
-            AI-written study companion for this lesson — generated from your note, saved with it. Regenerate anytime, or import from NotebookLM if the AI is unavailable.
+            Two ways to get your study companion. <span className="font-semibold text-fg">Option 1</span> generates it here instantly.
+            <span className="font-semibold text-fg"> Option 2 — NotebookLM</span> is the backup when the lesson is very long or credits run out.
           </p>
           {explanationUpdatedAt && hasExplanation && (
-            <p className="mt-1 text-[11px] text-muted-fg/70">Updated {new Date(explanationUpdatedAt).toLocaleDateString()} · {new Date(explanationUpdatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+            <p className="mt-1 text-[11px] text-muted-fg/70">
+              Updated {new Date(explanationUpdatedAt).toLocaleDateString()} · {new Date(explanationUpdatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </p>
           )}
         </div>
 
@@ -223,17 +223,16 @@ export function NoteExplanation({
             <p className="text-sm font-semibold">No explanation yet</p>
             <p className="mt-1 text-xs leading-relaxed text-muted-fg">
               {hasLesson
-                ? "Generate an AI explanation from your lesson, or import one from NotebookLM (used when the prompt is very long or credits run out)."
+                ? "Generate it here with AI, or use Option 2 — NotebookLM — when the lesson is very long or credits are exhausted."
                 : "Write your lesson above (≥20 chars) first, then generate or paste an explanation here."}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button size="sm" onClick={doGenerate} disabled={generating || !hasLesson}>
                 <Sparkles size={14} /> Generate with AI
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => setPasteOpen((v) => !v)}>
-                {pasteOpen ? "Close import" : "Import from NotebookLM"}
-                <ExternalLink size={14} />
-              </Button>
+              <a href="#notebooklm-option2" className="inline-flex h-9 items-center gap-2 rounded-full border border-glass-border px-4 text-xs font-semibold text-fg hover:border-accent hover:text-accent">
+                Go to Option 2 — NotebookLM <ExternalLink size={14} />
+              </a>
             </div>
           </div>
         )}
@@ -242,33 +241,50 @@ export function NoteExplanation({
           <div className="mt-4 flex gap-3 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm">
             <AlertTriangle size={16} className="mt-0.5 shrink-0 text-danger" />
             <div className="min-w-0">
-              <p className="font-semibold text-danger">AI couldn’t generate — use NotebookLM instead</p>
+              <p className="font-semibold text-danger">AI couldn’t generate — try Option 2 below</p>
               <p className="mt-1 text-xs leading-relaxed text-fg/80">{err}</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Button size="sm" variant="secondary" onClick={() => setPasteOpen(true)}>
-                  Import from NotebookLM <ExternalLink size={14} />
-                </Button>
+                <a href="#notebooklm-option2" className="inline-flex h-8 items-center gap-2 rounded-full bg-bg px-3 text-xs font-semibold hover:brightness-110">
+                  Go to Option 2 — NotebookLM <ExternalLink size={12} />
+                </a>
                 <Button size="sm" variant="ghost" onClick={() => setErr(null)}>Dismiss</Button>
               </div>
             </div>
           </div>
         )}
 
-        {/* NotebookLM import — always available */}
-        <div className="mt-6 rounded-2xl border border-glass-border bg-bg-raised p-5">
-          <h3 className="flex items-center gap-2 text-sm font-bold tracking-tight">
-            <ExternalLink size={14} className="text-accent" /> Import explanation via NotebookLM
-          </h3>
-          <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs leading-relaxed text-muted-fg">
-            <li>Copy the prompt below (it already includes your lesson).</li>
+        {/* ── OPTION 2 ── */}
+        <div
+          id="notebooklm-option2"
+          className="mt-6 rounded-2xl border border-accent/25 bg-accent-soft/40 p-5 ring-1 ring-accent/10"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="flex items-center gap-2 text-sm font-bold tracking-tight">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-fg">
+                <BookOpen size={14} />
+              </span>
+              Option 2 — Import via NotebookLM
+              <span className="hidden rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg sm:inline">Backup solution</span>
+            </h3>
+            <span className="shrink-0 rounded-full border border-accent/30 bg-bg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent">When AI fails or lesson is too long</span>
+          </div>
+          <p className="mt-2 text-xs leading-relaxed text-muted-fg">
+            Used when the built-in AI is rate-limited, credits are exhausted, or your lesson exceeds the size limit. You generate the explanation in{" "}
+            <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-accent underline underline-offset-2">
+              NotebookLM
+            </a>{" "}
+            with a pre-built prompt (already includes your lesson), then paste the result back here.
+          </p>
+          <ol className="mt-3 list-decimal space-y-1 pl-5 text-xs leading-relaxed text-muted-fg">
+            <li>Click <span className="font-semibold text-fg">Copy prompt</span> below.</li>
             <li>
               Open{" "}
               <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-accent underline underline-offset-2">
                 NotebookLM
               </a>{" "}
-              → New notebook → paste the prompt → generate.
+              → <span className="font-semibold text-fg">New notebook</span> → paste the prompt → generate.
             </li>
-            <li>Copy NotebookLM’s answer, come back here, paste it below and save.</li>
+            <li>Copy NotebookLM’s answer, come back here, paste it in the box below and hit Save.</li>
           </ol>
 
           <div className="mt-4">
@@ -296,39 +312,25 @@ export function NoteExplanation({
             </div>
           </div>
 
-          <div className="mt-5 border-t border-glass-border pt-5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Paste explanation here</label>
-              {!pasteOpen && hasExplanation && (
-                <Button size="sm" variant="ghost" onClick={() => setPasteOpen(true)}>Paste new</Button>
-              )}
+          <div className="mt-5 border-t border-accent/15 pt-5">
+            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Paste NotebookLM answer here</label>
+            <textarea
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              rows={10}
+              placeholder="Paste the NotebookLM answer here (Markdown supported — headings, bullets, bold)…"
+              className="glass-inset mt-2 flex min-h-40 w-full rounded-xl px-4 py-3 text-sm leading-relaxed text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20"
+            />
+            <div className="mt-3 flex flex-wrap justify-end gap-2">
+              <Button size="sm" onClick={doSavePaste} disabled={saving || !pasteText.trim()}>
+                {saving ? <Loader2 size={14} className="animate-spin" /> : null} Save explanation
+              </Button>
             </div>
-            {(pasteOpen || !hasExplanation) && (
-              <>
-                <textarea
-                  value={pasteText}
-                  onChange={(e) => setPasteText(e.target.value)}
-                  rows={10}
-                  placeholder="Paste the NotebookLM answer here (Markdown supported — headings, bullets, bold)…"
-                  className="glass-inset mt-2 flex min-h-40 w-full rounded-xl px-4 py-3 text-sm leading-relaxed text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20"
-                />
-                <div className="mt-3 flex flex-wrap justify-end gap-2">
-                  {pasteOpen && hasExplanation && (
-                    <Button variant="ghost" size="sm" onClick={() => { setPasteOpen(false); setPasteText(""); }}>
-                      Cancel
-                    </Button>
-                  )}
-                  <Button size="sm" onClick={doSavePaste} disabled={saving || !pasteText.trim()}>
-                    {saving ? <Loader2 size={14} className="animate-spin" /> : null} Save explanation
-                  </Button>
-                </div>
-                {pasteText.trim().length > 0 && (
-                  <p className="mt-2 text-right text-xs text-muted-fg">{pasteText.trim().length.toLocaleString()} chars — will overwrite current explanation</p>
-                )}
-              </>
+            {pasteText.trim().length > 0 && (
+              <p className="mt-2 text-right text-xs text-muted-fg">{pasteText.trim().length.toLocaleString()} chars — will overwrite current explanation</p>
             )}
-            {!pasteOpen && hasExplanation && !editing && (
-              <p className="mt-2 text-xs text-muted-fg">Paste a new version from NotebookLM to replace the current one.</p>
+            {hasExplanation && !pasteText.trim() && !editing && (
+              <p className="mt-2 text-xs text-muted-fg">Pasting here replaces the current explanation. Your previous one will be overwritten.</p>
             )}
           </div>
         </div>
