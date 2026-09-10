@@ -80,8 +80,9 @@ async function streamGemini(apiKey: string, source: string, out: ReturnType<type
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    buf += decoder.decode(value, { stream: true });
+    buf += decoder.decode(value, { stream: true }).replaceAll("\r\n", "\n");
     let idx: number;
+    // Gemini SSE frames end with \n\n after CR normalization; accept bare \n\n too.
     while ((idx = buf.indexOf("\n\n")) !== -1) {
       const frame = buf.slice(0, idx); buf = buf.slice(idx + 2);
       for (const line of frame.split("\n")) {
