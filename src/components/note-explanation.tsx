@@ -101,6 +101,8 @@ export function NoteExplanation({
     }, speed);
   };
 
+  // Live SSE generation: explanation streams in token-by-token as the
+  // provider produces it (no full wait, no fake typewriter).
   const doGenerate = async () => {
     if (!hasLesson) {
       setErr("Add more lesson content first (at least 20 characters).");
@@ -108,27 +110,64 @@ export function NoteExplanation({
     }
     setErr(null);
     setGenerating(true);
+    setIsTyping(true);
+    setDisplayed("");
+    let acc = "";
+    let streamed = false;
     try {
-      const res = await fetch("/api/ai/explain", {
+      const res = await fetch("/api/ai/explain/stream", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ text: content, title }),
       });
-      const j = (await res.json()) as { ok: boolean; explanation?: string; error?: string; message?: string };
-      if (!j.ok) {
-        const msg = (j as any).message ?? "AI explanation failed.";
-        setErr(msg);
+      if (!res.ok || !res.body) {
+        const j = (await res.json().catch(() => null)) as { message?: string } | null;
+        setErr(j?.message ?? `AI explanation failed (${res.status}).`);
         return;
       }
-      const exp = (j as any).explanation as string;
-      await updateNote(noteId, { explanation: exp });
-      onSaved(exp);
-      // typewriter reveal
-      startTyping(exp);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let idx: number;
+        while ((idx = buf.indexOf("\n\n")) !== -1) {
+          const frame = buf.slice(0, idx); buf = buf.slice(idx + 2);
+          const dataLine = frame.split("\n").find((l) => l.startsWith("data:"));
+          if (!dataLine) continue;
+          let ev: { type?: string; text?: string; message?: string; elapsedMs?: number };
+          try { ev = JSON.parse(dataLine.slice(5).trim()); } catch { continue; }
+          if (ev.type === "delta" && ev.text) {
+            streamed = true;
+            acc += ev.text;
+            setDisplayed(acc);
+          } else if (ev.type === "error") {
+            if (streamed) {
+              // partial output already on screen — keep it, note the truncation
+              setErr((ev.message ?? "") + " (Partial output kept.)");
+            } else {
+              setErr(ev.message ?? "AI explanation failed.");
+            }
+          } else if (ev.type === "done") {
+            // finished cleanly below
+          }
+        }
+      }
+      if (acc.trim()) {
+        const cleaned = acc.replace(/^```(?:markdown)?\s*/i, "").replace(/```\s*$/i, "").trim();
+        await updateNote(noteId, { explanation: cleaned });
+        onSaved(cleaned);
+        setDisplayed(cleaned);
+      } else if (!streamed) {
+        setErr("AI returned no content. Try Option 2 — NotebookLM below.");
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Network error. Try Option 2 — NotebookLM below.");
     } finally {
       setGenerating(false);
+      setIsTyping(false);
     }
   };
 

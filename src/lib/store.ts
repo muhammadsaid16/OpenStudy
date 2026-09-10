@@ -46,6 +46,10 @@ interface AppState {
   reducedMotion: boolean;
   setReducedMotion: (v: boolean) => void;
 
+  // Language (UI direction): en = LTR English, ar = RTL Arabic
+  lang: "en" | "ar";
+  setLang: (l: "en" | "ar") => void;
+
   // Hydrate persisted prefs from localStorage AFTER mount (post-hydration) so
   // the first client render always matches the server render. Reading
   // localStorage at module scope made sidebarOpen/theme differ between server
@@ -65,7 +69,7 @@ interface AppState {
 
 const STORAGE_KEY = "study-prefs";
 
-function loadPrefs(): Partial<Pick<AppState, "theme" | "reducedMotion" | "sidebarOpen">> {
+function loadPrefs(): Partial<Pick<AppState, "theme" | "reducedMotion" | "sidebarOpen" | "lang">> {
   if (typeof window === "undefined") return {};
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -107,6 +111,17 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ reducedMotion: v });
   },
 
+  lang: "en",
+  setLang: (l) => {
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("dir", l === "ar" ? "rtl" : "ltr");
+      document.documentElement.setAttribute("lang", l);
+    }
+    const prev = get();
+    persist({ theme: prev.theme, reducedMotion: prev.reducedMotion, sidebarOpen: prev.sidebarOpen, lang: l });
+    set({ lang: l });
+  },
+
   hydrateFromStorage: () => {
     const prefs = loadPrefs();
     const patch: Partial<AppState> = {};
@@ -116,6 +131,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       patch.theme = normalizeTheme(prefs.theme);
       if (typeof document !== "undefined") {
         document.documentElement.setAttribute("data-theme", patch.theme);
+      }
+    }
+    if (prefs.lang === "ar" || prefs.lang === "en") {
+      patch.lang = prefs.lang;
+      if (typeof document !== "undefined") {
+        document.documentElement.setAttribute("dir", prefs.lang === "ar" ? "rtl" : "ltr");
+        document.documentElement.setAttribute("lang", prefs.lang);
       }
     }
     if (Object.keys(patch).length > 0) set(patch);

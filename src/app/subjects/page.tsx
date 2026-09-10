@@ -83,6 +83,7 @@ export default function SubjectsPage() {
   const [topicStats, setTopicStats] = useState<Record<string, { notes: number; cards: number; bundles: Bundle[] }>>({});
   const [allBundles, setAllBundles] = useState<Bundle[]>([]);
   const [linkTopicId, setLinkTopicId] = useState<string | null>(null);
+  const [deckSearch, setDeckSearch] = useState("");
   const [linkBundleId, setLinkBundleId] = useState("");
 
   const [topicCounts, setTopicCounts] = useState<Record<string, number>>({});
@@ -827,8 +828,43 @@ export default function SubjectsPage() {
               }
             />
           ) : (
+            <>
+            {allBundles.length > 3 && (
+              <div className="mb-4 flex items-center gap-2">
+                <div className="relative flex-1 max-w-sm">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" aria-hidden />
+                  <input
+                    value={deckSearch}
+                    onChange={(e) => setDeckSearch(e.target.value)}
+                    placeholder="Search decks…"
+                    aria-label="Search decks"
+                    className="glass-inset w-full rounded-xl border border-glass-border py-2 pl-9 pr-3 text-sm text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20"
+                  />
+                </div>
+                {deckSearch && (
+                  <span className="text-xs text-muted-fg">
+                    {allBundles.filter((b) => {
+                      const q = deckSearch.toLowerCase();
+                      return b.name.toLowerCase().includes(q) || (b.description ?? "").toLowerCase().includes(q) ||
+                        ((b as any).topic?.subject?.name ?? "").toLowerCase().includes(q) || ((b as any).topic?.name ?? "").toLowerCase().includes(q);
+                    }).length} of {allBundles.length}
+                  </span>
+                )}
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-              {allBundles.map((bundle) => (
+              {allBundles
+                .filter((bundle) => {
+                  if (!deckSearch.trim()) return true;
+                  const q = deckSearch.toLowerCase();
+                  return (
+                    bundle.name.toLowerCase().includes(q) ||
+                    (bundle.description ?? "").toLowerCase().includes(q) ||
+                    (((bundle as any).topic?.subject?.name ?? "").toLowerCase().includes(q)) ||
+                    (((bundle as any).topic?.name ?? "").toLowerCase().includes(q))
+                  );
+                })
+                .map((bundle) => (
                 <div
                   key={bundle.id}
                   className="group relative flex h-64 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 transition-all duration-200 hover:-translate-y-1"
@@ -901,6 +937,7 @@ export default function SubjectsPage() {
                 </div>
               ))}
             </div>
+            </>
           )}
         </>
       )}

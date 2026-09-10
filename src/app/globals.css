@@ -638,3 +638,10 @@ p.font-mono,
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
 }
+
+/* ─── RTL (Arabic UI) ─────────────────────────────────────────
+   dir=rtl flips flow automatically; fix the few physical utilities
+   that must mirror (sidebar border, chevrons handled per-component). */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}

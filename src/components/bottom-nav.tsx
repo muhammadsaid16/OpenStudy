@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useT } from "@/lib/i18n";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -19,13 +20,13 @@ import { cn } from "@/lib/utils";
 // are icon-only (with aria-labels) so 7 destinations fit a 360px viewport;
 // the active tab grows to reveal its label.
 const navItems = [
-  { href: "/", label: "Home", icon: LayoutDashboard },
-  { href: "/subjects", label: "Library", icon: Library },
-  { href: "/notes", label: "Notes", icon: StickyNote },
-  { href: "/sessions", label: "Sessions", icon: Timer },
-  { href: "/goals", label: "Goals", icon: Target },
-  { href: "/stats", label: "Stats", icon: BarChart3 },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/", label: "nav.dashboard", icon: LayoutDashboard },
+  { href: "/subjects", label: "nav.library", icon: Library },
+  { href: "/notes", label: "nav.notes", icon: StickyNote },
+  { href: "/sessions", label: "nav.sessions", icon: Timer },
+  { href: "/goals", label: "nav.goals", icon: Target },
+  { href: "/stats", label: "nav.stats", icon: BarChart3 },
+  { href: "/settings", label: "nav.settings", icon: Settings },
 ];
 
 function isLibraryActive(pathname: string, href: string) {
@@ -39,6 +40,7 @@ function isLibraryActive(pathname: string, href: string) {
 // app-wide prefers-reduced-motion CSS override).
 export function BottomNav() {
   const pathname = usePathname();
+  const t = useT();
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 flex h-16 border-t border-border bg-bg md:hidden pb-[env(safe-area-inset-bottom)]">
@@ -48,7 +50,7 @@ export function BottomNav() {
           <Link
             key={href}
             href={href}
-            aria-label={label}
+            aria-label={t(label)}
             aria-current={isActive ? "page" : undefined}
             className={cn(
               "relative flex min-w-0 flex-col items-center justify-center gap-1 transition-all duration-200",
@@ -65,7 +67,7 @@ export function BottomNav() {
             <Icon size={20} aria-hidden />
             {isActive && (
               <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-widest">
-                {label}
+                {t(label)}
               </span>
             )}
           </Link>

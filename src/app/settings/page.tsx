@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { InstallAppButton } from "@/components/install-app-button";
 import { useAppStore, type ThemeName } from "@/lib/store";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
@@ -66,6 +67,8 @@ function Toggle({
 
 export default function SettingsPage() {
   const theme = useAppStore((s) => s.theme);
+  const lang = useAppStore((s) => s.lang);
+  const setLang = useAppStore((s) => s.setLang);
   const setTheme = useAppStore((s) => s.setTheme);
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const setReducedMotion = useAppStore((s) => s.setReducedMotion);
@@ -136,6 +139,30 @@ export default function SettingsPage() {
           lives under a clear section heading with Interface prefs. */}
       <section className="mb-12">
         <h2 className="mb-1 text-lg font-bold tracking-tight text-fg">Appearance</h2>
+        {/* Language (UI + direction): English LTR / العربية RTL */}
+        <div className="mb-6 mt-3 rounded-2xl border border-border bg-bg-raised/60 p-4">
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-fg">Language</p>
+          <div className="inline-flex rounded-full border border-glass-border bg-glass p-1" role="group" aria-label="Language">
+            <button
+              onClick={() => setLang("en")}
+              aria-pressed={lang === "en"}
+              className={`relative flex-1 rounded-full px-4 py-2 text-xs font-bold transition-colors ${lang === "en" ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"}`}
+            >
+              English
+            </button>
+            <button
+              onClick={() => setLang("ar")}
+              aria-pressed={lang === "ar"}
+              className={`relative flex-1 rounded-full px-4 py-2 text-xs font-bold transition-colors ${lang === "ar" ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"}`}
+            >
+              العربية
+            </button>
+          </div>
+          <p className="mt-2 text-[11px] text-muted-fg">Arabic switches the whole interface to RTL العربية.</p>
+          <div className="mt-3">
+            <InstallAppButton />
+          </div>
+        </div>
         <p className="mb-4 text-xs text-muted-fg">Theme — pick the mood; it applies instantly.</p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {THEMES.map((t) => {

@@ -17,6 +17,7 @@ import {
   Moon,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 // Flat list kept for typing; navGroups above drives the render.
@@ -34,31 +35,32 @@ const navItems = [
 // INSIGHTS (reflection) / SYSTEM. Library merges Subjects + Flashcards +
 // Bundles (one hierarchy: Subject → Topic → Deck → Cards). This fixes the
 // duplicate "two pages for same purpose" reported on /subjects vs /flashcards.
+// Labels are i18n keys rendered through useT() (src/lib/i18n.ts).
 const navGroups: { heading: string; items: typeof navItems }[] = [
   {
-    heading: "Learn",
+    heading: "nav.learn",
     items: [
-      { href: "/subjects", label: "Library", icon: Library },
-      { href: "/notes", label: "Notes", icon: StickyNote },
+      { href: "/subjects", label: "nav.library", icon: Library },
+      { href: "/notes", label: "nav.notes", icon: StickyNote },
     ],
   },
   {
-    heading: "Focus",
+    heading: "nav.focus",
     items: [
-      { href: "/sessions", label: "Sessions", icon: Timer },
-      { href: "/goals", label: "Goals", icon: Target },
+      { href: "/sessions", label: "nav.sessions", icon: Timer },
+      { href: "/goals", label: "nav.goals", icon: Target },
     ],
   },
   {
-    heading: "Insights",
+    heading: "nav.insights",
     items: [
-      { href: "/", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/stats", label: "Stats", icon: BarChart3 },
+      { href: "/", label: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/stats", label: "nav.stats", icon: BarChart3 },
     ],
   },
   {
-    heading: "System",
-    items: [{ href: "/settings", label: "Settings", icon: Settings }],
+    heading: "nav.system",
+    items: [{ href: "/settings", label: "nav.settings", icon: Settings }],
   },
 ];
 
@@ -76,6 +78,7 @@ export function Sidebar() {
   const theme = useAppStore((s) => s.theme);
   const setTheme = useAppStore((s) => s.setTheme);
   const { sidebarOpen, toggleSidebar } = useAppStore();
+  const t = useT();
   const isLight = theme === "light" || theme === "paper";
   const isDark = !isLight;
 
@@ -110,7 +113,7 @@ export function Sidebar() {
           <div key={group.heading}>
             {sidebarOpen && (
               <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-fg/70">
-                {group.heading}
+                {t(group.heading)}
               </p>
             )}
             <div className="space-y-1">
@@ -138,7 +141,7 @@ export function Sidebar() {
                     )}
                     <span className="relative z-10 flex items-center gap-3">
                       <Icon size={18} aria-hidden />
-                      {sidebarOpen && <span>{label}</span>}
+                      {sidebarOpen && <span>{t(label)}</span>}
                     </span>
                   </Link>
                 );
@@ -156,14 +159,14 @@ export function Sidebar() {
           <>
             <div className="mb-1.5 flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-                Appearance
+                {t("nav.appearance")}
               </p>
               <Link
                 href="/settings"
                 aria-label="All themes in Settings"
                 className="text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-accent"
               >
-                All →
+                {t("nav.all")}
               </Link>
             </div>
             <div className="inline-flex w-full rounded-full border border-glass-border bg-glass p-1" role="group" aria-label="Theme">
@@ -173,7 +176,7 @@ export function Sidebar() {
                 className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${isLight ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
               >
                 {isLight && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
-                <span className="relative flex items-center gap-1.5"><Sun size={13} aria-hidden /> Light</span>
+                <span className="relative flex items-center gap-1.5"><Sun size={13} aria-hidden /> {t("nav.light")}</span>
               </button>
               <button
                 onClick={() => setTheme("aurora")}
@@ -181,7 +184,7 @@ export function Sidebar() {
                 className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${isDark ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
               >
                 {isDark && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
-                <span className="relative flex items-center gap-1.5"><Moon size={13} aria-hidden /> Dark</span>
+                <span className="relative flex items-center gap-1.5"><Moon size={13} aria-hidden /> {t("nav.dark")}</span>
               </button>
             </div>
             <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
