@@ -2,44 +2,48 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getBundle, getBundleCards, exportBundle } from "@/app/actions";
+import { exportBundle } from "@/app/actions";
 
-// Direct share link: /share/{bundleId}
-// Fetches the bundle, encodes it as a share payload, and redirects to /share#{hash}
-// where the existing share page handles the import UI.
+// Legacy direct link: /share/{bundleId} — sender's old link format.
+// Export the bundle on the sender's device and redirect to hash form
+// /share#<payload> where the real import UI lives. If the bundle is
+// gone (or this is the receiver opening a stale id), show not-found.
+// Uses the same utf-8-safe encoding as lib/share.ts so non-ascii survives.
+function toHash(json: string): string {
+  return btoa(unescape(encodeURIComponent(json)))
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "");
+}
+
 export default function ShareBundlePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const [status, setStatus] = useState<"loading" | "redirecting" | "not_found" | "empty">("loading");
+  const [status, setStatus] = useState<"loading" | "not_found">("loading");
 
   useEffect(() => {
     const bundleId = params.id;
     if (!bundleId) { setStatus("not_found"); return; }
-
     exportBundle(bundleId)
       .then((json) => {
-        const payload = btoa(json).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-        router.push(`/share#${payload}`);
+        const hash = toHash(json);
+        router.replace("/share#" + hash);
       })
       .catch(() => setStatus("not_found"));
-  }, [params.id]);
+  }, [params.id, router]);
 
   if (status === "not_found") {
     return (
       <div className="mx-auto max-w-lg p-12 text-center">
         <h1 className="text-2xl font-bold uppercase">BUNDLE NOT FOUND</h1>
-        <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">
-          THIS BUNDLE MAY HAVE BEEN DELETED OR THE LINK IS INVALID.
-        </p>
+        <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">THIS BUNDLE WAS DELETED OR THE LINK IS FROM ANOTHER DEVICE. ASK THE SENDER FOR THE LINK ENDING IN #… OR A .STUDYMAX-BUNDLE.JSON FILE.</p>
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-lg p-12 text-center">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-        LOADING SHARED DECK…
-      </p>
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">LOADING SHARED DECK…</p>
     </div>
   );
 }

@@ -34,8 +34,14 @@ export function encodeShare(bundle: SharedBundle): string {
 }
 
 export function decodeShare<T>(hash: string): T {
-  const clean = hash.startsWith("#") ? hash.slice(1) : hash;
-  const padded = clean.replaceAll("-", "+").replaceAll("_", "/");
+  let clean = hash.startsWith("#") ? hash.slice(1) : hash;
+  clean = clean.trim();
+  clean = clean.replaceAll("\n", "").replaceAll("\r", "").replaceAll(" ", "");
+  let padded = clean.replaceAll("-", "+").replaceAll("_", "/");
+  const pad = padded.length % 4;
+  if (pad === 1) throw new Error("Invalid share payload");
+  if (pad === 2) padded += "==";
+  else if (pad === 3) padded += "=";
   const json = decodeURIComponent(escape(atob(padded)));
   return JSON.parse(json) as T;
 }
