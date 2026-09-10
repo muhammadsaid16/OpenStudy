@@ -12,8 +12,10 @@
 //    keeps this legacy mapping — trailing columns are never description.
 // Also accepts JSON arrays of { front, back, description? } for flexibility
 // (description also accepts the aliases desc/hint/note/notes).
-// Header names that map a column to the card's optional description.
+// Header names that map a column to the card's optional description (legacy single).
 const DESCRIPTION_HEADERS = new Set(["description", "desc", "hint", "note", "notes"]);
+const FRONT_DESC_HEADERS = new Set(["frontdescription", "front_description", "frontdesc", "front_desc", "frontnote", "front_note", "fronthint", "front_hint", "front description", "front desc", "front note", "front hint"]);
+const BACK_DESC_HEADERS = new Set(["backdescription", "back_description", "backdesc", "back_desc", "backnote", "back_note", "backhint", "back_hint", "back description", "back desc", "back note", "back hint"]);
 // Header names for card kind (basic/cloze/choice — "mcq" and
 // "multiple choice" also map to choice).
 const KIND_HEADERS = new Set(["kind", "type", "cardtype", "card_type"]);
@@ -40,7 +42,7 @@ function parseChoicesCell(v: string): string[] | undefined {
 
 export function parseCardsFile(
   raw: string
-): { front: string; back: string; tags?: string[]; description?: string; kind?: "basic" | "cloze" | "choice"; choices?: string[] }[] {
+): { front: string; back: string; tags?: string[]; description?: string; frontDescription?: string; backDescription?: string; kind?: "basic" | "cloze" | "choice"; choices?: string[] }[] {
   let trimmed = raw.trim();
   if (!trimmed) return [];
 
@@ -74,11 +76,22 @@ export function parseCardsFile(
                 : Array.isArray(tagStr)
                   ? (tagStr as string[])
                   : undefined;
+            const rawFrontDesc = o.frontDescription ?? o.front_description ?? o.frontDesc ?? o.front_desc ?? o["front description"] ?? o["front desc"];
+            const frontDescription =
+              rawFrontDesc === undefined || rawFrontDesc === null
+                ? undefined
+                : String(rawFrontDesc).trim() || undefined;
+            const rawBackDesc = o.backDescription ?? o.back_description ?? o.backDesc ?? o.back_desc ?? o["back description"] ?? o["back desc"];
+            const backDescription =
+              rawBackDesc === undefined || rawBackDesc === null
+                ? undefined
+                : String(rawBackDesc).trim() || undefined;
             const rawDesc = o.description ?? o.desc ?? o.hint ?? o.note ?? o.notes;
             const description =
               rawDesc === undefined || rawDesc === null
                 ? undefined
                 : String(rawDesc).trim() || undefined;
+            // Legacy fallback: if no backDescription but description exists, keep description for compat
             const rawKind = o.kind ?? o.type;
             const kind =
               typeof rawKind === "string" ? parseKindCell(rawKind) : undefined;
@@ -93,6 +106,8 @@ export function parseCardsFile(
               front: front.trim(),
               back: back.trim(),
               ...(tags?.length ? { tags } : {}),
+              ...(frontDescription ? { frontDescription } : {}),
+              ...(backDescription ? { backDescription } : {}),
               ...(description ? { description } : {}),
               ...(kind && kind !== "basic" ? { kind } : {}),
               ...(choices?.length ? { choices } : {}),
@@ -103,6 +118,8 @@ export function parseCardsFile(
           back: string;
           tags?: string[];
           description?: string;
+          frontDescription?: string;
+          backDescription?: string;
           kind?: "basic" | "cloze" | "choice";
           choices?: string[];
         }[];
@@ -118,12 +135,14 @@ export function parseCardsFile(
     .filter((l) => l.trim().length > 0);
   if (lines.length === 0) return [];
 
-  const result: { front: string; back: string; tags?: string[]; description?: string; kind?: "basic" | "cloze" | "choice"; choices?: string[] }[] = [];
+  const result: { front: string; back: string; tags?: string[]; description?: string; frontDescription?: string; backDescription?: string; kind?: "basic" | "cloze" | "choice"; choices?: string[] }[] = [];
 
   // Column map built from the first data line when it is a recognized header
   // row. `tagCols === undefined` means no header was recognized → legacy
   // behavior (all trailing columns are tags, e.g. headerless Anki TSV).
   let descCol: number | undefined;
+  let frontDescCol: number | undefined;
+  let backDescCol: number | undefined;
   let kindCol: number | undefined;
   let choicesCol: number | undefined;
   let tagCols: number[] | undefined;
@@ -153,12 +172,20 @@ export function parseCardsFile(
       first = false;
       if (isHeaderRow) {
         descCol = undefined;
+        frontDescCol = undefined;
+        backDescCol = undefined;
         kindCol = undefined;
         choicesCol = undefined;
         tagCols = [];
         for (let i = 2; i < cells.length; i++) {
-          const name = cells[i].toLowerCase();
-          if (DESCRIPTION_HEADERS.has(name)) {
+          const rawName = cells[i].trim();
+          const name = rawName.toLowerCase();
+          const norm = name.replace(/[\s_]+/g, "");
+          if (FRONT_DESC_HEADERS.has(name) || FRONT_DESC_HEADERS.has(norm)) {
+            if (frontDescCol === undefined) frontDescCol = i;
+          } else if (BACK_DESC_HEADERS.has(name) || BACK_DESC_HEADERS.has(norm)) {
+            if (backDescCol === undefined) backDescCol = i;
+          } else if (DESCRIPTION_HEADERS.has(name)) {
             if (descCol === undefined) descCol = i;
           } else if (KIND_HEADERS.has(name)) {
             if (kindCol === undefined) kindCol = i;
@@ -179,13 +206,28 @@ export function parseCardsFile(
 
     let tags: string[] | undefined;
     let description: string | undefined;
+    let frontDescription: string | undefined;
+    let backDescription: string | undefined;
     let kind: "basic" | "cloze" | "choice" | undefined;
     let choices: string[] | undefined;
     if (tagCols) {
       // Header-mapped row: description/kind/choices/tags come from mapped columns.
+      if (frontDescCol !== undefined && frontDescCol < cells.length) {
+        const d = cells[frontDescCol].trim();
+        if (d) frontDescription = d;
+      }
+      if (backDescCol !== undefined && backDescCol < cells.length) {
+        const d = cells[backDescCol].trim();
+        if (d) backDescription = d;
+      }
       if (descCol !== undefined && descCol < cells.length) {
         const d = cells[descCol].trim();
         if (d) description = d;
+      }
+      // Legacy fallback: if no backDescription but description exists, keep description
+      if (!backDescription && description && frontDescCol === undefined && backDescCol === undefined) {
+        // keep description as legacy; also map to backDescription for new code if desired?
+        // We preserve description field but don't auto-map to avoid duplication
       }
       if (kindCol !== undefined && kindCol < cells.length) {
         kind = parseKindCell(cells[kindCol]);
@@ -213,6 +255,8 @@ export function parseCardsFile(
       front,
       back,
       ...(tags?.length ? { tags } : {}),
+      ...(frontDescription ? { frontDescription } : {}),
+      ...(backDescription ? { backDescription } : {}),
       ...(description ? { description } : {}),
       ...(kind && kind !== "basic" ? { kind } : {}),
       ...(choices?.length ? { choices } : {}),

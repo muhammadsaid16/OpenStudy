@@ -144,6 +144,8 @@ function FlashcardsContent() {
         !q ||
         card.front.toLowerCase().includes(q) ||
         card.back.toLowerCase().includes(q) ||
+        ((card as any).frontDescription ?? "").toLowerCase().includes(q) ||
+        ((card as any).backDescription ?? "").toLowerCase().includes(q) ||
         (card.description ?? "").toLowerCase().includes(q);
       return matchesSearch;
     });
@@ -168,7 +170,8 @@ function FlashcardsContent() {
   const [selectedTopicId, setSelectedTopicId] = useState("");
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
-  const [desc, setDesc] = useState("");
+  const [frontDesc, setFrontDesc] = useState("");
+  const [backDesc, setBackDesc] = useState("");
   const [kind, setKind] = useState<CardKind>("basic");
   const [choicesText, setChoicesText] = useState("");
   const [creating, setCreating] = useState(false);
@@ -212,7 +215,8 @@ function FlashcardsContent() {
   const [editCard, setEditCard] = useState<ManagedFlashcard | null>(null);
   const [editFront, setEditFront] = useState("");
   const [editBack, setEditBack] = useState("");
-  const [editDesc, setEditDesc] = useState("");
+  const [editFrontDesc, setEditFrontDesc] = useState("");
+  const [editBackDesc, setEditBackDesc] = useState("");
   const [editKind, setEditKind] = useState<CardKind>("basic");
   const [editChoicesText, setEditChoicesText] = useState("");
   const [editTags, setEditTags] = useState<string[]>([]);
@@ -545,14 +549,15 @@ function FlashcardsContent() {
     const choices = kind === "choice" ? cleanChoices(choicesText.split("\n")) : undefined;
     try {
       if (selectedBundle) {
-        await createBundleFlashcard({ bundleId: selectedBundle, front: front.trim(), back: back.trim(), description: desc.trim() || undefined, kind, choices });
+        await createBundleFlashcard({ bundleId: selectedBundle, front: front.trim(), back: back.trim(), frontDescription: frontDesc.trim() || undefined, backDescription: backDesc.trim() || undefined, kind, choices });
       } else if (selectedTopicId) {
-        await createFlashcard({ topicId: selectedTopicId, front: front.trim(), back: back.trim(), description: desc.trim() || undefined, kind, choices });
+        await createFlashcard({ topicId: selectedTopicId, front: front.trim(), back: back.trim(), frontDescription: frontDesc.trim() || undefined, backDescription: backDesc.trim() || undefined, kind, choices });
       }
       setModalOpen(false);
       setFront("");
       setBack("");
-      setDesc("");
+      setFrontDesc("");
+      setBackDesc("");
       setKind("basic");
       setChoicesText("");
       setSelectedTopicId("");
@@ -572,7 +577,9 @@ function FlashcardsContent() {
       await updateFlashcard(editCard.id, {
         front: editFront.trim(),
         back: editBack.trim(),
-        description: editDesc.trim() || null,
+        frontDescription: editFrontDesc.trim() || null,
+        backDescription: editBackDesc.trim() || null,
+        description: editBackDesc.trim() || null,
         tags: editTags,
         kind: editKind,
         choices: editKind === "choice" ? cleanChoices(editChoicesText.split("\n")) : undefined,
@@ -949,7 +956,8 @@ function FlashcardsContent() {
             setEditCard(card);
             setEditFront(card.front);
             setEditBack(card.back);
-            setEditDesc(card.description ?? "");
+            setEditFrontDesc((card as any).frontDescription ?? "");
+            setEditBackDesc((card as any).backDescription ?? card.description ?? "");
             setEditTags(card.tags?.map((t) => t.tag.name) ?? []);
             setEditKind(cardKind(card));
             setEditChoicesText((card.choices ?? []).join("\n"));
@@ -1019,8 +1027,14 @@ function FlashcardsContent() {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Description (optional)</label>
-            <Input placeholder="Optional hint or context shown with the card" value={desc} onChange={(e) => setDesc(e.target.value)}
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Front description (optional)</label>
+            <Input placeholder="Hint shown with question" value={frontDesc} onChange={(e) => setFrontDesc(e.target.value)}
+              onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Back description (optional)</label>
+            <Input placeholder="Hint shown with answer" value={backDesc} onChange={(e) => setBackDesc(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
             />
           </div>
@@ -1055,8 +1069,12 @@ function FlashcardsContent() {
               <Input value={editBack} onChange={(e) => setEditBack(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Description (optional)</label>
-              <Input placeholder="Optional hint or context shown with the card" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Front description (optional)</label>
+              <Input placeholder="Hint shown with question" value={editFrontDesc} onChange={(e) => setEditFrontDesc(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Back description (optional)</label>
+              <Input placeholder="Hint shown with answer" value={editBackDesc} onChange={(e) => setEditBackDesc(e.target.value)} />
             </div>
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Tags</label>

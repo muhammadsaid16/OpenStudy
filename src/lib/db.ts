@@ -78,6 +78,8 @@ export interface FlashcardRec {
   bundleId?: string | null;
   front: string;
   back: string;
+  frontDescription?: string | null;
+  backDescription?: string | null;
   description?: string | null;
   difficulty: number;
   kind?: CardKind | null; // absent (pre-v5) = basic

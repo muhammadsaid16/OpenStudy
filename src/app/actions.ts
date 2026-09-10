@@ -326,6 +326,8 @@ export async function createFlashcard(data: {
   subjectId?: string;
   front: string;
   back: string;
+  frontDescription?: string | null;
+  backDescription?: string | null;
   description?: string | null;
   difficulty?: number;
   kind?: CardKind;
@@ -336,6 +338,8 @@ export async function createFlashcard(data: {
     subjectId: z.string().min(1).optional(),
     front: z.string().min(1).max(2000),
     back: z.string().min(1).max(5000),
+    frontDescription: z.string().max(2000).nullish(),
+    backDescription: z.string().max(2000).nullish(),
     description: z.string().max(2000).nullish(),
     difficulty: z.number().int().min(1).max(5).optional(),
     kind: z.enum(["basic", "cloze", "choice"]).optional(),
@@ -357,7 +361,9 @@ export async function createFlashcard(data: {
     bundleId: null,
     front: parsed.front,
     back: parsed.back,
-    description: parsed.description ?? null,
+    frontDescription: parsed.frontDescription ?? null,
+    backDescription: parsed.backDescription ?? parsed.description ?? null,
+    description: parsed.description ?? parsed.backDescription ?? null,
     difficulty: parsed.difficulty ?? 1,
     kind,
     choices: kind === "choice" ? choices : null,
@@ -377,12 +383,14 @@ export async function createFlashcard(data: {
 
 export async function updateFlashcard(
   id: string,
-  data: { front?: string; back?: string; topicId?: string; tags?: string[]; description?: string | null; kind?: CardKind; choices?: string[] }
+  data: { front?: string; back?: string; topicId?: string; tags?: string[]; frontDescription?: string | null; backDescription?: string | null; description?: string | null; kind?: CardKind; choices?: string[] }
 ) {
   const parsed = z.object({
     front: z.string().min(1).max(2000).optional(),
     back: z.string().min(1).max(5000).optional(),
     topicId: z.string().min(1).optional(),
+    frontDescription: z.string().max(2000).nullish(),
+    backDescription: z.string().max(2000).nullish(),
     description: z.string().max(2000).nullish(),
     tags: z.array(z.string().min(1).max(50)).max(20).optional(),
     kind: z.enum(["basic", "cloze", "choice"]).optional(),
@@ -401,8 +409,14 @@ export async function updateFlashcard(
     throw new Error("Choice cards need at least 2 options.");
   }
   const { tags, ...rest } = parsed;
+  // Legacy compat: description -> backDescription if backDescription absent
+  const normalizedRest: Record<string, unknown> = { ...rest };
+  if (parsed.description !== undefined && parsed.description !== null && parsed.backDescription === undefined) {
+    normalizedRest.backDescription = parsed.description;
+    // keep description for backwards compat as well
+  }
   await db.flashcards.update(id, {
-    ...rest,
+    ...normalizedRest,
     ...(parsed.kind !== undefined ? { kind: parsed.kind } : {}),
     ...(parsed.choices !== undefined ? { choices: nextKind === "choice" ? nextChoices : null } : {}),
     // Switching away from choice drops stale distractors.
@@ -990,6 +1004,8 @@ export async function createBundleFlashcard(data: {
   bundleId: string;
   front: string;
   back: string;
+  frontDescription?: string | null;
+  backDescription?: string | null;
   description?: string | null;
   tags?: string[];
   kind?: CardKind;
@@ -1017,7 +1033,9 @@ export async function createBundleFlashcard(data: {
     bundleId: rest.bundleId,
     front: rest.front,
     back: rest.back,
-    description: rest.description ?? null,
+    frontDescription: (rest as any).frontDescription ?? null,
+    backDescription: (rest as any).backDescription ?? (rest as any).description ?? null,
+    description: (rest as any).description ?? (rest as any).backDescription ?? null,
     difficulty: 1,
     kind,
     choices: kind === "choice" ? choices : null,
@@ -1039,10 +1057,10 @@ export async function createBundleFlashcard(data: {
 // ─── Import a batch of cards (parsed from CSV/Anki/JSON) ──────
 export async function importCardsIntoBundle(
   bundleId: string,
-  cards: { front: string; back: string; tags?: string[]; description?: string; kind?: CardKind; choices?: string[] }[]
+  cards: { front: string; back: string; tags?: string[]; description?: string; frontDescription?: string; backDescription?: string; kind?: CardKind; choices?: string[] }[]
 ) {
   const parsed = importBatchSchema.parse(
-    (cards ?? []).map((c) => ({ front: c.front, back: c.back, tags: c.tags, description: c.description }))
+    (cards ?? []).map((c) => ({ front: c.front, back: c.back, tags: c.tags, description: c.description, frontDescription: (c as any).frontDescription, backDescription: (c as any).backDescription ?? (c as any).description }))
   );
 
   const now = new Date();
@@ -1064,7 +1082,9 @@ export async function importCardsIntoBundle(
       bundleId,
       front: c.front,
       back: c.back,
-      description: c.description ?? null,
+      frontDescription: (c as any).frontDescription ?? null,
+      backDescription: (c as any).backDescription ?? c.description ?? null,
+      description: c.description ?? (c as any).backDescription ?? null,
       difficulty: 1,
       kind,
       choices: kind === "choice" ? choices : null,
@@ -1114,6 +1134,8 @@ export async function exportBundle(bundleId: string) {
       front: c.front,
       back: c.back,
       // Omit when absent so exports of description-less cards stay byte-identical.
+      ...((c as any).frontDescription ? { frontDescription: (c as any).frontDescription } : {}),
+      ...((c as any).backDescription ? { backDescription: (c as any).backDescription } : {}),
       ...(c.description ? { description: c.description } : {}),
       // Omit basic kind so old exports/imports stay byte-identical.
       ...(cardKind(c) !== "basic" ? { kind: cardKind(c) } : {}),
@@ -1132,6 +1154,8 @@ export async function importBundleCards(
     answer?: string;
     description?: string;
     desc?: string;
+    frontDescription?: string;
+    backDescription?: string;
     tags?: string[];
     kind?: unknown;
     choices?: string[];
@@ -1146,6 +1170,8 @@ export async function importBundleCards(
         front: String(c.front ?? c.question ?? "").trim(),
         back: String(c.back ?? c.answer ?? "").trim(),
         description: String(c.description ?? c.desc ?? "").trim() || undefined,
+        frontDescription: String((c as any).frontDescription ?? (c as any).front_description ?? "").trim() || undefined,
+        backDescription: String((c as any).backDescription ?? (c as any).back_description ?? c.description ?? c.desc ?? "").trim() || undefined,
         tags: Array.isArray(c.tags)
           ? c.tags.map((t) => String(t).trim()).filter(Boolean)
           : undefined,
@@ -1173,8 +1199,10 @@ export async function exportBundleMarkdown(bundleId: string): Promise<string> {
   } else {
     cards.forEach((c, i) => {
       lines.push(`## ${i + 1}. ${c.front}`);
-      if (c.description) lines.push(`\n> ${c.description.replace(/\s*\n+\s*/g, " ")}`);
+      if ((c as any).frontDescription) lines.push(`\n> ${(c as any).frontDescription.replace(/\s*\n+\s*/g, " ")}`);
+      if (c.description && !(c as any).backDescription) lines.push(`\n> ${c.description.replace(/\s*\n+\s*/g, " ")}`);
       lines.push(`\n${c.back}\n`);
+      if ((c as any).backDescription && (c as any).backDescription !== c.description) lines.push(`\n> ${(c as any).backDescription.replace(/\s*\n+\s*/g, " ")}\n`);
     });
   }
   return lines.join("\n");
@@ -1896,7 +1924,9 @@ export async function bulkCreateFlashcards(
       bundleId,
       front: c.front,
       back: c.back,
-      description: c.description ?? null,
+      frontDescription: (c as any).frontDescription ?? null,
+      backDescription: (c as any).backDescription ?? c.description ?? null,
+      description: c.description ?? (c as any).backDescription ?? null,
       difficulty: c.difficulty ?? 1,
       kind,
       choices: kind === "choice" ? choices : null,

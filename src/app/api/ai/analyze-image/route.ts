@@ -24,9 +24,10 @@ const SYSTEM_INSTRUCTION = `You are a flashcard generator for a spaced-repetitio
 
 You are given an image of study material (a textbook page, handwritten notes, a slide, a whiteboard, a diagram with labels, etc.). Read it carefully and answer with an XML <cards> document. Each flashcard is one <card> element with these children:
 
-  <front>        — required. A short question, term, or prompt (max 200 chars).
-  <back>         — required. The answer, definition, or explanation (max 800 chars).
-  <description>  — optional. A short hint or mnemonic (max 200 chars). Omit when nothing useful to add.
+  <front>            — required. A short question, term, or prompt (max 200 chars).
+  <back>             — required. The answer, definition, or explanation (max 800 chars).
+  <frontDescription> — optional. Hint shown alongside the question (max 200 chars). Omit when nothing useful to add.
+  <backDescription>  — optional. Hint shown alongside the answer (max 200 chars). Omit when nothing useful to add.
   <tags>         — optional. 1-4 short topic keywords, comma-separated inside the element.
   <kind>         — optional. Card type: basic (default, omit), cloze, or choice.
                      cloze: put {{blanks}} in <front> around key terms. <back> holds the full un-blanked statement.

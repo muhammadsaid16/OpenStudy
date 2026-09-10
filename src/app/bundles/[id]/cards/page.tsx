@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils";
 import type { BundleRec, CardKind } from "@/lib/db";
 import { cardKind, cleanChoices } from "@/lib/card-kinds";
 import { CardKindFields } from "@/components/card-kind-fields";
-import { getCardStatus, RATING_BUTTONS } from "@/lib/card-status";
+import { RATING_BUTTONS } from "@/lib/card-status";
 
 type CardTag = { tag: { id: string; name: string } };
 
@@ -44,6 +44,8 @@ type Card = {
   id: string;
   front: string;
   back: string;
+  frontDescription?: string | null;
+  backDescription?: string | null;
   description?: string | null;
   kind?: CardKind | null;
   choices?: string[] | null;
@@ -76,7 +78,8 @@ export default function BundleCardsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
-  const [desc, setDesc] = useState("");
+  const [frontDesc, setFrontDesc] = useState("");
+  const [backDesc, setBackDesc] = useState("");
   const [createKind, setCreateKind] = useState<CardKind>("basic");
   const [createChoicesText, setCreateChoicesText] = useState("");
   const [createTags, setCreateTags] = useState<string[]>([]);
@@ -87,7 +90,8 @@ export default function BundleCardsPage() {
   const [editCard, setEditCard] = useState<Card | null>(null);
   const [editFront, setEditFront] = useState("");
   const [editBack, setEditBack] = useState("");
-  const [editDesc, setEditDesc] = useState("");
+  const [editFrontDesc, setEditFrontDesc] = useState("");
+  const [editBackDesc, setEditBackDesc] = useState("");
   const [editKind, setEditKind] = useState<CardKind>("basic");
   const [editChoicesText, setEditChoicesText] = useState("");
   const [editTags, setEditTags] = useState<string[]>([]);
@@ -101,6 +105,7 @@ export default function BundleCardsPage() {
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [reviewQueue, setReviewQueue] = useState<Card[]>([]);
   const [reviewIndex, setReviewIndex] = useState(0);
+  const [learningQueue, setLearningQueue] = useState<Card[]>([]);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [reviewing, setReviewing] = useState(false);
@@ -153,6 +158,8 @@ export default function BundleCardsPage() {
         !q ||
         card.front.toLowerCase().includes(q) ||
         card.back.toLowerCase().includes(q) ||
+        ((card as any).frontDescription ?? "").toLowerCase().includes(q) ||
+        ((card as any).backDescription ?? "").toLowerCase().includes(q) ||
         (card.description ?? "").toLowerCase().includes(q);
       const matchesTag =
         filterTag === "all" || card.tags.some((t) => t.tag.name === filterTag);
@@ -178,7 +185,8 @@ export default function BundleCardsPage() {
         bundleId,
         front: front.trim(),
         back: back.trim(),
-        description: desc.trim() || undefined,
+        frontDescription: frontDesc.trim() || undefined,
+        backDescription: backDesc.trim() || undefined,
         tags: createTags.length ? createTags : undefined,
         kind: createKind,
         choices: createKind === "choice" ? cleanChoices(createChoicesText.split("\n")) : undefined,
@@ -186,7 +194,7 @@ export default function BundleCardsPage() {
       setCreateOpen(false);
       setFront("");
       setBack("");
-      setDesc("");
+      setFrontDesc(""); setBackDesc("");
       setCreateKind("basic");
       setCreateChoicesText("");
       setCreateTags([]);
@@ -207,7 +215,8 @@ export default function BundleCardsPage() {
       await updateFlashcard(editCard.id, {
         front: editFront.trim(),
         back: editBack.trim(),
-        description: editDesc.trim() || null,
+        frontDescription: editFrontDesc.trim() || null,
+        backDescription: editBackDesc.trim() || null,
         tags: editTags,
         kind: editKind,
         choices: editKind === "choice" ? cleanChoices(editChoicesText.split("\n")) : undefined,
@@ -263,30 +272,52 @@ export default function BundleCardsPage() {
       if (list.length === 0) { showToast("No cards due in this deck", "info"); return; }
       setReviewQueue(list);
       setReviewIndex(0);
+      setLearningQueue([]);
       setIsFlipped(false);
       setIsReviewing(true);
     } catch { showToast("Failed to load cards", "danger"); }
   };
 
   const handleRate = async (quality: number) => {
-    if (reviewing || reviewIndex >= reviewQueue.length) return;
-    const card = reviewQueue[reviewIndex];
+    const activeCard: Card | null = (reviewQueue[reviewIndex] as Card | undefined) ?? (learningQueue[0] as Card | undefined) ?? null;
+    const servingFromLearningQueue = reviewQueue[reviewIndex] == null;
+    if (reviewing || !activeCard) return;
     setReviewing(true);
     try {
-      await reviewFlashcardWithLog(card.id, quality);
-      const next = reviewIndex + 1;
-      if (next >= reviewQueue.length) {
-        setIsReviewing(false);
-        setReviewQueue([]);
-        setReviewIndex(0);
-        setIsFlipped(false);
-        showToast(`Reviewed ${reviewQueue.length} cards`, "success");
-        setLoaded(false);
-        await load();
-      } else {
-        setReviewIndex(next);
-        setIsFlipped(false);
+      await reviewFlashcardWithLog(activeCard.id, quality);
+      if (quality < 3 && !servingFromLearningQueue) {
+        setLearningQueue((prev) => [...prev, activeCard as Card]);
       }
+      if (!servingFromLearningQueue) {
+        if (reviewIndex < reviewQueue.length - 1) {
+          setReviewIndex((i) => i + 1);
+        } else {
+          const hasLearning = quality < 3 ? true : learningQueue.length > 0;
+          setReviewQueue([]);
+          setReviewIndex(0);
+          if (!hasLearning) {
+            setIsReviewing(false);
+            setLearningQueue([]);
+            showToast(`Reviewed ${reviewQueue.length} cards`, "success");
+            setLoaded(false);
+            await load();
+          }
+        }
+      } else if (quality >= 3) {
+        setLearningQueue((prev) => {
+          const next = prev.slice(1);
+          if (next.length === 0) {
+            setIsReviewing(false);
+            showToast(`Reviewed ${reviewQueue.length + prev.length} cards`, "success");
+            setLoaded(false);
+            load();
+          }
+          return next;
+        });
+      } else {
+        setLearningQueue((prev) => [...prev.slice(1), prev[0]]);
+      }
+      setIsFlipped(false);
     } catch (e) {
       console.error("review failed", e);
       showToast("Failed to save rating", "danger");
@@ -297,13 +328,14 @@ export default function BundleCardsPage() {
     setExportMenuOpen(false);
     try {
       const all = await getBundleCards(bundleId);
-      const header = ["front","back","description","kind","choices","tags"];
+      const header = ["front","back","frontDescription","backDescription","kind","choices","tags"];
       const rows = (all as any[]).map((c) => {
         const esc = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
         return [
           esc(c.front),
           esc(c.back),
-          esc(c.description ?? ""),
+          esc((c as any).frontDescription ?? ""),
+          esc((c as any).backDescription ?? c.description ?? ""),
           esc(c.kind ?? "basic"),
           esc((c.choices ?? []).join("|")),
           esc((c.tags ?? []).map((t: any) => t.tag?.name ?? t.name ?? "").join(",")),
@@ -446,23 +478,29 @@ export default function BundleCardsPage() {
           </div>
         </div>
 
-        {isReviewing && reviewQueue.length > 0 && (
+        {(() => {
+          const activeCard: Card | null = (reviewQueue[reviewIndex] as Card | undefined) ?? (learningQueue[0] as Card | undefined) ?? null;
+          const remainingMain = reviewQueue.length > 0 ? reviewQueue.length - reviewIndex : 0;
+          const totalDue = remainingMain + learningQueue.length;
+          const completed = reviewQueue.length > 0 ? reviewIndex : 0;
+          const initialTotal = totalDue + completed;
+          if (!isReviewing || !activeCard) return null;
+          return (
           <div className="mb-8 mx-auto max-w-2xl space-y-4">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
-              <span>{reviewIndex + 1} / {reviewQueue.length}</span>
+              <span>{completed + 1} / {initialTotal} {learningQueue.length > 0 ? `• Relearning × ${learningQueue.length}` : ""}</span>
               <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">Exit</button>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div className="h-full bg-accent transition-all" style={{ width: `${(reviewIndex / reviewQueue.length) * 100}%` }} />
+              <div className="h-full bg-accent transition-all" style={{ width: `${(completed / Math.max(initialTotal, 1)) * 100}%` }} />
             </div>
             {(() => {
-              const card = reviewQueue[reviewIndex];
-              if (!card) return null;
+              const card = activeCard;
               return (
                 <div className="glass rounded-3xl p-8 min-h-[280px] flex flex-col">
                   <div className="flex-1 flex flex-col justify-center text-center">
                     <p className="text-xl font-bold tracking-tight leading-relaxed">{isFlipped ? card.back : card.front}</p>
-                    {isFlipped && (card as any).description && <p className="mt-3 text-sm text-muted-fg">{(card as any).description}</p>}
+                    {isFlipped ? (((card as any).backDescription ?? (card as any).description) && <p className="mt-3 text-sm text-muted-fg">{(card as any).backDescription ?? (card as any).description}</p>) : (((card as any).frontDescription) && <p className="mt-3 text-sm text-muted-fg/80">{(card as any).frontDescription}</p>)}
                   </div>
                   {!isFlipped ? (
                     <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">Show answer</Button>
@@ -480,7 +518,8 @@ export default function BundleCardsPage() {
               );
             })()}
           </div>
-        )}
+          );
+        })()}
 
         {/* Search + Tag filter */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row">
@@ -556,7 +595,6 @@ export default function BundleCardsPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredCards.map((card) => {
               const flipped = flippedIds.has(card.id);
-              const status = getCardStatus(card, nowMs);
               const isSelected = selectedIds.has(card.id);
               return (
                 <div
@@ -587,12 +625,6 @@ export default function BundleCardsPage() {
                         aria-label={`Select card: ${card.front}`}
                         className="h-4 w-4 cursor-pointer accent-accent"
                       />
-                      <span
-                        className={cn("h-2 w-2 rounded-full", flipped ? "bg-accent-fg/80" : status.dot)}
-                      />
-                      <span className={cn("text-[10px] font-bold uppercase tracking-widest", flipped ? "text-accent-fg/70" : "text-muted-fg")}>
-                        {status.label}
-                      </span>
                     </div>
                     <div className="flex gap-1">
                       <button
@@ -600,7 +632,8 @@ export default function BundleCardsPage() {
                           setEditCard(card);
                           setEditFront(card.front);
                           setEditBack(card.back);
-                          setEditDesc(card.description ?? "");
+                          setEditFrontDesc((card as any).frontDescription ?? "");
+                          setEditBackDesc((card as any).backDescription ?? card.description ?? "");
                           setEditKind(cardKind(card));
                           setEditChoicesText((card.choices ?? []).join("\n"));
                           setEditTags(card.tags.map((t) => t.tag.name));
@@ -636,16 +669,19 @@ export default function BundleCardsPage() {
                       <p className="text-lg font-bold tracking-tight leading-relaxed">
                         {flipped ? card.back : card.front}
                       </p>
-                      {card.description && (
-                        <p
-                          className={cn(
-                            "mt-2 text-xs leading-relaxed tracking-tight",
-                            flipped ? "text-accent-fg/70" : "text-muted-fg"
-                          )}
-                        >
-                          {card.description}
-                        </p>
-                      )}
+                      {(() => {
+                        const d = flipped ? ((card as any).backDescription ?? card.description) : (card as any).frontDescription;
+                        return d ? (
+                          <p
+                            className={cn(
+                              "mt-2 text-xs leading-relaxed tracking-tight",
+                              flipped ? "text-accent-fg/70" : "text-muted-fg"
+                            )}
+                          >
+                            {d}
+                          </p>
+                        ) : null;
+                      })()}
                     </div>
                   </div>
                   {card.tags.length > 0 && (
@@ -693,10 +729,16 @@ export default function BundleCardsPage() {
             onChange={(e) => setBack(e.target.value)}
           />
           <Input
-            label="Description (optional)"
-            placeholder="Optional hint or context shown with the card"
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
+            label="Front description (optional)"
+            placeholder="Hint shown with question"
+            value={frontDesc}
+            onChange={(e) => setFrontDesc(e.target.value)}
+          />
+          <Input
+            label="Back description (optional)"
+            placeholder="Hint shown with answer"
+            value={backDesc}
+            onChange={(e) => setBackDesc(e.target.value)}
           />
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
@@ -735,10 +777,16 @@ export default function BundleCardsPage() {
               onChange={(e) => setEditBack(e.target.value)}
             />
             <Input
-              label="Description (optional)"
-              placeholder="Optional hint or context shown with the card"
-              value={editDesc}
-              onChange={(e) => setEditDesc(e.target.value)}
+              label="Front description (optional)"
+              placeholder="Hint shown with question"
+              value={editFrontDesc}
+              onChange={(e) => setEditFrontDesc(e.target.value)}
+            />
+            <Input
+              label="Back description (optional)"
+              placeholder="Hint shown with answer"
+              value={editBackDesc}
+              onChange={(e) => setEditBackDesc(e.target.value)}
             />
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">

@@ -13,12 +13,13 @@ import { Button, EmptyState, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { spotlightProps } from "@/lib/interactions";
 import { Markdown } from "@/components/markdown";
-import { getCardStatus } from "@/lib/card-status";
 
 export interface BrowseCard {
   id: string;
   front: string;
   back: string;
+  frontDescription?: string | null;
+  backDescription?: string | null;
   description?: string | null;
   choices?: string[] | null;
   tags?: { tag: { id: string; name: string } }[] | null;
@@ -175,7 +176,6 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
           {p.browseFilteredCards.map((card) => {
             const flipped = p.browseFlipped.has(card.id);
             const selected = p.browseSelected.has(card.id);
-            const status = getCardStatus(card, p.nowMs);
             return (
               <div
                 key={card.id}
@@ -197,8 +197,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                     >
                       {selected ? <CheckSquare size={14} className="text-accent" /> : <Square size={14} />}
                     </button>
-                    <span className={cn("h-2 w-2 rounded-full", flipped ? "bg-accent-fg/80" : status.dot)} />
-                    <span className={cn("text-[10px] font-bold uppercase tracking-widest", flipped ? "text-accent-fg/70" : "text-muted-fg")}>{status.label}</span>
+
                   </div>
                   <div className="flex gap-1">
                     <button
@@ -232,11 +231,11 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                     </div>
                   </div>
                 </div>
-                {card.description && (
+                {((flipped ? ((card as any).backDescription ?? card.description) : (card as any).frontDescription) && (
                   <p className={cn("mt-2 text-xs leading-relaxed tracking-tight", flipped ? "text-accent-fg/70" : "text-muted-fg")}>
-                    {card.description}
+                    {flipped ? ((card as any).backDescription ?? card.description) : (card as any).frontDescription}
                   </p>
-                )}
+                ))}
                 {card.tags && card.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {card.tags.map(({ tag }) => (

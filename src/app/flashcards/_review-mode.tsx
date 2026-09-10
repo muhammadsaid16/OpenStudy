@@ -12,12 +12,14 @@ import { cn } from "@/lib/utils";
 import { spotlightProps } from "@/lib/interactions";
 import { Markdown } from "@/components/markdown";
 import { Volume2, VolumeX } from "lucide-react";
-import { getCardStatus, RATING_BUTTONS, type CardStatusLike } from "@/lib/card-status";
+import { RATING_BUTTONS } from "@/lib/card-status";
 
 export interface ReviewCard {
   id: string;
   front: string;
   back: string;
+  frontDescription?: string | null;
+  backDescription?: string | null;
   description?: string | null;
   choices?: string[] | null;
   topic?: { name: string; subject?: { name?: string } | null } | null;
@@ -265,16 +267,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                       {p.speaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
                     </button>
                   )}
-                  {(() => {
-                    const st = p.activeCard ? getCardStatus(p.activeCard, p.nowMs) : null;
-                    if (!st) return null;
-                    return (
-                      <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-                        <span className={cn("h-2 w-2 rounded-full", st.dot)} />
-                        {st.label}
-                      </span>
-                    );
-                  })()}
+
                 </div>
               </div>
               <div className="flex flex-1 flex-col items-center justify-center px-10 pb-4 text-center">
@@ -289,6 +282,11 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                       ? p.maskCloze(p.activeCard.front)
                       : p.activeCard.front)}
                 </div>
+                {(p.activeCard as any).frontDescription && (
+                  <p className="mt-4 max-w-[28rem] text-sm font-normal normal-case tracking-normal leading-relaxed text-muted-fg">
+                    {(p.activeCard as any).frontDescription}
+                  </p>
+                )}
                 {p.activeCard && p.cardKindOf(p.activeCard) === "choice" && (
                   <div className="mt-6 grid w-full max-w-[28rem] gap-2" onClick={(e) => e.stopPropagation()}>
                     {p.choiceOptions.map((opt) => (
@@ -331,8 +329,8 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                       if (p.speaking) p.onStopTts();
                       else
                         p.onSpeak(
-                          p.activeCard!.description
-                            ? `${p.activeCard!.back}\n${p.activeCard!.description}`
+                          ((p.activeCard as any).backDescription ?? p.activeCard!.description)
+                            ? `${p.activeCard!.back}\n${(p.activeCard as any).backDescription ?? p.activeCard!.description}`
                             : p.activeCard!.back
                         );
                     }}
@@ -360,9 +358,9 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                 <div className="[&_p]:text-accent-fg [&_li]:text-accent-fg text-3xl font-bold leading-relaxed tracking-tight text-accent-fg sm:text-4xl [&_.md-p]:text-accent-fg">
                   <Markdown content={p.activeCard.back} align="center" />
                 </div>
-                {p.activeCard.description && (
+                {((p.activeCard as any).backDescription ?? p.activeCard.description) && (
                   <p className="mt-4 max-w-[28rem] text-sm font-normal normal-case tracking-normal leading-relaxed text-accent-fg/70">
-                    {p.activeCard.description}
+                    {(p.activeCard as any).backDescription ?? p.activeCard.description}
                   </p>
                 )}
               </div>

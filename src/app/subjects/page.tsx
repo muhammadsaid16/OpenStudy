@@ -94,6 +94,7 @@ export default function SubjectsPage() {
   const [dueCount, setDueCount] = useState<number | null>(null);
   const [reviewQueue, setReviewQueue] = useState<any[]>([]);
   const [reviewIndex, setReviewIndex] = useState(0);
+  const [learningQueue, setLearningQueue] = useState<any[]>([]);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [reviewing, setReviewing] = useState(false);
@@ -232,6 +233,7 @@ export default function SubjectsPage() {
       if (list.length === 0) { showToast("No cards due", "info"); return; }
       setReviewQueue(list);
       setReviewIndex(0);
+      setLearningQueue([]);
       setIsFlipped(false);
       setIsReviewing(true);
       setActiveTab("study");
@@ -246,6 +248,7 @@ export default function SubjectsPage() {
       if (list.length === 0) { showToast("No cards due in this deck", "info"); return; }
       setReviewQueue(list);
       setReviewIndex(0);
+      setLearningQueue([]);
       setIsFlipped(false);
       setIsReviewing(true);
       setActiveTab("study");
@@ -253,30 +256,58 @@ export default function SubjectsPage() {
   };
 
   const handleRate = async (quality: number) => {
-    if (reviewing || reviewIndex >= reviewQueue.length) return;
-    const card = reviewQueue[reviewIndex];
+    const activeCard: any = reviewQueue[reviewIndex] ?? learningQueue[0] ?? null;
+    const servingFromLearningQueue = reviewQueue[reviewIndex] == null;
+    if (reviewing || !activeCard) return;
     setReviewing(true);
     try {
-      await reviewFlashcardWithLog(card.id, quality);
-      const next = reviewIndex + 1;
-      if (next >= reviewQueue.length) {
-        setIsReviewing(false);
-        setReviewQueue([]);
-        setReviewIndex(0);
-        setIsFlipped(false);
-        showToast(`Reviewed ${reviewQueue.length} cards`, "success");
-        loadDueCount();
-        const bundles = await getBundles();
-        setAllBundles(bundles as Bundle[]);
-      } else {
-        setReviewIndex(next);
-        setIsFlipped(false);
+      await reviewFlashcardWithLog(activeCard.id, quality);
+      if (quality < 3 && !servingFromLearningQueue) {
+        setLearningQueue((prev) => [...prev, activeCard]);
       }
+      if (!servingFromLearningQueue) {
+        if (reviewIndex < reviewQueue.length - 1) {
+          setReviewIndex((i) => i + 1);
+        } else {
+          // End of main queue — hand off to learning queue or finish
+          const hasLearning = quality < 3 ? true : learningQueue.length > 0;
+          setReviewQueue([]);
+          setReviewIndex(0);
+          if (!hasLearning) {
+            setIsReviewing(false);
+            setLearningQueue([]);
+            showToast(`Reviewed ${reviewQueue.length} cards`, "success");
+            loadDueCount();
+            const bundles = await getBundles();
+            setAllBundles(bundles as Bundle[]);
+          }
+        }
+      } else if (quality >= 3) {
+        setLearningQueue((prev) => {
+          const next = prev.slice(1);
+          if (next.length === 0) {
+            setIsReviewing(false);
+            showToast(`Reviewed ${reviewQueue.length + prev.length} cards`, "success");
+            loadDueCount();
+            getBundles().then((bundles) => setAllBundles(bundles as Bundle[]));
+          }
+          return next;
+        });
+      } else {
+        setLearningQueue((prev) => [...prev.slice(1), prev[0]]);
+      }
+      setIsFlipped(false);
     } catch (e) {
       console.error("review failed", e);
       showToast("Failed to save rating", "danger");
     } finally { setReviewing(false); }
   };
+
+  const activeCard: any = reviewQueue[reviewIndex] ?? learningQueue[0] ?? null;
+  const remainingMain = reviewQueue.length > 0 ? reviewQueue.length - reviewIndex : 0;
+  const totalDue = remainingMain + learningQueue.length;
+  const completed = reviewQueue.length > 0 ? reviewIndex : 0;
+  const initialTotal = totalDue + completed;
 
   useEffect(() => {
     getSubjects().then((s) => {
@@ -697,26 +728,22 @@ export default function SubjectsPage() {
 
       {activeTab === "study" && (
         <>
-          {isReviewing && reviewQueue.length > 0 ? (
+          {isReviewing && activeCard ? (
             <div className="mx-auto max-w-2xl space-y-6">
               <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
-                <span>{reviewIndex + 1} / {reviewQueue.length}</span>
+                <span>{completed + 1} / {initialTotal} {learningQueue.length > 0 ? `• Relearning × ${learningQueue.length}` : ""}</span>
                 <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">Exit</button>
               </div>
               <div className="w-full h-1.5 overflow-hidden rounded-full bg-muted">
-                <div className="h-full bg-accent transition-all" style={{ width: `${((reviewIndex) / reviewQueue.length) * 100}%`}} />
+                <div className="h-full bg-accent transition-all" style={{ width: `${(completed / Math.max(initialTotal, 1)) * 100}%`}} />
               </div>
-              {(() => {
-                const card = reviewQueue[reviewIndex];
-                if (!card) return null;
-                return (
                   <div className="glass rounded-3xl p-8 min-h-[280px] flex flex-col">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted-fg mb-3">
-                      {(card as any).topic?.subject?.name ? `${(card as any).topic.subject.name} › ${(card as any).topic.name}` : (card as any).topic?.name || "General"}
+                      {(activeCard as any).topic?.subject?.name ? `${(activeCard as any).topic.subject.name} › ${(activeCard as any).topic.name}` : (activeCard as any).topic?.name || "General"}
                     </p>
                     <div className="flex-1 flex flex-col justify-center text-center">
-                      <p className="text-xl font-bold tracking-tight leading-relaxed">{isFlipped ? card.back : card.front}</p>
-                      {isFlipped && (card as any).description && <p className="mt-3 text-sm text-muted-fg">{(card as any).description}</p>}
+                      <p className="text-xl font-bold tracking-tight leading-relaxed">{isFlipped ? activeCard.back : activeCard.front}</p>
+                      {isFlipped && (activeCard as any).description && <p className="mt-3 text-sm text-muted-fg">{(activeCard as any).description}</p>}
                     </div>
                     {!isFlipped ? (
                       <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">Show answer</Button>
@@ -736,8 +763,6 @@ export default function SubjectsPage() {
                       </div>
                     )}
                   </div>
-                );
-              })()}
             </div>
           ) : (
             <div className="space-y-6">

@@ -10,6 +10,8 @@ import { z } from "zod";
 export const AiCardInput = z.object({
   front: z.string().min(1).max(2000),
   back: z.string().min(1).max(8000),
+  frontDescription: z.string().max(2000).optional(),
+  backDescription: z.string().max(2000).optional(),
   description: z.string().max(2000).optional(),
   tags: z.array(z.string().min(1).max(40)).max(20).optional(),
   difficulty: z.number().int().min(1).max(5).optional(),
@@ -58,6 +60,8 @@ export function parseAiCardsInput(raw: string): AiCardInput[] {
 export interface XmlCard {
   front: string;
   back: string;
+  frontDescription?: string;
+  backDescription?: string;
   description?: string;
   tags?: string[];
   kind?: "basic" | "cloze" | "choice";
@@ -113,8 +117,24 @@ export function parseAiCardsXml(raw: string): XmlCard[] {
     const back = innerText(frag, "back");
     if (!front || !back) continue; // card without both required fields → drop
     const card: XmlCard = { front, back };
-    const description = innerText(frag, "description");
-    if (description) card.description = description;
+    // front/back descriptions (with aliases), fallback to legacy description -> backDescription
+    const frontDesc =
+      innerText(frag, "frontDescription") ??
+      innerText(frag, "front_description") ??
+      innerText(frag, "frontDesc") ??
+      innerText(frag, "front_desc");
+    if (frontDesc) card.frontDescription = frontDesc;
+    const backDesc =
+      innerText(frag, "backDescription") ??
+      innerText(frag, "back_description") ??
+      innerText(frag, "backDesc") ??
+      innerText(frag, "back_desc");
+    if (backDesc) card.backDescription = backDesc;
+    const description = innerText(frag, "description") ?? innerText(frag, "desc") ?? innerText(frag, "hint") ?? innerText(frag, "note");
+    if (description) {
+      card.description = description;
+      if (!card.backDescription && !card.frontDescription) card.backDescription = description;
+    }
     // tags: one <tags>a, b, c</tags> CSV or multiple <tag>x</tag>
     const tagsBlock = innerText(frag, "tags");
     if (tagsBlock) {
@@ -175,11 +195,13 @@ export function parseAiCardsXml(raw: string): XmlCard[] {
  * The single prompt we hand to the user. One block, copy it as-is.
  * Designed for NotebookLM specifically but works in any chat LLM.
  */
-export const NOTEBOOKLM_IMPORT_PROMPT = `You are a flashcard generator. Read the source below and return a JSON array of study flashcards. Each card must be an object with two required fields and one optional field:
+export const NOTEBOOKLM_IMPORT_PROMPT = `You are a flashcard generator. Read the source below and return a JSON array of study flashcards. Each card must be an object with two required fields and optional description fields:
 
   "front" — a short question, term, or prompt (max 200 chars)
   "back"  — the answer, definition, or explanation (max 800 chars)
-  "description" — an optional short hint, context, or mnemonic shown with the card (max 200 chars). Omit it when the source has nothing useful to add.
+  "frontDescription" — optional hint shown alongside the question (max 200 chars). Omit when nothing useful to add.
+  "backDescription" — optional hint shown alongside the answer (max 200 chars). Omit when nothing useful to add.
+  "description" — legacy alias for backDescription (still accepted for backwards compat, prefer backDescription).
   "kind" — optional card type: "basic" (default), "cloze", or "choice".
     - cloze: put {{blanks}} in "front" around the key term(s), e.g. "Paris is {{the capital}} of France". "back" holds the full un-blanked statement.
     - choice: "back" is the correct answer and "choices" lists 2-4 wrong options (plain strings, no letters).
@@ -195,7 +217,7 @@ Rules:
 
 Output format (return this exact shape, with your cards in place of "..."):
 [
-  { "front": "...", "back": "...", "description": "..." },
+  { "front": "...", "back": "...", "frontDescription": "...", "backDescription": "..." },
   { "front": "...", "back": "..." }
 ]
 
