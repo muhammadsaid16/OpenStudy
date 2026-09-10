@@ -16,6 +16,10 @@ function decodeFromHash(hash: string): SharedState {
     return { bundle };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
+    // A deck shared with 0 cards — friendlier than "invalid link".
+    if (msg.includes("cards") && (msg.includes("too_small") || msg.includes(">= 1"))) {
+      return { bad: true, reason: "THE SENDER SHARED AN EMPTY DECK — IT HAS NO CARDS YET. ASK THEM TO ADD CARDS AND SHARE AGAIN." };
+    }
     return { bad: true, reason: msg };
   }
 }

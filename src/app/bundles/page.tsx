@@ -241,6 +241,10 @@ export default function BundlesPage() {
                       try {
                         const json = await exportBundle(bundle.id);
                         const data = JSON.parse(json) as { name: string; description?: string | null; cards: { front: string; back: string; description?: string | null; tags?: string[]; kind?: string; choices?: string[] }[] };
+                        if (!data.cards.length) {
+                          showToast(`"${bundle.name}" has no cards yet — add cards before sharing.`, "warning");
+                          return;
+                        }
                         const payload = { name: data.name, ...(data.description ? { description: data.description } : {}), cards: data.cards.map((c) => ({ front: c.front, back: c.back, ...(c.description ? { description: c.description } : {}), ...(c.kind && c.kind !== "basic" ? { kind: c.kind as "cloze" | "choice" } : {}), ...(c.choices?.length ? { choices: c.choices } : {}), ...(c.tags?.length ? { tags: c.tags } : {}) })) };
                         const hash = encodeShare(payload as Parameters<typeof encodeShare>[0]);
                         if (hash.length > SHARE_URL_LIMIT) {

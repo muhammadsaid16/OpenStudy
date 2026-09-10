@@ -39,6 +39,10 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
     setBusy(true); setError(""); setCopied(false);
     try {
       const p = await payload();
+      if (!p.cards.length) {
+        setError(`"${bundleName}" HAS NO CARDS YET — ADD CARDS BEFORE SHARING.`);
+        return;
+      }
       const hash = encodeShare(p);
       if (hash.length > SHARE_URL_LIMIT) {
         setTooBig(true); setLink(null);
@@ -54,6 +58,10 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
     setBusy(true); setError("");
     try {
       const p = await payload();
+      if (!p.cards.length) {
+        setError(`"${bundleName}" HAS NO CARDS YET — ADD CARDS BEFORE SHARING.`);
+        return;
+      }
       const blob = new Blob([JSON.stringify({ app: "studymax-share", version: 1, ...p }, null, 2)], { type: "application/json" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
