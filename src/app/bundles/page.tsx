@@ -168,10 +168,10 @@ export default function BundlesPage() {
               if (!f) return;
               try {
                 const shared = parseSharedBundle(JSON.parse(await f.text()));
-                const created = await createBundle({ name: shared.name, description: shared.description });
+                const created = await createBundle({ name: shared.name, description: shared.description ?? undefined });
                 await importCardsIntoBundle(created.id, shared.cards.map((c) => ({
-                  front: c.front, back: c.back, description: c.description,
-                  tags: c.tags, kind: c.kind, choices: c.choices,
+                  front: c.front, back: c.back, description: c.description ?? undefined,
+                  tags: c.tags ?? undefined, kind: c.kind ?? undefined, choices: c.choices ?? undefined,
                 })));
                 router.push("/bundles/" + created.id + "/cards");
               } catch {

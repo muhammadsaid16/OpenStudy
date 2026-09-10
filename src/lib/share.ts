@@ -9,17 +9,17 @@ import { z } from "zod";
 export const sharedCardSchema = z.object({
   front: z.string().min(1),
   back: z.string().min(1),
-  description: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  kind: z.enum(["basic", "cloze", "choice"]).optional(),
-  choices: z.array(z.string()).optional(),
+  description: z.string().nullable().optional(),
+  tags: z.array(z.string()).nullable().optional(),
+  kind: z.enum(["basic", "cloze", "choice"]).nullable().optional(),
+  choices: z.array(z.string()).nullable().optional(),
 });
 
 export const sharedBundleSchema = z.object({
-  app: z.literal("studymax-share").optional(),
-  version: z.number().optional(),
+  app: z.literal("studymax-share").nullable().optional(),
+  version: z.number().nullable().optional(),
   name: z.string().min(1).max(200),
-  description: z.string().max(2000).optional(),
+  description: z.string().max(2000).nullable().optional(),
   cards: z.array(sharedCardSchema).min(1).max(5000),
 });
 
@@ -47,5 +47,19 @@ export function decodeShare<T>(hash: string): T {
 }
 
 export function parseSharedBundle(raw: unknown): SharedBundle {
-  return sharedBundleSchema.parse(raw);
+  // Normalize: sender may have exported description: null / tags: null (Dexie stores null)
+  // which strict .optional() rejects. Coerce null → undefined before zod.
+  const norm = raw as Record<string, unknown>;
+  if (norm && typeof norm === "object") {
+    if (norm.description === null) norm.description = undefined;
+    if (Array.isArray((norm as { cards?: unknown[] }).cards)) {
+      for (const c of (norm as { cards: Record<string, unknown>[] }).cards) {
+        if (c.description === null) c.description = undefined;
+        if (c.tags === null) c.tags = undefined;
+        if (c.kind === null) c.kind = undefined;
+        if (c.choices === null) c.choices = undefined;
+      }
+    }
+  }
+  return sharedBundleSchema.parse(norm);
 }

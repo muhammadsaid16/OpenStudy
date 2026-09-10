@@ -41,14 +41,15 @@ export default function SharePage() {
     if (!bundle) return;
     setBusy(true); setError("");
     try {
-      const created = await createBundle({ name: bundle.name, description: bundle.description });
+      // description may be null (schema allows it) — createBundle's zod rejects null
+      const created = await createBundle({ name: bundle.name, description: bundle.description ?? undefined });
       await importCardsIntoBundle(created.id, bundle.cards.map((c) => ({
         front: c.front,
         back: c.back,
-        description: c.description,
-        tags: c.tags,
-        kind: c.kind,
-        choices: c.choices,
+        description: c.description ?? undefined,
+        tags: c.tags ?? undefined,
+        kind: c.kind ?? undefined,
+        choices: c.choices ?? undefined,
       })));
       router.push("/bundles/" + created.id + "/cards");
     } catch { setError("IMPORT FAILED — THE LINK MAY BE CORRUPT."); }

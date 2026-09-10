@@ -470,8 +470,8 @@ export default function SubjectsPage() {
                 if (!f) return;
                 try {
                   const shared = parseSharedBundle(JSON.parse(await f.text()));
-                  const created = await createBundle({ name: shared.name, description: shared.description });
-                  await importCardsIntoBundle(created.id, shared.cards.map((c: any) => ({ front: c.front, back: c.back, description: c.description, tags: c.tags, kind: c.kind, choices: c.choices })));
+                  const created = await createBundle({ name: shared.name, description: shared.description ?? undefined });
+                  await importCardsIntoBundle(created.id, shared.cards.map((c: any) => ({ front: c.front, back: c.back, description: c.description ?? undefined, tags: c.tags ?? undefined, kind: c.kind ?? undefined, choices: c.choices ?? undefined })));
                   const bundles = await getBundles();
                   setAllBundles(bundles as Bundle[]);
                   showToast(`Imported ${shared.cards.length} cards into ${shared.name}`, "success");
