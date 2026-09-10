@@ -10,8 +10,8 @@ import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import { showUndo } from "@/components/undo-toast";
 import { showToast } from "@/components/toast";
 import { SubjectTopicMenu } from "@/components/subject-topic-menu";
-import { getBundles, createBundle, updateBundle, deleteBundle, importCardsIntoBundle, getSubjects } from "@/app/actions";
-import { parseSharedBundle } from "@/lib/share";
+import { exportBundle, getBundles, createBundle, updateBundle, deleteBundle, importCardsIntoBundle, getSubjects } from "@/app/actions";
+import { encodeShare, parseSharedBundle, SHARE_URL_LIMIT } from "@/lib/share";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
 import { themeAccent } from "@/lib/bundle-colors";
 import { useAppStore } from "@/lib/store";
@@ -44,6 +44,7 @@ export default function BundlesPage() {
 
   // Delete
   const [deleteTarget, setDeleteTarget] = useState<Bundle | null>(null);
+  const [shareBusy, setShareBusy] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -229,25 +230,50 @@ export default function BundlesPage() {
                 </div>
                 <div className="flex -mr-2 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100" onClick={(e) => e.preventDefault()}>
                   <button
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.stopPropagation();
                       e.preventDefault();
-                      const url = `${window.location.origin}/share/${bundle.id}`;
-                      navigator.clipboard.writeText(url).catch(() => {
-                        const ta = document.createElement("textarea");
-                        ta.value = url;
-                        document.body.appendChild(ta);
-                        ta.select();
-                        document.execCommand("copy");
-                        ta.remove();
-                      });
+                      if (shareBusy) return;
+                      setShareBusy(bundle.id);
+                      try {
+                        const json = await exportBundle(bundle.id);
+                        const data = JSON.parse(json) as { name: string; description?: string | null; cards: { front: string; back: string; description?: string | null; tags?: string[]; kind?: string; choices?: string[] }[] };
+                        const payload = { name: data.name, ...(data.description ? { description: data.description } : {}), cards: data.cards.map((c) => ({ front: c.front, back: c.back, ...(c.description ? { description: c.description } : {}), ...(c.kind && c.kind !== "basic" ? { kind: c.kind as "cloze" | "choice" } : {}), ...(c.choices?.length ? { choices: c.choices } : {}), ...(c.tags?.length ? { tags: c.tags } : {}) })) };
+                        const hash = encodeShare(payload as Parameters<typeof encodeShare>[0]);
+                        if (hash.length > SHARE_URL_LIMIT) {
+                          // Too big for a link — download file instead (same as ShareBundleButton fallback)
+                          const blob = new Blob([JSON.stringify({ app: "studymax-share", version: 1, ...payload }, null, 2)], { type: "application/json" });
+                          const a = document.createElement("a");
+                          a.href = URL.createObjectURL(blob);
+                          a.download = data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".studymax-bundle.json";
+                          a.click();
+                          URL.revokeObjectURL(a.href);
+                          showToast("Deck too big for a link — downloaded file instead. Send the file.", "warning");
+                        } else {
+                          const url = `${window.location.origin}/share#${hash}`;
+                          await navigator.clipboard.writeText(url).catch(() => {
+                            const ta = document.createElement("textarea");
+                            ta.value = url;
+                            document.body.appendChild(ta);
+                            ta.select();
+                            document.execCommand("copy");
+                            ta.remove();
+                          });
+                          showToast("Share link copied — works on any device", "success");
+                        }
+                      } catch {
+                        showToast("Could not build share link", "danger");
+                      } finally {
+                        setShareBusy(null);
+                      }
                     }}
                     aria-label="Copy share link"
-                    title="Copy share link"
-                    className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
+                    title="Copy share link — works on any device"
+                    className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-accent disabled:opacity-50"
+                    disabled={shareBusy === bundle.id}
                   >
                     <Link2 size={13} />
-                    Share
+                    {shareBusy === bundle.id ? "…" : "Share"}
                   </button>
                   <button
                     onClick={(e) => {
