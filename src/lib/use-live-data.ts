@@ -1,61 +1,56 @@
 "use client";
 
 // ─── Realtime data hook ────────────────────────────────────────
-// Offline-first realtime: fetch once on mount, then re-fetch on ANY
-// Dexie table mutation — including cross-tab (Dexie propagates 'changes'
-// events between same-origin tabs). Zero server.
+// Offline-first realtime: Dexie liveQuery re-runs the querier on any
+// table it read (local + cross-tab mutations) — zero server.
 //
-// Why not useLiveQuery? On hard loads (SSR hydration) its first emit can
-// race React hydration and never render — the page stayed on PageLoader
-// forever. This wrapper does the same live reactivity with plain state:
-//   • mount → querier() once
-//   • db.on('changes') → querier() again (local + cross-tab mutations)
-//   • visibilitychange → re-fetch when returning to the tab
-//     (catches mutations made while Dexie events were missed)
+// Why not plain useLiveQuery? On hard loads (SSR hydration) its first
+// emit can race React hydration and the component never re-renders —
+// pages stuck on PageLoader forever (SPA nav worked, hard load hung).
 //
-// deps: like useEffect deps — pass values the querier closes over.
+// This wrapper combines both safely:
+//   • a plain mount-fetch guarantees the first paint (hydration-proof)
+//   • liveQuery keeps it updated forever after (proven on SPA + updates)
+// A sequence guard keeps the freshest result — whichever path delivers
+// last wins, so there's no stale overwrite.
 
 import { useEffect, useRef, useState } from "react";
-import { db } from "@/lib/db";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export function useLiveData<T>(querier: () => Promise<T> | T, deps: unknown[] = []): T | undefined {
-  const [value, setValue] = useState<T | undefined>(undefined);
-  // keep the latest querier in a ref so the change listener always calls the fresh one
+  // First paint: plain fetch on mount (deps change = remount fetch, same as before).
+  const [mounted, setMounted] = useState<T | undefined>(undefined);
   const querierRef = useRef(querier);
   querierRef.current = querier;
   const seq = useRef(0);
 
   useEffect(() => {
     let alive = true;
-
     const run = async () => {
       const id = ++seq.current;
       try {
         const next = await querierRef.current();
-        if (alive && id === seq.current) setValue(next);
+        if (alive && id === seq.current) setMounted(next);
       } catch {
-        // querier errors leave the previous value; page keeps its own error UI
+        // leave previous value; pages own their error UI
       }
     };
-
     run();
-
-    const onChange = () => run();
-    // "changes" is a valid Dexie event; the TS overload list just doesn't include it.
-    (db.on as unknown as { on: (ev: string, fn: () => void) => void }).on("changes", onChange);
-
+    // Refetch when returning to the tab (catches anything missed while hidden).
     const onVis = () => {
       if (document.visibilityState === "visible") run();
     };
     document.addEventListener("visibilitychange", onVis);
-
     return () => {
       alive = false;
-      (db.on("changes") as unknown as { unsubscribe: (fn: () => void) => void }).unsubscribe(onChange);
       document.removeEventListener("visibilitychange", onVis);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
-  return value;
+  // Live updates: liveQuery takes over after hydration. Undefined until its
+  // first emit — that's fine, `mounted` already holds the first paint.
+  const live = useLiveQuery(querier, deps);
+
+  return live !== undefined ? live : mounted;
 }
