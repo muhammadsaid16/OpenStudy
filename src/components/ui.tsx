@@ -126,7 +126,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           className={cn(
             "glass-inset flex h-12 w-full rounded-xl px-4 py-2 text-base font-medium tracking-tight",
             "text-fg placeholder:text-muted-fg/60",
-            "focus:outline-none focus:border-accent/20",
+            "focus:outline-none focus:!border-accent/20",
             "transition-colors duration-200",
             error && "!border border-danger",
             className
@@ -158,7 +158,7 @@ export function Textarea({ className, label, error, ...props }: TextareaProps) {
         className={cn(
           "glass-inset flex w-full rounded-xl px-4 py-3 text-base font-medium tracking-tight",
           "text-fg placeholder:text-muted-fg/60",
-          "focus:outline-none focus:border-accent/20 resize-none",
+          "focus:outline-none focus:!border-accent/20 resize-none",
           "transition-colors duration-200",
           error && "!border border-danger",
           className
