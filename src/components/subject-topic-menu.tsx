@@ -62,8 +62,8 @@ export function SubjectTopicMenu({
   }, [subjectId]);
 
   const selectCls = compact
-    ? "glass-inset w-full cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg outline-none appearance-none border border-transparent focus:outline-none"
-    : "glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg transition-colors outline-none appearance-none disabled:opacity-50 border border-transparent focus:outline-none";
+    ? "glass-inset w-full cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg outline-none appearance-none border border-transparent focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20"
+    : "glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg transition-colors outline-none appearance-none disabled:opacity-50 border border-transparent focus:outline-none focus-visible:ring-1 focus-visible:ring-accent/20 focus-visible:border-accent/20";
 
   return (
     <div className={cn("grid gap-3", compact ? "grid-cols-2" : "sm:grid-cols-2")}>

@@ -552,14 +552,14 @@ export default function SubjectsPage() {
               linking, so Subjects never looks dead while /flashcards has
               content. */}
           {allBundles.filter((b) => !b.topicId).length > 0 && (
-            <div className="glass rounded-2xl p-5">
+            <div className="glass rounded-2xl p-4 min-w-0 overflow-hidden">
               <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-fg">
-                <Layers size={14} /> Unlinked bundles ({allBundles.filter((b) => !b.topicId).length})
+                <Layers size={14} className="shrink-0" /> Unlinked bundles ({allBundles.filter((b) => !b.topicId).length})
               </p>
               <p className="mb-4 text-sm text-muted-fg">
                 These decks exist on the Flashcards page but aren't filed under any subject/topic yet.
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 min-w-0">
                 {allBundles.filter((b) => !b.topicId).map((b) => (
                   <button
                     key={b.id}
@@ -567,11 +567,11 @@ export default function SubjectsPage() {
                       setManageTopicsFor(null);
                       router.push(`/bundles/${b.id}/cards`);
                     }}
-                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-bold hover:border-accent hover:text-accent hover:bg-accent-soft"
+                    className="inline-flex min-w-0 max-w-full items-center gap-1 truncate rounded-full border border-border px-3 py-1.5 text-xs font-bold hover:border-accent hover:text-accent hover:bg-accent-soft"
                     style={{ borderColor: b.color || undefined, color: b.color || undefined }}
                     title="Open bundle cards"
                   >
-                    <Layers size={12} /> {b.name}
+                    <Layers size={12} className="shrink-0" /> <span className="min-w-0 truncate">{b.name}</span>
                   </button>
                 ))}
               </div>

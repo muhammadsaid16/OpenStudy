@@ -242,11 +242,12 @@ export default function GoalsPage() {
   const exportGoalsAsCsv = async () => {
     setExportMenuOpen(false);
     try {
-      const [allGoals] = await Promise.all([getGoals(), getAllMilestones()]);
-      const header = ["title","description","horizon","status","dueDate"];
-      const rows = (allGoals as any[]).map((g)=>
-        [csvEsc(g.title), csvEsc(g.description ?? ""), csvEsc(g.horizon ?? "regular"), csvEsc(g.status ?? "backlog"), csvEsc(g.dueDate ? new Date(g.dueDate).toISOString().slice(0,10) : "")].join(",")
-      );
+      const [allGoals, allMilestones] = await Promise.all([getGoals(), getAllMilestones()]);
+      const header = ["title","description","horizon","status","dueDate","milestoneTitles"];
+      const rows = (allGoals as any[]).map((g)=>{
+        const milestoneTitles = (allMilestones as any[]).filter((m)=>m.goalId===g.id).map((m)=>m.title).join(";");
+        return [csvEsc(g.title), csvEsc(g.description ?? ""), csvEsc(g.horizon ?? "regular"), csvEsc(String(g.status ?? "backlog").toUpperCase()), csvEsc(g.dueDate ? new Date(g.dueDate).toISOString().slice(0,10) : ""), csvEsc(milestoneTitles)].join(",");
+      });
       const csv = [header.join(","), ...rows].join("\n");
       const blob = new Blob([csv], { type: "text/csv" });
       const url = URL.createObjectURL(blob);

@@ -30,7 +30,7 @@ export function StatsStreakBadge({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent-soft px-3 py-1.5",
+        "inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent-soft px-3 py-1.5",
         className
       )}
     >
