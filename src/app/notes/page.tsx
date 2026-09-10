@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition, Suspense, useRef } from "react";
-import { Plus, Trash2, Pin, StickyNote, Pencil, Eye, BookOpen, Search, X, Download, Upload } from "lucide-react";
+import { Plus, Trash2, Pin, StickyNote, Pencil, Eye, BookOpen, Search, X, Download, Upload, Lightbulb, ClockAlert } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button, Modal, Input, EmptyState, Skeleton, Textarea } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
@@ -83,6 +83,7 @@ function NotesContent() {
     return (
       n.title.toLowerCase().includes(q) ||
       (n.content ?? "").toLowerCase().includes(q) ||
+      (n.explanation ?? "").toLowerCase().includes(q) ||
       n.tags.some((t) => t.tag.name.toLowerCase().includes(q)) ||
       (n.topic?.name ?? "").toLowerCase().includes(q) ||
       (n.topic?.subject?.name ?? "").toLowerCase().includes(q)
@@ -507,6 +508,18 @@ function NotesContent() {
                 <div className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-fg">
                   {note.content ? <Markdown content={note.content} /> : <span className="italic text-muted-fg/70">No content</span>}
                 </div>
+                {/* Explanation snippet */}
+                {(note as any).explanation && (
+                  <div className={`mt-3 flex gap-2 rounded-xl border px-3 py-2 ${(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 ? "border-amber-500/25 bg-amber-500/10" : "border-accent/15 bg-accent-soft/40"}`}>
+                    <Lightbulb size={12} className={`mt-0.5 shrink-0 ${(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 ? "text-amber-600" : "text-accent"}`} />
+                    <p className="line-clamp-2 text-xs leading-relaxed text-fg/75">
+                      {(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 && (
+                        <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 mr-1"><ClockAlert size={10}/> Outdated ·</span>
+                      )}
+                      {(note as any).explanation.replace(/\n/g, " ").slice(0, 130)}{(note as any).explanation.length > 130 ? "…" : ""}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Footer */}

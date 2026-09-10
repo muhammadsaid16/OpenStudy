@@ -264,6 +264,7 @@ export default function NotePage() {
           content={note.content ?? ""}
           explanation={(note as any).explanation ?? null}
           explanationUpdatedAt={(note as any).explanationUpdatedAt ?? null}
+          noteUpdatedAt={(note as any).updatedAt ?? null}
           onSaved={(next) =>
             setNote((prev) => (prev ? ({ ...prev, explanation: next, explanationUpdatedAt: next ? new Date() : null } as any) : prev))
           }
