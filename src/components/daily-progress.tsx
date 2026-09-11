@@ -6,6 +6,7 @@
 
 import { useEffect, useRef } from "react";
 import { Flame, Layers, Timer } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export interface DailyProgressData {
   cardsReviewed: number;
@@ -63,6 +64,7 @@ function Ring({
 }
 
 export function DailyProgress({ data }: { data: DailyProgressData }) {
+  const t = useT();
   // Three separate ref objects — passed to <Ring> by NAME in JSX (never
   // indexed/dereferenced during render) and gathered into an array only
   // inside the effect below, where ref access is allowed.
@@ -122,9 +124,9 @@ export function DailyProgress({ data }: { data: DailyProgressData }) {
   }, [data.cardsReviewed, data.minutesToday, data.streakDays]);
 
   return (
-    <div className="glass flex items-center gap-6 rounded-3xl p-6" role="img"
-      aria-label={`Daily progress: ${data.cardsReviewed} of ${data.cardsGoal} cards, ${data.minutesToday} of ${data.minutesGoal} minutes, ${data.streakDays} day streak`}>
-      <div className="relative h-[140px] w-[140px] shrink-0">
+    <div className="glass flex flex-col gap-4 rounded-3xl p-6 sm:flex-row sm:items-center sm:gap-6" role="img"
+      aria-label={t("dailyProgress.aria").replace("{c}", String(data.cardsReviewed)).replace("{cg}", String(data.cardsGoal)).replace("{m}", String(data.minutesToday)).replace("{mg}", String(data.minutesGoal)).replace("{s}", String(data.streakDays))}>
+      <div className="relative mx-auto h-[140px] w-[140px] shrink-0 sm:mx-0">
         {/* outer → inner: cards (accent), minutes (flow), streak (grow).
             Ref objects are passed by name — never indexed/dereferenced
             during render; they're only read inside effects/callbacks. */}
@@ -132,19 +134,19 @@ export function DailyProgress({ data }: { data: DailyProgressData }) {
         <Ring pct={clamped[1]} color={RING[1].color} size={96} stroke={10} circleRef={minutesCircle} />
         <Ring pct={clamped[2]} color={RING[2].color} size={52} stroke={10} circleRef={streakCircle} />
       </div>
-      <div className="min-w-0 flex-1 space-y-3">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-          Today&apos;s Progress
+      <div className="min-w-0 flex-1 space-y-3 overflow-hidden">
+        <p className="truncate text-xs font-bold uppercase tracking-widest text-muted-fg">
+          {t("dailyProgress.today")}
         </p>
         {[
-          { label: "Cards reviewed", value: `${data.cardsReviewed}/${data.cardsGoal}`, color: RING[0].color },
-          { label: "Focus minutes", value: `${data.minutesToday}/${data.minutesGoal}`, color: RING[1].color },
-          { label: "Day streak", value: `${data.streakDays}`, color: RING[2].color },
+          { label: t("dash.cardsReviewed"), value: `${data.cardsReviewed}/${data.cardsGoal}`, color: RING[0].color },
+          { label: t("dash.focusMinutes"), value: `${data.minutesToday}/${data.minutesGoal}`, color: RING[1].color },
+          { label: t("dash.dayStreak"), value: `${data.streakDays}`, color: RING[2].color },
         ].map((row) => (
           <div key={row.label} className="flex items-center gap-2.5 text-sm">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: row.color }} aria-hidden />
-            <span className="text-muted-fg">{row.label}</span>
-            <span className="ms-auto font-mono font-bold tabular-nums">{row.value}</span>
+            <span className="truncate text-muted-fg">{row.label}</span>
+            <span className="ms-auto shrink-0 font-mono font-bold tabular-nums">{row.value}</span>
           </div>
         ))}
       </div>

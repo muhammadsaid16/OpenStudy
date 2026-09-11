@@ -391,6 +391,8 @@ const DICT: Dict = {
   "subjSelect.selectSubject": { en: "Select a subject", ar: "اختر مادة" },
   "subjSelect.selectSubjectPh": { en: "Select a subject…", ar: "اختر مادة…" },
   "subjSelect.subjectName": { en: "Subject name (e.g. Biology)", ar: "اسم المادة (مثال: أحياء)" },
+  "dailyProgress.today": { en: "Today's Progress", ar: "تقدم اليوم" },
+  "dailyProgress.aria": { en: "Daily progress: {c} of {cg} cards, {m} of {mg} minutes, {s} day streak", ar: "التقدم اليومي: {c} من {cg} بطاقات، {m} من {mg} دقائق، {s} أيام متتالية" },
 };
 
 export function useT() {
