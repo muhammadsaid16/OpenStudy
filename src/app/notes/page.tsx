@@ -363,7 +363,7 @@ function NotesContent() {
             {!(loaded && notes.length === 0) && (
               <Button onClick={() => setModalOpen(true)}>
                 <Plus size={16} />
-                New note
+                {t("notes.newNote")}
               </Button>
             )}
           </div>

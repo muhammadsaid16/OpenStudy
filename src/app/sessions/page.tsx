@@ -608,15 +608,15 @@ export default function SessionsPage() {
               >
                 {!timerRunning ? (
                   <>
-                    <Play size={20} /> Start
+                    <Play size={20} /> {t("sessions.start")}
                   </>
                 ) : timerPaused ? (
                   <>
-                    <Play size={20} /> Resume
+                    <Play size={20} /> {t("sessions.resume")}
                   </>
                 ) : (
                   <>
-                    <Pause size={20} /> Pause
+                    <Pause size={20} /> {t("sessions.pause")}
                   </>
                 )}
               </button>
@@ -713,15 +713,15 @@ export default function SessionsPage() {
               >
                 {!pomo.running ? (
                   <>
-                    <Play size={20} /> Start
+                    <Play size={20} /> {t("sessions.start")}
                   </>
                 ) : pomo.paused ? (
                   <>
-                    <Play size={20} /> Resume
+                    <Play size={20} /> {t("sessions.resume")}
                   </>
                 ) : (
                   <>
-                    <Pause size={20} /> Pause
+                    <Pause size={20} /> {t("sessions.pause")}
                   </>
                 )}
               </button>
