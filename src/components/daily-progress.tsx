@@ -40,10 +40,8 @@ function Ring({
     <svg
       width={size}
       height={size}
-      // center on the container's midpoint (NOT inset-0, which stretches
-      // every svg to the 140px box and throws inner rings off-center so
-      // they collide instead of nesting concentrically)
-      className="absolute start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90"
+      // physical centering — logical start-*/translate-x breaks in RTL for concentric rings
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90"
       aria-hidden
     >
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-muted)" strokeWidth={stroke} />
@@ -134,8 +132,8 @@ export function DailyProgress({ data }: { data: DailyProgressData }) {
         <Ring pct={clamped[1]} color={RING[1].color} size={96} stroke={10} circleRef={minutesCircle} />
         <Ring pct={clamped[2]} color={RING[2].color} size={52} stroke={10} circleRef={streakCircle} />
       </div>
-      <div className="min-w-0 flex-1 space-y-3 overflow-hidden">
-        <p className="truncate text-xs font-bold uppercase tracking-widest text-muted-fg">
+      <div className="min-w-0 flex-1 space-y-3">
+        <p className="text-xs font-bold text-muted-fg">
           {t("dailyProgress.today")}
         </p>
         {[
@@ -145,8 +143,8 @@ export function DailyProgress({ data }: { data: DailyProgressData }) {
         ].map((row) => (
           <div key={row.label} className="flex items-center gap-2.5 text-sm">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: row.color }} aria-hidden />
-            <span className="truncate text-muted-fg">{row.label}</span>
-            <span className="ms-auto shrink-0 font-mono font-bold tabular-nums">{row.value}</span>
+            <span className="text-muted-fg">{row.label}</span>
+            <span className="ms-auto font-mono font-bold tabular-nums">{row.value}</span>
           </div>
         ))}
       </div>
