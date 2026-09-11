@@ -546,6 +546,7 @@ const DICT: Dict = {
   "stats.period1Y": { en: "1Y", ar: "سنة" },
   "stats.period30D": { en: "30D", ar: "٣٠ يوم" },
   "stats.period90D": { en: "90D", ar: "٩٠ يوم" },
+  "subj.howItWorksDesc": { en: "Library merges the old Subjects + Flashcards/Bundles hierarchies: Subject → Topic → Deck → Cards is now one path. Create a subject, add topics, then create a deck inside a topic — or create a standalone deck and link it later. All cards live in decks and stay reviewable via Study.", ar: "تدمج المكتبة التسلسلات القديمة للمواد والبطاقات/المجموعات: المادة ← الموضوع ← المجموعة ← البطاقات في مسار واحد. أنشئ مادة، أضف مواضيع، ثم أنشئ مجموعة داخل موضوع — أو أنشئ مجموعة مستقلة واربطها لاحقًا. جميع البطاقات تعيش في المجموعات وتبقى قابلة للمراجعة عبر دراسة." },
 };
 
 export function useT() {

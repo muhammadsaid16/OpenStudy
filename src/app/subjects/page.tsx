@@ -1021,7 +1021,7 @@ export default function SubjectsPage() {
               <div className="glass rounded-2xl p-6">
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("subjnew.howItWorks")}</h4>
                 <p className="mt-2 text-sm leading-relaxed text-muted-fg">
-                  Library merges the old Subjects + Flashcards/Bundles hierarchies: Subject → Topic → Deck → Cards is now one path. Create a subject, add topics, then create a deck inside a topic — or create a standalone deck and link it later. All cards live in decks and stay reviewable via Study.
+                  {t("subj.howItWorksDesc")}
                 </p>
               </div>
             </div>
