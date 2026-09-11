@@ -19,10 +19,10 @@ import { Flame, Layers, Clock, Trophy, AlertTriangle, Activity, Timer } from "lu
 import { useLiveData } from "@/lib/use-live-data";
 
 type Period = "30" | "90" | "365" | "all";
-const PERIODS: { key: Period; label: string; weeks: number }[] = [
-  { key: "30", label: "30D", weeks: 5 },
-  { key: "90", label: "90D", weeks: 13 },
-  { key: "365", label: "1Y", weeks: 52 },
+const PERIODS: { key: Period; labelKey: string; weeks: number }[] = [
+  { key: "30", labelKey: "stats.period30D", weeks: 5 },
+  { key: "90", labelKey: "stats.period90D", weeks: 13 },
+  { key: "365", labelKey: "stats.period1Y", weeks: 52 },
   { key: "all", labelKey: "stats.allPeriod", weeks: 52 },
 ];
 
@@ -261,8 +261,8 @@ export default function StatsPage() {
           { icon: Activity, labelKey: "stats.masteredLabel", value: `${mastered}`, sub: `${cards.length} cards`, color: "var(--color-grow)" },
           { icon: AlertTriangle, labelKey: "stats.dueLeeches", value: `${dueNow}`, sub: `${leeches} leeches`, color: dueNow > 20 ? "var(--color-danger)" : "var(--color-warning)" },
         ].map(k => (
-          <Card key={k.label} className="!p-4 flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg"><k.icon size={12} style={{ color: k.color }} /> {k.label}</div>
+          <Card key={k.labelKey} className="!p-4 flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg"><k.icon size={12} style={{ color: k.color }} /> {t(k.labelKey)}</div>
             <div className="font-mono text-2xl font-bold tabular-nums tracking-tight">{k.value}</div>
             <div className="text-[11px] text-muted-fg">{k.sub}</div>
           </Card>

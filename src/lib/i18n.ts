@@ -543,6 +543,9 @@ const DICT: Dict = {
   "stats.streakLabel": { en: "Streak", ar: "التتابع" },
   "stats.totalReviews": { en: "Total reviews", ar: "إجمالي المراجعات" },
   "subj.deleteTopicBtn": { en: "Delete topic", ar: "حذف الموضوع" },
+  "stats.period1Y": { en: "1Y", ar: "سنة" },
+  "stats.period30D": { en: "30D", ar: "٣٠ يوم" },
+  "stats.period90D": { en: "90D", ar: "٩٠ يوم" },
 };
 
 export function useT() {
