@@ -38,7 +38,7 @@ type Phase =
 
 const MAX_CHARS = 8_000;
 const MIN_CHARS = 20;
-const GEN_STAGES = ["Reading source", t("ui.extracting_concepts"), "Writing cards"] as const;
+const GEN_STAGES = ["Reading source", "ui.extracting_concepts", "Writing cards"] as const;
 
 interface ApiSuccess {
   ok: true;
@@ -427,7 +427,7 @@ export function AiGenerateModal({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imagePreview}
-                  alt=t("ui.selected_study_material")
+                  alt={t("ui.selected_study_material")}
                   className="mx-auto max-w-full h-auto max-h-[320px] object-contain"
                 />
                 <button
@@ -502,7 +502,7 @@ export function AiGenerateModal({
       <Loader2 size={28} className="animate-spin text-accent" />
       <div className="space-y-1 text-center">
         <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
-          {GEN_STAGES[stageIdx]}
+          {t(GEN_STAGES[stageIdx])}
         </p>
         <p className="text-xs text-muted-fg leading-relaxed">
           {mode === "image" ? (

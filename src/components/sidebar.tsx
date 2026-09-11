@@ -22,13 +22,13 @@ import { cn } from "@/lib/utils";
 
 // Flat list kept for typing; navGroups above drives the render.
 const navItems = [
-  { href: "/", label: t("ui.dashboard"), icon: LayoutDashboard },
-  { href: "/subjects", label: t("ui.library"), icon: Library },
-  { href: "/notes", label: t("ui.notes"), icon: StickyNote },
-  { href: "/sessions", label: t("ui.sessions"), icon: Timer },
-  { href: "/goals", label: t("ui.goals"), icon: Target },
-  { href: "/stats", label: t("ui.stats"), icon: BarChart3 },
-  { href: "/settings", label: t("ui.settings"), icon: Settings },
+  { href: "/", labelKey: "ui.dashboard", icon: LayoutDashboard },
+  { href: "/subjects", labelKey: "ui.library", icon: Library },
+  { href: "/notes", labelKey: "ui.notes", icon: StickyNote },
+  { href: "/sessions", labelKey: "ui.sessions", icon: Timer },
+  { href: "/goals", labelKey: "ui.goals", icon: Target },
+  { href: "/stats", labelKey: "ui.stats", icon: BarChart3 },
+  { href: "/settings", labelKey: "ui.settings", icon: Settings },
 ];
 
 // Nav groups — spec mental model: LEARN (content) / FOCUS (time) /
@@ -36,31 +36,31 @@ const navItems = [
 // Bundles (one hierarchy: Subject → Topic → Deck → Cards). This fixes the
 // duplicate "two pages for same purpose" reported on /subjects vs /flashcards.
 // Labels are i18n keys rendered through useT() (src/lib/i18n.ts).
-const navGroups: { heading: string; items: typeof navItems }[] = [
+const navGroups: { headingKey: string; items: typeof navItems }[] = [
   {
-    heading: "nav.learn",
+    headingKey: "nav.learn",
     items: [
-      { href: "/subjects", label: "nav.library", icon: Library },
-      { href: "/notes", label: "nav.notes", icon: StickyNote },
+      { href: "/subjects", labelKey: "nav.library", icon: Library },
+      { href: "/notes", labelKey: "nav.notes", icon: StickyNote },
     ],
   },
   {
-    heading: "nav.focus",
+    headingKey: "nav.focus",
     items: [
-      { href: "/sessions", label: "nav.sessions", icon: Timer },
-      { href: "/goals", label: "nav.goals", icon: Target },
+      { href: "/sessions", labelKey: "nav.sessions", icon: Timer },
+      { href: "/goals", labelKey: "nav.goals", icon: Target },
     ],
   },
   {
-    heading: "nav.insights",
+    headingKey: "nav.insights",
     items: [
-      { href: "/", label: "nav.dashboard", icon: LayoutDashboard },
-      { href: "/stats", label: "nav.stats", icon: BarChart3 },
+      { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/stats", labelKey: "nav.stats", icon: BarChart3 },
     ],
   },
   {
-    heading: "nav.system",
-    items: [{ href: "/settings", label: "nav.settings", icon: Settings }],
+    headingKey: "nav.system",
+    items: [{ href: "/settings", labelKey: "nav.settings", icon: Settings }],
   },
 ];
 
@@ -109,14 +109,14 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-5 overflow-y-auto p-3" aria-label="Main">
         {navGroups.map((group) => (
-          <div key={group.heading}>
+          <div key={t(group.headingKey)}>
             {sidebarOpen && (
               <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-fg/70">
-                {t(group.heading)}
+                {t(t(group.headingKey))}
               </p>
             )}
             <div className="space-y-1">
-              {group.items.map(({ href, label, icon: Icon }) => {
+              {group.items.map(({ href, labelKey, icon: Icon }) => {
                 const isActive = isLibraryActive(pathname, href);
                 return (
                   <Link
@@ -140,7 +140,7 @@ export function Sidebar() {
                     )}
                     <span className="relative z-10 flex items-center gap-3">
                       <Icon size={18} aria-hidden />
-                      {sidebarOpen && <span>{t(label)}</span>}
+                      {sidebarOpen && <span>{t(labelKey)}</span>}
                     </span>
                   </Link>
                 );

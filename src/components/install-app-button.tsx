@@ -12,7 +12,7 @@ import { Button } from "@/components/ui";
 // beforeinstallprompt and show a button. iOS Safari doesn't fire it —
 // there we show a hint instead.
 type BIPEvent = Event & {
-  prompt: () =>{t("ui.promise")}<void>;
+  prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 

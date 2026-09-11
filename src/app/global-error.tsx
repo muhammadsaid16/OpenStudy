@@ -20,9 +20,9 @@ function readLang(): "en" | "ar" {
 
 const ERR = {
   en: {
-    title: t("ui.openstudy_hit_a_snag"),
+    titleKey: "ui.openstudy_hit_a_snag",
     body: "Something failed at the app shell level. Your local data is safe.",
-    reload: t("ui.reload_app"),
+    reloadKey: "ui.reload_app",
   },
   ar: {
     title: "واجه OpenStudy مشكلة",
@@ -57,8 +57,8 @@ export default function GlobalError({
       >
         <div style={{ textAlign: "center", padding: "2rem", maxWidth: 420 }}>
           <AlertTriangle size={48} color="#FB4A55" style={{ margin: "0 auto 1rem" }} />
-          <h1 style={{ fontSize: 24, margin: "0 0 0.5rem" }}>{s.title}</h1>
-          <p style={{ color: "#94A3B8", fontSize: 14, lineHeight: 1.6 }}>{s.body}</p>
+          <h1 style={{ fontSize: 24, margin: "0 0 0.5rem" }}>{(s as any).titleKey ? t((s as any).titleKey) : (s as any).title}</h1>
+          <p style={{ color: "#94A3B8", fontSize: 14, lineHeight: 1.6 }}>{(s as any).bodyKey ? t((s as any).bodyKey) : (s as any).body}</p>
           {error?.digest && (
             <p style={{ color: "#94A3B8", fontSize: 11, fontFamily: "monospace" }}>
               code: {error.digest.slice(0, 8)}
@@ -78,7 +78,7 @@ export default function GlobalError({
               cursor: "pointer",
             }}
           >
-            {s.reload}
+            {(s as any).reloadKey ? t((s as any).reloadKey) : (s as any).reload}
           </button>
         </div>
       </body>

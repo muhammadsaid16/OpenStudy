@@ -295,7 +295,7 @@ export function LeechesMode(p: LeechesModeProps) {
           {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
         </div>
       ) : p.leechCards.length === 0 ? (
-        <EmptyState icon={<AlertTriangle size={48} />} title={t("flashcards.noLeeches")} description=t("flashcards.noLeechesDesc") />
+        <EmptyState icon={<AlertTriangle size={48} />} title={t("flashcards.noLeeches")} description={t("flashcards.noLeechesDesc")} />
       ) : (
         <div className="space-y-3">
           {p.leechCards.map((card) => (

@@ -804,6 +804,7 @@ const DICT: Dict = {
   "ui.skip_phase": { en: "Skip phase", ar: "تخطي المرحلة" },
   "ui.start_focus_session": { en: "Start focus session", ar: "ابدأ جلسة تركيز" },
   "ui.stop_and_log_session": { en: "Stop and log session", ar: "أوقف وسجّل الجلسة" },
+  "ui.achieved": { en: "Achieved", ar: "تم الإنجاز" },
 };
 
 export function useT() {

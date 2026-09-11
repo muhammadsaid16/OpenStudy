@@ -12,9 +12,9 @@ import { Timer } from "lucide-react";
 import { usePomodoro, phaseSeconds, type PomoPhase } from "@/lib/pomodoro";
 
 const PHASE_LABEL: Record<PomoPhase, string> = {
-  work: t("ui.focus"),
-  break: t("ui.break"),
-  long: t("ui.long_break_1"),
+  work: "ui.focus",
+  break: "ui.break",
+  long: "ui.long_break_1",
 };
 
 export function GlobalFocusChip() {
@@ -30,7 +30,7 @@ export function GlobalFocusChip() {
   };
   const label = pomo.title?.trim()
     ? pomo.title.trim().slice(0, 24)
-    : PHASE_LABEL[pomo.phase];
+    : t(PHASE_LABEL[pomo.phase]);
 
   return (
     <Link

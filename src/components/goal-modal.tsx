@@ -17,7 +17,7 @@ import { Rocket, ListTodo, Repeat } from "lucide-react";
 // Swatch palette drawn from theme tokens — resolved at runtime so every
 // theme recolors them. `null` = no custom color.
 const SWATCHES: { value: string | null; css: string; label: string }[] = [
-  { value: null, css: "transparent", label: t("ui.no_color") },
+  { value: null, css: "transparent", label: "ui.no_color" },
   { value: "var(--color-accent)", css: "var(--color-accent)", label: "Accent" },
   { value: "var(--color-flow)", css: "var(--color-flow)", label: "Flow" },
   { value: "var(--color-grow)", css: "var(--color-grow)", label: "Grow" },
@@ -123,10 +123,10 @@ function GoalForm({
   };
 
   return (
-    <Modal open onClose={onClose} title={goal ? t("ui.edit_goal") : "New goal"}>
+    <Modal open onClose={onClose} title={goal ? "ui.edit_goal" : "New goal"}>
       <div className="space-y-4">
         <Input
-          placeholder={t("modal.exampleGoal")}
+          placeholder={"modal.exampleGoal"}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => {
@@ -135,7 +135,7 @@ function GoalForm({
           autoFocus
         />
         <Textarea
-          placeholder={t("modal.whyMatters")}
+          placeholder={"modal.whyMatters"}
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -143,12 +143,12 @@ function GoalForm({
 
         {/* Horizon picker */}
         <div>
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("ui.horizon")}</p>
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">{"ui.horizon"}</p>
           <div className="inline-flex w-full rounded-full border border-glass-border bg-glass p-1">
             {(
               [
-                { id: "long", label: t("goals.longTerm"), icon: Rocket },
-                { id: "regular", label: t("goals.todo"), icon: ListTodo },
+                { id: "long", label: "goals.longTerm", icon: Rocket },
+                { id: "regular", label: "goals.todo", icon: ListTodo },
               ] as const
             ).map(({ id, label, icon: Icon }) => (
               <button
@@ -175,7 +175,7 @@ function GoalForm({
         {/* Repeat picker */}
         <div>
           <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">
-            <Repeat size={11} />{t("ui.repeats")}</p>
+            <Repeat size={11} />{"ui.repeats"}</p>
           <div className="inline-flex w-full rounded-full border border-glass-border bg-glass p-1">
             {(
               [
@@ -210,7 +210,7 @@ function GoalForm({
 
         {/* Due date */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("ui.due_date")}</label>
+          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{"ui.due_date"}</label>
           <input
             type="date"
             value={dueDate}
@@ -221,7 +221,7 @@ function GoalForm({
 
         {/* Subject + topic context */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("dash.subject")}</label>
+          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{"dash.subject"}</label>
           <SubjectTopicMenu
             subjects={subjects}
             subjectId={subjectId}
@@ -233,7 +233,7 @@ function GoalForm({
 
         {/* Color swatches */}
         <div>
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("fc.color")}</p>
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">{"fc.color"}</p>
           <div className="flex flex-wrap items-center gap-2">
             {SWATCHES.map((s) => (
               <button
@@ -259,9 +259,9 @@ function GoalForm({
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="secondary" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button variant="secondary" onClick={onClose}>{"common.cancel"}</Button>
           <Button onClick={handleSubmit} disabled={!title.trim() || saving}>
-            {saving ? t("fc.saving") : goal ? "Save changes" : t("ui.create_goal")}
+            {saving ? "fc.saving" : goal ? "Save changes" : "ui.create_goal"}
           </Button>
         </div>
       </div>

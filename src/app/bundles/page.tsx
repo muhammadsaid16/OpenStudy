@@ -373,7 +373,7 @@ export default function BundlesPage() {
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={t("modal.newBundle")}>
         <div className="space-y-6">
           <Input label={t("bundles.bundleNameShort")} placeholder="e.g. IELTS vocabulary" value={newName} onChange={(e) => setNewName(e.target.value)} />
-          <Input label=t("ui.description_optional") placeholder={t("modal.briefDesc")} value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
+          <Input label={t("ui.description_optional")} placeholder={t("modal.briefDesc")} value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
           <BundleColorPicker value={newColor} onChange={setNewColor} />
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Subject & topic (optional)</label>
@@ -400,7 +400,7 @@ export default function BundlesPage() {
         {editBundle && (
           <div className="space-y-6">
             <Input label={t("bundles.bundleNameShort")} value={editName} onChange={(e) => setEditName(e.target.value)} />
-            <Input label=t("ui.description_optional") value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
+            <Input label={t("ui.description_optional")} value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
             <BundleColorPicker value={editColor} onChange={setEditColor} />
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="ghost" onClick={() => setEditBundle(null)}>{t("common.cancel")}</Button>

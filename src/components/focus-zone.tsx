@@ -32,19 +32,19 @@ const SOUNDSCAPES: SoundscapeName[] = [
 
 const PHASE_META = {
   work: {
-    label: t("ui.focus"),
+    labelKey: "ui.focus",
     chip: "bg-accent-soft text-accent",
     from: "var(--color-accent)",
     to: "var(--color-flow)",
   },
   break: {
-    label: t("ui.break"),
+    labelKey: "ui.break",
     chip: "bg-flow/10 text-flow",
     from: "var(--color-flow)",
     to: "var(--color-grow)",
   },
   long: {
-    label: t("ui.long_break"),
+    labelKey: "ui.long_break",
     chip: "bg-grow/10 text-grow",
     from: "var(--color-grow)",
     to: "var(--color-accent)",
@@ -197,7 +197,7 @@ export function FocusZone() {
       <div className="relative mx-auto mb-6 w-fit">
         {pomo.active && <div className="focus-halo" aria-hidden />}
         <svg width={size} height={size} className="-rotate-90" role="img"
-          aria-label={`Pomodoro ${meta.label} phase, ${fmt(pomo.seconds)} remaining`}>
+          aria-label={`Pomodoro ${t(meta.labelKey)} phase, ${fmt(pomo.seconds)} remaining`}>
           <defs>
             <linearGradient id="focus-ring" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor={meta.from} />
@@ -226,7 +226,7 @@ export function FocusZone() {
             )}
           >
             {pomo.phase === "work" ? <Brain size={11} aria-hidden /> : <Coffee size={11} aria-hidden />}
-            {meta.label}
+            {t(meta.labelKey)}
           </span>
           <span className="font-mono text-5xl font-bold tabular-nums tracking-tight">
             {fmt(pomo.seconds)}

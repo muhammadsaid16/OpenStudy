@@ -31,12 +31,12 @@ let listeners: ((t: Toast) => void)[] = [];
 let nextId = 1;
 
 export function showToast(message: string, tone: ToastTone = "info") {
-  const t = useT();
-  const toast: Toast = { message, tone, id: nextId++ };
+    const toast: Toast = { message, tone, id: nextId++ };
   listeners.forEach((l) => l(toast));
 }
 
 export function ToastHost() {
+  const t = useT();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [exiting, setExiting] = useState<Set<number>>(new Set());
   const timers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
@@ -78,18 +78,18 @@ export function ToastHost() {
       aria-live="polite"
       className="pointer-events-none fixed bottom-6 start-1/2 z-[100] flex -translate-x-1/2 flex-col items-center gap-2"
     >
-      {toasts.map((t) => {
-        const isExiting = exiting.has(t.id);
+      {toasts.map((toast) => {
+        const isExiting = exiting.has(toast.id);
         return (
           <div
-            key={t.id}
+            key={toast.id}
             className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-border bg-bg px-5 py-3 shadow-2xl ${isExiting ? "animate-[fall_0.2s_ease-in_forwards]" : "animate-[rise_0.2s_ease-out]"}`}
           >
-            <span className={`text-xs font-bold tracking-wide ${TONE_CLASS[t.tone]}`}>
-              {t.message}
+            <span className={`text-xs font-bold tracking-wide ${TONE_CLASS[toast.tone]}`}>
+              {toast.message}
             </span>
             <button
-              onClick={() => dismiss(t.id)}
+              onClick={() => dismiss(toast.id)}
               aria-label={t("ui.dismiss")}
               className="text-muted-fg transition-colors hover:text-accent"
             >

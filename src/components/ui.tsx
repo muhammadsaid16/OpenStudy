@@ -272,7 +272,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
           <h2 className="font-display text-xl font-bold tracking-tight">{title}</h2>
           <button
             onClick={onClose}
-            aria-label={t("common.close")}
+            aria-label={"common.close"}
             className="rounded-full p-2 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
           >
             ✕

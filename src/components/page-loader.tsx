@@ -27,8 +27,9 @@ export type LoaderVariant =
   | "stats";    // stats
 
 function LoaderBar({ label }: { label: string }) {
+  const t = useT();
   // Spec (global): loading labels are implementation-style text —
-  // t("ui.loading_dashboard") exposed internals. Skeletons stay visual only;
+  // "ui.loading_dashboard" exposed internals. Skeletons stay visual only;
   // a visually-hidden status keeps screen readers informed.
   return (
     <div className="mb-10" role="status" aria-label={`Loading ${label}`}>

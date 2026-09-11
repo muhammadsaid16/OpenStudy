@@ -82,7 +82,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
           <EmptyState
             icon={<Layers size={48} />}
             title={t("flashcards.noBundles")}
-            description=t("ui.create_your_first_bundle_to_orga")
+            description={t("ui.create_your_first_bundle_to_orga")}
             action={
               <Button onClick={() => p.onOpenBundleCreate()}>
                 <Plus size={16} />{t("fc.createBundle")}</Button>
@@ -147,7 +147,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
       <EmptyState
         icon={<Brain size={48} />}
         title={t("flashcards.noCardsYet")}
-        description=t("ui.create_your_first_flashcard_to_s")
+        description={t("ui.create_your_first_flashcard_to_s")}
         action={
           <Button onClick={() => p.onOpenCreate()}>
             <Plus size={16} />{t("ui.create_first_card")}</Button>

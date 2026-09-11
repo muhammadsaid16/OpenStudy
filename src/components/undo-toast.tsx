@@ -24,6 +24,7 @@ export function showUndo(action: UndoAction) {
 }
 
 export function UndoToastHost() {
+  const t = useT();
   const [current, setCurrent] = useState<UndoAction | null>(null);
   const [exiting, setExiting] = useState(false);
 

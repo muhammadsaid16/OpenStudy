@@ -60,7 +60,7 @@ export function WeeklyAnalytics({ data }: { data: WeekDay[] }) {
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-flow/10 text-flow">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d=t("ui.m3_3v18h18") />
+              <path d={t("ui.m3_3v18h18")} />
               <path d="m19 9-5 5-4-4-3 3" />
             </svg>
           </div>

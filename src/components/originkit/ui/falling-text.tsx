@@ -36,7 +36,7 @@ type Props = {
 };
 
 export default function GravityFall({
-    text = t("ui.gravity_fall"),
+    text = "Gravity Fall",
     font = {
         fontFamily: "Inter",
         variant: "Bold",

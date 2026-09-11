@@ -12,7 +12,7 @@ import { exportAllData, importAllData } from "@/app/actions";
 import { showToast } from "@/components/toast";
 import { Download, Upload, Check, AlertTriangle } from "lucide-react";
 
-const THEMES: { id: ThemeName; name: string; bg: string; accent: string; fg: string }[] = [
+const THEMES: { id: ThemeName; name: string; nameKey?: string; bg: string; accent: string; fg: string }[] = [
   { id: "aurora", name: "Aurora", bg: "#0B0F17", accent: "#FF7A72", fg: "#E7EDF7" },
   { id: "midnight", name: "Midnight", bg: "#030712", accent: "#60A5FA", fg: "#E4EDFF" },
   { id: "nebula", name: "Nebula", bg: "#0D0716", accent: "#C084FC", fg: "#F2E9FF" },
@@ -23,7 +23,7 @@ const THEMES: { id: ThemeName; name: string; bg: string; accent: string; fg: str
   { id: "arctic", name: "Arctic", bg: "#07111E", accent: "#38BDF8", fg: "#E8F6FF" },
   { id: "sandstone", name: "Sandstone", bg: "#151210", accent: "#E8B45C", fg: "#F7EFE3" },
   { id: "mono", name: "Mono", bg: "#09090B", accent: "#FFFFFF", fg: "#FAFAFA" },
-  { id: "light", name: t("nav.light"), bg: "#F1F5F9", accent: "#B91C1C", fg: "#0F172A" },
+  { id: "light", name: "Light", nameKey: "nav.light", bg: "#F1F5F9", accent: "#B91C1C", fg: "#0F172A" },
   { id: "paper", name: "Paper", bg: "#FAF7F2", accent: "#9A3412", fg: "#292018" },
 ];
 
@@ -165,39 +165,39 @@ export default function SettingsPage() {
         </div>
         <p className="mb-4 text-xs text-muted-fg">{t("settings.themeHint")}</p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {THEMES.map((t) => {
-            const active = theme === t.id;
+          {THEMES.map((th) => {
+            const active = theme === th.id;
             return (
               <button
-                key={t.id}
-                onClick={() => setTheme(t.id)}
+                key={th.id}
+                onClick={() => setTheme(th.id)}
                 aria-pressed={active}
-                aria-label={`Use ${t.name} theme`}
+                aria-label={`Use ${th.nameKey ? t(th.nameKey) : th.name} theme`}
                 className={cn(
                   "group flex flex-col gap-3 rounded-2xl border p-3 transition-all",
                   active ? "border-accent ring-2 ring-accent ring-offset-1 ring-offset-bg" : "border-border hover:border-accent"
                 )}
-                style={{ background: t.bg }}
+                style={{ background: th.bg }}
               >
                 <div className="flex items-center justify-between">
                   <span
                     className="h-8 w-8 rounded-full border"
-                    style={{ background: t.accent, borderColor: t.fg }}
+                    style={{ background: th.accent, borderColor: th.fg }}
                   />
                   {active && (
                     <Check
                       className="h-4 w-4 shrink-0"
                       strokeWidth={3}
                       aria-hidden
-                      style={{ color: t.fg }}
+                      style={{ color: th.fg }}
                     />
                   )}
                 </div>
                 <span
                   className="text-xs font-bold uppercase tracking-widest"
-                  style={{ color: t.fg }}
+                  style={{ color: th.fg }}
                 >
-                  {t.name}
+                  {th.nameKey ? t(th.nameKey) : th.name}
                 </span>
               </button>
             );

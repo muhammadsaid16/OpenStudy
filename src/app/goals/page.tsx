@@ -63,10 +63,10 @@ const CARD_VARIANTS = {
   }),
 };
 
-const COLUMNS: { id: GoalStatus; labelKey: string; hint: string; dot: string }[] = [
-  { id: "backlog", labelKey: "goals.col.backlog", hint: t("ui.someday_not_started"), dot: "bg-muted-fg" },
-  { id: "in_progress", labelKey: "goals.col.inProgress", hint: t("ui.actively_working_on"), dot: "bg-flow" },
-  { id: "done", labelKey: "goals.col.done", hint: "Achieved", dot: "bg-grow" },
+const COLUMNS: { id: GoalStatus; labelKey: string; hintKey: string; dot: string }[] = [
+  { id: "backlog", labelKey: "goals.col.backlog", hintKey: "ui.someday_not_started", dot: "bg-muted-fg" },
+  { id: "in_progress", labelKey: "goals.col.inProgress", hintKey: "ui.actively_working_on", dot: "bg-flow" },
+  { id: "done", labelKey: "goals.col.done", hintKey: "ui.achieved", dot: "bg-grow" },
 ];
 
 const PREV_STATUS: Partial<Record<GoalStatus, GoalStatus>> = {
@@ -521,7 +521,7 @@ export default function GoalsPage() {
                     {cards.length}
                   </span>
                   <span className="ms-auto hidden text-[10px] text-muted-fg lg:block">
-                    {col.hint}
+                    {t(col.hintKey)}
                   </span>
                 </div>
 
