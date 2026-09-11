@@ -32,6 +32,8 @@ import {
   reviewFlashcardWithLog,
 } from "@/app/actions";
 import { parseCardsFile } from "@/lib/parsers/cards";
+import { AiGenerateButton } from "@/components/ai-generate-button";
+import { AiImportButton } from "@/components/ai-import-button";
 import { ShareBundleButton } from "@/components/share-bundle-button";
 import { showToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
@@ -499,6 +501,8 @@ export default function BundleCardsPage() {
               {copied ? t("cards.copied") : t("cards.shareBundleBtn")}
             </button>
             <ShareBundleButton bundleId={bundleId} bundleName={bundleName} />
+            <AiImportButton bundleId={bundleId} bundleName={bundleName} availableBundles={allBundles} onImported={load} />
+            <AiGenerateButton bundles={allBundles} defaultBundleId={bundleId} onCreated={load} />
             <Button onClick={() => setCreateOpen(true)}>
               <Plus size={16} />
               {t("cards.addCard")}
