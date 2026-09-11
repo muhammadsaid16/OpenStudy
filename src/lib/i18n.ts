@@ -410,6 +410,22 @@ const DICT: Dict = {
   "goals.emptyTitle": { en: "No goals yet", ar: "لا أهداف بعد" },
   "goals.emptyDesc": { en: "Capture your long-term vision and daily todos, then move them across the board.", ar: "دوّن رؤيتك طويلة المدى ومهامك اليومية، ثم حرّكها عبر اللوحة." },
   "goals.createFirstBtn": { en: "Create your first goal", ar: "أنشئ هدفك الأول" },
+  "sessions.autoNamed": { en: "Auto-named from cycles if empty", ar: "يُسمّى تلقائيًا من الدورات إذا تُرك فارغًا" },
+  "sessions.exampleReviewing": { en: "e.g. Reviewing chapter 5", ar: "مثال: مراجعة الفصل ٥" },
+  "sessions.general": { en: "General", ar: "عام" },
+  "sessions.modePomodoro": { en: "Pomodoro", ar: "بومودورو" },
+  "sessions.modeStopwatch": { en: "Stopwatch", ar: "ساعة إيقاف" },
+  "sessions.optional": { en: " (optional)", ar: " (اختياري)" },
+  "sessions.pickSubjectFirst": { en: "Pick a subject first", ar: "اختر مادة أولًا" },
+  "sessions.ready": { en: "READY", ar: "جاهز" },
+  "sessions.sessionTitle": { en: "Session title", ar: "عنوان الجلسة" },
+  "sessions.saveSetupAs": { en: "Save this setup as… (e.g. Deep work 50/10)", ar: "احفظ هذا الإعداد باسم… (مثال: عمل عميق ٥٠/١٠)" },
+  "subjectMenu.noSubject": { en: "No subject", ar: "بدون مادة" },
+  "subjectMenu.noTopic": { en: "No topic", ar: "بدون موضوع" },
+  "subjectMenu.allLabel": { en: "All {label}s", ar: "كل {label}" },
+  "subjectMenu.pickFirst": { en: "Pick a {label} first", ar: "اختر {label} أولًا" },
+  "common.loading": { en: "Loading…", ar: "جارٍ التحميل…" },
+  "notesDetail.backToNotes": { en: "Back to notes", ar: "العودة إلى الملاحظات" },
 };
 
 export function useT() {

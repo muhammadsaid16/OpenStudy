@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useEffect, useState } from "react";
 import { getTopics } from "@/app/actions";
 import { cn } from "@/lib/utils";
@@ -19,8 +21,8 @@ export function SubjectTopicMenu({
   topicId,
   onSubjectChange,
   onTopicChange,
-  subjectLabel = "Subject",
-  topicLabel = "Topic",
+  subjectLabel,
+  topicLabel,
   compact = false,
   subjectOptional = false,
 }: {
@@ -35,6 +37,9 @@ export function SubjectTopicMenu({
   /** When true: subject may stay empty and topic empty = "No topic". */
   subjectOptional?: boolean;
 }) {
+  const t = useT();
+  const displaySubjectLabel = subjectLabel ?? t("common.subject");
+  const displayTopicLabel = topicLabel ?? t("notes.topic");
   const [topics, setTopics] = useState<{ id: string; name: string }[] | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -70,11 +75,11 @@ export function SubjectTopicMenu({
       <div>
         {!compact && (
           <label className="mb-2 block text-xs font-bold tracking-wider text-muted-fg">
-            {subjectLabel}
+            {displaySubjectLabel}
           </label>
         )}
         <select
-          aria-label={subjectLabel}
+          aria-label={displaySubjectLabel}
           value={subjectId}
           onChange={(e) => {
             onSubjectChange(e.target.value);
@@ -84,10 +89,10 @@ export function SubjectTopicMenu({
         >
           <option value="" className="bg-bg text-fg">
             {subjectOptional
-              ? "No subject"
-              : subjectLabel === "Subject"
-              ? "General"
-              : `All ${subjectLabel.toLowerCase()}s`}
+              ? t("subjectMenu.noSubject")
+              : !subjectLabel
+              ? t("sessions.general")
+              : t("subjectMenu.allLabel").replace("{label}", displaySubjectLabel.toLowerCase())}
           </option>
           {subjects.map((s) => (
             <option key={s.id} value={s.id} className="bg-bg text-fg">
@@ -99,11 +104,11 @@ export function SubjectTopicMenu({
       <div>
         {!compact && (
           <label className="mb-2 block text-xs font-bold tracking-wider text-muted-fg">
-            {topicLabel}
+            {displayTopicLabel}
           </label>
         )}
         <select
-          aria-label={topicLabel}
+          aria-label={displayTopicLabel}
           value={topicId}
           onChange={(e) => onTopicChange(e.target.value)}
           disabled={!subjectId || loading || !topics || topics.length === 0}
@@ -111,18 +116,18 @@ export function SubjectTopicMenu({
         >
           <option value="" className="bg-bg text-fg">
             {loading
-              ? "Loading…"
+              ? t("common.loading")
               : !subjectId
-              ? `Pick a ${subjectLabel.toLowerCase()} first`
+              ? t("subjectMenu.pickFirst").replace("{label}", displaySubjectLabel.toLowerCase())
               : topics && topics.length === 0
-              ? "No topics yet"
+              ? t("subjSelect.noTopics")
               : subjectOptional
-              ? "No topic"
-              : `All ${topicLabel.toLowerCase()}s`}
+              ? t("subjectMenu.noTopic")
+              : t("subjectMenu.allLabel").replace("{label}", displayTopicLabel.toLowerCase())}
           </option>
-          {(topics ?? []).map((t) => (
-            <option key={t.id} value={t.id} className="bg-bg text-fg">
-              {t.name}
+          {(topics ?? []).map((tp) => (
+            <option key={tp.id} value={tp.id} className="bg-bg text-fg">
+              {tp.name}
             </option>
           ))}
         </select>

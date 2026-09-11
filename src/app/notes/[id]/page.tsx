@@ -157,7 +157,7 @@ export default function NotePage() {
         <h2 className="text-2xl font-bold tracking-tight">{t("notesDetail.notFound")}</h2>
         <p className="mt-2 text-sm text-muted-fg">{t("notesDetail.deleted")}</p>
         <Button className="mt-6" onClick={() => router.push("/notes")}>
-          <ArrowLeft size={16} /> Back to notes
+          <ArrowLeft size={16} /> {t("notesDetail.backToNotes")}
         </Button>
       </div>
     );

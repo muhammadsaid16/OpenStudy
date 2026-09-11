@@ -321,8 +321,8 @@ export default function SessionsPage() {
       <div className="mb-6 inline-flex items-center gap-1 rounded-full border border-border bg-bg-raised/60 p-1">
         {(
           [
-            { id: "stopwatch", label: "Stopwatch", icon: <Timer size={14} /> },
-            { id: "pomodoro", label: "Pomodoro", icon: <Clock size={14} /> },
+            { id: "stopwatch", label: t("sessions.modeStopwatch"), icon: <Timer size={14} /> },
+            { id: "pomodoro", label: t("sessions.modePomodoro"), icon: <Clock size={14} /> },
           ] as { id: TimerMode; label: string; icon: React.ReactNode }[]
         ).map((m) => (
           <button
@@ -356,13 +356,13 @@ export default function SessionsPage() {
         <div className="space-y-6 lg:col-span-3">
           <div>
             <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
-              Session title{mode === "pomodoro" ? " (optional)" : ""}
+              {t("sessions.sessionTitle")}{mode === "pomodoro" ? t("sessions.optional") : ""}
             </label>
             <input
               ref={titleInputRef}
               value={sessionTitle}
               onChange={(e) => setSessionTitle(e.target.value)}
-              placeholder={mode === "pomodoro" ? "Auto-named from cycles if empty" : "e.g. Reviewing chapter 5"}
+              placeholder={mode === "pomodoro" ? t("sessions.autoNamed") : t("sessions.exampleReviewing")}
               disabled={anyRunning}
               autoFocus={!anyRunning}
               className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-accent/20"
@@ -538,7 +538,7 @@ export default function SessionsPage() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") saveCurrentAsPreset();
                   }}
-                  placeholder="Save this setup as… (e.g. Deep work 50/10)"
+                  placeholder={t("sessions.saveSetupAs")}
                   disabled={pomo.running}
                   maxLength={50}
                   className="glass-inset w-full rounded-xl px-4 py-2.5 text-xs text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-accent/20"
