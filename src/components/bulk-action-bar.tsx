@@ -183,7 +183,7 @@ export function BulkActionBar({
           <div className="flex justify-end gap-2">
             <Button variant="secondary" size="sm" onClick={() => setDeleteOpen(false)}>{t("common.cancel")}</Button>
             <Button variant="danger" size="sm" onClick={doDelete} disabled={busy}>
-              {busy ? "Deleting…" : "Delete"}
+              {busy ? "Deleting…" : t("common.delete")}
             </Button>
           </div>
         </div>

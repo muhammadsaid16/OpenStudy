@@ -240,7 +240,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
               <span className="absolute inset-x-6 top-0 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent" />
               <div className="flex items-center justify-between px-7 pt-5">
                 <div className="flex items-center gap-2">
-                  <Badge>Question</Badge>
+                  <Badge>{t("cards.questionLabel")}</Badge>
                   {p.activeCard && p.cardKindOf(p.activeCard) !== "basic" && p.activeCard && (
                     <Badge className="border-accent/50 bg-accent/10 text-accent">
                       {p.cardKindOf(p.activeCard)}
@@ -321,7 +321,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
             <div className="flip-face flip-back absolute inset-0 flex flex-col overflow-hidden rounded-2xl border border-accent bg-accent">
               <span className="absolute inset-x-6 top-0 h-0.5 bg-gradient-to-r from-transparent via-accent-fg/60 to-transparent" />
               <div className="flex items-center justify-between px-7 pt-5">
-                <Badge className="bg-accent-fg/15 text-accent-fg">Answer</Badge>
+                <Badge className="bg-accent-fg/15 text-accent-fg">{t("cards.answerLabel")}</Badge>
                 {p.ttsSupported && (
                   <button
                     type="button"

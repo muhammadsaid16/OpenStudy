@@ -687,7 +687,7 @@ export default function SubjectsPage() {
                     }}
                     className="inline-flex min-w-0 max-w-full items-center gap-1 truncate rounded-full border border-border px-3 py-1.5 text-xs font-bold hover:border-accent hover:text-accent hover:bg-accent-soft"
                     style={{ borderColor: b.color || undefined, color: b.color || undefined }}
-                    title="Open bundle cards"
+                    title={t("subj.openBundleCards")}
                   >
                     <Layers size={12} className="shrink-0" /> <span className="min-w-0 truncate">{b.name}</span>
                   </button>
@@ -1095,11 +1095,11 @@ export default function SubjectsPage() {
           ) : managedTopics.length === 0 ? (
             <EmptyState
               icon={<BookOpen size={40} />}
-              title="No topics yet"
+              title={t("subj.noTopicsYet")}
               description="Add your first topic above — then create a bundle for it to start making cards."
             />
           ) : filteredTopics.length === 0 ? (
-            <EmptyState icon={<Search size={40} />} title="No match" description="Try a different search." />
+            <EmptyState icon={<Search size={40} />} title={t("common.noMatch")} description=t("common.tryDifferent") />
           ) : (
             <div className="max-h-[58vh] space-y-3 overflow-y-auto pe-1">
               {filteredTopics.map((topic) => {
@@ -1148,7 +1148,7 @@ export default function SubjectsPage() {
                                 }}
                                 className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest hover:border-accent hover:text-accent hover:bg-accent-soft"
                                 style={{ borderColor: b.color || manageSubjectColor, color: b.color || manageSubjectColor }}
-                                title="Manage bundle cards"
+                                title={t("subj.manageBundleCards")}
                               >
                                 <Layers size={10} /> {b.name}
                               </button>
@@ -1168,7 +1168,7 @@ export default function SubjectsPage() {
                             setEditTopicId(topic.id);
                             setEditTopicName(topic.name);
                           }}
-                          aria-label="Edit topic"
+                          aria-label={t("subj.editTopic")}
                           className="p-2 text-muted-fg transition-colors hover:bg-accent hover:text-accent-fg"
                         >
                           <Pencil size={14} />
@@ -1176,7 +1176,7 @@ export default function SubjectsPage() {
                       )}
                       <button
                         onClick={() => setDeleteTopicId(topic.id)}
-                        aria-label="Delete topic"
+                        aria-label={t("subj.deleteTopicBtn")}
                         className="p-2 text-muted-fg transition-colors hover:bg-danger hover:text-on-color"
                       >
                         <Trash2 size={14} />

@@ -331,7 +331,7 @@ export function NoteExplanation({
           {hasExplanation ? (
             <>
               <Button size="sm" variant="secondary" onClick={() => { setEditText(shown); setEditing((v) => !v); }}>
-                <Pencil size={14} /> {editing ? "Cancel edit" : "Edit"}
+                <Pencil size={14} /> {editing ? "Cancel edit" : t("common.edit")}
               </Button>
               <Button size="sm" variant="secondary" onClick={copyExp}>
                 {copiedExp ? <Check size={14} /> : <Copy size={14} />} {copiedExp ? "Copied" : "Copy"}

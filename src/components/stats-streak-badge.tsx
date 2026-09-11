@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import { Flame } from "lucide-react";
 import { computeStreak } from "@/lib/stats";
 import type { ReviewLogRec } from "@/lib/db";
@@ -11,6 +13,7 @@ export function StatsStreakBadge({
   reviews: ReviewLogRec[];
   className?: string;
 }) {
+  const t = useT();
   const streak = computeStreak(reviews);
   if (streak === 0) {
     return (

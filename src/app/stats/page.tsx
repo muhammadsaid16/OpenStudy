@@ -23,7 +23,7 @@ const PERIODS: { key: Period; label: string; weeks: number }[] = [
   { key: "30", label: "30D", weeks: 5 },
   { key: "90", label: "90D", weeks: 13 },
   { key: "365", label: "1Y", weeks: 52 },
-  { key: "all", label: "ALL", weeks: 52 },
+  { key: "all", label: t("stats.allPeriod"), weeks: 52 },
 ];
 
 // ── helpers ───────────────────────────────────────────────────────
@@ -230,7 +230,7 @@ export default function StatsPage() {
           <ScrambleSubtitle text={t("stats.subtitle")} className="mt-2 text-sm text-muted-fg uppercase tracking-widest" />
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label="Period">
+          <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label={t("stats.periodLabel")}>
             {PERIODS.map(p => {
               const isEmpty = reviews.length === 0 && sessions.length === 0;
               const active = period === p.key;
@@ -254,12 +254,12 @@ export default function StatsPage() {
       {/* KPI strip */}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-6">
         {[
-          { icon: Layers, label: "Total reviews", value: totalReviews.toLocaleString(), sub: `${avgPerDay}/day`, color: "var(--color-accent)" },
-          { icon: Trophy, label: "Accuracy", value: `${acc}%`, sub: `${reviews.filter(r => (r.quality ?? 0) >= 3).length} correct`, color: "var(--color-grow)" },
+          { icon: Layers, label: t("stats.totalReviews"), value: totalReviews.toLocaleString(), sub: `${avgPerDay}/day`, color: "var(--color-accent)" },
+          { icon: Trophy, label: t("stats.accuracy"), value: `${acc}%`, sub: `${reviews.filter(r => (r.quality ?? 0) >= 3).length} correct`, color: "var(--color-grow)" },
           { icon: Timer, label: t("dash.studyTime"), value: `${totalHours}h`, sub: `${sessions.length} sessions`, color: "var(--color-flow)" },
-          { icon: Flame, label: "Streak", value: `${streak} days`, sub: streak === 0 ? "start today" : "keep it up", color: "var(--color-accent)" },
-          { icon: Activity, label: "Mastered", value: `${mastered}`, sub: `${cards.length} cards`, color: "var(--color-grow)" },
-          { icon: AlertTriangle, label: "Due / leeches", value: `${dueNow}`, sub: `${leeches} leeches`, color: dueNow > 20 ? "var(--color-danger)" : "var(--color-warning)" },
+          { icon: Flame, label: t("stats.streakLabel"), value: `${streak} days`, sub: streak === 0 ? "start today" : "keep it up", color: "var(--color-accent)" },
+          { icon: Activity, label: t("stats.masteredLabel"), value: `${mastered}`, sub: `${cards.length} cards`, color: "var(--color-grow)" },
+          { icon: AlertTriangle, label: t("stats.dueLeeches"), value: `${dueNow}`, sub: `${leeches} leeches`, color: dueNow > 20 ? "var(--color-danger)" : "var(--color-warning)" },
         ].map(k => (
           <Card key={k.label} className="!p-4 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg"><k.icon size={12} style={{ color: k.color }} /> {k.label}</div>

@@ -40,7 +40,7 @@ export function CommandPalette() {
       ]);
       const out: Entry[] = [];
       for (const s of subjects)
-        out.push({ id: "s" + s.id, group: "Subjects", title: s.name, sub: "", href: "/subjects" });
+        out.push({ id: "s" + s.id, group: t("common.subjects"), title: s.name, sub: "", href: "/subjects" });
       for (const b of bundles ?? [])
         out.push({ id: "b" + b.id, group: "Bundles", title: b.name, sub: (b as { description?: string }).description ?? "", href: "/bundles/" + b.id + "/cards" });
       for (const c of (cards ?? []).slice(0, 1500)) {
@@ -52,7 +52,7 @@ export function CommandPalette() {
         });
       }
       for (const n of (notes ?? []).slice(0, 500))
-        out.push({ id: "n" + n.id, group: "Notes", title: n.title, sub: "", href: "/notes/" + n.id });
+        out.push({ id: "n" + n.id, group: t("common.notesLabel"), title: n.title, sub: "", href: "/notes/" + n.id });
       setIndex(out);
     } catch { setIndex([]); }
   }, []);
@@ -94,7 +94,7 @@ export function CommandPalette() {
     const needle = q.trim().toLowerCase();
     const pool = needle ? all.filter((e) => hay(e).includes(needle)) : all;
     const out: Entry[] = [];
-    for (const g of ["Cards", "Bundles", "Subjects", "Notes"])
+    for (const g of ["Cards", "Bundles", t("common.subjects"), t("common.notesLabel")])
       for (const e of pool) {
         if (e.group !== g) continue;
         if (out.filter((x) => x.group === g).length >= PER_GROUP) continue;

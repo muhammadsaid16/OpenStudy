@@ -224,7 +224,7 @@ export default function NotePage() {
                 onClick={() => setDeleteOpen(true)}
                 className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
                 title={t("common.delete")}
-                aria-label="Delete note"
+                aria-label={t("notes.deleteNoteBtn")}
               >
                 <Trash2 size={16} />
               </button>

@@ -98,7 +98,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
             className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent"
           >
             {p.allBrowseSelected ? <CheckSquare size={14} /> : <Square size={14} />}
-            {p.allBrowseSelected ? "Deselect all" : "Select all"}
+            {p.allBrowseSelected ? "Deselect all" : t("cards.selectAll")}
           </button>
           {p.browseSelected.size > 0 && (
             <>
@@ -227,7 +227,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                 >
                   <div>
                     <span className={cn("mb-2 inline-block text-[10px] font-bold uppercase tracking-widest", flipped ? "text-accent-fg/70" : "text-muted-fg")}>
-                      {flipped ? "Answer" : "Question"}
+                      {flipped ? t("cards.answerLabel") : t("cards.questionLabel")}
                     </span>
                     <div className="text-center text-lg font-bold tracking-tight leading-relaxed">
                       {flipped ? <Markdown content={card.back} align="center" /> : card.front}

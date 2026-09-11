@@ -754,7 +754,7 @@ export default function SessionsPage() {
             History
           </h2>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label="History range">
+            <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label={t("sessions.historyRange")}>
               {([
                 ["today", "Today"],
                 ["7d", "7 days"],
@@ -774,7 +774,7 @@ export default function SessionsPage() {
               ))}
             </div>
             <select
-              aria-label="Filter by subject"
+              aria-label={t("sessions.filterSubject")}
               value={historySubject}
               onChange={(e) => setHistorySubject(e.target.value)}
               className="glass-inset cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg outline-none focus:outline-none"
@@ -814,7 +814,7 @@ export default function SessionsPage() {
         ) : filteredSessions.length === 0 ? (
           <EmptyState
             icon={<Timer size={48} />}
-            title="No sessions in view"
+            title={t("sessions.noSessionsView")}
             description="No sessions match this filter — try a wider range."
           />
         ) : (
@@ -848,7 +848,7 @@ export default function SessionsPage() {
                   </span>
                   <button
                     onClick={() => handleDeleteSession(session.id)}
-                    aria-label="Delete session"
+                    aria-label={t("sessions.deleteSession")}
                     className="flex h-9 w-9 items-center justify-center rounded-full text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
                   >
                     <Trash2 size={14} />
@@ -864,7 +864,7 @@ export default function SessionsPage() {
       <Modal
         open={deleteConfirm !== null}
         onClose={() => setDeleteConfirm(null)}
-        title={deleteConfirm?.kind === "preset" ? "Delete preset" : "Delete session"}
+        title={deleteConfirm?.kind === "preset" ? "Delete preset" : t("sessions.deleteSession")}
       >
         <div className="space-y-6">
           <p className="text-sm text-muted-fg">

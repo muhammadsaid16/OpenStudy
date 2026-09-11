@@ -728,7 +728,7 @@ export default function GoalsPage() {
                               )}
                               <input
                                 placeholder={t("modal.addStep")}
-                                aria-label="Add a step"
+                                aria-label={t("goals.addStepShort")}
                                 value={newStep}
                                 onChange={(e) => setNewStep(e.target.value)}
                                 onKeyDown={(e) => {

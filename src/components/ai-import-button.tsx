@@ -27,8 +27,8 @@ export function AiImportButton({
         size="sm"
         variant="secondary"
         onClick={(e) => { e.stopPropagation(); e.preventDefault(); setOpen(true); }}
-        aria-label="Import cards from NotebookLM"
-        title="Import cards from NotebookLM"
+        aria-label={t("ai.importNb")}
+        title={t("ai.importNb")}
       >
         <Sparkles size={14} />
         <span className="hidden sm:inline">AI IMPORT</span>
