@@ -727,7 +727,7 @@ export default function GoalsPage() {
                               ))
                               )}
                               <input
-                                placeholder="Add a step…"
+                                placeholder={t("modal.addStep")}
                                 aria-label="Add a step"
                                 value={newStep}
                                 onChange={(e) => setNewStep(e.target.value)}
@@ -773,15 +773,13 @@ export default function GoalsPage() {
       <Modal
         open={deleteTarget !== null}
         onClose={() => setDeleteTarget(null)}
-        title="Delete goal?"
+        title={t("modal.deleteGoal")}
       >
         <p className="text-sm text-muted-fg">
           “{deleteTarget?.title}” and all of its steps will be removed permanently.
         </p>
         <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
-            Cancel
-          </Button>
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>{t("common.cancel")}</Button>
           <Button variant="danger" onClick={confirmDelete}>
             <Trash2 size={14} />
             Delete goal

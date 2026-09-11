@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // Direct AI card generation — paste source text or upload an image, the server
 // calls Gemini, and the result is previewed for one-click bulk-accept.
 
@@ -64,6 +66,7 @@ export function AiGenerateModal({
   onClose: () => void;
   onCreated?: () => void | Promise<void>;
 }) {
+  const t = useT();
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const [mode, setMode] = useState<"text" | "image">("text");
@@ -704,7 +707,7 @@ export function AiGenerateModal({
   );
 
   return (
-    <Modal open={open} onClose={close} title="AI cards">
+    <Modal open={open} onClose={close} title={t("modal.aiCards")}>
       <div className="space-y-4">
         {phase === "input" && inputStep}
         {phase === "generating" && generatingStep}

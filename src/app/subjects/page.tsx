@@ -888,7 +888,7 @@ export default function SubjectsPage() {
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDeckShare(bundle); }}
                             aria-label="Copy share link"
-                            title="Copy share link — works on any device"
+                            title={t("share.copyLinkDesc")}
                             disabled={deckShareBusy === bundle.id}
                             className="rounded-full p-1.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent disabled:opacity-50"
                           >
@@ -1041,12 +1041,8 @@ export default function SubjectsPage() {
             Delete this subject and all of its topics, notes, and cards? This cannot be undone.
           </p>
           <div className="flex justify-end gap-4 pt-2">
-            <Button variant="ghost" onClick={() => setDeleteSubjectId(null)}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={handleDelete}>
-              Delete
-            </Button>
+            <Button variant="ghost" onClick={() => setDeleteSubjectId(null)}>{t("common.cancel")}</Button>
+            <Button variant="danger" onClick={handleDelete}>{t("common.delete")}</Button>
           </div>
         </div>
       </Modal>
@@ -1254,7 +1250,7 @@ export default function SubjectsPage() {
                         ))}
                       </select>
                       <Button size="sm" disabled={!linkBundleId} onClick={handleLinkBundle}>{t("subjnew.link")}</Button>
-                      <Button size="sm" variant="ghost" onClick={() => setLinkTopicId(null)}>Cancel</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setLinkTopicId(null)}>{t("common.cancel")}</Button>
                     </div>
                   )}
                 </div>
@@ -1271,7 +1267,7 @@ export default function SubjectsPage() {
       <Modal
         open={!!deleteTopicId}
         onClose={() => setDeleteTopicId(null)}
-        title="Delete topic"
+        title={t("modal.deleteTopic")}
       >
         {deleteTopicId && (
           <div className="space-y-6">
@@ -1279,19 +1275,15 @@ export default function SubjectsPage() {
               Delete this topic? Its flashcards and notes will be moved to no topic or removed. Linked bundles will be unlinked (not deleted). This cannot be undone.
             </p>
             <div className="flex justify-end gap-4 pt-2">
-              <Button variant="ghost" onClick={() => setDeleteTopicId(null)}>
-                Cancel
-              </Button>
-              <Button variant="danger" onClick={() => handleDeleteTopic(deleteTopicId)}>
-                Delete
-              </Button>
+              <Button variant="ghost" onClick={() => setDeleteTopicId(null)}>{t("common.cancel")}</Button>
+              <Button variant="danger" onClick={() => handleDeleteTopic(deleteTopicId)}>{t("common.delete")}</Button>
             </div>
           </div>
         )}
       </Modal>
 
       {/* Create Modal */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New subject">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t("modal.newSubject")}>
         <div className="space-y-6">
           <Input
             label={t("subjnew.subjectName")}
@@ -1308,9 +1300,7 @@ export default function SubjectsPage() {
           <BundleColorPicker value={color} onChange={setColor} />
           <SubjectIconPicker value={icon} onChange={setIcon} />
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
-            </Button>
+            <Button variant="ghost" onClick={() => setModalOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreate} disabled={isPending || !name.trim()}>
               {isPending ? "Creating..." : "Create"}
             </Button>
@@ -1319,7 +1309,7 @@ export default function SubjectsPage() {
       </Modal>
 
       {/* Deck Create Modal (Library → Decks) */}
-      <Modal open={deckCreateOpen} onClose={() => setDeckCreateOpen(false)} title="New deck">
+      <Modal open={deckCreateOpen} onClose={() => setDeckCreateOpen(false)} title={t("modal.newDeck")}>
         <div className="space-y-6">
           <Input label={t("subjnew.deckName")} placeholder={t("subjnew.exampleDeck")} value={deckName} onChange={(e) => setDeckName(e.target.value)} />
           <Input label={t("subjnew.descriptionOptional")} placeholder={t("subjnew.briefDescription")} value={deckDesc} onChange={(e) => setDeckDesc(e.target.value)} />
@@ -1329,7 +1319,7 @@ export default function SubjectsPage() {
             <SubjectTopicMenu subjects={subjects.map(s => ({ id: s.id, name: s.name, color: s.color }))} subjectId={deckSubjectId} topicId={deckTopicId} onSubjectChange={setDeckSubjectId} onTopicChange={setDeckTopicId} subjectOptional />
           </div>
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setDeckCreateOpen(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setDeckCreateOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreateDeck} disabled={!deckName.trim()}>{deckName.trim() ? "Create" : "Create"}</Button>
           </div>
         </div>
@@ -1354,9 +1344,7 @@ export default function SubjectsPage() {
             <BundleColorPicker value={editColor} onChange={setEditColor} />
             <SubjectIconPicker value={editIcon} onChange={setEditIcon} />
             <div className="flex justify-end gap-4 pt-4">
-              <Button variant="ghost" onClick={() => setEditSubject(null)}>
-                Cancel
-              </Button>
+              <Button variant="ghost" onClick={() => setEditSubject(null)}>{t("common.cancel")}</Button>
               <Button onClick={handleEditSave} disabled={isPending || !editName.trim()}>
                 {isPending ? "Saving..." : "Save"}
               </Button>
@@ -1373,8 +1361,8 @@ export default function SubjectsPage() {
             <Input label={t("subjnew.descriptionOptional")} placeholder={t("subjnew.briefDescription")} value={deckEditDesc} onChange={(e) => setDeckEditDesc(e.target.value)} />
             <BundleColorPicker value={deckEditColor} onChange={setDeckEditColor} />
             <div className="flex justify-end gap-4 pt-4">
-              <Button variant="ghost" onClick={() => setDeckEditBundle(null)}>Cancel</Button>
-              <Button onClick={handleDeckEdit} disabled={!deckEditName.trim()}>Save</Button>
+              <Button variant="ghost" onClick={() => setDeckEditBundle(null)}>{t("common.cancel")}</Button>
+              <Button onClick={handleDeckEdit} disabled={!deckEditName.trim()}>{t("common.save")}</Button>
             </div>
           </div>
         )}
@@ -1388,8 +1376,8 @@ export default function SubjectsPage() {
               Delete &quot;{deckDeleteTarget.name}&quot; and all its {deckDeleteTarget._count.flashcards} cards? You get a 5-second undo.
             </p>
             <div className="flex justify-end gap-4 pt-2">
-              <Button variant="ghost" onClick={() => setDeckDeleteTarget(null)}>Cancel</Button>
-              <Button variant="danger" onClick={handleDeckDelete}>Delete</Button>
+              <Button variant="ghost" onClick={() => setDeckDeleteTarget(null)}>{t("common.cancel")}</Button>
+              <Button variant="danger" onClick={handleDeckDelete}>{t("common.delete")}</Button>
             </div>
           </div>
         )}

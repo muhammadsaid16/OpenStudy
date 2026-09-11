@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { Button, Modal } from "@/components/ui";
@@ -10,6 +12,7 @@ import { SHARE_URL_LIMIT, encodeShare, type SharedBundle } from "@/lib/share";
 // works offline — the payload rides in the hash, no server) or download
 // the same payload as a .studymax-bundle.json file for big decks.
 export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; bundleName: string }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState<string | null>(null);
@@ -86,7 +89,7 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
         <Share2 size={16} />
         SHARE
       </Button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Share bundle">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("modal.shareBundle")}>
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-widest text-muted-fg">
             Anyone with the link or file can import “{bundleName}” into their library.

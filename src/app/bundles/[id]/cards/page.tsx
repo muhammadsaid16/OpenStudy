@@ -751,7 +751,7 @@ export default function BundleCardsPage() {
       />
 
       {/* Create Modal */}
-      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="New card">
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={t("modal.newCard")}>
         <div className="space-y-6">
           <Input
             label="Question (front)"
@@ -767,13 +767,13 @@ export default function BundleCardsPage() {
           />
           <Input
             label="Front description (optional)"
-            placeholder="Hint shown with question"
+            placeholder={t("modal.hintQuestion")}
             value={frontDesc}
             onChange={(e) => setFrontDesc(e.target.value)}
           />
           <Input
             label="Back description (optional)"
-            placeholder="Hint shown with answer"
+            placeholder={t("modal.hintAnswer")}
             value={backDesc}
             onChange={(e) => setBackDesc(e.target.value)}
           />
@@ -786,9 +786,7 @@ export default function BundleCardsPage() {
           <CardKindFields kind={createKind} onKindChange={setCreateKind} choicesText={createChoicesText} onChoicesTextChange={setCreateChoicesText} />
           {createError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{createError}</p>}
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setCreateOpen(false)}>
-              Cancel
-            </Button>
+            <Button variant="ghost" onClick={() => setCreateOpen(false)}>{t("common.cancel")}</Button>
             <Button
               onClick={handleCreate}
               disabled={creating || !front.trim() || !back.trim()}
@@ -800,7 +798,7 @@ export default function BundleCardsPage() {
       </Modal>
 
       {/* Edit Modal */}
-      <Modal open={!!editCard} onClose={() => setEditCard(null)} title="Edit card">
+      <Modal open={!!editCard} onClose={() => setEditCard(null)} title={t("modal.editCard")}>
         {editCard && (
           <div className="space-y-6">
             <Input
@@ -815,13 +813,13 @@ export default function BundleCardsPage() {
             />
             <Input
               label="Front description (optional)"
-              placeholder="Hint shown with question"
+              placeholder={t("modal.hintQuestion")}
               value={editFrontDesc}
               onChange={(e) => setEditFrontDesc(e.target.value)}
             />
             <Input
               label="Back description (optional)"
-              placeholder="Hint shown with answer"
+              placeholder={t("modal.hintAnswer")}
               value={editBackDesc}
               onChange={(e) => setEditBackDesc(e.target.value)}
             />
@@ -834,9 +832,7 @@ export default function BundleCardsPage() {
             <CardKindFields kind={editKind} onKindChange={setEditKind} choicesText={editChoicesText} onChoicesTextChange={setEditChoicesText} />
             {editError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{editError}</p>}
             <div className="flex justify-end gap-4 pt-4">
-              <Button variant="ghost" onClick={() => setEditCard(null)}>
-                Cancel
-              </Button>
+              <Button variant="ghost" onClick={() => setEditCard(null)}>{t("common.cancel")}</Button>
               <Button
                 onClick={handleEditSave}
                 disabled={saving || !editFront.trim() || !editBack.trim()}
@@ -852,7 +848,7 @@ export default function BundleCardsPage() {
       <Modal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="Delete card"
+        title={t("modal.deleteCard")}
       >
         {deleteTarget && (
           <div className="space-y-6">
@@ -860,12 +856,8 @@ export default function BundleCardsPage() {
               Delete this card? This cannot be undone.
             </p>
             <div className="flex justify-end gap-4 pt-2">
-              <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
-                Cancel
-              </Button>
-              <Button variant="danger" onClick={handleDelete} disabled={deleting}>
-                Delete
-              </Button>
+              <Button variant="ghost" onClick={() => setDeleteTarget(null)}>{t("common.cancel")}</Button>
+              <Button variant="danger" onClick={handleDelete} disabled={deleting}>{t("common.delete")}</Button>
             </div>
           </div>
         )}

@@ -223,7 +223,7 @@ export default function NotePage() {
               <button
                 onClick={() => setDeleteOpen(true)}
                 className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
-                title="Delete"
+                title={t("common.delete")}
                 aria-label="Delete note"
               >
                 <Trash2 size={16} />
@@ -284,7 +284,7 @@ export default function NotePage() {
             <Button size="sm" variant="secondary" onClick={openEdit}>
               <Pencil size={14} /> Edit
             </Button>
-            <Button size="sm" variant="secondary" onClick={() => setGenerateOpen(true)} aria-label="Generate cards with AI" title="Generate cards with AI">
+            <Button size="sm" variant="secondary" onClick={() => setGenerateOpen(true)} aria-label={t("notes.generateCards")} title={t("notes.generateCards")}>
               <Sparkles size={14} /> AI Generate
             </Button>
             <NoteAiImportButton noteId={note.id} noteTitle={note.title} availableBundles={bundles} />
@@ -300,14 +300,14 @@ export default function NotePage() {
       </div>
 
       {/* Delete confirmation */}
-      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title="Delete note">
+      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title={t("modal.deleteNote")}>
         <div className="space-y-6">
           <p className="text-sm text-muted-fg">
             Delete “{note.title}”? You can undo this right after.
           </p>
           <div className="flex justify-end gap-4 pt-2">
-            <Button variant="ghost" onClick={() => setDeleteOpen(false)}>Cancel</Button>
-            <Button variant="danger" onClick={handleDelete}>Delete</Button>
+            <Button variant="ghost" onClick={() => setDeleteOpen(false)}>{t("common.cancel")}</Button>
+            <Button variant="danger" onClick={handleDelete}>{t("common.delete")}</Button>
           </div>
         </div>
       </Modal>
@@ -334,8 +334,8 @@ export default function NotePage() {
           </div>
           <TagInput label="Tags" tags={editTags} onChange={setEditTags} />
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setEditOpen(false)}>Cancel</Button>
-            <Button onClick={handleEditSave} disabled={!editTitle.trim()}>Save</Button>
+            <Button variant="ghost" onClick={() => setEditOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={handleEditSave} disabled={!editTitle.trim()}>{t("common.save")}</Button>
           </div>
         </div>
       </Modal>

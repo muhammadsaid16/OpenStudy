@@ -383,7 +383,7 @@ function NotesContent() {
             {topicFilter && (
               <span className="inline-flex items-center gap-2 rounded-full border border-accent bg-accent px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-fg">
                 <BookOpen size={12} /> {activeTopicName}
-                <button onClick={() => router.push("/notes")} className="ms-1 hover:opacity-70" title="Clear topic filter">
+                <button onClick={() => router.push("/notes")} className="ms-1 hover:opacity-70" title={t("notes.clearFilter")}>
                   <X size={12} />
                 </button>
               </span>
@@ -452,7 +452,7 @@ function NotesContent() {
                   <button
                     onClick={() => router.push("/notes/" + note.id)}
                     aria-label="Study note"
-                    title="Study"
+                    title={t("common.study")}
                     className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-accent"
                   >
                     <Eye size={14} />
@@ -545,7 +545,7 @@ function NotesContent() {
       )}
 
       {/* Create Modal */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New note">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t("modal.newNote")}>
         <div className="space-y-6">
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
@@ -584,9 +584,7 @@ function NotesContent() {
           />
           <TagInput label={t("notes.tags")} tags={tags} onChange={setTags} />
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setModalOpen(false)}>
-              Cancel
-            </Button>
+            <Button variant="ghost" onClick={() => setModalOpen(false)}>{t("common.cancel")}</Button>
             <Button
               onClick={handleCreate}
               disabled={isPending || !title.trim()}
@@ -598,7 +596,7 @@ function NotesContent() {
       </Modal>
 
       {/* Edit Modal */}
-      <Modal open={!!editNote} onClose={() => { setEditNote(null); setEditTopicId(""); }} title="Edit note">
+      <Modal open={!!editNote} onClose={() => { setEditNote(null); setEditTopicId(""); }} title={t("modal.editNote")}>
         {editNote && (
           <div className="space-y-6">
             <div className="space-y-2">
@@ -638,12 +636,8 @@ function NotesContent() {
             />
             <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />
             <div className="flex justify-end gap-4 pt-4">
-              <Button variant="ghost" onClick={() => { setEditNote(null); setEditTopicId(""); }}>
-                Cancel
-              </Button>
-              <Button onClick={handleEditSave} disabled={!editTitle.trim()}>
-                Save
-              </Button>
+              <Button variant="ghost" onClick={() => { setEditNote(null); setEditTopicId(""); }}>{t("common.cancel")}</Button>
+              <Button onClick={handleEditSave} disabled={!editTitle.trim()}>{t("common.save")}</Button>
             </div>
           </div>
         )}

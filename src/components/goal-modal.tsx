@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // GoalModal — create/edit a goal. Aurora Glass styling: glass-inset
 // wells, rounded-full pill horizon picker, theme-token swatches only
 // (no hardcoded colors — adapts to all 12 themes).
@@ -45,6 +47,7 @@ export function GoalModal({
   subjects: SubjectRec[];
   onSaved: () => void;
 }) {
+  const t = useT();
   if (!open) return null;
   // Keyed remount: the form re-initializes from `goal` every time the
   // modal opens — no useEffect/setState reset dance (React 19 lint-safe).
@@ -70,6 +73,7 @@ function GoalForm({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const t = useT();
   const [title, setTitle] = useState(goal?.title ?? "");
   const [description, setDescription] = useState(goal?.description ?? "");
   const [horizon, setHorizon] = useState<GoalHorizon>(goal?.horizon ?? "regular");
@@ -122,7 +126,7 @@ function GoalForm({
     <Modal open onClose={onClose} title={goal ? "Edit goal" : "New goal"}>
       <div className="space-y-4">
         <Input
-          placeholder="E.g. Pass IELTS with band 8"
+          placeholder={t("modal.exampleGoal")}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => {
@@ -131,7 +135,7 @@ function GoalForm({
           autoFocus
         />
         <Textarea
-          placeholder="Why does this matter?"
+          placeholder={t("modal.whyMatters")}
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -264,9 +268,7 @@ function GoalForm({
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
+          <Button variant="secondary" onClick={onClose}>{t("common.cancel")}</Button>
           <Button onClick={handleSubmit} disabled={!title.trim() || saving}>
             {saving ? "Saving…" : goal ? "Save changes" : "Create goal"}
           </Button>

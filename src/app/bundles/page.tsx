@@ -277,7 +277,7 @@ export default function BundlesPage() {
                       }
                     }}
                     aria-label="Copy share link"
-                    title="Copy share link — works on any device"
+                    title={t("share.copyLinkDesc")}
                     className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-accent disabled:opacity-50"
                     disabled={shareBusy === bundle.id}
                   >
@@ -378,10 +378,10 @@ export default function BundlesPage() {
       )}
 
       {/* Create Modal */}
-      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="New bundle">
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={t("modal.newBundle")}>
         <div className="space-y-6">
           <Input label="Bundle name" placeholder="e.g. IELTS vocabulary" value={newName} onChange={(e) => setNewName(e.target.value)} />
-          <Input label="Description (optional)" placeholder="Brief description..." value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
+          <Input label="Description (optional)" placeholder={t("modal.briefDesc")} value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
           <BundleColorPicker value={newColor} onChange={setNewColor} />
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Subject & topic (optional)</label>
@@ -395,7 +395,7 @@ export default function BundlesPage() {
             />
           </div>
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setCreateOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreate} disabled={loading || !newName.trim()}>
               {loading ? "Creating..." : "Create"}
             </Button>
@@ -411,8 +411,8 @@ export default function BundlesPage() {
             <Input label="Description (optional)" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
             <BundleColorPicker value={editColor} onChange={setEditColor} />
             <div className="flex justify-end gap-4 pt-4">
-              <Button variant="ghost" onClick={() => setEditBundle(null)}>Cancel</Button>
-              <Button onClick={handleEdit} disabled={loading || !editName.trim()}>Save</Button>
+              <Button variant="ghost" onClick={() => setEditBundle(null)}>{t("common.cancel")}</Button>
+              <Button onClick={handleEdit} disabled={loading || !editName.trim()}>{t("common.save")}</Button>
             </div>
           </div>
         )}
@@ -426,8 +426,8 @@ export default function BundlesPage() {
               Delete &quot;{deleteTarget.name}&quot; and all its flashcards? This cannot be undone.
             </p>
             <div className="flex justify-end gap-4 pt-2">
-              <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
-              <Button variant="danger" onClick={handleDelete} disabled={loading}>Delete</Button>
+              <Button variant="ghost" onClick={() => setDeleteTarget(null)}>{t("common.cancel")}</Button>
+              <Button variant="danger" onClick={handleDelete} disabled={loading}>{t("common.delete")}</Button>
             </div>
           </div>
         )}
