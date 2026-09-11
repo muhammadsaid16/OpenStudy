@@ -494,8 +494,8 @@ export default function GoalsPage() {
       ) : goals.length === 0 ? (
         <EmptyState
           icon={<Target size={48} />}
-          title="No goals yet"
-          description="Capture your long-term vision and daily todos, then move them across the board."
+          title={t("goals.emptyTitle")}
+          description={t("goals.emptyDesc")}
           action={
             <Button
               onClick={() => {
@@ -504,7 +504,7 @@ export default function GoalsPage() {
               }}
             >
               <Plus size={16} />
-              Create your first goal
+              {t("goals.createFirstBtn")}
             </Button>
           }
         />

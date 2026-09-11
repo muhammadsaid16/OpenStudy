@@ -201,12 +201,12 @@ export default function BundlesPage() {
       ) : bundles.length === 0 ? (
         <EmptyState
           icon={<Layers size={48} />}
-          title="No bundles yet"
-          description="Create your first bundle to start organizing flashcards."
+          title={t("bundles.emptyTitle")}
+          description={t("bundles.emptyDesc")}
           action={
             <Button onClick={() => setCreateOpen(true)}>
               <Plus size={16} />
-              Create bundle
+              {t("bundles.createBundle")}
             </Button>
           }
         />

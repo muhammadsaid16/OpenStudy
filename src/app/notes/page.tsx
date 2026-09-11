@@ -326,11 +326,11 @@ function NotesContent() {
                 className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
               >
                 <Download size={14} />
-                Export
+                {t("notes.exportBtn")}
               </button>
               {exportMenuOpen && (
                 <>
-                  <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label="Close export menu" />
+                  <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label={t("common.closeExport")} />
                   <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
                     <button onClick={exportAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                       <Download size={14} /> JSON
@@ -348,7 +348,7 @@ function NotesContent() {
               className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft disabled:opacity-50"
             >
               <Upload size={14} />
-              {importing ? "Importing..." : "Import"}
+              {importing ? t("notes.importingBtn") : t("notes.importBtn")}
             </button>
             <input
               ref={importInputRef}
@@ -405,20 +405,20 @@ function NotesContent() {
       ) : notes.length === 0 ? (
         <EmptyState
           icon={<StickyNote size={48} />}
-          title="No notes yet"
-          description="Create notes linked to your study topics."
+          title={t("notes.emptyTitle")}
+          description={t("notes.emptyDesc")}
           action={
             <Button onClick={() => setModalOpen(true)}>
               <Plus size={16} />
-              Create note
+              {t("notes.createNoteBtn")}
             </Button>
           }
         />
       ) : filteredNotes.length === 0 ? (
         <EmptyState
           icon={<Search size={48} />}
-          title="No results"
-          description="Try a different search."
+          title={t("notes.noResultsTitle")}
+          description={t("notes.noResultsDesc")}
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

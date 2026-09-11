@@ -604,9 +604,9 @@ export default function SubjectsPage() {
           else if (e.key === "End") { e.preventDefault(); setActiveTab(tabs[tabs.length - 1]); }
         }} className="mt-8 flex gap-2 border-b border-border">
           {[
-            { id: "subjects", label: "Subjects", count: loaded ? subjects.length : undefined },
-            { id: "decks", label: "Decks", count: loaded ? allBundles.length : undefined },
-            { id: "study", label: "Study", count: dueCount ?? undefined },
+            { id: "subjects", label: t("subj.tabs.subjects"), count: loaded ? subjects.length : undefined },
+            { id: "decks", label: t("subj.tabs.decks"), count: loaded ? allBundles.length : undefined },
+            { id: "study", label: t("subj.tabs.study"), count: dueCount ?? undefined },
           ].map((tab) => (
             <button
               key={tab.id}

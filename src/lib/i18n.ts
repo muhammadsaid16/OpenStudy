@@ -393,6 +393,23 @@ const DICT: Dict = {
   "subjSelect.subjectName": { en: "Subject name (e.g. Biology)", ar: "اسم المادة (مثال: أحياء)" },
   "dailyProgress.today": { en: "Today's Progress", ar: "تقدم اليوم" },
   "dailyProgress.aria": { en: "Daily progress: {c} of {cg} cards, {m} of {mg} minutes, {s} day streak", ar: "التقدم اليومي: {c} من {cg} بطاقات، {m} من {mg} دقائق، {s} أيام متتالية" },
+  "subj.tabs.subjects": { en: "Subjects", ar: "المواد" },
+  "subj.tabs.decks": { en: "Decks", ar: "المجموعات" },
+  "subj.tabs.study": { en: "Study", ar: "دراسة" },
+  "notes.exportBtn": { en: "Export", ar: "تصدير" },
+  "notes.importBtn": { en: "Import", ar: "استيراد" },
+  "notes.importingBtn": { en: "Importing...", ar: "جارٍ الاستيراد…" },
+  "notes.emptyTitle": { en: "No notes yet", ar: "لا ملاحظات بعد" },
+  "notes.emptyDesc": { en: "Create notes linked to your study topics.", ar: "أنشئ ملاحظات مرتبطة بمواضيعك الدراسية." },
+  "notes.createNoteBtn": { en: "Create note", ar: "إنشاء ملاحظة" },
+  "notes.noResultsTitle": { en: "No results", ar: "لا نتائج" },
+  "notes.noResultsDesc": { en: "Try a different search.", ar: "جرّب بحثًا مختلفًا." },
+  "bundles.emptyTitle": { en: "No bundles yet", ar: "لا مجموعات بعد" },
+  "bundles.emptyDesc": { en: "Create your first bundle to start organizing flashcards.", ar: "أنشئ مجموعتك الأولى لبدء تنظيم البطاقات." },
+  "bundles.createBundle": { en: "Create bundle", ar: "إنشاء مجموعة" },
+  "goals.emptyTitle": { en: "No goals yet", ar: "لا أهداف بعد" },
+  "goals.emptyDesc": { en: "Capture your long-term vision and daily todos, then move them across the board.", ar: "دوّن رؤيتك طويلة المدى ومهامك اليومية، ثم حرّكها عبر اللوحة." },
+  "goals.createFirstBtn": { en: "Create your first goal", ar: "أنشئ هدفك الأول" },
 };
 
 export function useT() {
