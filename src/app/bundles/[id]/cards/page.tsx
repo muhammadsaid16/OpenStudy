@@ -437,7 +437,7 @@ export default function BundleCardsPage() {
               </button>
               {exportMenuOpen && (
                 <>
-                  <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label="Close export menu" />
+                  <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label={t("common.closeExport")} />
                   <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg shadow-2xl z-20">
                   <button onClick={exportAsJson} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                     <Download size={14} /> JSON
@@ -518,7 +518,7 @@ export default function BundleCardsPage() {
           <div className="mb-8 mx-auto max-w-2xl space-y-4">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
               <span>{completed + 1} / {initialTotal} {learningQueue.length > 0 ? `• Relearning × ${learningQueue.length}` : ""}</span>
-              <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">Exit</button>
+              <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">{t("cards.exit")}</button>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div className="h-full bg-accent transition-all" style={{ width: `${(completed / Math.max(initialTotal, 1)) * 100}%` }} />
@@ -583,7 +583,7 @@ export default function BundleCardsPage() {
             <label className="flex h-10 cursor-pointer items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-fg">
               <input
                 type="checkbox"
-                aria-label="Select all visible cards"
+                aria-label={t("cards.selectAll")}
                 checked={filteredCards.length > 0 && filteredCards.every((c) => selectedIds.has(c.id))}
                 onChange={(e) => {
                   setSelectedIds((prev) => {
@@ -621,7 +621,7 @@ export default function BundleCardsPage() {
         ) : filteredCards.length === 0 ? (
           <EmptyState
             icon={<GalleryHorizontalEnd size={48} />}
-            title={cards.length === 0 ? "No cards yet" : "No cards found"}
+            title={cards.length === 0 ? t("cards.noCardsYet") : t("cards.noCardsFound")}
             description={
               cards.length === 0
                 ? "Add your first flashcard to this bundle."
@@ -675,14 +675,14 @@ export default function BundleCardsPage() {
                           setEditChoicesText((card.choices ?? []).join("\n"));
                           setEditTags(card.tags.map((t) => t.tag.name));
                         }}
-                        aria-label="Edit"
+                        aria-label={t("common.edit")}
                         className={cn("rounded-full p-2.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent")}
                       >
                         <Pencil size={13} />
                       </button>
                       <button
                         onClick={() => setDeleteTarget(card)}
-                        aria-label="Delete"
+                        aria-label={t("common.delete")}
                         className={cn("rounded-full p-2.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-danger/10 hover:text-danger")}
                       >
                         <Trash2 size={13} />
@@ -754,13 +754,13 @@ export default function BundleCardsPage() {
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={t("modal.newCard")}>
         <div className="space-y-6">
           <Input
-            label="Question (front)"
+            label={t("cards.questionFront")}
             placeholder="e.g. What is SM-2?"
             value={front}
             onChange={(e) => setFront(e.target.value)}
           />
           <Input
-            label="Answer (back)"
+            label={t("cards.answerBack")}
             placeholder="e.g. A spaced repetition algorithm."
             value={back}
             onChange={(e) => setBack(e.target.value)}
@@ -802,12 +802,12 @@ export default function BundleCardsPage() {
         {editCard && (
           <div className="space-y-6">
             <Input
-              label="Question (front)"
+              label={t("cards.questionFront")}
               value={editFront}
               onChange={(e) => setEditFront(e.target.value)}
             />
             <Input
-              label="Answer (back)"
+              label={t("cards.answerBack")}
               value={editBack}
               onChange={(e) => setEditBack(e.target.value)}
             />

@@ -477,6 +477,12 @@ const DICT: Dict = {
   "deckCard.oneCard": { en: "1 card", ar: "بطاقة واحدة" },
   "deckCard.open": { en: "Open", ar: "فتح" },
   "deckCard.review": { en: "Review", ar: "مراجعة" },
+  "cards.answerBack": { en: "Answer (back)", ar: "الإجابة (الخلف)" },
+  "cards.noCardsFound": { en: "No cards found", ar: "لا بطاقات مطابقة" },
+  "cards.noCardsYet": { en: "No cards yet", ar: "لا بطاقات بعد" },
+  "cards.questionFront": { en: "Question (front)", ar: "السؤال (الواجهة)" },
+  "cards.selectAll": { en: "Select all visible cards", ar: "تحديد كل البطاقات الظاهرة" },
+  "cards.exit": { en: "Exit", ar: "خروج" },
 };
 
 export function useT() {
