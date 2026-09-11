@@ -54,5 +54,9 @@ export function usePendingDeletes(storageKey: string) {
     }, []);
   };
 
-  return { pendingRef: pendingRef.current, add, remove, has, getAll, size, persist, useCommitOrphans };
+  const persistPending = (arg?: Set<string>) => {
+    if (arg instanceof Set) pendingRef.current = arg;
+    persist();
+  };
+  return { pending: pendingRef.current, pendingRef: pendingRef.current, add, remove, has, getAll, size, persist, persistPending, useCommitOrphans };
 }

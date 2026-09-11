@@ -45,6 +45,7 @@ import { readableOn } from "@/lib/utils";
 import { tiltHandlers } from "@/lib/interactions";
 import { shuffled } from "@/lib/card-kinds";
 import { useLiveData } from "@/lib/use-live-data";
+import { usePendingDeletes } from "@/hooks/usePendingDeletes";
 
 type Subject = Awaited<ReturnType<typeof getSubjects>>[number];
 type Bundle = Awaited<ReturnType<typeof getBundles>>[number];
@@ -380,16 +381,7 @@ export default function SubjectsPage() {
   // Realtime: subjects + bundles + due badge re-fetch on ANY table change.
   const live = useLiveData(() => Promise.all([getSubjects(), getBundles(), getAllDueFlashcards()]), []);
   // Pending deck deletes survive refresh
-  const DECK_PENDING_KEY = "openstudy:pendingDeckDeletes";
-  const deckPendingRef = useState(() => {
-    try {
-      const raw = localStorage.getItem(DECK_PENDING_KEY);
-      return new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
-    } catch { return new Set<string>(); }
-  })[0];
-  const persistDeckPending = (s: Set<string>) => {
-    try { localStorage.setItem(DECK_PENDING_KEY, JSON.stringify([...s])); } catch {}
-  };
+  const { pending: deckPendingRef, persistPending: persistDeckPending } = usePendingDeletes("openstudy:pendingDeckDeletes");
   useEffect(() => {
     if (deckPendingRef.size === 0) return;
     const ids = [...deckPendingRef];

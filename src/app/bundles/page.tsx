@@ -18,6 +18,7 @@ import { themeAccent } from "@/lib/bundle-colors";
 import { useAppStore } from "@/lib/store";
 import { spotlightProps } from "@/lib/interactions";
 import { useLiveData } from "@/lib/use-live-data";
+import { usePendingDeletes } from "@/hooks/usePendingDeletes";
 
 type Bundle = Awaited<ReturnType<typeof getBundles>>[number];
 
@@ -52,16 +53,7 @@ export default function BundlesPage() {
 
   // Realtime: bundles + subjects re-fetch on ANY table change.
   // Pending deletes survive refresh — hide bundles whose delete is still within the 5s undo window.
-  const PENDING_KEY = "openstudy:pendingBundleDeletes";
-  const pendingRef = useState(() => {
-    try {
-      const raw = localStorage.getItem(PENDING_KEY);
-      return new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
-    } catch { return new Set<string>(); }
-  })[0];
-  const persistPending = (set: Set<string>) => {
-    try { localStorage.setItem(PENDING_KEY, JSON.stringify([...set])); } catch {}
-  };
+  const { pending: pendingRef, persistPending } = usePendingDeletes("openstudy:pendingBundleDeletes");
   const live = useLiveData(() => Promise.all([getBundles(), getSubjects()]), []);
   useEffect(() => {
     if (!live) return;
