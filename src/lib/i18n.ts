@@ -489,6 +489,13 @@ const DICT: Dict = {
   "cards.copied": { en: "Copied!", ar: "تم النسخ!" },
   "cards.manageTitle": { en: "Manage cards", ar: "إدارة البطاقات" },
   "cards.shareBundleBtn": { en: "Share bundle", ar: "مشاركة المجموعة" },
+  "ai.importCircle": { en: "Import cards from NotebookLM", ar: "استيراد بطاقات من NotebookLM" },
+  "ai.importNote": { en: "Import note as flashcards", ar: "استيراد الملاحظة كبطاقات" },
+  "common.export": { en: "Export", ar: "تصدير" },
+  "common.import": { en: "Import", ar: "استيراد" },
+  "common.share": { en: "Share", ar: "مشاركة" },
+  "toast.importedGoals": { en: "Imported {n} goals", ar: "تم استيراد {n} أهداف" },
+  "toast.importedNotes": { en: "Imported {n} notes", ar: "تم استيراد {n} ملاحظات" },
 };
 
 export function useT() {

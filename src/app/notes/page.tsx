@@ -296,7 +296,7 @@ function NotesContent() {
       }
       const fresh = await getAllNotes();
       setNotes(fresh as Note[]);
-      if (ok) showToast(`Imported ${ok} notes${skipped ? `, ${skipped} skipped` : ""}`, "success");
+      if (ok) showToast(t("toast.importedNotes").replace("{n}", String(ok))${skipped ? `, ${skipped} skipped` : ""}`, "success");
       else showToast("No notes imported", "warning");
     } catch (e) {
       console.error(e);

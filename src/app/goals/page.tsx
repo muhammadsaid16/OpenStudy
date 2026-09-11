@@ -329,7 +329,7 @@ export default function GoalsPage() {
         try { await createMilestone(goalId, mTitle); if(m.done) { /* milestones are created undone; leave as is */ } msOk++; } catch {}
       }
       await refresh();
-      if(ok) showToast(`Imported ${ok} goals${msOk?` + ${msOk} milestones`:""}${skipped?`, ${skipped} skipped`:""}`, "success");
+      if(ok) showToast(t("toast.importedGoals").replace("{n}", String(ok))${msOk?` + ${msOk} milestones`:""}${skipped?`, ${skipped} skipped`:""}`, "success");
       else showToast("No goals imported","warning");
     } catch(e){ console.error(e); showToast("Import failed: invalid file","danger"); }
     finally { setImporting(false); if(importInputRef.current) importInputRef.current.value=""; }
@@ -354,7 +354,7 @@ export default function GoalsPage() {
                 className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
               >
                 <Download size={14} />
-                Export
+                {t("common.export")}
               </button>
               {exportMenuOpen && (
                 <>

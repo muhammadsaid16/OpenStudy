@@ -433,7 +433,7 @@ export default function BundleCardsPage() {
                 className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
               >
                 <Download size={14} />
-                Export
+                {t("common.export")}
               </button>
               {exportMenuOpen && (
                 <>

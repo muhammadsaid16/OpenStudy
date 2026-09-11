@@ -86,9 +86,7 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
   return (
     <>
       <Button variant="secondary" onClick={() => { setOpen(true); setLink(null); setTooBig(false); setError(""); }}>
-        <Share2 size={16} />
-        SHARE
-      </Button>
+        <Share2 size={16} />{t("common.share")}</Button>
       <Modal open={open} onClose={() => setOpen(false)} title={t("modal.shareBundle")}>
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-widest text-muted-fg">

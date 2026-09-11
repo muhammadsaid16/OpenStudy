@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { AiImportModal } from "./ai-import-modal";
@@ -14,6 +16,7 @@ export function NoteAiImportButton({
   noteTitle: string;
   availableBundles: BundleRec[];
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   return (
     <>
