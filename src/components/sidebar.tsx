@@ -22,13 +22,13 @@ import { cn } from "@/lib/utils";
 
 // Flat list kept for typing; navGroups above drives the render.
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/subjects", label: "Library", icon: Library },
-  { href: "/notes", label: "Notes", icon: StickyNote },
-  { href: "/sessions", label: "Sessions", icon: Timer },
-  { href: "/goals", label: "Goals", icon: Target },
-  { href: "/stats", label: "Stats", icon: BarChart3 },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/", label: t("ui.dashboard"), icon: LayoutDashboard },
+  { href: "/subjects", label: t("ui.library"), icon: Library },
+  { href: "/notes", label: t("ui.notes"), icon: StickyNote },
+  { href: "/sessions", label: t("ui.sessions"), icon: Timer },
+  { href: "/goals", label: t("ui.goals"), icon: Target },
+  { href: "/stats", label: t("ui.stats"), icon: BarChart3 },
+  { href: "/settings", label: t("ui.settings"), icon: Settings },
 ];
 
 // Nav groups — spec mental model: LEARN (content) / FOCUS (time) /
@@ -92,15 +92,14 @@ export function Sidebar() {
       {/* Wordmark */}
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         {sidebarOpen && (
-          <Link href="/" aria-label="OpenStudy home">
-            <span className="font-display text-xl font-bold tracking-tight text-fg">
-              Open<span className="text-accent">Study</span>
+          <Link href="/" aria-label={t("ui.openstudy_home")}>
+            <span className="font-display text-xl font-bold tracking-tight text-fg">{t("ui.open")}<span className="text-accent">{t("ui.study")}</span>
             </span>
           </Link>
         )}
         <button
           onClick={toggleSidebar}
-          aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          aria-label={sidebarOpen ? t("ui.collapse_sidebar") : "Expand sidebar"}
           className="rounded-full p-2 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
         >
           {sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
@@ -163,7 +162,7 @@ export function Sidebar() {
               </p>
               <Link
                 href="/settings"
-                aria-label="All themes in Settings"
+                aria-label={t("ui.all_themes_in_settings")}
                 className="text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-accent"
               >
                 {t("nav.all")}
@@ -195,7 +194,7 @@ export function Sidebar() {
           /* collapsed rail: toggle dark/light */
           <button
             onClick={() => setTheme(isLight ? "aurora" : "light")}
-            aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
+            aria-label={isLight ? t("ui.switch_to_dark_mode") : t("ui.switch_to_light_mode")}
             className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl border border-glass-border text-muted-fg transition-colors hover:text-accent"
           >
             {isLight ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}

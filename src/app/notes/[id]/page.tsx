@@ -173,8 +173,7 @@ export default function NotePage() {
           onClick={() => router.push("/notes")}
           className="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent transition-colors"
         >
-          <ArrowLeft size={14} /> Back to notes
-        </button>
+          <ArrowLeft size={14} />{t("notesDetail.backToNotes")}</button>
 
         {/* Header */}
         <div
@@ -189,11 +188,11 @@ export default function NotePage() {
                     className="inline-block rounded-full px-2.5 py-1 text-[10px]"
                     style={{ backgroundColor: `color-mix(in srgb, ${accent} 12%, transparent)`, color: accent, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accent} 25%, transparent)` }}
                   >
-                    {note.topic.subject?.name || "General"}
+                    {note.topic.subject?.name || t("ui.general")}
                   </span>
                   <span aria-hidden>›</span>
                   <span>{note.topic.name}</span>
-                  {note.isPinned && <span className="ms-1 inline-flex items-center gap-1 text-accent"><Pin size={10} /> Pinned</span>}
+                  {note.isPinned && <span className="ms-1 inline-flex items-center gap-1 text-accent"><Pin size={10} />{t("notesDetail.pinned")}</span>}
                 </p>
               )}
               <h1 className="font-display text-3xl font-bold tracking-tight text-fg lg:text-4xl">
@@ -208,7 +207,7 @@ export default function NotePage() {
                 onClick={handleTogglePin}
                 className={`rounded-full p-2.5 transition-colors ${note.isPinned ? "bg-accent text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent"}`}
                 title={note.isPinned ? "Unpin" : "Pin"}
-                aria-label={note.isPinned ? "Unpin note" : "Pin note"}
+                aria-label={note.isPinned ? t("ui.unpin_note") : t("ui.pin_note")}
               >
                 <Pin size={16} />
               </button>
@@ -253,11 +252,10 @@ export default function NotePage() {
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft text-accent">
                 <StickyNote size={28} />
               </div>
-              <p className="text-sm font-bold uppercase tracking-widest">No content yet</p>
+              <p className="text-sm font-bold uppercase tracking-widest">{t("notes.noContentYet")}</p>
               <p className="mt-1 text-xs text-muted-fg">Edit this note to add study material</p>
               <Button size="sm" className="mt-6" onClick={openEdit}>
-                <Pencil size={14} /> Edit note
-              </Button>
+                <Pencil size={14} />{t("modal.editNote")}</Button>
             </div>
           )}
         </div>
@@ -282,8 +280,7 @@ export default function NotePage() {
           </p>
           <div className="flex gap-2">
             <Button size="sm" variant="secondary" onClick={openEdit}>
-              <Pencil size={14} /> Edit
-            </Button>
+              <Pencil size={14} />{t("notes.edit")}</Button>
             <Button size="sm" variant="secondary" onClick={() => setGenerateOpen(true)} aria-label={t("notes.generateCards")} title={t("notes.generateCards")}>
               <Sparkles size={14} /> AI Generate
             </Button>
@@ -316,7 +313,7 @@ export default function NotePage() {
       <Modal open={editOpen} onClose={() => setEditOpen(false)} title={t("notesDetail.editNote")}>
         <div className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Title</label>
+            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("notes.titleField")}</label>
             <input
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
@@ -324,7 +321,7 @@ export default function NotePage() {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Content</label>
+            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("notes.contentField")}</label>
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
@@ -332,7 +329,7 @@ export default function NotePage() {
               className="glass-inset flex w-full rounded-xl px-4 py-3 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20 resize-none"
             />
           </div>
-          <TagInput label="Tags" tags={editTags} onChange={setEditTags} />
+          <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setEditOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleEditSave} disabled={!editTitle.trim()}>{t("common.save")}</Button>

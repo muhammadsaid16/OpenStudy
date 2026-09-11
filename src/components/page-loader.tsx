@@ -28,7 +28,7 @@ export type LoaderVariant =
 
 function LoaderBar({ label }: { label: string }) {
   // Spec (global): loading labels are implementation-style text —
-  // "LOADING DASHBOARD_" exposed internals. Skeletons stay visual only;
+  // t("ui.loading_dashboard") exposed internals. Skeletons stay visual only;
   // a visually-hidden status keeps screen readers informed.
   return (
     <div className="mb-10" role="status" aria-label={`Loading ${label}`}>
@@ -39,9 +39,7 @@ function LoaderBar({ label }: { label: string }) {
         <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
           {label.toUpperCase()}
         </p>
-        <p className="font-mono text-xs uppercase tracking-widest text-muted-fg">
-          OPENSTUDY
-        </p>
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-fg">{t("ui.openstudy")}</p>
       </div>
       <div className="relative h-0.5 w-full overflow-hidden bg-border">
         <div className="animate-loader absolute inset-y-0 w-1/4 bg-accent" />

@@ -38,7 +38,7 @@ type Phase =
 
 const MAX_CHARS = 8_000;
 const MIN_CHARS = 20;
-const GEN_STAGES = ["Reading source", "Extracting concepts", "Writing cards"] as const;
+const GEN_STAGES = ["Reading source", t("ui.extracting_concepts"), "Writing cards"] as const;
 
 interface ApiSuccess {
   ok: true;
@@ -134,7 +134,7 @@ export function AiGenerateModal({
       return;
     }
     if (f.size > 8 * 1024 * 1024) {
-      setErr("Image is over 8 MB. Use a smaller photo.");
+      setErr(t("ui.image_is_over_8_mb_use_a_smaller"));
       setErrCode("IMAGE_TOO_LARGE");
       setPhase("error");
       e.target.value = "";
@@ -161,7 +161,7 @@ export function AiGenerateModal({
 
   const generate = async () => {
     if (!bundleId) {
-      setErr("Pick a destination bundle first.");
+      setErr(t("ui.pick_a_destination_bundle_first"));
       setErrCode("NO_BUNDLE");
       setPhase("error");
       return;
@@ -208,7 +208,7 @@ export function AiGenerateModal({
     }
 
     if (!imageValid) {
-      setErr("Pick an image first.");
+      setErr(t("ui.pick_an_image_first"));
       setErrCode("CLIENT_VALIDATION");
       setPhase("error");
       return;
@@ -249,7 +249,7 @@ export function AiGenerateModal({
   const acceptAll = async () => {
     const keep = cards.filter((_, i) => !rejected.has(i));
     if (keep.length === 0) {
-      setErr("Uncheck at least one card to accept.");
+      setErr(t("ui.uncheck_at_least_one_card_to_acc"));
       setErrCode("NONE_SELECTED");
       setPhase("error");
       return;
@@ -266,7 +266,7 @@ export function AiGenerateModal({
         })))
       );
       if (!r.ok) {
-        setErr(r.error || "Import failed.");
+        setErr(r.error || t("ui.import_failed"));
         setErrCode("BULK_FAILED");
         setPhase("error");
         return;
@@ -324,8 +324,7 @@ export function AiGenerateModal({
           }`}
           aria-pressed={mode === "text"}
         >
-          <FileText size={14} /> TEXT
-        </button>
+          <FileText size={14} />{t("ui.text")}</button>
         <button
           type="button"
           onClick={() => { if (phase !== "generating" && phase !== "saving") setMode("image"); }}
@@ -337,8 +336,7 @@ export function AiGenerateModal({
           }`}
           aria-pressed={mode === "image"}
         >
-          <ImageIcon size={14} /> IMAGE
-        </button>
+          <ImageIcon size={14} />{t("ui.image")}</button>
       </div>
 
       {/* Source description */}
@@ -350,15 +348,13 @@ export function AiGenerateModal({
 
       {/* Bundle picker */}
       <div className="space-y-1">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-          DESTINATION BUNDLE
-        </p>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("ui.destination_bundle_1")}</p>
         {bundles.length > 0 ? (
           <select
             value={bundleId}
             onChange={(e) => setBundleId(e.target.value)}
             className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm font-bold text-fg focus:outline-none"
-            aria-label="Destination bundle"
+            aria-label={t("ui.destination_bundle")}
           >
             {bundles.map((b) => (
               <option key={b.id} value={b.id} className="bg-bg text-fg">
@@ -378,9 +374,7 @@ export function AiGenerateModal({
       {mode === "text" ? (
         <div className="space-y-2">
           <div className="flex items-end justify-between">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-              YOUR SOURCE TEXT
-            </p>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("ui.your_source_text")}</p>
             <span
               className={`font-mono text-[10px] uppercase tracking-widest ${
                 sourceLen > MAX_CHARS
@@ -406,7 +400,7 @@ export function AiGenerateModal({
             className="w-full min-h-[260px] resize-y rounded-xl border border-border bg-bg p-3 text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:outline-none"
             spellCheck={false}
             autoComplete="off"
-            aria-label="Source text for AI card generation"
+            aria-label={t("ui.source_text_for_ai_card_generati")}
           />
           <p className="text-[11px] text-muted-fg leading-relaxed">
             {sourceLen < MIN_CHARS
@@ -418,16 +412,14 @@ export function AiGenerateModal({
         </div>
       ) : (
         <div className="space-y-2">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-            YOUR IMAGE
-          </p>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("ui.your_image")}</p>
           <input
             ref={fileInputRef}
             type="file"
             accept="image/png,image/jpeg,image/webp,image/gif"
             onChange={onPickImage}
             className="hidden"
-            aria-label="Image to analyze"
+            aria-label={t("ui.image_to_analyze")}
           />
           {imagePreview ? (
             <div className="space-y-2">
@@ -435,14 +427,14 @@ export function AiGenerateModal({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imagePreview}
-                  alt="Selected study material"
+                  alt=t("ui.selected_study_material")
                   className="mx-auto max-w-full h-auto max-h-[320px] object-contain"
                 />
                 <button
                   type="button"
                   onClick={clearImage}
                   className="absolute end-2 top-2 rounded-full border border-border bg-bg/90 p-1 text-muted-fg hover:text-accent hover:bg-accent-soft"
-                  aria-label="Remove image"
+                  aria-label={t("ui.remove_image")}
                 >
                   <X size={14} />
                 </button>
@@ -458,9 +450,7 @@ export function AiGenerateModal({
               className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-bg px-4 py-12 text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
             >
               <Upload size={28} />
-              <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
-                CLICK TO PICK AN IMAGE
-              </span>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest">{t("ui.click_to_pick_an_image")}</span>
               <span className="text-[11px]">
                 PNG / JPEG / WEBP / GIF · MAX 8 MB
               </span>
@@ -500,7 +490,7 @@ export function AiGenerateModal({
           }
         >
           {mode === "image" ? <ImageIcon size={14} /> : <Wand2 size={14} />}
-          {mode === "image" ? "Analyze image" : "Generate cards"}
+          {mode === "image" ? t("ui.analyze_image") : "Generate cards"}
         </Button>
       </div>
     </div>
@@ -516,7 +506,7 @@ export function AiGenerateModal({
         </p>
         <p className="text-xs text-muted-fg leading-relaxed">
           {mode === "image" ? (
-            <>Analyzing <span className="font-bold text-fg">{imageFile?.name ?? "image"}</span> → <span className="font-bold text-fg">{selectedBundle?.name ?? "—"}</span></>
+            <>{t("ui.analyzing")}<span className="font-bold text-fg">{imageFile?.name ?? "image"}</span> → <span className="font-bold text-fg">{selectedBundle?.name ?? "—"}</span></>
           ) : (
             <>{sourceLen.toLocaleString()} chars → <span className="font-bold text-fg">{selectedBundle?.name ?? "—"}</span></>
           )}
@@ -563,8 +553,7 @@ export function AiGenerateModal({
               }}
               className="flex items-center gap-1 text-accent hover:underline"
             >
-              <RefreshCw size={11} /> Try again
-            </button>
+              <RefreshCw size={11} />{t("err.tryAgain")}</button>
           </div>
           {/* Kind breakdown */}
           <div className="flex flex-wrap gap-1.5">
@@ -583,9 +572,7 @@ export function AiGenerateModal({
       {/* OCR preview — shown by default for image mode */}
       {meta?.ocrPreview && (
         <div className="rounded-xl border border-border/60 bg-bg/40 p-3 text-[11px] text-muted-fg">
-          <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg/60">
-            WHAT THE MODEL READ
-          </p>
+          <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg/60">{t("ui.what_the_model_read")}</p>
           <p className="leading-relaxed text-fg/80">{meta.ocrPreview.slice(0, 300)}{meta.ocrPreview.length > 300 ? "…" : ""}</p>
         </div>
       )}
@@ -608,7 +595,7 @@ export function AiGenerateModal({
                   type="button"
                   onClick={() => toggleReject(i)}
                   aria-pressed={!off}
-                  aria-label={off ? "Include this card" : "Exclude this card"}
+                  aria-label={off ? t("ui.include_this_card") : t("ui.exclude_this_card")}
                   className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors ${
                     off
                       ? "border-border bg-bg text-muted-fg"
@@ -652,9 +639,7 @@ export function AiGenerateModal({
           {keepCount} OF {cards.length} SELECTED
         </span>
         <div className="flex gap-2">
-          <Button variant="secondary" size="sm" onClick={() => setPhase("input")}>
-            BACK
-          </Button>
+          <Button variant="secondary" size="sm" onClick={() => setPhase("input")}>{t("ui.back")}</Button>
           <Button
             size="sm"
             onClick={acceptAll}
@@ -696,12 +681,8 @@ export function AiGenerateModal({
           variant="secondary"
           size="sm"
           onClick={() => router.push(`/bundles/${bundleId}/cards`)}
-        >
-          REVIEW CARDS
-        </Button>
-        <Button size="sm" onClick={close}>
-          DONE
-        </Button>
+        >{t("ui.review_cards")}</Button>
+        <Button size="sm" onClick={close}>{t("ui.done_1")}</Button>
       </div>
     </div>
   );

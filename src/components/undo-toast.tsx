@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useEffect, useState, useCallback } from "react";
 
 export type UndoAction = {
@@ -13,6 +15,7 @@ let listeners: ((action: UndoAction) => void)[] = [];
 let activeCommitTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function showUndo(action: UndoAction) {
+  const t = useT();
   if (activeCommitTimer !== null) {
     clearTimeout(activeCommitTimer);
     activeCommitTimer = null;
@@ -75,12 +78,10 @@ export function UndoToastHost() {
         <button
           onClick={handleUndo}
           className="rounded-full bg-accent px-3 py-1 text-xs font-bold tracking-wide text-accent-fg transition-colors hover:opacity-90"
-        >
-          Undo
-        </button>
+        >{t("ui.undo")}</button>
         <button
           onClick={handleDismiss}
-          aria-label="Dismiss"
+          aria-label={t("ui.dismiss")}
           className="text-muted-fg transition-colors hover:text-accent"
         >
           ✕

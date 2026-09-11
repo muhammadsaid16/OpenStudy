@@ -82,8 +82,7 @@ export function HardestCardsTable({
                 <td className="py-2.5 pr-2 text-right">
                   {doneId === r.cardId ? (
                     <span className="inline-flex items-center gap-1 text-success text-xs font-bold uppercase">
-                      <Check size={12} /> RESET
-                    </span>
+                      <Check size={12} />{t("ui.reset")}</span>
                   ) : (
                     <Button
                       size="sm"
@@ -91,8 +90,7 @@ export function HardestCardsTable({
                       onClick={() => setConfirmId(r.cardId)}
                       aria-label={`Reset progress on card: ${r.front}`}
                     >
-                      <RotateCcw size={12} /> RESET
-                    </Button>
+                      <RotateCcw size={12} />{t("ui.reset")}</Button>
                   )}
                 </td>
               </tr>
@@ -115,9 +113,7 @@ export function HardestCardsTable({
             {rows.find((r) => r.cardId === confirmId)?.front}
           </p>
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setConfirmId(null)}>
-              Cancel
-            </Button>
+            <Button variant="secondary" size="sm" onClick={() => setConfirmId(null)}>{t("common.cancel")}</Button>
             <Button size="sm" onClick={() => confirmId && doReset(confirmId)} disabled={busy}>
               {busy ? "Resetting…" : "Reset"}
             </Button>

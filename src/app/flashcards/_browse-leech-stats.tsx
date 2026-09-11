@@ -73,7 +73,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
         <div className="relative flex-1">
           <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-fg" />
           <input
-            placeholder={p.browseScope === "bundles" ? "Search bundles..." : "Search all cards..."}
+            placeholder={p.browseScope === "bundles" ? t("ui.search_bundles") : t("ui.search_all_cards")}
             value={p.browseQuery}
             onChange={(e) => p.onQueryChange(e.target.value)}
             className="h-10 w-full rounded-xl border border-border bg-bg ps-10 pe-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
@@ -109,8 +109,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                 onClick={p.onBatchDelete}
                 className="flex items-center gap-2 rounded-full border border-danger px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-danger transition-colors hover:bg-danger hover:text-on-color"
               >
-                <Trash2 size={14} /> Delete
-              </button>
+                <Trash2 size={14} />{t("notes.delete")}</button>
               <button
                 onClick={p.onBatchTag}
                 className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
@@ -121,8 +120,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                 onClick={p.onBatchMove}
                 className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
               >
-                <ArrowRight size={14} /> Move
-              </button>
+                <ArrowRight size={14} />{t("ui.move")}</button>
             </>
           )}
         </div>
@@ -196,7 +194,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                     <button
                       onClick={(e) => { e.stopPropagation(); p.onSelectToggle(card.id); }}
                       className="rounded-full text-muted-fg transition-colors hover:text-accent"
-                      aria-label={selected ? "Deselect card" : "Select card"}
+                      aria-label={selected ? t("ui.deselect_card") : "Select card"}
                     >
                       {selected ? <CheckSquare size={14} className="text-accent" /> : <Square size={14} />}
                     </button>
@@ -255,7 +253,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                       {card.bundle.name}
                     </span>
                   ) : card.topic ? (
-                    <span>{card.topic.subject?.name ?? "General"} › {card.topic.name}</span>
+                    <span>{card.topic.subject?.name ?? t("ui.general")} › {card.topic.name}</span>
                   ) : <span />}
                 </div>
               </div>
@@ -287,9 +285,7 @@ export function LeechesMode(p: LeechesModeProps) {
     <div className="space-y-6">
       <div className="rounded-2xl border border-danger/40 bg-danger/5 p-4">
         <p className="text-sm font-bold uppercase tracking-widest text-danger">
-          <AlertTriangle size={14} className="me-2 inline" />
-          Leech protection
-        </p>
+          <AlertTriangle size={14} className="me-2 inline" />{t("ui.leech_protection")}</p>
         <p className="mt-1 text-xs text-muted-fg uppercase tracking-widest">
           Cards with 5+ consecutive &quot;again&quot; answers are flagged here. Consider rewriting, splitting, or adding hints.
         </p>
@@ -299,7 +295,7 @@ export function LeechesMode(p: LeechesModeProps) {
           {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
         </div>
       ) : p.leechCards.length === 0 ? (
-        <EmptyState icon={<AlertTriangle size={48} />} title={t("flashcards.noLeeches")} description="No cards have been flagged yet. Keep studying!" />
+        <EmptyState icon={<AlertTriangle size={48} />} title={t("flashcards.noLeeches")} description=t("flashcards.noLeechesDesc") />
       ) : (
         <div className="space-y-3">
           {p.leechCards.map((card) => (
@@ -307,7 +303,7 @@ export function LeechesMode(p: LeechesModeProps) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold tracking-tight">{card.front}</p>
                 <p className="mt-0.5 text-xs text-muted-fg uppercase tracking-widest">
-                  {card.bundle?.name ?? "No bundle"} • {card.consecutiveAgain}× again
+                  {card.bundle?.name ?? t("ui.no_bundle")} • {card.consecutiveAgain}× again
                 </p>
               </div>
               <Button size="sm" variant="secondary" onClick={() => p.onUnleech(card.id)}>
@@ -338,11 +334,11 @@ export function StatsMode(p: StatsModeProps) {
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-2xl border border-border bg-bg p-6 text-center">
           <p className="text-4xl font-bold tracking-tighter text-accent">{p.streak}</p>
-          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">Day streak</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.dayStreak")}</p>
         </div>
         <div className="rounded-2xl border border-border bg-bg p-6 text-center">
           <p className="text-4xl font-bold tracking-tighter">{p.reviewsToday}</p>
-          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">Reviews today</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">{t("ui.reviews_today")}</p>
         </div>
         <div className="rounded-2xl border border-border bg-bg p-6 text-center">
           <p className="text-4xl font-bold tracking-tighter text-success">{p.leechCount}</p>
@@ -366,12 +362,12 @@ export function StatsMode(p: StatsModeProps) {
           })}
         </div>
         <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-fg">
-          <span>LESS</span>
+          <span>{t("heatmap.less")}</span>
           <div className="h-3 w-3 bg-muted" />
           <div className="h-3 w-3 bg-accent/30" />
           <div className="h-3 w-3 bg-accent/60" />
           <div className="h-3 w-3 bg-accent" />
-          <span>MORE</span>
+          <span>{t("heatmap.more")}</span>
         </div>
       </div>
     </div>

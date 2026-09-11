@@ -22,9 +22,7 @@ export function ContinueStudying({ target }: { target: ContinueTarget | null }) 
   const t = useT();
   return (
     <div className="glass rounded-3xl p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-        Continue studying
-      </p>
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.continueStudying")}</p>
       {target ? (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -38,7 +36,7 @@ export function ContinueStudying({ target }: { target: ContinueTarget | null }) 
                 {target.title}
               </p>
               <p className="text-[11px] text-muted-fg">
-                {target.subjectName ?? "General"} · {target.minutes}m · {target.when}
+                {target.subjectName ?? t("ui.general")} · {target.minutes}m · {target.when}
               </p>
             </div>
           </div>
@@ -47,19 +45,15 @@ export function ContinueStudying({ target }: { target: ContinueTarget | null }) 
             aria-label={`Resume ${target.title}`}
             className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-bold text-accent-fg transition-transform hover:scale-105"
           >
-            <RotateCw size={13} aria-hidden />
-            Resume
-          </Link>
+            <RotateCw size={13} aria-hidden />{t("dash.resume")}</Link>
         </div>
       ) : (
         <div className="mt-3 flex flex-col items-start gap-2 py-2">
-          <p className="text-sm text-muted-fg">No active study item</p>
+          <p className="text-sm text-muted-fg">{t("dash.noActive")}</p>
           <Link
             href="/sessions"
             className="text-xs font-bold tracking-tight text-accent transition-opacity hover:opacity-80"
-          >
-            Start your first session →
-          </Link>
+          >{t("dash.startFirst")}</Link>
         </div>
       )}
     </div>

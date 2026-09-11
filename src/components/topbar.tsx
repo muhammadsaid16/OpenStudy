@@ -20,7 +20,7 @@ export function TopBar({ dueCards }: { dueCards: number }) {
   const [q, setQ] = useState("");
   const router = useRouter();
   // OS-aware shortcut hint (audit §7): ⌘K on Apple, Ctrl K elsewhere.
-  // Determined once after mount (SSR-safe: renders "Ctrl K" on server,
+  // Determined once after mount (SSR-safe: renders t("ui.ctrl_k") on server,
   // corrects to ⌘K on the client before paint in practice).
   const [isMac, setIsMac] = useState(false);
   useEffect(() => {
@@ -93,7 +93,7 @@ export function TopBar({ dueCards }: { dueCards: number }) {
           className="w-full bg-transparent ps-10 pe-14 text-sm text-fg placeholder:text-muted-fg/60 outline-none"
         />
         <kbd className="absolute end-4 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-fg">
-          {isMac ? "⌘K" : "Ctrl K"}
+          {isMac ? "⌘K" : t("ui.ctrl_k")}
         </kbd>
       </label>
     </div>

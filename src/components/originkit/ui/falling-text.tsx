@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import * as React from "react";
 import { useEffect, useCallback, useMemo } from "react";
 import {
@@ -34,7 +36,7 @@ type Props = {
 };
 
 export default function GravityFall({
-    text = "Gravity Fall",
+    text = t("ui.gravity_fall"),
     font = {
         fontFamily: "Inter",
         variant: "Bold",
@@ -52,6 +54,7 @@ export default function GravityFall({
     transition = { type: "spring", stiffness: 400, damping: 15, mass: 1 },
     split = "char",
 }: Props) {
+  const t = useT();
     const [scope, animate] = useAnimate();
 
     const normalizedOpacity = startOpacity / 100;

@@ -153,13 +153,9 @@ export default function BundlesPage() {
           </div>
           {!(loaded && bundles.length === 0) && (
             <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => document.getElementById("share-import")?.click()}>
-                Import share
-              </Button>
+              <Button variant="secondary" onClick={() => document.getElementById("share-import")?.click()}>{t("ui.import_share")}</Button>
               <Button onClick={() => setCreateOpen(true)}>
-                <Plus size={16} />
-                New bundle
-              </Button>
+                <Plus size={16} />{t("fc.newBundle")}</Button>
             </div>
           )}
           <input
@@ -276,13 +272,13 @@ export default function BundlesPage() {
                         setShareBusy(null);
                       }
                     }}
-                    aria-label="Copy share link"
+                    aria-label={t("common.copyLink")}
                     title={t("share.copyLinkDesc")}
                     className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-accent disabled:opacity-50"
                     disabled={shareBusy === bundle.id}
                   >
                     <Link2 size={13} />
-                    {shareBusy === bundle.id ? "…" : "Share"}
+                    {shareBusy === bundle.id ? "…" : t("ui.share")}
                   </button>
                   <button
                     onClick={(e) => {
@@ -294,9 +290,7 @@ export default function BundlesPage() {
                     title={t("bundles.manageCards")}
                     className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
                   >
-                    <Layers size={13} />
-                    Manage
-                  </button>
+                    <Layers size={13} />{t("ui.manage")}</button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -362,9 +356,7 @@ export default function BundlesPage() {
                       router.push(`/bundles/${bundle.id}/cards`);
                     }}
                     className="py-2 text-xs font-bold uppercase tracking-widest text-accent hover:underline"
-                  >
-                    Manage cards
-                  </button>
+                  >{t("ui.manage_cards")}</button>
                   {bundle._count.flashcards > 0 && (
                     <span className="text-xs font-bold uppercase tracking-widest text-muted-fg group-hover:underline">
                       Study →
@@ -381,7 +373,7 @@ export default function BundlesPage() {
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title={t("modal.newBundle")}>
         <div className="space-y-6">
           <Input label={t("bundles.bundleNameShort")} placeholder="e.g. IELTS vocabulary" value={newName} onChange={(e) => setNewName(e.target.value)} />
-          <Input label="Description (optional)" placeholder={t("modal.briefDesc")} value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
+          <Input label=t("ui.description_optional") placeholder={t("modal.briefDesc")} value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
           <BundleColorPicker value={newColor} onChange={setNewColor} />
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Subject & topic (optional)</label>
@@ -397,7 +389,7 @@ export default function BundlesPage() {
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setCreateOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreate} disabled={loading || !newName.trim()}>
-              {loading ? "Creating..." : "Create"}
+              {loading ? "Creating..." : t("common.create")}
             </Button>
           </div>
         </div>
@@ -408,7 +400,7 @@ export default function BundlesPage() {
         {editBundle && (
           <div className="space-y-6">
             <Input label={t("bundles.bundleNameShort")} value={editName} onChange={(e) => setEditName(e.target.value)} />
-            <Input label="Description (optional)" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
+            <Input label=t("ui.description_optional") value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
             <BundleColorPicker value={editColor} onChange={setEditColor} />
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="ghost" onClick={() => setEditBundle(null)}>{t("common.cancel")}</Button>

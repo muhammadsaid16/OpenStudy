@@ -103,7 +103,7 @@ export default function DashboardPage() {
                         title:
                           stats.recentSessions[0].title ||
                           stats.recentSessions[0].subject?.name ||
-                          "Last session",
+                          t("ui.last_session"),
                         subjectName: stats.recentSessions[0].subject?.name ?? null,
                         subjectColor: stats.recentSessions[0].subject?.color ?? null,
                         minutes: stats.recentSessions[0].durationMin,
@@ -131,9 +131,7 @@ export default function DashboardPage() {
             </motion.div>
             {stats.subjectBreakdown.length > 0 && (
               <motion.div variants={item}>
-                <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-fg">
-                  Subjects
-                </p>
+                <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-fg">{t("ui.subjects")}</p>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {stats.subjectBreakdown.slice(0, 4).map((s) => (
                     <Link key={s.id} href="/subjects" aria-label={`Open ${s.name}`}>
@@ -187,7 +185,7 @@ export default function DashboardPage() {
                             {session.title}
                           </p>
                           <p className="text-[11px] uppercase tracking-widest text-muted-fg">
-                            {session.subject?.name ?? "General"}
+                            {session.subject?.name ?? t("ui.general")}
                           </p>
                         </div>
                       </div>
@@ -199,7 +197,7 @@ export default function DashboardPage() {
                               : "bg-flow/10 text-flow"
                           }`}
                         >
-                          {session.completed ? "Done" : "Active"}
+                          {session.completed ? t("ui.done") : t("ui.active")}
                         </span>
                         <span className="font-mono text-xs tabular-nums text-muted-fg">
                           {formatDuration(session.durationMin)}
@@ -240,14 +238,14 @@ export default function DashboardPage() {
                   label: t("dash.tabs.topics"),
                   value: stats.totalTopics,
                   icon: Layers,
-                  emptyCta: "Create a topic",
+                  emptyCta: t("ui.create_a_topic"),
                   emptyHref: "/subjects",
                 },
                 {
                   label: t("dash.tabs.cards"),
                   value: stats.totalFlashcards,
                   icon: Brain,
-                  emptyCta: "Make flashcards",
+                  emptyCta: t("ui.make_flashcards"),
                   emptyHref: "/subjects",
                 },
                 {

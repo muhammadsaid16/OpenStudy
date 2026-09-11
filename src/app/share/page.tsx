@@ -79,11 +79,11 @@ export default function SharePage() {
   if ("empty" in shared) {
     return (
       <div className="mx-auto max-w-lg p-12 text-center">
-        <h1 className="text-2xl font-bold uppercase">NO SHARE DATA</h1>
+        <h1 className="text-2xl font-bold uppercase">{t("share.noData")}</h1>
         <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">OPEN THE LINK THE SENDER GAVE YOU — IT MUST END WITH # AND A LONG CODE. IF YOU HAVE A .STUDYMAX-BUNDLE.JSON FILE, IMPORT IT BELOW.</p>
         <label className="mt-6 inline-flex cursor-pointer items-center rounded-full border border-border bg-bg px-5 py-2.5 text-xs font-bold uppercase tracking-widest">
           <input type="file" accept=".json,application/json" className="hidden" onChange={onFile} disabled={fileBusy} />
-          {fileBusy ? "Reading…" : "Import from file"}
+          {fileBusy ? "Reading…" : t("ui.import_from_file")}
         </label>
         {error !== "" && <p className="mt-3 text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
       </div>
@@ -93,14 +93,14 @@ export default function SharePage() {
   if ("bad" in shared)
     return (
       <div className="mx-auto max-w-lg p-12 text-center">
-        <h1 className="text-2xl font-bold uppercase">INVALID SHARE LINK</h1>
+        <h1 className="text-2xl font-bold uppercase">{t("share.invalid")}</h1>
         <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">ASK THE SENDER FOR A FRESH LINK OR FILE. LINKS ARE LONG — SOME APPS CUT THEM OFF. THE FILE (.STUDYMAX-BUNDLE.JSON) ALWAYS WORKS.</p>
         <div className="mt-6 flex flex-col items-center gap-3">
           <label className="inline-flex cursor-pointer items-center rounded-full border border-border bg-bg px-5 py-2.5 text-xs font-bold uppercase tracking-widest">
             <input type="file" accept=".json,application/json" className="hidden" onChange={onFile} disabled={fileBusy} />
-            {fileBusy ? "Reading…" : "Import from file instead"}
+            {fileBusy ? "Reading…" : t("ui.import_from_file_instead")}
           </label>
-          <Button variant="secondary" onClick={() => router.push("/subjects")}>Back to library</Button>
+          <Button variant="secondary" onClick={() => router.push("/subjects")}>{t("share.backToLibrary")}</Button>
         </div>
         {error !== "" && <p className="mt-3 text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
         <p className="mt-4 break-all text-[10px] text-muted-fg">{shared.reason}</p>
@@ -110,13 +110,13 @@ export default function SharePage() {
   if (!bundle)
     return (
       <div className="mx-auto max-w-lg p-12 text-center">
-        <p className="text-xs uppercase tracking-widest text-muted-fg">READING SHARED DECK…</p>
+        <p className="text-xs uppercase tracking-widest text-muted-fg">{t("share.reading")}</p>
       </div>
     );
 
   return (
     <div className="mx-auto max-w-xl p-8 lg:p-12">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">Shared deck</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("share.sharedDeck")}</p>
       <h1 className="mt-1 text-3xl font-bold lg:text-5xl">{bundle.name}</h1>
       {bundle.description && <p className="mt-2 text-sm text-muted-fg">{bundle.description}</p>}
       <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">{bundle.cards.length} cards</p>
@@ -133,14 +133,14 @@ export default function SharePage() {
       </div>
       {error !== "" && <p className="mt-3 text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
       <div className="mt-6 flex gap-2">
-        <Button disabled={busy} onClick={doImport}>{busy ? "Importing…" : `Import ${bundle.cards.length} cards`}</Button>
+        <Button disabled={busy} onClick={doImport}>{busy ? t("ui.importing") : `Import ${bundle.cards.length} cards`}</Button>
         <Button variant="secondary" onClick={() => router.push("/subjects")}>{t("common.cancel")}</Button>
       </div>
       <div className="mt-8 border-t border-border pt-6">
         <p className="text-xs uppercase tracking-widest text-muted-fg">Or import a .studymax-bundle.json file instead</p>
         <label className="mt-3 inline-flex cursor-pointer items-center rounded-full border border-border bg-bg px-5 py-2.5 text-xs font-bold uppercase tracking-widest">
           <input type="file" accept=".json,application/json" className="hidden" onChange={onFile} disabled={fileBusy} />
-          {fileBusy ? "Reading…" : "Choose file"}
+          {fileBusy ? "Reading…" : t("ui.choose_file")}
         </label>
       </div>
     </div>

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui";
 // beforeinstallprompt and show a button. iOS Safari doesn't fire it —
 // there we show a hint instead.
 type BIPEvent = Event & {
-  prompt: () => Promise<void>;
+  prompt: () =>{t("ui.promise")}<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
@@ -56,9 +56,7 @@ export function InstallAppButton() {
   if (deferred) {
     return (
       <Button size="sm" onClick={install}>
-        <Download size={14} />
-        Install app
-      </Button>
+        <Download size={14} />{t("ui.install_app")}</Button>
     );
   }
   if (isIOS) {

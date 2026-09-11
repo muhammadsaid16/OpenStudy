@@ -24,11 +24,11 @@ export function NoteAiImportButton({
         size="sm"
         variant="secondary"
         onClick={() => setOpen(true)}
-        aria-label="Import note as flashcards"
-        title="Import note as flashcards"
+        aria-label={t("ui.import_note_as_flashcards")}
+        title={t("ui.import_note_as_flashcards")}
       >
         <Sparkles size={14} />
-        <span className="hidden sm:inline">AI IMPORT</span>
+        <span className="hidden sm:inline">{t("ui.ai_import")}</span>
       </Button>
       {open && (
         <AiImportModal

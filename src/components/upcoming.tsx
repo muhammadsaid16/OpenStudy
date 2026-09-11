@@ -38,19 +38,15 @@ export function Upcoming({ items }: { items: UpcomingItem[] }) {
 
   return (
     <div className="glass rounded-3xl p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-        Upcoming
-      </p>
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.upcoming")}</p>
       {next.length === 0 ? (
         <div className="mt-3 flex flex-col items-start gap-2 py-2">
-          <p className="text-sm text-muted-fg">No deadlines</p>
+          <p className="text-sm text-muted-fg">{t("dash.noDeadlines")}</p>
           <Link
             href="/goals"
             className="inline-flex items-center gap-1.5 text-xs font-bold tracking-tight text-accent transition-opacity hover:opacity-80"
           >
-            <Plus size={12} aria-hidden />
-            Add a goal with a deadline →
-          </Link>
+            <Plus size={12} aria-hidden />{t("dash.addGoalDeadline")}</Link>
         </div>
       ) : (
         <ul className="mt-3 divide-y divide-border">

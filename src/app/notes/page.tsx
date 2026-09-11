@@ -300,7 +300,7 @@ function NotesContent() {
       else showToast("No notes imported", "warning");
     } catch (e) {
       console.error(e);
-      showToast("Import failed: invalid file", "danger");
+      showToast(t("fc.importFailed"), "danger");
     } finally {
       setImporting(false);
       if (importInputRef.current) importInputRef.current.value = "";
@@ -333,8 +333,7 @@ function NotesContent() {
                   <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label={t("common.closeExport")} />
                   <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
                     <button onClick={exportAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
-                      <Download size={14} /> JSON
-                    </button>
+                      <Download size={14} />{t("ui.json")}</button>
                     <button onClick={exportAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                       <Download size={14} /> CSV
                     </button>
@@ -494,7 +493,7 @@ function NotesContent() {
                   </p>
                 )}
                 <div className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-fg">
-                  {note.content ? <Markdown content={note.content} /> : <span className="italic text-muted-fg/70">No content</span>}
+                  {note.content ? <Markdown content={note.content} /> : <span className="italic text-muted-fg/70">{t("notes.noContent")}</span>}
                 </div>
                 {/* Explanation snippet */}
                 {(note as any).explanation && (
@@ -548,9 +547,7 @@ function NotesContent() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t("modal.newNote")}>
         <div className="space-y-6">
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-              Topic
-            </label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.topic")}</label>
             <SubjectTopicSelect
               subjects={subjects}
               value={selectedTopicId}
@@ -562,8 +559,7 @@ function NotesContent() {
                 onClick={() => setSelectedTopicId("")}
                 className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs font-bold text-muted-fg transition-colors hover:border-danger/20 hover:bg-danger/10 hover:text-danger"
               >
-                <X size={12} /> Remove
-              </button>
+                <X size={12} />{t("notes.remove")}</button>
             )}
             <p className="text-[11px] uppercase tracking-widest text-muted-fg">
               {selectedTopicId ? t("notes.linkedHint") : t("notes.optionalHint")}
@@ -589,7 +585,7 @@ function NotesContent() {
               onClick={handleCreate}
               disabled={isPending || !title.trim()}
             >
-              {isPending ? "Creating..." : "Create"}
+              {isPending ? "Creating..." : t("common.create")}
             </Button>
           </div>
         </div>
@@ -600,9 +596,7 @@ function NotesContent() {
         {editNote && (
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-                Topic
-              </label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.topic")}</label>
               <SubjectTopicSelect
                 subjects={subjects}
                 value={editTopicId}
@@ -614,8 +608,7 @@ function NotesContent() {
                   onClick={() => setEditTopicId("")}
                   className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs font-bold text-muted-fg transition-colors hover:border-danger/20 hover:bg-danger/10 hover:text-danger"
                 >
-                  <X size={12} /> Remove
-                </button>
+                  <X size={12} />{t("notes.remove")}</button>
               )}
               {!editTopicId && subjects.length > 0 && (
                 <p className="text-[11px] uppercase tracking-widest text-warning">

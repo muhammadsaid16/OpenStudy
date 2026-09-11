@@ -47,9 +47,7 @@ export function SubjectIconPicker({
   const t = useT();
   return (
     <div className={cn("space-y-2", className)}>
-      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-        ICON
-      </p>
+      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("ui.icon")}</p>
       <div className="grid grid-cols-6 gap-1.5">
         {SUBJECT_ICON_NAMES.map((name) => {
           const Icon = SUBJECT_ICONS[name]!;

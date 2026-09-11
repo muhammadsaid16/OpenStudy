@@ -30,9 +30,7 @@ export default function RouteError({
         <AlertTriangle size={32} aria-hidden />
       </div>
       <div>
-        <h2 className="font-display text-2xl font-bold tracking-tight">
-          Something broke
-        </h2>
+        <h2 className="font-display text-2xl font-bold tracking-tight">{t("err.title")}</h2>
         <p className="mt-2 max-w-sm text-sm text-muted-fg">
           {t("err.body")}
         </p>
@@ -47,9 +45,7 @@ export default function RouteError({
           onClick={reset}
           className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-accent-fg transition-transform hover:scale-105"
         >
-          <RotateCcw size={14} aria-hidden />
-          Try again
-        </button>
+          <RotateCcw size={14} aria-hidden />{t("err.tryAgain")}</button>
         <a
           href="/"
           className="inline-flex items-center gap-2 rounded-full border border-glass-border bg-glass px-5 py-2.5 text-sm font-bold text-fg transition-colors hover:bg-accent-soft"

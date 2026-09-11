@@ -32,19 +32,19 @@ const SOUNDSCAPES: SoundscapeName[] = [
 
 const PHASE_META = {
   work: {
-    label: "Focus",
+    label: t("ui.focus"),
     chip: "bg-accent-soft text-accent",
     from: "var(--color-accent)",
     to: "var(--color-flow)",
   },
   break: {
-    label: "Break",
+    label: t("ui.break"),
     chip: "bg-flow/10 text-flow",
     from: "var(--color-flow)",
     to: "var(--color-grow)",
   },
   long: {
-    label: "Long Break",
+    label: t("ui.long_break"),
     chip: "bg-grow/10 text-grow",
     from: "var(--color-grow)",
     to: "var(--color-accent)",
@@ -176,9 +176,7 @@ export function FocusZone() {
           audit §2: one primary action, everything else recedes) */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-            Focus Zone
-          </p>
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.focusZone")}</p>
           <h2 className="font-display text-xl font-bold tracking-tight">{t("focus.pomodoro")}</h2>
         </div>
         <button
@@ -247,7 +245,7 @@ export function FocusZone() {
         {!pomo.running ? (
           <button
             onClick={start}
-            aria-label="Start focus session"
+            aria-label={t("ui.start_focus_session")}
             className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg transition-transform hover:scale-105 active:scale-95 glow-accent"
           >
             <Play size={22} className="ml-0.5" />
@@ -256,21 +254,21 @@ export function FocusZone() {
           <>
             <button
               onClick={pomo.togglePause}
-              aria-label={pomo.paused ? "Resume" : "Pause"}
+              aria-label={pomo.paused ? t("dash.resume") : "Pause"}
               className="flex h-12 w-12 items-center justify-center rounded-full border border-glass-border bg-glass text-fg backdrop-blur-md transition-transform hover:scale-105 active:scale-95"
             >
               {pomo.paused ? <Play size={18} /> : <Pause size={18} />}
             </button>
             <button
               onClick={pomo.skip}
-              aria-label="Skip phase"
+              aria-label={t("ui.skip_phase")}
               className="flex h-12 w-12 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg backdrop-blur-md transition-transform hover:scale-105 hover:text-accent active:scale-95"
             >
               <SkipForward size={18} />
             </button>
             <button
               onClick={stop}
-              aria-label="Stop and log session"
+              aria-label={t("ui.stop_and_log_session")}
               className="flex h-12 w-12 items-center justify-center rounded-full border border-danger/40 bg-danger/10 text-danger transition-transform hover:bg-danger hover:text-on-color active:scale-95"
             >
               <Square size={16} />
@@ -347,7 +345,7 @@ export function FocusZone() {
         />
         {subjects.length > 0 && (
           <select
-            aria-label="Subject"
+            aria-label={t("dash.subject")}
             value={subjectId}
             onChange={(e) => setSubjectId(e.target.value)}
             disabled={pomo.running}

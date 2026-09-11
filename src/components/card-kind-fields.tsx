@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { cn } from "@/lib/utils";
 import type { CardKind } from "@/lib/db";
 
@@ -17,9 +19,10 @@ export function CardKindFields({
   choicesText: string;
   onChoicesTextChange: (v: string) => void;
 }) {
+  const t = useT();
   return (
     <div className="space-y-1.5">
-      <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">CARD TYPE</label>
+      <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("ui.card_type")}</label>
       <div className="grid grid-cols-3 gap-2">
         {(["basic", "cloze", "choice"] as CardKind[]).map((k) => (
           <button

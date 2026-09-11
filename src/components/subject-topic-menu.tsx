@@ -34,7 +34,7 @@ export function SubjectTopicMenu({
   subjectLabel?: string;
   topicLabel?: string;
   compact?: boolean;
-  /** When true: subject may stay empty and topic empty = "No topic". */
+  /** When true: subject may stay empty and topic empty = t("ui.no_topic"). */
   subjectOptional?: boolean;
 }) {
   const t = useT();

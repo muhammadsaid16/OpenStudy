@@ -83,7 +83,7 @@ export function AiImportModal({
   };
 
   const importNow = async () => {
-    if (!pasted.trim()) { setErr("Paste some JSON first."); setPhase("error"); return; }
+    if (!pasted.trim()) { setErr(t("ui.paste_some_json_first")); setPhase("error"); return; }
     if (kind === "note" && !targetBundleId) {
       setErr("Pick a destination bundle for these cards."); setPhase("error"); return;
     }
@@ -93,7 +93,7 @@ export function AiImportModal({
       const r = kind === "bundle"
         ? await bulkCreateFlashcards(sourceId, pasted)
         : await bulkCreateFlashcardsFromNote(sourceId, targetBundleId, pasted);
-      if (!r.ok) { setErr(r.error || "Import failed."); setPhase("error"); return; }
+      if (!r.ok) { setErr(r.error || t("ui.import_failed")); setPhase("error"); return; }
       setCreated(r.created);
       setPhase("done");
       try {
@@ -124,11 +124,10 @@ export function AiImportModal({
       <div className="flex flex-wrap gap-2 pt-1">
         <Button size="sm" variant="secondary" onClick={copyPrompt}>
           {copied ? <Check size={14} /> : <Clipboard size={14} />}
-          {copied ? "Copied" : "Copy prompt"}
+          {copied ? "Copied" : t("ui.copy_prompt")}
         </Button>
         <Button size="sm" variant="secondary" onClick={openNotebookLM}>
-          <ExternalLink size={14} /> Open NotebookLM
-        </Button>
+          <ExternalLink size={14} />{t("ui.open_notebooklm")}</Button>
       </div>
     </div>
   );
@@ -144,7 +143,7 @@ export function AiImportModal({
           value={targetBundleId}
           onChange={(e) => setTargetBundleId(e.target.value)}
           className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm font-bold text-fg focus:outline-none"
-          aria-label="Destination bundle"
+          aria-label={t("ui.destination_bundle")}
         >
           {availableBundles.map((b) => (
             <option key={b.id} value={b.id} className="bg-bg text-fg">
@@ -173,16 +172,16 @@ export function AiImportModal({
   const pasteStep = (
     <div className="space-y-2">
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-        {kind === "note" ? "Step 03" : "Step 02"} — paste the JSON below
+        {kind === "note" ? t("ui.step_03") : "Step 02"} — paste the JSON below
       </p>
       <textarea
         value={pasted}
         onChange={(e) => { setPasted(e.target.value); if (phase === "error") setPhase("idle"); }}
-        placeholder={`[\n  { "front": "What is 2+2?", "back": "4", "description": "Optional hint" },\n  { "front": "...", "back": "..." }\n]`}
+        placeholder={`[\n  { "front": "What is 2+2?", "back": "4", "description": t("ui.optional_hint") },\n  { "front": "...", "back": "..." }\n]`}
         className="w-full min-h-[200px] resize-y rounded-xl border border-border bg-bg p-3 font-mono text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:outline-none"
         spellCheck={false}
         autoComplete="off"
-        aria-label="Paste NotebookLM JSON output"
+        aria-label={t("ui.paste_notebooklm_json_output")}
       />
       <div className="flex items-center justify-between text-[11px] uppercase tracking-widest">
         <span className="text-muted-fg">
@@ -193,7 +192,7 @@ export function AiImportModal({
               <span className="text-warning">Unreadable JSON — check format</span>
             )
           ) : (
-            "Paste the JSON here"
+            t("ui.paste_the_json_here")
           )}
         </span>
         {pasted && (
@@ -201,9 +200,7 @@ export function AiImportModal({
             type="button"
             onClick={() => setPasted("")}
             className="text-muted-fg hover:text-accent"
-          >
-            CLEAR
-          </button>
+          >{t("ui.clear")}</button>
         )}
       </div>
     </div>
@@ -257,10 +254,8 @@ export function AiImportModal({
           variant="secondary"
           size="sm"
           onClick={() => router.push(kind === "bundle" ? `/bundles/${sourceId}/cards` : `/bundles/${targetBundleId}/cards`)}
-        >
-          REVIEW CARDS
-        </Button>
-        <Button size="sm" onClick={close}>DONE</Button>
+        >{t("ui.review_cards")}</Button>
+        <Button size="sm" onClick={close}>{t("ui.done_1")}</Button>
       </div>
     </div>
   );

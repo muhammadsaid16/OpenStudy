@@ -106,14 +106,11 @@ export function BulkActionBar({
             <Tag size={12} /> TAG
           </Button>
           <Button size="sm" variant="secondary" onClick={() => setMoveOpen(true)} disabled={busy}>
-            <ArrowRight size={12} /> MOVE
-          </Button>
+            <ArrowRight size={12} />{t("ui.move_1")}</Button>
           <Button size="sm" variant="secondary" onClick={doReset} disabled={busy}>
-            <RotateCcw size={12} /> RESET
-          </Button>
+            <RotateCcw size={12} />{t("ui.reset")}</Button>
           <Button size="sm" variant="danger" onClick={() => setDeleteOpen(true)} disabled={busy}>
-            <Trash2 size={12} /> DELETE
-          </Button>
+            <Trash2 size={12} />{t("ui.delete")}</Button>
           <span className="h-4 w-px bg-border" />
           <button
             type="button"
@@ -150,8 +147,7 @@ export function BulkActionBar({
       {/* MOVE modal */}
       <Modal open={moveOpen} onClose={() => setMoveOpen(false)} title={t("bulk.move")}>
         <div className="space-y-4">
-          <p className="text-sm text-muted-fg">
-            Move <span className="font-bold text-fg">{ids.length}</span> cards to another bundle.
+          <p className="text-sm text-muted-fg">{t("ui.move")}<span className="font-bold text-fg">{ids.length}</span> cards to another bundle.
           </p>
           <select
             value={effectiveMoveTarget}
@@ -168,7 +164,7 @@ export function BulkActionBar({
           <div className="flex justify-end gap-2">
             <Button variant="secondary" size="sm" onClick={() => setMoveOpen(false)}>{t("common.cancelUpper")}</Button>
             <Button size="sm" onClick={doMove} disabled={busy || !effectiveMoveTarget}>
-              {busy ? "Moving…" : "Move"}
+              {busy ? "Moving…" : t("ui.move")}
             </Button>
           </div>
         </div>
@@ -177,13 +173,12 @@ export function BulkActionBar({
       {/* DELETE confirm */}
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title={t("bulk.delete")}>
         <div className="space-y-4">
-          <p className="text-sm text-fg">
-            Delete <span className="font-bold text-danger">{ids.length}</span> cards? This cannot be undone.
+          <p className="text-sm text-fg">{t("notes.delete")}<span className="font-bold text-danger">{ids.length}</span> cards? This cannot be undone.
           </p>
           <div className="flex justify-end gap-2">
             <Button variant="secondary" size="sm" onClick={() => setDeleteOpen(false)}>{t("common.cancel")}</Button>
             <Button variant="danger" size="sm" onClick={doDelete} disabled={busy}>
-              {busy ? "Deleting…" : t("common.delete")}
+              {busy ? t("ui.deleting") : t("common.delete")}
             </Button>
           </div>
         </div>

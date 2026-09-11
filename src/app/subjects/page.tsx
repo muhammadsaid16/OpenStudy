@@ -273,7 +273,7 @@ export default function SubjectsPage() {
       setIsFlipped(false);
       setIsReviewing(true);
       setActiveTab("study");
-      showToast("Practice mode — no cards due, showing all cards", "info");
+      showToast(t("fc.practiceMode"), "info");
     } catch { showToast("Failed to load cards", "danger"); }
   };
 
@@ -303,7 +303,7 @@ export default function SubjectsPage() {
       setIsFlipped(false);
       setIsReviewing(true);
       setActiveTab("study");
-      showToast("Practice mode — no cards due, showing all cards", "info");
+      showToast(t("fc.practiceMode"), "info");
     } catch { showToast("Failed to load cards", "danger"); }
   };
 
@@ -600,7 +600,7 @@ export default function SubjectsPage() {
           const idx = tabs.indexOf(activeTab);
           if (e.key === "ArrowRight") { e.preventDefault(); setActiveTab(tabs[(idx + 1) % tabs.length]); }
           else if (e.key === "ArrowLeft") { e.preventDefault(); setActiveTab(tabs[(idx - 1 + tabs.length) % tabs.length]); }
-          else if (e.key === "Home") { e.preventDefault(); setActiveTab(tabs[0]); }
+          else if (e.key === t("ui.home")) { e.preventDefault(); setActiveTab(tabs[0]); }
           else if (e.key === "End") { e.preventDefault(); setActiveTab(tabs[tabs.length - 1]); }
         }} className="mt-8 flex gap-2 border-b border-border">
           {[
@@ -887,7 +887,7 @@ export default function SubjectsPage() {
                         <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDeckShare(bundle); }}
-                            aria-label="Copy share link"
+                            aria-label={t("common.copyLink")}
                             title={t("share.copyLinkDesc")}
                             disabled={deckShareBusy === bundle.id}
                             className="rounded-full p-1.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent disabled:opacity-50"
@@ -950,21 +950,21 @@ export default function SubjectsPage() {
             <div className="mx-auto max-w-2xl space-y-6">
               <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
                 <span>{completed + 1} / {initialTotal} {learningQueue.length > 0 ? `• Relearning × ${learningQueue.length}` : ""}</span>
-                <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">Exit</button>
+                <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">{t("cards.exit")}</button>
               </div>
               <div className="w-full h-1.5 overflow-hidden rounded-full bg-muted">
                 <div className="h-full bg-accent transition-all" style={{ width: `${(completed / Math.max(initialTotal, 1)) * 100}%`}} />
               </div>
                   <div className="glass rounded-3xl p-8 min-h-[280px] flex flex-col">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted-fg mb-3">
-                      {(activeCard as any).topic?.subject?.name ? `${(activeCard as any).topic.subject.name} › ${(activeCard as any).topic.name}` : (activeCard as any).topic?.name || "General"}
+                      {(activeCard as any).topic?.subject?.name ? `${(activeCard as any).topic.subject.name} › ${(activeCard as any).topic.name}` : (activeCard as any).topic?.name || t("ui.general")}
                     </p>
                     <div className="flex-1 flex flex-col justify-center text-center">
                       <p className="text-xl font-bold tracking-tight leading-relaxed">{isFlipped ? activeCard.back : activeCard.front}</p>
                       {isFlipped && (activeCard as any).description && <p className="mt-3 text-sm text-muted-fg">{(activeCard as any).description}</p>}
                     </div>
                     {!isFlipped ? (
-                      <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">Show answer</Button>
+                      <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">{t("cards.showAnswer")}</Button>
                     ) : (
                       <div className="mt-6 grid grid-cols-3 gap-2">
                         {RATING_BUTTONS.map((btn) => (
@@ -989,7 +989,7 @@ export default function SubjectsPage() {
                   <div>
                     <h3 className="text-lg font-bold tracking-tight">{t("subjnew.spacedRepetition")}</h3>
                     <p className="mt-1 text-sm text-muted-fg">
-                      {dueCount === null ? "Loading…" : dueCount === 0 ? "All caught up — no cards due." : `${dueCount} cards due for review.`}
+                      {dueCount === null ? t("ui.loading") : dueCount === 0 ? "All caught up — no cards due." : `${dueCount} cards due for review.`}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -1159,9 +1159,7 @@ export default function SubjectsPage() {
                     )}
                     <div className="flex shrink-0 gap-1">
                       {editTopicId === topic.id ? (
-                        <Button size="sm" onClick={() => handleRenameTopic(topic.id)}>
-                          SAVE
-                        </Button>
+                        <Button size="sm" onClick={() => handleRenameTopic(topic.id)}>{t("ui.save_1")}</Button>
                       ) : (
                         <button
                           onClick={() => {
@@ -1194,8 +1192,7 @@ export default function SubjectsPage() {
                         }}
                         className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
                       >
-                        <FileText size={12} /> Notes
-                      </button>
+                        <FileText size={12} />{t("ui.notes")}</button>
                       {bundles.length > 0 ? (
                         <button
                           onClick={() => {
@@ -1212,15 +1209,13 @@ export default function SubjectsPage() {
                           disabled={isPending}
                           className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg hover:opacity-90 disabled:opacity-50"
                         >
-                          <Plus size={12} /> New bundle
-                        </button>
+                          <Plus size={12} />{t("fc.newBundle")}</button>
                       )}
                       <button
                         onClick={() => setLinkTopicId(linkTopicId === topic.id ? null : topic.id)}
                         className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
                       >
-                        <Link2 size={12} /> Link
-                      </button>
+                        <Link2 size={12} />{t("ui.link")}</button>
                       {bundles.length > 1 && (
                         <button
                           onClick={() => {
@@ -1302,7 +1297,7 @@ export default function SubjectsPage() {
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setModalOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreate} disabled={isPending || !name.trim()}>
-              {isPending ? "Creating..." : "Create"}
+              {isPending ? "Creating..." : t("common.create")}
             </Button>
           </div>
         </div>
@@ -1320,7 +1315,7 @@ export default function SubjectsPage() {
           </div>
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setDeckCreateOpen(false)}>{t("common.cancel")}</Button>
-            <Button onClick={handleCreateDeck} disabled={!deckName.trim()}>{deckName.trim() ? "Create" : "Create"}</Button>
+            <Button onClick={handleCreateDeck} disabled={!deckName.trim()}>{deckName.trim() ? t("common.create") : t("common.create")}</Button>
           </div>
         </div>
       </Modal>
@@ -1346,7 +1341,7 @@ export default function SubjectsPage() {
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="ghost" onClick={() => setEditSubject(null)}>{t("common.cancel")}</Button>
               <Button onClick={handleEditSave} disabled={isPending || !editName.trim()}>
-                {isPending ? "Saving..." : "Save"}
+                {isPending ? "Saving..." : t("ui.save")}
               </Button>
             </div>
           </div>

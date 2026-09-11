@@ -23,7 +23,7 @@ const THEMES: { id: ThemeName; name: string; bg: string; accent: string; fg: str
   { id: "arctic", name: "Arctic", bg: "#07111E", accent: "#38BDF8", fg: "#E8F6FF" },
   { id: "sandstone", name: "Sandstone", bg: "#151210", accent: "#E8B45C", fg: "#F7EFE3" },
   { id: "mono", name: "Mono", bg: "#09090B", accent: "#FFFFFF", fg: "#FAFAFA" },
-  { id: "light", name: "Light", bg: "#F1F5F9", accent: "#B91C1C", fg: "#0F172A" },
+  { id: "light", name: t("nav.light"), bg: "#F1F5F9", accent: "#B91C1C", fg: "#0F172A" },
   { id: "paper", name: "Paper", bg: "#FAF7F2", accent: "#9A3412", fg: "#292018" },
 ];
 
@@ -95,7 +95,7 @@ export default function SettingsPage() {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
       console.error("Export failed", e);
-      showToast("Export failed — see console", "danger");
+      showToast(t("fc.exportFailed"), "danger");
     } finally {
       setExportStatus("idle");
     }
@@ -149,9 +149,7 @@ export default function SettingsPage() {
               onClick={() => setLang("en")}
               aria-pressed={lang === "en"}
               className={`relative flex-1 rounded-full px-4 py-2 text-xs font-bold transition-colors ${lang === "en" ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"}`}
-            >
-              English
-            </button>
+            >{t("settings.english")}</button>
             <button
               onClick={() => setLang("ar")}
               aria-pressed={lang === "ar"}

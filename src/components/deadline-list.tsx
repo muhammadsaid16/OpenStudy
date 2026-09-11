@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // ─── Deadline List — urgency-coded rows with relative dates ────────
 // HIGH = pulsing danger dot, MED = warning, LOW = muted.
 // Deadlines are derived from due flashcard counts per subject.
@@ -38,12 +40,11 @@ const URGENCY_LABEL: Record<Urgency, string> = {
 };
 
 export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
+  const t = useT();
   if (deadlines.length === 0) {
     return (
       <div className="glass rounded-3xl p-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-          Deadlines
-        </p>
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.deadlines")}</p>
         <div className="flex flex-col items-center py-6 text-center">
           <p className="text-sm text-muted-fg">Nothing due — your queue is clear. ✦</p>
           {/* audit §9: empty card still offers the next action instead of
@@ -62,9 +63,7 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
   return (
     <div className="glass rounded-3xl p-6">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-          Deadlines
-        </p>
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.deadlines")}</p>
         <span className="font-mono text-xs font-bold tabular-nums text-muted-fg">
           {deadlines.reduce((a, d) => a + d.dueCount, 0)} cards
         </span>

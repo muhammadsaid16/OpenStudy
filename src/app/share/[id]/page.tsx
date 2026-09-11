@@ -38,7 +38,7 @@ export default function ShareBundlePage() {
   if (status === "not_found") {
     return (
       <div className="mx-auto max-w-lg p-12 text-center">
-        <h1 className="text-2xl font-bold uppercase">BUNDLE NOT FOUND</h1>
+        <h1 className="text-2xl font-bold uppercase">{t("ui.bundle_not_found")}</h1>
         <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">THIS BUNDLE WAS DELETED OR THE LINK IS FROM ANOTHER DEVICE. ASK THE SENDER FOR THE LINK ENDING IN #… OR A .STUDYMAX-BUNDLE.JSON FILE.</p>
       </div>
     );

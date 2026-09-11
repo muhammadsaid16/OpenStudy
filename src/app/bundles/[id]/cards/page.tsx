@@ -219,7 +219,7 @@ export default function BundleCardsPage() {
       setLoaded(false);
       await load();
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message.slice(0, 140) : "Could not create card.");
+      setCreateError(err instanceof Error ? err.message.slice(0, 140) : t("ui.could_not_create_card"));
     } finally {
       setCreating(false);
     }
@@ -243,7 +243,7 @@ export default function BundleCardsPage() {
       setLoaded(false);
       await load();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message.slice(0, 140) : "Could not save card.");
+      setEditError(err instanceof Error ? err.message.slice(0, 140) : t("ui.could_not_save_card"));
     } finally {
       setSaving(false);
     }
@@ -277,7 +277,7 @@ export default function BundleCardsPage() {
       await load();
     } catch (e) {
       console.error(e);
-      showToast("Import failed: invalid file", "danger");
+      showToast(t("fc.importFailed"), "danger");
     } finally {
       setImporting(false);
     }
@@ -303,7 +303,7 @@ export default function BundleCardsPage() {
       setLearningQueue([]);
       setIsFlipped(false);
       setIsReviewing(true);
-      showToast("Practice mode — no cards due, showing all cards", "info");
+      showToast(t("fc.practiceMode"), "info");
     } catch { showToast("Failed to load cards", "danger"); }
   };
 
@@ -389,7 +389,7 @@ export default function BundleCardsPage() {
       const rawName = bundleName || "bundle";
       const safeName = rawName.replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-") || "bundle";
       a.href = url; a.download = `${safeName}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (e) { console.error("Export failed", e); showToast("Export failed — see console", "danger"); }
+    } catch (e) { console.error("Export failed", e); showToast(t("fc.exportFailed"), "danger"); }
   };
 
   return (
@@ -416,7 +416,7 @@ export default function BundleCardsPage() {
                 </p>
               </div>
               <RevealHeading
-                text={bundleName || "Bundle"}
+                text={bundleName || t("fc.bundle")}
                 className="text-2xl font-bold uppercase tracking-tight text-fg"
               />
               {bundleTopicLabel && (
@@ -440,8 +440,7 @@ export default function BundleCardsPage() {
                   <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label={t("common.closeExport")} />
                   <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg shadow-2xl z-20">
                   <button onClick={exportAsJson} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
-                    <Download size={14} /> JSON
-                  </button>
+                    <Download size={14} />{t("ui.json")}</button>
                   <button onClick={exportAsCsv} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start border-t border-border">
                     <Download size={14} /> CSV
                   </button>
@@ -595,9 +594,7 @@ export default function BundleCardsPage() {
                   });
                 }}
                 className="h-4 w-4 cursor-pointer accent-accent"
-              />
-              Select all
-            </label>
+              />{t("cards.selectAll2")}</label>
           )}
         </div>
 
@@ -623,7 +620,7 @@ export default function BundleCardsPage() {
             description={
               cards.length === 0
                 ? t("cards.addFirstDesc")
-                : "Try a different search or filter."
+                : t("ui.try_a_different_search_or_filter")
             }
           />
         ) : (
@@ -764,21 +761,19 @@ export default function BundleCardsPage() {
             onChange={(e) => setBack(e.target.value)}
           />
           <Input
-            label="Front description (optional)"
+            label={t("fc.frontDesc")}
             placeholder={t("modal.hintQuestion")}
             value={frontDesc}
             onChange={(e) => setFrontDesc(e.target.value)}
           />
           <Input
-            label="Back description (optional)"
+            label={t("fc.backDesc")}
             placeholder={t("modal.hintAnswer")}
             value={backDesc}
             onChange={(e) => setBackDesc(e.target.value)}
           />
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-              Tags
-            </label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.tags")}</label>
             <TagInput tags={createTags} onChange={setCreateTags} />
           </div>
           <CardKindFields kind={createKind} onKindChange={setCreateKind} choicesText={createChoicesText} onChoicesTextChange={setCreateChoicesText} />
@@ -789,7 +784,7 @@ export default function BundleCardsPage() {
               onClick={handleCreate}
               disabled={creating || !front.trim() || !back.trim()}
             >
-              {creating ? "Creating..." : "Create"}
+              {creating ? "Creating..." : t("common.create")}
             </Button>
           </div>
         </div>
@@ -810,21 +805,19 @@ export default function BundleCardsPage() {
               onChange={(e) => setEditBack(e.target.value)}
             />
             <Input
-              label="Front description (optional)"
+              label={t("fc.frontDesc")}
               placeholder={t("modal.hintQuestion")}
               value={editFrontDesc}
               onChange={(e) => setEditFrontDesc(e.target.value)}
             />
             <Input
-              label="Back description (optional)"
+              label={t("fc.backDesc")}
               placeholder={t("modal.hintAnswer")}
               value={editBackDesc}
               onChange={(e) => setEditBackDesc(e.target.value)}
             />
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-                Tags
-              </label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.tags")}</label>
               <TagInput tags={editTags} onChange={setEditTags} />
             </div>
             <CardKindFields kind={editKind} onKindChange={setEditKind} choicesText={editChoicesText} onChoicesTextChange={setEditChoicesText} />
@@ -835,7 +828,7 @@ export default function BundleCardsPage() {
                 onClick={handleEditSave}
                 disabled={saving || !editFront.trim() || !editBack.trim()}
               >
-                {saving ? "Saving..." : "Save"}
+                {saving ? "Saving..." : t("ui.save")}
               </Button>
             </div>
           </div>

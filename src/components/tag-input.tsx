@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useState } from "react";
 import { X } from "lucide-react";
 
@@ -16,6 +18,7 @@ interface TagInputProps {
  * (accent-soft pill badges).
  */
 export function TagInput({ tags, onChange, placeholder, label }: TagInputProps) {
+  const t = useT();
   const [draft, setDraft] = useState("");
 
   const commit = () => {
@@ -69,7 +72,7 @@ export function TagInput({ tags, onChange, placeholder, label }: TagInputProps) 
             }
           }}
           onBlur={commit}
-          placeholder={placeholder ?? "Add tag, press Enter"}
+          placeholder={placeholder ?? t("ui.add_tag_press_enter")}
           className="min-w-[120px] flex-1 bg-transparent text-sm text-fg placeholder:text-muted-fg/60 outline-none"
         />
       </div>

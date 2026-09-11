@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import { useMemo } from "react";
 import { buildRetentionCurve } from "@/lib/stats";
 import type { ReviewLogRec } from "@/lib/db";
@@ -11,14 +13,13 @@ const INNER_W = W - PADDING.left - PADDING.right;
 const INNER_H = H - PADDING.top - PADDING.bottom;
 
 export function RetentionCurve({ reviews }: { reviews: ReviewLogRec[] }) {
+  const t = useT();
   const points = useMemo(() => buildRetentionCurve(reviews), [reviews]);
   const hasData = points.some((p) => p.sampleSize > 0);
 
   if (!hasData) {
     return (
-      <div className="flex h-[200px] items-center justify-center text-xs uppercase tracking-widest text-muted-fg">
-        NOT ENOUGH REVIEW DATA YET
-      </div>
+      <div className="flex h-[200px] items-center justify-center text-xs uppercase tracking-widest text-muted-fg">{t("ui.not_enough_review_data_yet")}</div>
     );
   }
 

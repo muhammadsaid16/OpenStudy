@@ -49,7 +49,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
       const startedAt = Date.now();
       setNow(startedAt); // seed the countdown before the first tick
       const when = new Date(startedAt + minutes * 60 * 1000);
-      schedule(when, "Time to review", `${dueCount} card${dueCount === 1 ? "" : "s"} due in OpenStudy.`);
+      schedule(when, t("ui.time_to_review"), `${dueCount} card${dueCount === 1 ? "" : "s"} due in OpenStudy.`);
       setRemindAt(when);
       setOpen(false);
     },
@@ -68,14 +68,12 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
       return (
         <div className="flex items-center justify-center gap-2 rounded-full border border-success/30 bg-success/10 px-3 py-1.5">
           <Bell size={11} className="text-success" />
-          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-success">
-            REMINDER SENT
-          </span>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-success">{t("ui.reminder_sent")}</span>
           <button
             type="button"
             onClick={() => setRemindAt(null)}
             className="text-success hover:text-accent"
-            aria-label="Dismiss"
+            aria-label={t("ui.dismiss")}
           >
             <X size={11} />
           </button>
@@ -92,7 +90,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
           type="button"
           onClick={cancel_}
           className="text-accent-fg hover:text-accent"
-          aria-label="Cancel reminder"
+          aria-label={t("ui.cancel_reminder")}
         >
           <X size={11} />
         </button>
@@ -108,8 +106,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
           onClick={() => setOpen(true)}
           className="inline-flex items-center gap-1.5 rounded-full border border-glass-border bg-glass px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-fg backdrop-blur-md transition-colors hover:border-accent hover:text-accent"
         >
-          <Bell size={11} /> REMIND ME
-        </button>
+          <Bell size={11} />{t("ui.remind_me")}</button>
       ) : (
         <div className="flex flex-wrap items-center justify-center gap-1.5">
           {PRESETS.map((p) => (

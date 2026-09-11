@@ -24,9 +24,7 @@ export function StatsStreakBadge({
         )}
       >
         <Flame size={14} className="text-muted-fg" />
-        <span className="font-mono text-xs font-bold uppercase tracking-widest text-muted-fg">
-          Start a streak
-        </span>
+        <span className="font-mono text-xs font-bold uppercase tracking-widest text-muted-fg">{t("ui.start_a_streak")}</span>
       </div>
     );
   }

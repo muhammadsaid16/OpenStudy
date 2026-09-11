@@ -58,7 +58,7 @@ export function StatsHeatmap({
           <span className="font-mono font-bold text-fg">0 REVIEWS</span>
         </div>
         <div className="flex h-[84px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">No activity yet</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("stats.noActivity")}</p>
           <p className="mt-1 text-[11px] text-muted-fg">Start reviewing to see your heatmap</p>
         </div>
       </div>
@@ -72,7 +72,7 @@ export function StatsHeatmap({
         <span className="font-mono font-bold text-fg">{total} REVIEWS</span>
       </div>
 
-      <div className="flex gap-1 overflow-x-auto pb-1" aria-label="Review heatmap">
+      <div className="flex gap-1 overflow-x-auto pb-1" aria-label={t("ui.review_heatmap")}>
         {/* Day labels column */}
         <div className="flex shrink-0 flex-col gap-1 pr-1 text-[9px] font-mono uppercase text-muted-fg/60">
           {DAY_LABELS.map((d, i) => (

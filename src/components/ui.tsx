@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { cn } from "@/lib/utils";
 import {
   forwardRef,
@@ -11,7 +13,7 @@ import {
 import { createPortal } from "react-dom";
 
 /* ════════════════════════════════════════════════════════════════
-   OPENSTUDY v2 UI PRIMITIVES — "Aurora Glass"
+   OPENSTUDY v2 UI PRIMITIVES — t("ui.aurora_glass")
    Glass surfaces, generous radii, token-driven color only.
    ════════════════════════════════════════════════════════════════ */
 
@@ -64,6 +66,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Card({ className, hover, glow, ...props }: CardProps) {
+  const t = useT();
   return (
     <div
       className={cn(
@@ -269,7 +272,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
           <h2 className="font-display text-xl font-bold tracking-tight">{title}</h2>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="rounded-full p-2 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
           >
             ✕

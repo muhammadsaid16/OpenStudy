@@ -11,8 +11,8 @@ export function ForecastCard({ cards }: { cards: FlashcardRec[] }) {
   const stats = [
     { label: "Today", value: f.dueToday, color: f.dueToday > 0 ? "text-accent" : "text-muted-fg" },
     { label: "Tomorrow", value: f.dueTomorrow - f.dueToday, color: "text-fg" },
-    { label: "This week", value: f.dueThisWeek - f.dueTomorrow, color: "text-fg" },
-    { label: "This month", value: f.dueThisMonth - f.dueThisWeek, color: "text-fg" },
+    { label: t("ui.this_week"), value: f.dueThisWeek - f.dueTomorrow, color: "text-fg" },
+    { label: t("ui.this_month"), value: f.dueThisMonth - f.dueThisWeek, color: "text-fg" },
   ];
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -61,7 +61,7 @@ export function BundleMasteryTable({
           <tr className="border-b border-border text-[10px] font-mono uppercase tracking-widest text-muted-fg">
             <th className="py-2 pr-4">BUNDLE</th>
             <th className="py-2 pr-4 text-right">{t("sfm.cards")}</th>
-            <th className="py-2 pr-4 text-right">DUE</th>
+            <th className="py-2 pr-4 text-right">{t("ui.due")}</th>
             <th className="py-2 pr-4 text-right">{t("sfm.leeches")}</th>
             <th className="py-2 pr-4 text-right">ACCURACY</th>
           </tr>

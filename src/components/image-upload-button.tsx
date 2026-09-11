@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useRef } from "react";
 import { ImagePlus } from "lucide-react";
 import { showToast } from "@/components/toast";
@@ -11,11 +13,12 @@ import { showToast } from "@/components/toast";
  */
 export function ImageUploadButton({
   onImage,
-  label = "Add image",
+  label = t("ui.add_image"),
 }: {
   onImage: (markdownImage: string) => void;
   label?: string;
 }) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -20,9 +20,9 @@ function readLang(): "en" | "ar" {
 
 const ERR = {
   en: {
-    title: "OpenStudy hit a snag",
+    title: t("ui.openstudy_hit_a_snag"),
     body: "Something failed at the app shell level. Your local data is safe.",
-    reload: "Reload app",
+    reload: t("ui.reload_app"),
   },
   ar: {
     title: "واجه OpenStudy مشكلة",

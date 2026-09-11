@@ -729,7 +729,7 @@ function FlashcardsContent() {
         notes: t("fc.sessionAccuracy").replace("{n}", String(acc)),
         completed: true,
         startedAt: new Date(sessionRef.current.startedAt),
-      }).catch((e) => console.error("Session log failed", e));
+      }).catch((e) => console.error(t("ui.session_log_failed"), e));
     }
   }, [totalDue, completedCount, t]);
 
@@ -1176,7 +1176,7 @@ function FlashcardsContent() {
                   setBundles((prev) => prev.map((b) => b.id === selectedBundle ? { ...b, name: editBundleName.trim(), description: editBundleDesc.trim() || undefined, color: editBundleColor } : b) as typeof prev);
                   setEditBundleOpen(false);
                 } catch (e) {
-                  console.error("Failed to edit bundle", e);
+                  console.error(t("ui.failed_to_edit_bundle"), e);
                 } finally {
                   setSavingBundle(false);
                 }

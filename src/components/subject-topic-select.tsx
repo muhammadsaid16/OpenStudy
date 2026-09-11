@@ -21,7 +21,7 @@ type Topic = { id: string; name: string; _count?: { flashcards: number } };
  * - If no topic name given, a topic is auto-created using the subject name.
  * - Zero subjects: inline first-subject creation (no dead-end).
  * - Linked state renders as an EDITABLE menu (change subject / pick existing
- *   topic / rename new topic), not dead "Topic linked" text.
+ *   topic / rename new topic), not dead t("ui.topic_linked") text.
  * Returns topicId via onChange once resolved.
  */
 export function SubjectTopicSelect({
@@ -94,7 +94,7 @@ export function SubjectTopicSelect({
     try {
       const topic = await createTopic({
         subjectId,
-        name: name.trim() || subjects.find((s) => s.id === subjectId)?.name || "General",
+        name: name.trim() || subjects.find((s) => s.id === subjectId)?.name || t("ui.general"),
       });
       onChange(topic.id);
       setTopicName("");
@@ -112,8 +112,7 @@ export function SubjectTopicSelect({
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-grow/40 bg-grow/10 px-2.5 py-1 text-xs font-bold text-grow">
-            <Check size={12} /> Topic linked
-          </span>
+            <Check size={12} />{t("ui.topic_linked")}</span>
           <button
             type="button"
             onClick={() => {
@@ -123,7 +122,7 @@ export function SubjectTopicSelect({
             }}
             className="text-xs font-bold text-accent hover:underline"
           >
-            {topics === null ? "Change" : "Close"}
+            {topics === null ? "Change" : t("common.close")}
           </button>
         </div>
 
@@ -225,7 +224,7 @@ export function SubjectTopicSelect({
           className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-bg px-4 py-2 text-xs font-bold text-fg transition-all hover:bg-accent hover:text-accent-fg disabled:opacity-50"
         >
           <Plus size={14} />
-          {creating ? "Creating…" : "Create subject"}
+          {creating ? t("fc.creating") : t("ui.create_subject")}
         </button>
         {subjectErr && <p className="text-xs text-danger">{subjectErr}</p>}
         <p className="text-xs text-muted-fg">First subject — more can be added in Subjects later.</p>

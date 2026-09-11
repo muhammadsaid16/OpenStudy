@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useEffect, useState, useCallback, useRef } from "react";
 
 /**
@@ -29,6 +31,7 @@ let listeners: ((t: Toast) => void)[] = [];
 let nextId = 1;
 
 export function showToast(message: string, tone: ToastTone = "info") {
+  const t = useT();
   const toast: Toast = { message, tone, id: nextId++ };
   listeners.forEach((l) => l(toast));
 }
@@ -87,7 +90,7 @@ export function ToastHost() {
             </span>
             <button
               onClick={() => dismiss(t.id)}
-              aria-label="Dismiss"
+              aria-label={t("ui.dismiss")}
               className="text-muted-fg transition-colors hover:text-accent"
             >
               ✕

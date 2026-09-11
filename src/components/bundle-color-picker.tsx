@@ -23,9 +23,7 @@ export function BundleColorPicker({
 
   return (
     <div className="space-y-3">
-      <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-        Color
-      </label>
+      <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.color")}</label>
       <div className="flex flex-wrap items-center gap-2">
         {BUNDLE_COLORS.map((c) => {
           const active = selected === c.toUpperCase();

@@ -31,7 +31,7 @@ export function AiImportButton({
         title={t("ai.importNb")}
       >
         <Sparkles size={14} />
-        <span className="hidden sm:inline">AI IMPORT</span>
+        <span className="hidden sm:inline">{t("ui.ai_import")}</span>
       </Button>
       {open && (
         <AiImportModal

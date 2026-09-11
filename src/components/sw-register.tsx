@@ -13,7 +13,7 @@ export function SwRegister() {
     if (!("serviceWorker" in navigator)) return;
     const onLoad = () => {
       navigator.serviceWorker.register("/sw.js").catch((err) => {
-        console.warn("SW registration failed", err);
+        console.warn(t("ui.sw_registration_failed"), err);
       });
     };
     if (document.readyState === "complete") onLoad();

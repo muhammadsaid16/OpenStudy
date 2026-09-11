@@ -381,9 +381,7 @@ export default function SessionsPage() {
             <div className="glass rounded-2xl p-5 space-y-5">
               {/* Built-in presets */}
               <div>
-                <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
-                  Presets
-                </label>
+                <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">{t("sessions.presets")}</label>
                 <div className="flex flex-wrap gap-2">
                   {BUILTIN_PRESETS.map((p) => {
                     const isActive =
@@ -450,9 +448,7 @@ export default function SessionsPage() {
               {/* Custom durations */}
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div>
-                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
-                    Work (min)
-                  </label>
+                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">{t("sessions.workMin")}</label>
                   <input
                     type="number"
                     inputMode="numeric"
@@ -465,9 +461,7 @@ export default function SessionsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
-                    Break (min)
-                  </label>
+                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">{t("sessions.breakMin")}</label>
                   <input
                     type="number"
                     inputMode="numeric"
@@ -480,9 +474,7 @@ export default function SessionsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
-                    Long break (min)
-                  </label>
+                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">{t("sessions.longBreak")}</label>
                   <input
                     type="number"
                     inputMode="numeric"
@@ -495,9 +487,7 @@ export default function SessionsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
-                    Cycles → long
-                  </label>
+                  <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">{t("sessions.cyclesLong")}</label>
                   <input
                     type="number"
                     inputMode="numeric"
@@ -525,9 +515,7 @@ export default function SessionsPage() {
                   onChange={(e) => applyConfig({ autoAdvance: e.target.checked })}
                   className="h-4 w-4 accent-accent"
                 />
-                <span className="text-xs font-bold text-muted-fg uppercase tracking-widest">
-                  Auto-start next phase
-                </span>
+                <span className="text-xs font-bold text-muted-fg uppercase tracking-widest">{t("sessions.autoStart")}</span>
               </label>
 
               {/* Save current setup as a named preset */}
@@ -551,8 +539,7 @@ export default function SessionsPage() {
                     (pomo.running || !presetName.trim()) && "opacity-40 cursor-not-allowed"
                   )}
                 >
-                  <Save size={13} /> Save
-                </button>
+                  <Save size={13} />{t("ui.save")}</button>
               </div>
             </div>
           )}
@@ -731,8 +718,7 @@ export default function SessionsPage() {
                     onClick={pomo.skip}
                     className="w-full bg-glass hover:bg-accent-soft text-muted-fg hover:text-accent font-black text-sm rounded-full transition-all py-2.5 flex items-center justify-center gap-2 border border-glass-border"
                   >
-                    <SkipForward size={14} /> Skip
-                  </button>
+                    <SkipForward size={14} />{t("ui.skip")}</button>
                   <button
                     onClick={stopPomodoro}
                     className="w-full bg-danger/10 hover:bg-danger/20 text-danger font-black text-sm rounded-full transition-all py-2.5 flex items-center justify-center gap-2 border border-danger/20"
@@ -750,16 +736,14 @@ export default function SessionsPage() {
           subject, duration, date, type; total reflects the filter. */}
       <div>
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <h2 className="text-3xl font-bold tracking-tighter">
-            History
-          </h2>
+          <h2 className="text-3xl font-bold tracking-tighter">{t("ui.history")}</h2>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label={t("sessions.historyRange")}>
               {([
                 ["today", "Today"],
                 ["7d", "7 days"],
                 ["30d", "30 days"],
-                ["all", "All"],
+                ["all", t("goals.col.all")],
               ] as const).map(([key, label]) => (
                 <button
                   key={key}
@@ -779,7 +763,7 @@ export default function SessionsPage() {
               onChange={(e) => setHistorySubject(e.target.value)}
               className="glass-inset cursor-pointer rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg outline-none focus:outline-none"
             >
-              <option value="all">All subjects</option>
+              <option value="all">{t("ui.all_subjects")}</option>
               {subjects.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -840,7 +824,7 @@ export default function SessionsPage() {
                 </div>
                 <div className="flex shrink-0 items-center gap-4">
                   <Badge variant={session.completed ? "success" : "default"}>
-                    {session.completed ? "Done" : "Partial"}
+                    {session.completed ? t("ui.done") : "Partial"}
                   </Badge>
                   <span className="hidden items-center gap-2 text-xs text-muted-fg uppercase tracking-widest sm:flex">
                     <Clock size={12} />
@@ -871,12 +855,8 @@ export default function SessionsPage() {
             Delete “{deleteConfirm?.label}”? This cannot be undone.
           </p>
           <div className="flex justify-end gap-4 pt-2">
-            <Button variant="ghost" onClick={() => setDeleteConfirm(null)}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={confirmDelete}>
-              Delete
-            </Button>
+            <Button variant="ghost" onClick={() => setDeleteConfirm(null)}>{t("common.cancel")}</Button>
+            <Button variant="danger" onClick={confirmDelete}>{t("notes.delete")}</Button>
           </div>
         </div>
       </Modal>

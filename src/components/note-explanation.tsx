@@ -151,7 +151,7 @@ export function NoteExplanation({
               // partial output already on screen — keep it, note the truncation
               setErr((ev.message ?? "") + " (Partial output kept.)");
             } else {
-              setErr(ev.message ?? "AI explanation failed.");
+              setErr(ev.message ?? t("ui.ai_explanation_failed"));
             }
           } else if (ev.type === "done") {
             // finished cleanly below
@@ -238,7 +238,7 @@ export function NoteExplanation({
   const downloadMarkdown = () => {
     const src = displayed ?? explanation;
     if (!src) return;
-    const md = `# ${title || "Untitled"} — Explanation\n\n${src}\n`;
+    const md = `# ${title || t("ui.untitled")} — Explanation\n\n${src}\n`;
     const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -343,13 +343,12 @@ export function NoteExplanation({
                 <FileDown size={14} /> PDF
               </Button>
               <Button size="sm" variant="ghost" onClick={doDelete} disabled={saving} className="text-muted-fg hover:text-danger">
-                <Trash2 size={14} /> Delete
-              </Button>
+                <Trash2 size={14} />{t("notes.delete")}</Button>
             </>
           ) : null}
-          <Button size="sm" onClick={doGenerate} disabled={generating || isTyping} title={!hasLesson ? "Add lesson content first" : "Generate explanation"}>
+          <Button size="sm" onClick={doGenerate} disabled={generating || isTyping} title={!hasLesson ? t("ui.add_lesson_content_first") : "Generate explanation"}>
             {generating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-            {generating ? "Generating…" : isTyping ? "Typing…" : hasExplanation ? "Regenerate" : "Generate"}
+            {generating ? t("ui.generating") : isTyping ? "Typing…" : hasExplanation ? t("ui.regenerate") : "Generate"}
           </Button>
         </div>
       </div>
@@ -363,7 +362,7 @@ export function NoteExplanation({
             onChange={(e) => setEditText(e.target.value)}
             rows={14}
             className="glass-inset mt-2 flex min-h-56 w-full rounded-xl px-4 py-3 text-sm leading-relaxed text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20"
-            placeholder="Edit the explanation…"
+            placeholder={t("ui.edit_the_explanation")}
           />
           <div className="mt-3 flex justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>{t("common.cancel")}</Button>
@@ -381,10 +380,8 @@ export function NoteExplanation({
             <p className="mt-1 text-xs leading-relaxed text-fg/80">The note was changed after this explanation was generated. Regenerate to bring it up to date, or update it via NotebookLM.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button size="sm" onClick={doGenerate} disabled={generating || isTyping}>
-                <Sparkles size={14} /> Regenerate
-              </Button>
-              <a href="#notebooklm-option2" className="inline-flex h-8 items-center gap-2 rounded-full border border-amber-500/30 bg-bg px-3 text-xs font-semibold hover:bg-amber-500/10">
-                Go to Option 2 <ExternalLink size={12} />
+                <Sparkles size={14} />{t("ui.regenerate")}</Button>
+              <a href="#notebooklm-option2" className="inline-flex h-8 items-center gap-2 rounded-full border border-amber-500/30 bg-bg px-3 text-xs font-semibold hover:bg-amber-500/10">{t("ui.go_to_option_2")}<ExternalLink size={12} />
               </a>
             </div>
           </div>
@@ -408,7 +405,7 @@ export function NoteExplanation({
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-glass-border bg-bg-raised/40 p-6">
-            <p className="text-sm font-semibold">No explanation yet</p>
+            <p className="text-sm font-semibold">{t("ui.no_explanation_yet")}</p>
             <p className="mt-1 text-xs leading-relaxed text-muted-fg">
               {hasLesson
                 ? "Generate it here with AI, or use Option 2 — NotebookLM — when the lesson is very long or credits are exhausted."
@@ -416,8 +413,7 @@ export function NoteExplanation({
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button size="sm" onClick={doGenerate} disabled={generating || !hasLesson || isTyping}>
-                <Sparkles size={14} /> Generate with AI
-              </Button>
+                <Sparkles size={14} />{t("ui.generate_with_ai")}</Button>
               <a href="#notebooklm-option2" className="inline-flex h-9 items-center gap-2 rounded-full border border-glass-border px-4 text-xs font-semibold text-fg hover:border-accent hover:text-accent">
                 Go to Option 2 — NotebookLM <ExternalLink size={14} />
               </a>
@@ -435,7 +431,7 @@ export function NoteExplanation({
                 <a href="#notebooklm-option2" className="inline-flex h-8 items-center gap-2 rounded-full bg-bg px-3 text-xs font-semibold hover:brightness-110">
                   Go to Option 2 — NotebookLM <ExternalLink size={12} />
                 </a>
-                <Button size="sm" variant="ghost" onClick={() => setErr(null)}>Dismiss</Button>
+                <Button size="sm" variant="ghost" onClick={() => setErr(null)}>{t("ui.dismiss")}</Button>
               </div>
             </div>
           </div>
@@ -452,34 +448,30 @@ export function NoteExplanation({
                 <BookOpen size={14} />
               </span>
               Option 2 — Import via NotebookLM
-              <span className="hidden rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg sm:inline">Backup solution</span>
+              <span className="hidden rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg sm:inline">{t("ui.backup_solution")}</span>
             </h3>
             <span className="shrink-0 rounded-full border border-accent/30 bg-bg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent">When AI fails or lesson is too long</span>
           </div>
           <p className="mt-2 text-xs leading-relaxed text-muted-fg">
             Used when the built-in AI is rate-limited, credits are exhausted, or your lesson exceeds the size limit. You generate the explanation in{" "}
-            <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-accent underline underline-offset-2">
-              NotebookLM
-            </a>{" "}
+            <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-accent underline underline-offset-2">{t("ui.notebooklm")}</a>{" "}
             with a pre-built prompt (already includes your lesson), then paste the result back here.
           </p>
           <ol className="mt-3 list-decimal space-y-1 pl-5 text-xs leading-relaxed text-muted-fg">
-            <li>Click <span className="font-semibold text-fg">Copy prompt</span> below.</li>
+            <li>{t("ui.click")}<span className="font-semibold text-fg">{t("ui.copy_prompt")}</span> below.</li>
             <li>
               Open{" "}
-              <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-accent underline underline-offset-2">
-                NotebookLM
-              </a>{" "}
-              → <span className="font-semibold text-fg">New notebook</span> → paste the prompt → generate.
+              <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-accent underline underline-offset-2">{t("ui.notebooklm")}</a>{" "}
+              → <span className="font-semibold text-fg">{t("ui.new_notebook")}</span> → paste the prompt → generate.
             </li>
             <li>Copy NotebookLM’s answer, come back here, paste it in the box below and hit Save.</li>
           </ol>
 
           <div className="mt-4">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Prompt to copy into NotebookLM</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("ui.prompt_to_copy_into_notebooklm")}</p>
               <Button size="sm" variant="secondary" onClick={copyPrompt} className="h-7 px-3 text-xs">
-                {copiedPrompt ? <ClipboardCheck size={14} /> : <Clipboard size={14} />} {copiedPrompt ? "Copied" : "Copy prompt"}
+                {copiedPrompt ? <ClipboardCheck size={14} /> : <Clipboard size={14} />} {copiedPrompt ? "Copied" : t("ui.copy_prompt")}
               </Button>
             </div>
             <pre className="glass-inset mt-2 max-h-52 overflow-auto whitespace-pre-wrap break-words rounded-xl p-4 text-xs leading-relaxed text-fg/90">
@@ -491,17 +483,16 @@ export function NoteExplanation({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-9 items-center gap-2 rounded-full bg-accent px-4 text-xs font-bold text-accent-fg transition hover:brightness-110"
-              >
-                Open NotebookLM <ExternalLink size={14} />
+              >{t("ui.open_notebooklm")}<ExternalLink size={14} />
               </a>
               <Button size="sm" variant="secondary" onClick={copyPrompt}>
-                {copiedPrompt ? <ClipboardCheck size={14} /> : <Clipboard size={14} />} {copiedPrompt ? "Copied" : "Copy prompt"}
+                {copiedPrompt ? <ClipboardCheck size={14} /> : <Clipboard size={14} />} {copiedPrompt ? "Copied" : t("ui.copy_prompt")}
               </Button>
             </div>
           </div>
 
           <div className="mt-5 border-t border-accent/15 pt-5">
-            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Paste NotebookLM answer here</label>
+            <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("ui.paste_notebooklm_answer_here")}</label>
             <textarea
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}

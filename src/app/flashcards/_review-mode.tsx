@@ -82,12 +82,10 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
           <EmptyState
             icon={<Layers size={48} />}
             title={t("flashcards.noBundles")}
-            description="Create your first bundle to organize flashcards."
+            description=t("ui.create_your_first_bundle_to_orga")
             action={
               <Button onClick={() => p.onOpenBundleCreate()}>
-                <Plus size={16} />
-                Create bundle
-              </Button>
+                <Plus size={16} />{t("fc.createBundle")}</Button>
             }
           />
         ) : (
@@ -149,12 +147,10 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
       <EmptyState
         icon={<Brain size={48} />}
         title={t("flashcards.noCardsYet")}
-        description="Create your first flashcard to start studying."
+        description=t("ui.create_your_first_flashcard_to_s")
         action={
           <Button onClick={() => p.onOpenCreate()}>
-            <Plus size={16} />
-            Create first card
-          </Button>
+            <Plus size={16} />{t("ui.create_first_card")}</Button>
         }
       />
     );
@@ -172,9 +168,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
         </div>
         <div className="flex justify-center gap-4">
           <Button onClick={p.onStudyAgain}>{t("review.studyAgain")}</Button>
-          <Button variant="secondary" onClick={p.onBackToBundles}>
-            Back to bundles
-          </Button>
+          <Button variant="secondary" onClick={p.onBackToBundles}>{t("cards.backToBundles")}</Button>
         </div>
       </div>
     );
@@ -210,9 +204,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
             p.sprintMode ? "border-accent bg-accent text-accent-fg" : "border-border text-muted-fg hover:border-accent"
           )}
         >
-          <Timer size={14} />
-          Speed sprint
-        </button>
+          <Timer size={14} />{t("ui.speed_sprint")}</button>
         {p.sprintMode && p.isFlipped && (
           <div className="flex items-center gap-2">
             <div className="h-2 w-24 rounded-full bg-muted">
@@ -232,7 +224,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
           className="flip-scene w-full cursor-pointer select-none"
           onClick={() => !p.sprintMode && p.onFlip()}
           role="button"
-          aria-label={p.isFlipped ? "Show question" : "Reveal answer"}
+          aria-label={p.isFlipped ? t("ui.show_question") : t("ui.reveal_answer")}
         >
           <div className="flip-card relative min-h-[440px] sm:min-h-[500px]" data-flipped={p.isFlipped}>
             {/* FRONT — QUESTION */}
@@ -276,7 +268,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
               <div className="flex flex-1 flex-col items-center justify-center px-10 pb-4 text-center">
                 {p.activeCard?.topic && (
                   <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-muted-fg/70">
-                    {p.activeCard.topic.subject?.name ?? "General"} › {p.activeCard.topic.name}
+                    {p.activeCard.topic.subject?.name ?? t("ui.general")} › {p.activeCard.topic.name}
                   </p>
                 )}
                 <div className="text-3xl font-bold leading-relaxed tracking-tight sm:text-4xl">
@@ -310,9 +302,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
               </div>
               <div className="flex items-center justify-between border-t border-border/60 px-7 py-3.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
                 <span className="font-mono">#{p.activeCard.id.slice(-4)}</span>
-                <span className="flex animate-pulse items-center gap-1.5">
-                  Click or press Space to reveal
-                  <Zap size={11} />
+                <span className="flex animate-pulse items-center gap-1.5">{t("ui.click_or_press_space_to_reveal")}<Zap size={11} />
                 </span>
               </div>
             </div>
@@ -369,7 +359,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
               </div>
               <div className="flex items-center justify-between border-t border-accent-fg/15 px-7 py-3.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg/70">
                 <span className="font-mono">#{p.activeCard.id.slice(-4)}</span>
-                <span>Rate it below</span>
+                <span>{t("ui.rate_it_below")}</span>
               </div>
             </div>
           </div>
@@ -378,9 +368,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
 
       {/* Show Answer button */}
       {!p.isFlipped && p.activeCard && (
-        <Button className="w-full" onClick={() => p.onFlipTo(true)}>
-          Show answer
-        </Button>
+        <Button className="w-full" onClick={() => p.onFlipTo(true)}>{t("cards.showAnswer")}</Button>
       )}
 
       {/* Rating buttons */}

@@ -196,7 +196,7 @@ export default function StatsPage() {
       name:
         topKey === "none"
           ? "General sessions"
-          : subjectNames.get(topKey) ?? "A subject",
+          : subjectNames.get(topKey) ?? t("ui.a_subject"),
       minutes: topMin,
     };
   })();
@@ -218,9 +218,7 @@ export default function StatsPage() {
           <button
             onClick={() => window.location.reload()}
             className="rounded-full bg-warning/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-fg transition-colors hover:bg-warning/30"
-          >
-            Retry
-          </button>
+          >{t("stats.retry")}</button>
         </div>
       )}
       {/* header */}
@@ -276,21 +274,21 @@ export default function StatsPage() {
         <Card className="!p-5">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("stats.bestDay")}</p>
           <p className="mt-1 font-display text-xl font-bold tracking-tight">
-            {bestDay ? `${bestDay.label} — ${bestDay.label2}` : "No data yet"}
+            {bestDay ? `${bestDay.label} — ${bestDay.label2}` : t("ui.no_data_yet")}
           </p>
           <p className="mt-1 text-xs text-muted-fg">
-            {bestDay ? `Most focused weekday across ${sessions.length} sessions.` : "Start a session to find yours."}
+            {bestDay ? `Most focused weekday across ${sessions.length} sessions.` : t("ui.start_a_session_to_find_yours")}
           </p>
         </Card>
         <Card className="!p-5">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("stats.mostStudied")}</p>
           <p className="mt-1 font-display text-xl font-bold tracking-tight">
-            {topSubject ? topSubject.name : "No data yet"}
+            {topSubject ? topSubject.name : t("ui.no_data_yet")}
           </p>
           <p className="mt-1 text-xs text-muted-fg">
             {topSubject
               ? `${formatDuration(topSubject.minutes)} focused — keep the streak on it.`
-              : "Your subjects appear here as you study."}
+              : t("ui.your_subjects_appear_here_as_you")}
           </p>
         </Card>
       </div>
@@ -300,7 +298,7 @@ export default function StatsPage() {
         <Card className="lg:col-span-8 !p-5">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <p className="font-semibold tracking-tight">Activity — last 30 days</p>
+              <p className="font-semibold tracking-tight">{t("stats.activity30")}</p>
               <p className="text-[11px] uppercase tracking-widest text-muted-fg">Daily review count · {daily.reduce((a,d)=>a+d.count,0)} in 30d</p>
             </div>
             <span className="text-[10px] font-mono uppercase tracking-widest text-muted-fg">max {Math.max(...daily.map(d=>d.count))}/day</span>
@@ -331,9 +329,7 @@ export default function StatsPage() {
           <div className="mt-6 border-t border-border pt-4">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-fg">Weekly velocity — last 12 weeks</p>
             {weekly.every((w) => w.count === 0) ? (
-              <div className="flex h-16 items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 text-xs font-bold uppercase tracking-widest text-muted-fg">
-                No weekly data yet
-              </div>
+              <div className="flex h-16 items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 text-xs font-bold uppercase tracking-widest text-muted-fg">{t("stats.noWeekly")}</div>
             ) : (
               <Bars data={weekly.map(w=>w.count)} color="var(--color-flow)" h={64} />
             )}
@@ -346,12 +342,12 @@ export default function StatsPage() {
           <p className="mb-4 text-[11px] uppercase tracking-widest text-muted-fg">When you review · 24h distribution</p>
           <HourlyBars buckets={hourly} />
           <div className="mt-4 rounded-xl border border-border bg-muted/30 p-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs"><Clock size={14} className="text-accent" /> Most active: <span className="font-mono font-bold">{hourly.indexOf(Math.max(...hourly))}:00</span></div>
+            <div className="flex items-center gap-2 text-xs"><Clock size={14} className="text-accent" />{t("stats.mostActive")}<span className="font-mono font-bold">{hourly.indexOf(Math.max(...hourly))}:00</span></div>
             <span className="text-[10px] uppercase tracking-widest text-muted-fg">{Math.max(...hourly)} reviews</span>
           </div>
           <div className="mt-4 space-y-2">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-fg">Quick stats</p>
-            <div className="flex justify-between text-sm"><span className="text-muted-fg">Due now</span><span className={`font-mono font-bold ${dueNow > 0 ? "text-accent" : "text-muted-fg"}`}>{dueNow}</span></div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-fg">{t("stats.quickStats")}</p>
+            <div className="flex justify-between text-sm"><span className="text-muted-fg">{t("stats.dueNow")}</span><span className={`font-mono font-bold ${dueNow > 0 ? "text-accent" : "text-muted-fg"}`}>{dueNow}</span></div>
             <div className="flex justify-between text-sm"><span className="text-muted-fg">{t("dash.tabs.cards")}</span><span className="font-mono font-bold">{cards.length}</span></div>
             <div className="flex justify-between text-sm"><span className="text-muted-fg">{t("common.bundles")}</span><span className="font-mono font-bold">{bundles.length}</span></div>
           </div>
@@ -361,7 +357,7 @@ export default function StatsPage() {
       {/* heatmap */}
       <Card className="mb-6 !p-5">
         <div className="mb-1 flex items-center justify-between">
-          <p className="font-semibold tracking-tight">Year in review</p>
+          <p className="font-semibold tracking-tight">{t("stats.yearReview")}</p>
           <span className="text-[10px] font-mono uppercase tracking-widest text-muted-fg hidden sm:inline">Daily log · {period === "all" ? "52 weeks" : period === "365" ? "52 weeks" : period === "90" ? "13 weeks" : "5 weeks"}</span>
         </div>
         <p className="mb-4 text-[11px] uppercase tracking-widest text-muted-fg">Daily review log · filtered by period</p>
@@ -371,12 +367,12 @@ export default function StatsPage() {
       {/* retention + forecast */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="!p-5">
-          <p className="mb-1 font-semibold tracking-tight">Retention curve</p>
+          <p className="mb-1 font-semibold tracking-tight">{t("stats.retention")}</p>
           <p className="mb-3 text-[11px] uppercase tracking-widest text-muted-fg">Accuracy vs. days since first review · {filteredReviews.length} reviews</p>
           <RetentionCurve reviews={filteredReviews} />
         </Card>
         <Card className="!p-5">
-          <p className="mb-1 font-semibold tracking-tight">Forecast</p>
+          <p className="mb-1 font-semibold tracking-tight">{t("stats.forecast")}</p>
           <p className="mb-3 text-[11px] uppercase tracking-widest text-muted-fg">Cards coming due (cumulative) · {cards.length} cards</p>
           <ForecastCard cards={cards} />
           <div className="mt-4 flex gap-2 text-[10px] font-mono uppercase tracking-widest">
@@ -389,7 +385,7 @@ export default function StatsPage() {
 
       <Card className="mt-6 !p-5">
         <div className="flex items-center justify-between mb-1">
-          <p className="font-semibold tracking-tight">Per-bundle mastery</p>
+          <p className="font-semibold tracking-tight">{t("stats.perBundle")}</p>
           <span className="text-[10px] font-mono uppercase tracking-widest text-muted-fg">Weakest first · {bundles.length} bundles</span>
         </div>
         <p className="mb-3 text-[11px] uppercase tracking-widest text-muted-fg">Accuracy = correct / total reviews per bundle</p>
@@ -398,7 +394,7 @@ export default function StatsPage() {
 
       <Card className="mt-6 !p-5">
         <div className="flex items-center gap-2 mb-1">
-          <p className="font-semibold tracking-tight">Hardest cards</p>
+          <p className="font-semibold tracking-tight">{t("ui.hardest_cards")}</p>
           {leeches > 0 && <span className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-on-color">{leeches} leeches</span>}
         </div>
         <p className="mb-3 text-[11px] uppercase tracking-widest text-muted-fg">Lowest accuracy (min. 3 reviews) · filtered by period</p>

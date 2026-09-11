@@ -42,12 +42,12 @@ export function CommandPalette() {
       for (const s of subjects)
         out.push({ id: "s" + s.id, group: t("common.subjects"), title: s.name, sub: "", href: "/subjects" });
       for (const b of bundles ?? [])
-        out.push({ id: "b" + b.id, group: "Bundles", title: b.name, sub: (b as { description?: string }).description ?? "", href: "/bundles/" + b.id + "/cards" });
+        out.push({ id: "b" + b.id, group: t("page.bundles"), title: b.name, sub: (b as { description?: string }).description ?? "", href: "/bundles/" + b.id + "/cards" });
       for (const c of (cards ?? []).slice(0, 1500)) {
         const k = cardKind(c as { kind?: string | null });
         const front = k === "cloze" ? maskCloze(c.front) : c.front;
         out.push({
-          id: "c" + c.id, group: "Cards", title: front.slice(0, 90), sub: k === "basic" ? c.back.slice(0, 90) : k.toUpperCase(),
+          id: "c" + c.id, group: t("ui.cards"), title: front.slice(0, 90), sub: k === "basic" ? c.back.slice(0, 90) : k.toUpperCase(),
           href: c.bundleId ? "/bundles/" + c.bundleId + "/cards" : "/subjects",
         });
       }
@@ -94,7 +94,7 @@ export function CommandPalette() {
     const needle = q.trim().toLowerCase();
     const pool = needle ? all.filter((e) => hay(e).includes(needle)) : all;
     const out: Entry[] = [];
-    for (const g of ["Cards", "Bundles", t("common.subjects"), t("common.notesLabel")])
+    for (const g of [t("ui.cards"), "Bundles", t("common.subjects"), t("common.notesLabel")])
       for (const e of pool) {
         if (e.group !== g) continue;
         if (out.filter((x) => x.group === g).length >= PER_GROUP) continue;
@@ -120,7 +120,7 @@ export function CommandPalette() {
   if (!open) return null;
   let lastGroup = "";
   return (
-    <div role="dialog" aria-label="Global search" className="fixed inset-0 z-[90] flex items-start justify-center bg-black/60 p-4 pt-[12vh]" onClick={() => setOpen(false)}>
+    <div role="dialog" aria-label={t("ui.global_search")} className="fixed inset-0 z-[90] flex items-start justify-center bg-black/60 p-4 pt-[12vh]" onClick={() => setOpen(false)}>
       <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-bg shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <input
           ref={inputRef}
@@ -131,12 +131,12 @@ export function CommandPalette() {
             else if (e.key === "ArrowUp") { e.preventDefault(); setSel((s) => Math.max(s - 1, 0)); }
             else if (e.key === "Enter" && results[sel]) go(results[sel]);
           }}
-          placeholder="SEARCH CARDS, BUNDLES, SUBJECTS, NOTES…"
+          placeholder={t("ui.search_cards_bundles_subjects_no")}
           className="w-full border-b-2 border-border bg-transparent px-5 py-4 text-sm font-bold uppercase tracking-widest outline-none placeholder:text-muted-fg"
         />
         <div ref={listRef} className="max-h-[50vh] overflow-y-auto p-2">
           {index === null && <p className="px-4 py-6 text-center text-xs uppercase tracking-widest text-muted-fg">LOADING…</p>}
-          {index !== null && results.length === 0 && <p className="px-4 py-6 text-center text-xs uppercase tracking-widest text-muted-fg">NO MATCHES</p>}
+          {index !== null && results.length === 0 && <p className="px-4 py-6 text-center text-xs uppercase tracking-widest text-muted-fg">{t("ui.no_matches")}</p>}
           {results.map((e, i) => {
             const head = e.group !== lastGroup ? e.group : null;
             lastGroup = e.group;

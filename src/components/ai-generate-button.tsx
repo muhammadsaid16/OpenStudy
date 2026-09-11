@@ -1,7 +1,7 @@
 "use client";
 
 import { useT } from "@/lib/i18n";
-// "Generate from text" — direct Gemini call. Sibling to AiImportButton
+// t("ui.generate_from_text") — direct Gemini call. Sibling to AiImportButton
 // (NotebookLM paste flow). Both add cards to a bundle; this one creates
 // them server-side instead of asking the user to copy/paste into a chat LLM.
 import { useState } from "react";
@@ -31,11 +31,11 @@ export function AiGenerateButton({
       <Button
         size="sm"
         onClick={(e) => { e.stopPropagation(); e.preventDefault(); setOpen(true); }}
-        aria-label="Generate cards from text with AI"
-        title="Generate cards from text with AI"
+        aria-label={t("ui.generate_cards_from_text_with_ai")}
+        title={t("ui.generate_cards_from_text_with_ai")}
       >
         <Wand2 size={14} />
-        <span className="hidden sm:inline">AI GENERATE</span>
+        <span className="hidden sm:inline">{t("ui.ai_generate")}</span>
       </Button>
       {open && (
         <AiGenerateModal

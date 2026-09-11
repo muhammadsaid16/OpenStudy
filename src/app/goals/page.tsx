@@ -64,8 +64,8 @@ const CARD_VARIANTS = {
 };
 
 const COLUMNS: { id: GoalStatus; labelKey: string; hint: string; dot: string }[] = [
-  { id: "backlog", labelKey: "goals.col.backlog", hint: "Someday / not started", dot: "bg-muted-fg" },
-  { id: "in_progress", labelKey: "goals.col.inProgress", hint: "Actively working on", dot: "bg-flow" },
+  { id: "backlog", labelKey: "goals.col.backlog", hint: t("ui.someday_not_started"), dot: "bg-muted-fg" },
+  { id: "in_progress", labelKey: "goals.col.inProgress", hint: t("ui.actively_working_on"), dot: "bg-flow" },
   { id: "done", labelKey: "goals.col.done", hint: "Achieved", dot: "bg-grow" },
 ];
 
@@ -331,7 +331,7 @@ export default function GoalsPage() {
       await refresh();
       if(ok) showToast(`${t("toast.importedGoals").replace("{n}", String(ok))}${msOk?` + ${msOk} milestones`:""}${skipped?`, ${skipped} skipped`:""}`, "success");
       else showToast("No goals imported","warning");
-    } catch(e){ console.error(e); showToast("Import failed: invalid file","danger"); }
+    } catch(e){ console.error(e); showToast(t("fc.importFailed"),"danger"); }
     finally { setImporting(false); if(importInputRef.current) importInputRef.current.value=""; }
   };
 
@@ -361,8 +361,7 @@ export default function GoalsPage() {
                   <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label={t("common.closeExport")} />
                   <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
                     <button onClick={exportGoalsAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
-                      <Download size={14} /> JSON
-                    </button>
+                      <Download size={14} />{t("ui.json")}</button>
                     <button onClick={exportGoalsAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                       <Download size={14} /> CSV
                     </button>
@@ -394,9 +393,7 @@ export default function GoalsPage() {
                 setModalOpen(true);
               }}
             >
-              <Plus size={16} />
-              New goal
-            </Button>
+              <Plus size={16} />{t("goals.newGoal")}</Button>
           </div>
         </div>
       </div>
@@ -588,8 +585,7 @@ export default function GoalsPage() {
                             </Badge>
                           ) : (
                             <Badge variant="flow">
-                              <ListTodo size={10} /> Todo
-                            </Badge>
+                              <ListTodo size={10} />{t("goals.todo")}</Badge>
                           )}
 
                           <h3 className="mt-2 pe-14 font-semibold tracking-tight text-fg">
@@ -655,9 +651,7 @@ export default function GoalsPage() {
                               <ChevronRight
                                 size={12}
                                 className={cn("transition-transform", expanded && "rotate-90")}
-                              />
-                              Steps
-                            </button>
+                              />{t("goals.steps")}</button>
                             <div className="flex gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 max-md:opacity-100">
                               {PREV_STATUS[g.status] && (
                                 <button
@@ -686,13 +680,13 @@ export default function GoalsPage() {
                           {expanded && (
                             <div className="mt-3 space-y-1.5 border-t border-border pt-3">
                               {ms.length === 0 ? (
-                                <p className="py-1 text-xs text-muted-fg">No steps yet — add one below.</p>
+                                <p className="py-1 text-xs text-muted-fg">{t("goals.noSteps")}</p>
                               ) : (
                                 ms.map((m) => (
                                 <div key={m.id} className="group/ms flex items-center gap-2">
                                   <button
                                     type="button"
-                                    aria-label={m.done ? "Mark step not done" : "Mark step done"}
+                                    aria-label={m.done ? t("ui.mark_step_not_done") : t("ui.mark_step_done")}
                                     onClick={async () => {
                                       await toggleMilestone(m.id, !m.done);
                                       await refresh();
@@ -753,7 +747,7 @@ export default function GoalsPage() {
 
                 {cards.length === 0 && (
                   <p className="px-1 py-6 text-center text-xs text-muted-fg">
-                    {filter !== "all" ? "Nothing here for this filter" : "Drop goals here"}
+                    {filter !== "all" ? "Nothing here for this filter" : t("ui.drop_goals_here")}
                   </p>
                 )}
               </div>
@@ -781,9 +775,7 @@ export default function GoalsPage() {
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="secondary" onClick={() => setDeleteTarget(null)}>{t("common.cancel")}</Button>
           <Button variant="danger" onClick={confirmDelete}>
-            <Trash2 size={14} />
-            Delete goal
-          </Button>
+            <Trash2 size={14} />{t("goals.deleteGoal")}</Button>
         </div>
       </Modal>
     </div>

@@ -53,7 +53,7 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
         setTooBig(false);
         setLink(window.location.origin + "/share#" + hash);
       }
-    } catch { setError("COULD NOT BUILD SHARE LINK."); }
+    } catch { setError(t("ui.could_not_build_share_link")); }
     finally { setBusy(false); }
   }
 
@@ -71,7 +71,7 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
       a.download = bundleName.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".studymax-bundle.json";
       a.click();
       URL.revokeObjectURL(a.href);
-    } catch { setError("COULD NOT BUILD SHARE FILE."); }
+    } catch { setError(t("ui.could_not_build_share_file")); }
     finally { setBusy(false); }
   }
 
@@ -93,13 +93,13 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
             Anyone with the link or file can import “{bundleName}” into their library.
           </p>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="secondary" disabled={busy} onClick={makeLink}>{busy ? "…" : "Copy link"}</Button>
-            <Button variant="secondary" disabled={busy} onClick={download}>{busy ? "…" : "Save file"}</Button>
+            <Button variant="secondary" disabled={busy} onClick={makeLink}>{busy ? "…" : t("ui.copy_link")}</Button>
+            <Button variant="secondary" disabled={busy} onClick={download}>{busy ? "…" : t("ui.save_file")}</Button>
           </div>
           {link && (
             <button type="button" onClick={copy} className="w-full break-all rounded-xl border border-accent bg-accent/10 p-3 text-start text-xs">
               {link}
-              <span className="mt-1 block font-bold uppercase tracking-widest">{copied ? "Copied ✓" : "Tap to copy"}</span>
+              <span className="mt-1 block font-bold uppercase tracking-widest">{copied ? "Copied ✓" : t("ui.tap_to_copy")}</span>
             </button>
           )}
           {tooBig && <p className="text-xs uppercase tracking-widest text-warning">Too big for a link — use save file instead.</p>}
