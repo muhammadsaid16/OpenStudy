@@ -698,7 +698,7 @@ export default function BundleCardsPage() {
                           flipped ? "text-accent-fg/70" : "text-muted-fg"
                         )}
                       >
-                        {flipped ? "Answer" : "Question"}
+                        {flipped ? t("cards.answerLabel") : t("cards.questionLabel")}
                         {cardKind(card) !== "basic" && ` • ${cardKind(card)}`}
                       </span>
                       <p className="text-lg font-bold tracking-tight leading-relaxed">

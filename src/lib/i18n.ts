@@ -516,6 +516,8 @@ const DICT: Dict = {
   "flashcards.readQuestion": { en: "Read question aloud", ar: "اقرأ السؤال بصوت عالٍ" },
   "goals.deleteStep": { en: "Delete step", ar: "حذف الخطوة" },
   "goals.overdue": { en: "Overdue", ar: "متأخر" },
+  "cards.answerLabel": { en: "Answer", ar: "الإجابة" },
+  "cards.questionLabel": { en: "Question", ar: "السؤال" },
 };
 
 export function useT() {

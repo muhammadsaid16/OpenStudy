@@ -94,7 +94,7 @@ export function Sidebar() {
         {sidebarOpen && (
           <Link href="/" aria-label="OpenStudy home">
             <span className="font-display text-xl font-bold tracking-tight text-fg">
-              Open<span className="text-accent">{t("common.study")}</span>
+              Open<span className="text-accent">Study</span>
             </span>
           </Link>
         )}
