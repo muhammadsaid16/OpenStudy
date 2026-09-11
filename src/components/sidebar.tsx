@@ -93,7 +93,7 @@ export function Sidebar() {
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         {sidebarOpen && (
           <Link href="/" aria-label={t("ui.openstudy_home")}>
-            <span className="font-display text-xl font-bold tracking-tight text-fg">{t("ui.open")}<span className="text-accent">{t("ui.study")}</span>
+            <span className="font-display text-xl font-bold tracking-tight text-fg">Open<span className="text-accent">Study</span>
             </span>
           </Link>
         )}
