@@ -473,6 +473,10 @@ const DICT: Dict = {
   "modal.whyMatters": { en: "Why does this matter?", ar: "لماذا هذا مهم؟" },
   "share.copyLinkDesc": { en: "Copy share link — works on any device", ar: "انسخ رابط المشاركة — يعمل على أي جهاز" },
   "notes.clearFilter": { en: "Clear topic filter", ar: "مسح تصفية الموضوع" },
+  "deckCard.nCards": { en: "{n} cards", ar: "{n} بطاقات" },
+  "deckCard.oneCard": { en: "1 card", ar: "بطاقة واحدة" },
+  "deckCard.open": { en: "Open", ar: "فتح" },
+  "deckCard.review": { en: "Review", ar: "مراجعة" },
 };
 
 export function useT() {

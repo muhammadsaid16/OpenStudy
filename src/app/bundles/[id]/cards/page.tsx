@@ -473,7 +473,7 @@ export default function BundleCardsPage() {
               className="flex h-10 items-center gap-1.5 rounded-full border border-accent bg-accent px-4 text-xs font-bold uppercase tracking-widest text-accent-fg transition-colors hover:opacity-90"
             >
               <span className="h-2 w-2 rounded-full bg-accent-fg animate-pulse" aria-hidden />
-              Review
+              {t("deckCard.review")}
             </button>
             <button
               onClick={async () => {

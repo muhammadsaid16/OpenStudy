@@ -882,7 +882,7 @@ export default function SubjectsPage() {
                       </div>
                       <div className="flex items-center gap-1">
                         <span className="rounded-full bg-bg-raised px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-                          {bundle._count.flashcards} cards
+                          {bundle._count.flashcards === 1 ? t("deckCard.oneCard") : t("deckCard.nCards").replace("{n}", String(bundle._count.flashcards))}
                         </span>
                         <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100">
                           <button
@@ -930,10 +930,10 @@ export default function SubjectsPage() {
                     </div>
                   </button>
                   <div className="mt-4 flex gap-2">
-                    <Button size="sm" variant="secondary" onClick={() => router.push(`/bundles/${bundle.id}/cards`)} className="flex-1">Open</Button>
+                    <Button size="sm" variant="secondary" onClick={() => router.push(`/bundles/${bundle.id}/cards`)} className="flex-1">{t("deckCard.open")}</Button>
                     <Button size="sm" onClick={() => startReviewForBundle(bundle.id)} className="flex-1 gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-accent-fg animate-pulse" aria-hidden />
-                      Review
+                      {t("deckCard.review")}
                     </Button>
                   </div>
                 </div>
@@ -1009,7 +1009,7 @@ export default function SubjectsPage() {
                     </button>
                     <Button size="sm" onClick={() => startReviewForBundle(b.id)} className="ms-3 shrink-0 gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-accent-fg animate-pulse" aria-hidden />
-                      Review
+                      {t("deckCard.review")}
                     </Button>
                   </div>
                 ))}
@@ -1133,7 +1133,7 @@ export default function SubjectsPage() {
                         {stats && (
                           <span className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
                             <span className="inline-flex items-center gap-1"><FileText size={10} /> {stats.notes} notes</span>
-                            <span className="inline-flex items-center gap-1"><Layers size={10} /> {stats.cards} cards</span>
+                            <span className="inline-flex items-center gap-1"><Layers size={10} /> {stats.cards === 1 ? t("deckCard.oneCard") : t("deckCard.nCards").replace("{n}", String(stats.cards))}</span>
                             <span className="inline-flex items-center gap-1"><BookOpen size={10} /> {bundles.length} bundles</span>
                           </span>
                         )}
@@ -1246,7 +1246,7 @@ export default function SubjectsPage() {
                       >
                         <option value="">{t("subjnew.selectBundle")}</option>
                         {unlinkedBundles.map((b) => (
-                          <option key={b.id} value={b.id}>{b.name} ({b._count.flashcards} cards)</option>
+                          <option key={b.id} value={b.id}>{b.name} ({b._count.flashcards === 1 ? t("deckCard.oneCard") : t("deckCard.nCards").replace("{n}", String(b._count.flashcards))})</option>
                         ))}
                       </select>
                       <Button size="sm" disabled={!linkBundleId} onClick={handleLinkBundle}>{t("subjnew.link")}</Button>
