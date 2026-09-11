@@ -30,6 +30,8 @@ import {
   noteSchema,
   bundleSchema,
   bundleCardSchema,
+  flashcardCreateSchema,
+  flashcardUpdateSchema,
   importBatchSchema,
   pomoPresetSchema,
   type SubjectInput,
@@ -161,21 +163,25 @@ export async function updateSubject(id: string, input: Partial<SubjectInput>) {
 
 export async function deleteSubject(id: string) {
   const subject = await db.subjects.get(id);
-  // Cascade: topics → (resources, notes, flashcards), subject's flashcards/sessions
   const topics = await db.topics.where("subjectId").equals(id).toArray();
-  for (const t of topics) {
-    await db.resources.where("topicId").equals(t.id).delete();
-    const notes = await db.notes.where("topicId").equals(t.id).toArray();
-    for (const n of notes) await db.noteTags.where("noteId").equals(n.id).delete();
-    await db.notes.where("topicId").equals(t.id).delete();
-    const cards = await db.flashcards.where("topicId").equals(t.id).toArray();
-    for (const c of cards) {
-      await db.cardTags.where("cardId").equals(c.id).delete();
-      await db.reviewLogs.where("flashcardId").equals(c.id).delete();
+  const topicIds = topics.map((x) => x.id);
+  if (topicIds.length) {
+    const notes = await db.notes.where("topicId").anyOf(topicIds).toArray();
+    const noteIds = notes.map((n) => n.id);
+    const cards = await db.flashcards.where("topicId").anyOf(topicIds).toArray();
+    const cardIds = cards.map((c) => c.id);
+    await db.resources.where("topicId").anyOf(topicIds).delete();
+    if (noteIds.length) await db.noteTags.where("noteId").anyOf(noteIds).delete();
+    await db.notes.where("topicId").anyOf(topicIds).delete();
+    if (cardIds.length) {
+      await db.cardTags.where("cardId").anyOf(cardIds).delete();
+      await db.reviewLogs.where("flashcardId").anyOf(cardIds).delete();
     }
-    await db.flashcards.where("topicId").equals(t.id).delete();
+    await db.flashcards.where("topicId").anyOf(topicIds).delete();
+    await db.topics.where("subjectId").equals(id).delete();
+  } else {
+    await db.topics.where("subjectId").equals(id).delete();
   }
-  await db.topics.where("subjectId").equals(id).delete();
   await db.flashcards.where("subjectId").equals(id).modify({ subjectId: null });
   await db.studySessions.where("subjectId").equals(id).modify({ subjectId: null });
   if (subject) await db.subjects.delete(id);
@@ -355,18 +361,7 @@ export async function createFlashcard(data: {
   kind?: CardKind;
   choices?: string[];
 }) {
-  const parsed = z.object({
-    topicId: z.string().min(1),
-    subjectId: z.string().min(1).optional(),
-    front: z.string().min(1).max(2000),
-    back: z.string().min(1).max(5000),
-    frontDescription: z.string().max(2000).nullish(),
-    backDescription: z.string().max(2000).nullish(),
-    description: z.string().max(2000).nullish(),
-    difficulty: z.number().int().min(1).max(5).optional(),
-    kind: z.enum(["basic", "cloze", "choice"]).optional(),
-    choices: z.array(z.string().min(1).max(200)).max(8).optional(),
-  }).parse(data);
+  const parsed = flashcardCreateSchema.parse(data);
   const kind = parsed.kind ?? "basic";
   const choices = cleanChoices(parsed.choices ?? []);
   if (kind === "cloze" && !isCloze(parsed.front)) {
@@ -407,17 +402,7 @@ export async function updateFlashcard(
   id: string,
   data: { front?: string; back?: string; topicId?: string; tags?: string[]; frontDescription?: string | null; backDescription?: string | null; description?: string | null; kind?: CardKind; choices?: string[] }
 ) {
-  const parsed = z.object({
-    front: z.string().min(1).max(2000).optional(),
-    back: z.string().min(1).max(5000).optional(),
-    topicId: z.string().min(1).optional(),
-    frontDescription: z.string().max(2000).nullish(),
-    backDescription: z.string().max(2000).nullish(),
-    description: z.string().max(2000).nullish(),
-    tags: z.array(z.string().min(1).max(50)).max(20).optional(),
-    kind: z.enum(["basic", "cloze", "choice"]).optional(),
-    choices: z.array(z.string().min(1).max(200)).max(8).optional(),
-  }).parse(data);
+  const parsed = flashcardUpdateSchema.parse(data);
   // Validate kind-specific rules against the merged front/choices so a
   // kind change can't strand a card in an unrunnable state.
   const current = await db.flashcards.get(id);

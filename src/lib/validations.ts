@@ -54,6 +54,25 @@ export const flashcardSchema = z.object({
 
 export type FlashcardInput = z.infer<typeof flashcardSchema>;
 
+export const flashcardCreateSchema = flashcardSchema.extend({
+  frontDescription: z.string().max(2000).nullish(),
+  backDescription: z.string().max(2000).nullish(),
+  description: z.string().max(2000).nullish(),
+  kind: z.enum(["basic", "cloze", "choice"]).optional(),
+  choices: z.array(z.string().min(1).max(200)).max(8).optional(),
+});
+export const flashcardUpdateSchema = z.object({
+  front: z.string().min(1).max(2000).optional(),
+  back: z.string().min(1).max(5000).optional(),
+  topicId: z.string().min(1).optional(),
+  frontDescription: z.string().max(2000).nullish(),
+  backDescription: z.string().max(2000).nullish(),
+  description: z.string().max(2000).nullish(),
+  tags: z.array(z.string().min(1).max(50)).max(20).optional(),
+  kind: z.enum(["basic", "cloze", "choice"]).optional(),
+  choices: z.array(z.string().min(1).max(200)).max(8).optional(),
+});
+
 export const flashcardReviewSchema = z.object({
   id: z.string().min(1),
   quality: z.number().int().min(0).max(5), // SM-2 quality rating
