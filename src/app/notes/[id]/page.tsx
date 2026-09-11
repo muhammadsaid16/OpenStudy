@@ -10,6 +10,7 @@ import { Button, Skeleton } from "@/components/ui";
 import { Modal } from "@/components/ui";
 import { TagInput } from "@/components/tag-input";
 import { Markdown } from "@/components/markdown";
+import { ReadAloudButton } from "@/components/read-aloud-button";
 import { NoteAiImportButton } from "@/components/note-ai-import-button";
 import { AiGenerateModal } from "@/components/ai-generate-modal";
 import { NoteExplanation } from "@/components/note-explanation";
@@ -203,6 +204,7 @@ export default function NotePage() {
               </p>
             </div>
             <div className="flex shrink-0 gap-1">
+              <ReadAloudButton text={`${note.title}. ${note.content ?? ""}`} />
               <button
                 onClick={handleTogglePin}
                 className={`rounded-full p-2.5 transition-colors ${note.isPinned ? "bg-accent text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent"}`}

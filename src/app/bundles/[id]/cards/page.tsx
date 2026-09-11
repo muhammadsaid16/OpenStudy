@@ -34,6 +34,7 @@ import {
 import { parseCardsFile } from "@/lib/parsers/cards";
 import { AiGenerateButton } from "@/components/ai-generate-button";
 import { AiImportButton } from "@/components/ai-import-button";
+import { ReadAloudButton } from "@/components/read-aloud-button";
 import { ShareBundleButton } from "@/components/share-bundle-button";
 import { showToast } from "@/components/toast";
 import { cn } from "@/lib/utils";
@@ -679,6 +680,13 @@ export default function BundleCardsPage() {
                       >
                         <Pencil size={13} />
                       </button>
+                      <span onClick={(e) => e.stopPropagation()} className="inline-flex">
+                        <ReadAloudButton
+                          text={`${flipped ? card.back : card.front}${(() => { const d = flipped ? ((card as any).backDescription ?? (card as any).description) : (card as any).frontDescription; return d ? ". " + d : ""; })()}`}
+                          size={13}
+                          className={cn(flipped ? "border-accent-fg/20 text-accent-fg/80 hover:bg-accent-fg/15" : "")}
+                        />
+                      </span>
                       <button
                         onClick={() => setDeleteTarget(card)}
                         aria-label={t("common.delete")}

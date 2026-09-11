@@ -49,7 +49,7 @@ import { motion } from "framer-motion";
 import { parseCardsFile } from "@/lib/parsers/cards";
 import { db as offlineDb, cacheBundles, cacheFlashcards, getCachedBundleCards } from "@/lib/db";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
-import { useTts } from "@/hooks/use-tts";
+import { useReadAloud } from "@/hooks/use-read-aloud";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
 import { themeAccent } from "@/lib/bundle-colors";
 import { useAppStore } from "@/lib/store";
@@ -240,10 +240,10 @@ function FlashcardsContent() {
   // ─── Offline sync ───────────────────────────────────────────
   const { online, pending, reviewCard } = useOfflineSync();
 
-  // ─── TTS (free browser speechSynthesis) ──────────────────────
-  // Button-triggered only — no auto-read: each card face has a speaker
-  // button; the answer speaker reads back + description together.
-  const { speaking, speak, stop: stopTts, supported: ttsSupported } = useTts();
+  // ─── TTS (server Edge TTS + browser fallback — works on phone + Linux) ──
+  const { status: ttsStatus, speak, stop: stopTts, playing: ttsPlaying } = useReadAloud();
+  const speaking = ttsStatus === "playing" || ttsStatus === "loading";
+  const ttsSupported = true;
 
   // ─── Confetti ───────────────────────────────────────────────
   const triggerConfetti = useCallback(() => {
