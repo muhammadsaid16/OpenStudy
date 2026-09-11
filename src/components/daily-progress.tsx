@@ -42,7 +42,7 @@ function Ring({
       // center on the container's midpoint (NOT inset-0, which stretches
       // every svg to the 140px box and throws inner rings off-center so
       // they collide instead of nesting concentrically)
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90"
+      className="absolute start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90"
       aria-hidden
     >
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-muted)" strokeWidth={stroke} />
@@ -144,7 +144,7 @@ export function DailyProgress({ data }: { data: DailyProgressData }) {
           <div key={row.label} className="flex items-center gap-2.5 text-sm">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: row.color }} aria-hidden />
             <span className="text-muted-fg">{row.label}</span>
-            <span className="ml-auto font-mono font-bold tabular-nums">{row.value}</span>
+            <span className="ms-auto font-mono font-bold tabular-nums">{row.value}</span>
           </div>
         ))}
       </div>

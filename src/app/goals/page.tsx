@@ -8,6 +8,7 @@
 // 12 themes apply automatically.
 
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { useT } from "@/lib/i18n";
 import { motion } from "framer-motion";
 import {
   getGoals,
@@ -92,6 +93,7 @@ function formatDue(d: Date): string {
 }
 
 export default function GoalsPage() {
+  const t = useT();
   const [goals, setGoals] = useState<GoalRec[]>([]);
   const [milestones, setMilestones] = useState<MilestoneRec[]>([]);
   const [subjects, setSubjects] = useState<SubjectRec[]>([]);
@@ -339,9 +341,9 @@ export default function GoalsPage() {
       <div className="mb-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <RevealHeading text="Goals" className="text-5xl lg:text-8xl" />
+            <RevealHeading text={t("goals.title")} className="text-5xl lg:text-8xl" />
             <ScrambleSubtitle
-              text="Long-term vision, tracked like a kanban"
+              text={t("goals.subtitle")}
               className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>
@@ -357,11 +359,11 @@ export default function GoalsPage() {
               {exportMenuOpen && (
                 <>
                   <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label="Close export menu" />
-                  <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
-                    <button onClick={exportGoalsAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                  <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
+                    <button onClick={exportGoalsAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                       <Download size={14} /> JSON
                     </button>
-                    <button onClick={exportGoalsAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                    <button onClick={exportGoalsAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                       <Download size={14} /> CSV
                     </button>
                   </div>
@@ -521,7 +523,7 @@ export default function GoalsPage() {
                   <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-fg">
                     {cards.length}
                   </span>
-                  <span className="ml-auto hidden text-[10px] text-muted-fg lg:block">
+                  <span className="ms-auto hidden text-[10px] text-muted-fg lg:block">
                     {col.hint}
                   </span>
                 </div>
@@ -559,9 +561,9 @@ export default function GoalsPage() {
                           onDragEnd={onDragEnd}
                         >
                           {/* Hover actions — always visible on touch, keyboard-reachable via focus */}
-                          <div className="absolute top-3 right-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100">
+                          <div className="absolute top-3 end-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100">
                             <button
-                              aria-label="Edit goal"
+                              aria-label={t("goals.editGoal")}
                               onClick={() => {
                                 setEditingGoal(g);
                                 setModalOpen(true);
@@ -571,7 +573,7 @@ export default function GoalsPage() {
                               <Pencil size={12} />
                             </button>
                             <button
-                              aria-label="Delete goal"
+                              aria-label={t("goals.deleteGoal")}
                               onClick={() => setDeleteTarget(g)}
                               className="flex h-7 w-7 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-danger"
                             >
@@ -590,7 +592,7 @@ export default function GoalsPage() {
                             </Badge>
                           )}
 
-                          <h3 className="mt-2 pr-14 font-semibold tracking-tight text-fg">
+                          <h3 className="mt-2 pe-14 font-semibold tracking-tight text-fg">
                             {g.title}
                           </h3>
                           {g.description && (
@@ -660,7 +662,7 @@ export default function GoalsPage() {
                               {PREV_STATUS[g.status] && (
                                 <button
                                   type="button"
-                                  aria-label="Move to previous column"
+                                  aria-label={t("goals.movePrev")}
                                   onClick={() => moveByButton(g, "prev")}
                                   className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                 >
@@ -670,7 +672,7 @@ export default function GoalsPage() {
                               {NEXT_STATUS[g.status] && (
                                 <button
                                   type="button"
-                                  aria-label="Move to next column"
+                                  aria-label={t("goals.moveNext")}
                                   onClick={() => moveByButton(g, "next")}
                                   className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                                 >

@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import { useMemo } from "react";
 import { buildHeatmap, groupHeatmapByWeek, type HeatmapCell } from "@/lib/stats";
 import type { ReviewLogRec } from "@/lib/db";
@@ -24,6 +26,7 @@ export function StatsHeatmap({
   reviews: ReviewLogRec[];
   weeks?: number;
 }) {
+  const t = useT();
   const columns = useMemo(() => {
     const cells = buildHeatmap(reviews, weeks);
     return groupHeatmapByWeek(cells);
@@ -106,14 +109,14 @@ export function StatsHeatmap({
 
       {/* Legend */}
       <div className="flex items-center justify-end gap-1.5 text-[10px] font-mono uppercase text-muted-fg/60">
-        <span>LESS</span>
+        <span>{t("heatmap.less")}</span>
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
             className={cn("h-2.5 w-2.5 rounded-sm border border-border/40", INTENSITY_BG[i as 0 | 1 | 2 | 3])}
           />
         ))}
-        <span>MORE</span>
+        <span>{t("heatmap.more")}</span>
       </div>
     </div>
   );

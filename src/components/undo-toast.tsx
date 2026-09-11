@@ -66,7 +66,7 @@ export function UndoToastHost() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed bottom-6 left-1/2 z-[100] flex -translate-x-1/2 flex-col items-center gap-2"
+      className="pointer-events-none fixed bottom-6 start-1/2 z-[100] flex -translate-x-1/2 flex-col items-center gap-2"
     >
       <div className={`pointer-events-auto flex items-center gap-3 rounded-2xl border border-border bg-bg px-5 py-3 shadow-2xl ${exiting ? "animate-[fall_0.2s_ease-in_forwards]" : "animate-[rise_0.2s_ease-out]"}`}>
         <span className="text-xs font-bold tracking-wide text-fg">

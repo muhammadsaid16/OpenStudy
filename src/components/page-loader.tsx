@@ -1,11 +1,16 @@
+"use client";
+
 import { Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/lib/store";
+import { tFor } from "@/lib/i18n";
 
 /* ─── Full-page themed loader ─────────────────────────────────────
-   Rendered by every route's loading.tsx. Pure server component —
-   theming comes from CSS variables on [data-theme], which the
-   no-flash <head> script sets before hydration, so the loader is
-   already in the right theme the instant it paints. */
+   Rendered by every route's loading.tsx. Client component so the
+   loader bar label can localize (lang from the store); theming
+   comes from CSS variables on [data-theme], which the no-flash
+   <head> script sets before hydration, so the loader is already in
+   the right theme the instant it paints. */
 
 export type LoaderVariant =
   | "generic"   // root fallback — branded full-page loader, route-agnostic
@@ -392,17 +397,17 @@ function KanbanBody() {
   );
 }
 
-const LABELS: Record<LoaderVariant, string> = {
-  generic: "OpenStudy",
-  dashboard: "Dashboard",
-  grid: "Page",
-  grid4: "Bundles",
-  flashcards: "Flashcards",
-  sessions: "Sessions",
-  settings: "Settings",
-  kanban: "Goals",
-  cards: "Cards",
-  stats: "Stats",
+const LABELS: Record<LoaderVariant, { key: string }> = {
+  generic: { key: "loader.generic" },
+  dashboard: { key: "loader.dashboard" },
+  grid: { key: "loader.page" },
+  grid4: { key: "page.bundles" },
+  flashcards: { key: "page.flashcards" },
+  sessions: { key: "sessions.title" },
+  settings: { key: "settings.title" },
+  kanban: { key: "goals.title" },
+  cards: { key: "loader.cards" },
+  stats: { key: "stats.title" },
 };
 
 export function PageLoader({
@@ -414,9 +419,10 @@ export function PageLoader({
   titleW?: string;
   testId?: string;
 }) {
+  const lang = useAppStore((s) => s.lang);
   return (
     <div className="rise-in p-8 lg:p-12" data-loader={testId}>
-      <LoaderBar label={LABELS[variant]} />
+      <LoaderBar label={tFor(lang, LABELS[variant].key)} />
       {variant !== "generic" && <HeaderRow titleW={titleW} />}
       {variant === "generic" && <GenericBody />}
       {variant === "dashboard" && <DashboardBody />}

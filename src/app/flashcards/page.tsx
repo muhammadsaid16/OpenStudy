@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react";
+import { useT } from "@/lib/i18n";
 import { Brain, Plus, Pencil, Layers, BarChart3, AlertTriangle, Download, Upload, Wifi, WifiOff, Search } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button, EmptyState, Modal, Input, Skeleton } from "@/components/ui";
@@ -66,6 +67,7 @@ type Bundle = Awaited<ReturnType<typeof getBundles>>[number];
 type Subject = { id: string; name: string; color: string };
 
 function FlashcardsContent() {
+  const t = useT();
   const searchParams = useSearchParams();
   const router = useRouter();
   const bundleParam = searchParams.get("bundle");
@@ -208,7 +210,7 @@ function FlashcardsContent() {
       if (b?.id) setSelectedBundle(b.id);
     } catch (e) {
       console.error("Failed to create bundle", e);
-      showToast("Couldn't create bundle — try again", "danger");
+      showToast(t("fc.createBundleFailed"), "danger");
     } finally {
       setCreatingBundle(false);
     }
@@ -324,7 +326,7 @@ function FlashcardsContent() {
             cards = due;
           }
         }
-        if (practiceFlag && cards.length > 0) showToast("Practice mode — no cards due, showing all cards", "info");
+        if (practiceFlag && cards.length > 0) showToast(t("fc.practiceMode"), "info");
       }
       if (cancelled) return;
       setPracticeMode(practiceFlag);
@@ -354,7 +356,7 @@ function FlashcardsContent() {
         const due = filterDueCards(all);
         if (due.length === 0 && all.length > 0) {
           cards = shuffled(all);
-          showToast("Practice mode — no cards due, showing all cards", "info");
+          showToast(t("fc.practiceMode"), "info");
         } else {
           cards = due;
         }
@@ -573,7 +575,7 @@ function FlashcardsContent() {
   const handleCreate = async () => {
     if (!front.trim() || !back.trim()) return;
     if (!selectedBundle && !selectedTopicId) {
-      setCreateError("Select a topic to file this card under.");
+      setCreateError(t("fc.selectTopicFirst"));
       return;
     }
     setCreateError("");
@@ -597,7 +599,7 @@ function FlashcardsContent() {
       setSelectedTopicId("");
       await loadDueCards();
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message.slice(0, 140) : "Could not create card.");
+      setCreateError(err instanceof Error ? err.message.slice(0, 140) : t("fc.createCardFailed"));
     } finally {
       setCreating(false);
     }
@@ -622,7 +624,7 @@ function FlashcardsContent() {
       // Refresh browse list so the edited card shows new text immediately
       if (browseLoaded) await loadBrowseAll();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message.slice(0, 140) : "Could not save card.");
+      setEditError(err instanceof Error ? err.message.slice(0, 140) : t("fc.saveCardFailed"));
     } finally {
       setSaving(false);
     }
@@ -646,7 +648,7 @@ function FlashcardsContent() {
       await loadDueCards();
       if (browseLoaded) await loadBrowseAll();
       showUndo({
-        message: `Card deleted`,
+        message: t("fc.cardDeleted"),
         undo: async () => {
           // Restore the exact card (same id, SM-2 state, tags, links) —
           // recreating it fresh would silently reset its scheduling.
@@ -722,22 +724,22 @@ function FlashcardsContent() {
         ? Math.round((sessionRef.current.correct / sessionRef.current.reviewed) * 100)
         : 0;
       createStudySession({
-        title: `Flashcard run — ${sessionRef.current.reviewed} reviewed`,
+        title: t("fc.sessionRunTitle").replace("{n}", String(sessionRef.current.reviewed)),
         durationMin: mins,
-        notes: `Accuracy: ${acc}%`,
+        notes: t("fc.sessionAccuracy").replace("{n}", String(acc)),
         completed: true,
         startedAt: new Date(sessionRef.current.startedAt),
       }).catch((e) => console.error("Session log failed", e));
     }
-  }, [totalDue, completedCount]);
+  }, [totalDue, completedCount, t]);
 
   return (
     <div className="p-8 lg:p-12">
       {/* Header */}
       <div className="mb-6">
-        <RevealHeading text="Flashcards" className="text-4xl lg:text-6xl" />
+        <RevealHeading text={t("page.flashcards")} className="text-4xl lg:text-6xl" />
         <ScrambleSubtitle
-          text="Spaced repetition review system"
+          text={t("page.flashcards.subtitle")}
           className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
         />
       </div>
@@ -753,10 +755,10 @@ function FlashcardsContent() {
               setLeechLoaded(false);
               setStatsLoaded(false);
             }}
-            aria-label="Select bundle to study"
+            aria-label={t("fc.selectBundleToStudy")}
             className="flex h-10 items-center gap-2 rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold uppercase tracking-tight text-fg backdrop-blur-md focus:outline-none"
           >
-            <option value="" className="bg-bg text-fg">All bundles</option>
+            <option value="" className="bg-bg text-fg">{t("fc.allBundles")}</option>
             {bundles.map((b) => (
               <option key={b.id} value={b.id} className="bg-bg text-fg">{b.name} ({b._count.flashcards})</option>
             ))}
@@ -764,7 +766,7 @@ function FlashcardsContent() {
           {selectedBundle && (
             <Button onClick={() => setModalOpen(true)}>
               <Plus size={16} />
-              Add card
+              {t("fc.addCard")}
             </Button>
           )}
           {selectedBundle && (() => {
@@ -784,9 +786,9 @@ function FlashcardsContent() {
           />
           <button
             onClick={() => router.push("/subjects")}
-            className="ml-auto py-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
+            className="ms-auto py-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
           >
-            Manage bundles →
+            {t("fc.manageBundles")}
           </button>
         </div>
 
@@ -804,9 +806,9 @@ function FlashcardsContent() {
                   setEditBundleOpen(true);
                 }}
                 className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
-                title="Edit bundle"
+                title={t("fc.editBundle")}
               >
-                <Pencil size={14} className="inline" /> Edit
+                <Pencil size={14} className="inline" /> {t("common.edit")}
               </button>
               <button
                 onClick={async () => {
@@ -825,20 +827,20 @@ function FlashcardsContent() {
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
                   } catch (e) {
                     console.error("Export failed", e);
-                    showToast("Export failed — see console", "danger");
+                    showToast(t("fc.exportFailed"), "danger");
                   }
                 }}
                 className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
-                title="Export bundle as JSON"
+                title={t("fc.exportBundleJson")}
               >
-                <Download size={14} className="inline" /> Export
+                <Download size={14} className="inline" /> {t("notes.export")}
               </button>
               <button
                 onClick={() => document.getElementById("import-file")?.click()}
                 className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
-                title="Import cards from JSON/CSV/Anki file"
+                title={t("fc.importCardsFile")}
               >
-                <Upload size={14} className="inline" /> Import
+                <Upload size={14} className="inline" /> {t("fc.import")}
               </button>
               <input
                 id="import-file"
@@ -856,11 +858,11 @@ function FlashcardsContent() {
                     if (!cards.length) throw new Error("No valid cards found");
                     const res = await importBundleCards(selectedBundle, cards);
                     if (res.count === 0) throw new Error("No valid cards found");
-                    showToast(`Imported ${res.count} cards`, "success");
+                    showToast(t("fc.importedNCards").replace("{n}", String(res.count)), "success");
                     await reloadCards();
                   } catch (err) {
                     console.error("Import failed", err);
-                    showToast("Import failed: invalid file", "danger");
+                    showToast(t("fc.importFailed"), "danger");
                   }
                   e.target.value = "";
                 }}
@@ -870,12 +872,12 @@ function FlashcardsContent() {
 
           <div
             className={cn(
-              "ml-auto flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-widest",
+              "ms-auto flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-widest",
               online ? "border-success/30 bg-success/10 text-success" : "border-danger/30 bg-danger/10 text-danger"
             )}
           >
             {online ? <Wifi size={11} className={pending > 0 ? "animate-pulse" : ""} /> : <WifiOff size={11} />}
-            {online ? (pending > 0 ? `Syncing ${pending}` : "Online") : `Offline (${pending} queued)`}
+            {online ? (pending > 0 ? t("fc.syncing").replace("{n}", String(pending)) : t("fc.online")) : t("fc.offlineQueued").replace("{n}", String(pending))}
           </div>
 
           {/* Mode tabs — sliding accent underline */}
@@ -897,11 +899,11 @@ function FlashcardsContent() {
                   />
                 )}
                 <span className="relative z-10">
-                  {m === "review" && <Brain size={14} className="mr-1 inline" />}
-                  {m === "browse" && <Search size={14} className="mr-1 inline" />}
-                  {m === "leeches" && <AlertTriangle size={14} className="mr-1 inline" />}
-                  {m === "stats" && <BarChart3 size={14} className="mr-1 inline" />}
-                  {m}
+                  {m === "review" && <Brain size={14} className="me-1 inline" />}
+                  {m === "browse" && <Search size={14} className="me-1 inline" />}
+                  {m === "leeches" && <AlertTriangle size={14} className="me-1 inline" />}
+                  {m === "stats" && <BarChart3 size={14} className="me-1 inline" />}
+                  {t(`fc.tab.${m}`)}
                 </span>
               </button>
             ))}
@@ -1026,100 +1028,100 @@ function FlashcardsContent() {
       )}
 
       {/* ═══════════════ CREATE MODAL ═══════════════ */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New flashcard">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t("fc.newFlashcard")}>
         <div className="space-y-6">
           {!selectedBundle && (
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Topic</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.topic")}</label>
               <SubjectTopicSelect subjects={subjects} value={selectedTopicId} onChange={setSelectedTopicId} onSubjectsChange={setSubjects} />
             </div>
           )}
           {selectedBundle && (
             <div className="inline-flex items-center gap-2 rounded-full border border-accent/50 bg-accent/5 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent">
               <Layers size={12} />
-              <span>Bundle</span>
+              <span>{t("fc.bundle")}</span>
               <span className="h-3 w-px bg-accent/40" />
               <span>{bundles.find((b) => b.id === selectedBundle)?.name}</span>
             </div>
           )}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Front (question)</label>
-              <ImageUploadButton onImage={(md) => setFront((prev) => prev ? `${prev} ${md}` : md)} label="Image" />
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.frontQuestion")}</label>
+              <ImageUploadButton onImage={(md) => setFront((prev) => prev ? `${prev} ${md}` : md)} label={t("fc.image")} />
             </div>
-            <Input placeholder="e.g. What is kinetic energy?" value={front} onChange={(e) => setFront(e.target.value)}
+            <Input placeholder={t("fc.frontExample")} value={front} onChange={(e) => setFront(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
             />
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Back (answer)</label>
-              <ImageUploadButton onImage={(md) => setBack((prev) => prev ? `${prev} ${md}` : md)} label="Image" />
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.backAnswer")}</label>
+              <ImageUploadButton onImage={(md) => setBack((prev) => prev ? `${prev} ${md}` : md)} label={t("fc.image")} />
             </div>
-            <Input placeholder="e.g. Energy of motion" value={back} onChange={(e) => setBack(e.target.value)}
+            <Input placeholder={t("fc.backExample")} value={back} onChange={(e) => setBack(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Front description (optional)</label>
-            <Input placeholder="Hint shown with question" value={frontDesc} onChange={(e) => setFrontDesc(e.target.value)}
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.frontDesc")}</label>
+            <Input placeholder={t("fc.hintQuestion")} value={frontDesc} onChange={(e) => setFrontDesc(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Back description (optional)</label>
-            <Input placeholder="Hint shown with answer" value={backDesc} onChange={(e) => setBackDesc(e.target.value)}
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.backDesc")}</label>
+            <Input placeholder={t("fc.hintAnswer")} value={backDesc} onChange={(e) => setBackDesc(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
             />
           </div>
           <CardKindFields kind={kind} onKindChange={setKind} choicesText={choicesText} onChoicesTextChange={setChoicesText} />
-          <p className="text-[10px] text-muted-fg uppercase tracking-widest">⌘/Ctrl + Enter to save</p>
+          <p className="text-[10px] text-muted-fg uppercase tracking-widest">{t("fc.cmdEnterToSave")}</p>
           {createError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{createError}</p>}
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setModalOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreate} disabled={creating || !front.trim() || !back.trim()}>
-              {creating ? "Creating..." : "Create"}
+              {creating ? t("fc.creating") : t("common.create")}
             </Button>
           </div>
         </div>
       </Modal>
 
       {/* ═══════════════ EDIT MODAL ═══════════════ */}
-      <Modal open={!!editCard} onClose={() => setEditCard(null)} title="Edit flashcard">
+      <Modal open={!!editCard} onClose={() => setEditCard(null)} title={t("fc.editFlashcard")}>
         {editCard && (
           <div className="space-y-6">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Front (question)</label>
-                <ImageUploadButton onImage={(md) => setEditFront((prev) => prev ? `${prev} ${md}` : md)} label="Image" />
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.frontQuestion")}</label>
+                <ImageUploadButton onImage={(md) => setEditFront((prev) => prev ? `${prev} ${md}` : md)} label={t("fc.image")} />
               </div>
               <Input value={editFront} onChange={(e) => setEditFront(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Back (answer)</label>
-                <ImageUploadButton onImage={(md) => setEditBack((prev) => prev ? `${prev} ${md}` : md)} label="Image" />
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.backAnswer")}</label>
+                <ImageUploadButton onImage={(md) => setEditBack((prev) => prev ? `${prev} ${md}` : md)} label={t("fc.image")} />
               </div>
               <Input value={editBack} onChange={(e) => setEditBack(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Front description (optional)</label>
-              <Input placeholder="Hint shown with question" value={editFrontDesc} onChange={(e) => setEditFrontDesc(e.target.value)} />
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.frontDesc")}</label>
+              <Input placeholder={t("fc.hintQuestion")} value={editFrontDesc} onChange={(e) => setEditFrontDesc(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Back description (optional)</label>
-              <Input placeholder="Hint shown with answer" value={editBackDesc} onChange={(e) => setEditBackDesc(e.target.value)} />
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.backDesc")}</label>
+              <Input placeholder={t("fc.hintAnswer")} value={editBackDesc} onChange={(e) => setEditBackDesc(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Tags</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.tags")}</label>
               <TagInput tags={editTags} onChange={setEditTags} />
             </div>
             <CardKindFields kind={editKind} onKindChange={setEditKind} choicesText={editChoicesText} onChoicesTextChange={setEditChoicesText} />
             {editError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{editError}</p>}
             <div className="flex justify-end gap-4 pt-4">
-              <Button variant="ghost" onClick={() => setEditCard(null)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setEditCard(null)}>{t("common.cancel")}</Button>
               <Button onClick={handleEditSave} disabled={saving || !editFront.trim() || !editBack.trim()}>
-                {saving ? "Saving..." : "Save"}
+                {saving ? t("fc.saving") : t("common.save")}
               </Button>
             </div>
           </div>
@@ -1127,18 +1129,18 @@ function FlashcardsContent() {
       </Modal>
 
       {/* ═══════════════ DELETE MODAL ═══════════════ */}
-      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete flashcard">
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title={t("fc.deleteFlashcard")}>
         {deleteTarget && (
           <div className="space-y-6">
-            <p className="text-sm text-muted-fg">Are you sure? This cannot be undone.</p>
+            <p className="text-sm text-muted-fg">{t("fc.deleteConfirm")}</p>
             <div className="rounded-2xl border border-border bg-muted/20 p-4">
               <p className="text-sm font-bold tracking-tight">{deleteTarget.front}</p>
               <p className="mt-1 text-xs text-muted-fg">{deleteTarget.back}</p>
             </div>
             <div className="flex justify-end gap-4 pt-2">
-              <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setDeleteTarget(null)}>{t("common.cancel")}</Button>
               <Button variant="danger" onClick={handleDelete} disabled={deleting}>
-                {deleting ? "Deleting..." : "Delete"}
+                {deleting ? t("fc.deleting") : t("common.delete")}
               </Button>
             </div>
           </div>
@@ -1146,21 +1148,21 @@ function FlashcardsContent() {
       </Modal>
 
       {/* ═══════════════ EDIT BUNDLE MODAL ═══════════════ */}
-      <Modal open={editBundleOpen} onClose={() => setEditBundleOpen(false)} title="Edit bundle">
+      <Modal open={editBundleOpen} onClose={() => setEditBundleOpen(false)} title={t("fc.editBundle")}>
         <div className="space-y-6">
           <Input
-            label="Name"
+            label={t("fc.name")}
             value={editBundleName}
             onChange={(e) => setEditBundleName(e.target.value)}
           />
           <Input
-            label="Description (optional)"
+            label={t("fc.descriptionOptional")}
             value={editBundleDesc}
             onChange={(e) => setEditBundleDesc(e.target.value)}
           />
           <BundleColorPicker value={editBundleColor} onChange={setEditBundleColor} />
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setEditBundleOpen(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setEditBundleOpen(false)}>{t("common.cancel")}</Button>
             <Button
               onClick={async () => {
                 if (!selectedBundle || !editBundleName.trim()) return;
@@ -1181,39 +1183,39 @@ function FlashcardsContent() {
               }}
               disabled={savingBundle}
             >
-              {savingBundle ? "Saving..." : "Save"}
+              {savingBundle ? t("fc.saving") : t("common.save")}
             </Button>
           </div>
         </div>
       </Modal>
 
       {/* ═══════════════ CREATE BUNDLE MODAL ═══════════════ */}
-      <Modal open={bundleCreateOpen} onClose={() => setBundleCreateOpen(false)} title="New bundle">
+      <Modal open={bundleCreateOpen} onClose={() => setBundleCreateOpen(false)} title={t("fc.newBundle")}>
         <div className="space-y-5">
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Name</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.name")}</label>
             <Input
               autoFocus
-              placeholder="e.g. Biology — Chapter 1"
+              placeholder={t("fc.bundleNameExample")}
               value={newBundleName}
               onChange={(e) => setNewBundleName(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleCreateBundle(); }}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Description (optional)</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.descriptionOptional")}</label>
             <Input
-              placeholder="What's inside this deck?"
+              placeholder={t("fc.deckContentsExample")}
               value={newBundleDesc}
               onChange={(e) => setNewBundleDesc(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Color</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.color")}</label>
             <BundleColorPicker value={newBundleColor} onChange={setNewBundleColor} />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Subject & topic (optional)</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.subjectTopicOptional")}</label>
             <SubjectTopicMenu
               subjects={subjects}
               subjectId={newBundleSubjectId}
@@ -1224,53 +1226,53 @@ function FlashcardsContent() {
             />
           </div>
           <div className="flex justify-end gap-2 pt-1">
-            <Button variant="secondary" onClick={() => setBundleCreateOpen(false)}>Cancel</Button>
+            <Button variant="secondary" onClick={() => setBundleCreateOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreateBundle} disabled={!newBundleName.trim() || creatingBundle}>
               <Plus size={16} />
-              {creatingBundle ? "Creating…" : "Create bundle"}
+              {creatingBundle ? t("fc.creating") : t("fc.createBundle")}
             </Button>
           </div>
         </div>
       </Modal>
 
       {/* ═══════════════ BATCH TAG MODAL ═══════════════ */}
-      <Modal open={batchTagModalOpen} onClose={() => setBatchTagModalOpen(false)} title="Batch tag cards">
+      <Modal open={batchTagModalOpen} onClose={() => setBatchTagModalOpen(false)} title={t("fc.batchTagTitle")}>
         <div className="space-y-6">
-          <p className="text-sm text-muted-fg">Add tags to {browseSelected.size} selected card{browseSelected.size !== 1 ? "s" : ""}.</p>
+          <p className="text-sm text-muted-fg">{t("fc.batchTagHint").replace("{n}", String(browseSelected.size))}</p>
           <Input
-            label="Tags (comma-separated)"
-            placeholder="e.g. verbs, grammar, exam"
+            label={t("fc.tagsCommaSeparated")}
+            placeholder={t("fc.tagsExample")}
             value={batchTagInput}
             onChange={(e) => setBatchTagInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleBatchTag(); }}
           />
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setBatchTagModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleBatchTag} disabled={!batchTagInput.trim()}>Apply tags</Button>
+            <Button variant="ghost" onClick={() => setBatchTagModalOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={handleBatchTag} disabled={!batchTagInput.trim()}>{t("fc.applyTags")}</Button>
           </div>
         </div>
       </Modal>
 
       {/* ═══════════════ BATCH MOVE MODAL ═══════════════ */}
-      <Modal open={batchMoveModalOpen} onClose={() => setBatchMoveModalOpen(false)} title="Batch move cards">
+      <Modal open={batchMoveModalOpen} onClose={() => setBatchMoveModalOpen(false)} title={t("fc.batchMoveTitle")}>
         <div className="space-y-6">
-          <p className="text-sm text-muted-fg">Move {browseSelected.size} selected card{browseSelected.size !== 1 ? "s" : ""} to a bundle.</p>
+          <p className="text-sm text-muted-fg">{t("fc.batchMoveHint").replace("{n}", String(browseSelected.size))}</p>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Target bundle</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.targetBundle")}</label>
             <select
               value={batchMoveTarget}
               onChange={(e) => setBatchMoveTarget(e.target.value)}
               className="h-10 w-full rounded-xl border border-border bg-bg px-3 text-sm text-fg focus:outline-none"
             >
-              <option value="" className="bg-bg text-fg">No bundle (unassigned)</option>
+              <option value="" className="bg-bg text-fg">{t("fc.noBundleUnassigned")}</option>
               {bundles.map((b) => (
                 <option key={b.id} value={b.id} className="bg-bg text-fg">{b.name}</option>
               ))}
             </select>
           </div>
           <div className="flex justify-end gap-4 pt-4">
-            <Button variant="ghost" onClick={() => setBatchMoveModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleBatchMove}>Move cards</Button>
+            <Button variant="ghost" onClick={() => setBatchMoveModalOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={handleBatchMove}>{t("fc.moveCards")}</Button>
           </div>
         </div>
       </Modal>

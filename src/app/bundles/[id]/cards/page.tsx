@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -56,6 +58,7 @@ type Card = {
 };
 
 export default function BundleCardsPage() {
+  const t = useT();
   const params = useParams<{ id: string }>();
   const bundleId = params.id;
   const router = useRouter();
@@ -398,7 +401,7 @@ export default function BundleCardsPage() {
             <button
               onClick={() => router.push("/bundles")}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
-              aria-label="Back to bundles"
+              aria-label={t("cards.backToBundles")}
             >
               <ArrowLeft size={18} />
             </button>
@@ -435,11 +438,11 @@ export default function BundleCardsPage() {
               {exportMenuOpen && (
                 <>
                   <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label="Close export menu" />
-                  <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg shadow-2xl z-20">
-                  <button onClick={exportAsJson} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                  <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg shadow-2xl z-20">
+                  <button onClick={exportAsJson} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                     <Download size={14} /> JSON
                   </button>
-                  <button onClick={exportAsCsv} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left border-t border-border">
+                  <button onClick={exportAsCsv} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start border-t border-border">
                     <Download size={14} /> CSV
                   </button>
                 </div>
@@ -529,7 +532,7 @@ export default function BundleCardsPage() {
                     {isFlipped ? (((card as any).backDescription ?? (card as any).description) && <p className="mt-3 text-sm text-muted-fg">{(card as any).backDescription ?? (card as any).description}</p>) : (((card as any).frontDescription) && <p className="mt-3 text-sm text-muted-fg/80">{(card as any).frontDescription}</p>)}
                   </div>
                   {!isFlipped ? (
-                    <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">Show answer</Button>
+                    <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">{t("cards.showAnswer")}</Button>
                   ) : (
                     <div className="mt-6 grid grid-cols-3 gap-2">
                       {RATING_BUTTONS.map((btn) => (
@@ -552,19 +555,19 @@ export default function BundleCardsPage() {
           <div className="relative flex-1">
             <Search
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg"
+              className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-fg"
             />
             <input
-              placeholder="Search cards..."
+              placeholder={t("cards.searchCards")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
+              className="h-10 w-full rounded-xl border border-border bg-bg ps-10 pe-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
             />
           </div>
           <select
             value={filterTag}
             onChange={(e) => setFilterTag(e.target.value)}
-            aria-label="Filter cards by tag"
+            aria-label={t("cards.filterByTag")}
             className="h-10 rounded-xl border border-border bg-bg px-3 text-sm text-fg focus:outline-none"
           >
             <option value="all" className="bg-bg text-fg">
@@ -607,7 +610,7 @@ export default function BundleCardsPage() {
               <div key={i} className="glass flex min-h-[200px] flex-col rounded-2xl p-5">
                 <div className="flex items-center gap-2">
                   <Skeleton className="h-5 w-16 rounded-full" />
-                  <Skeleton className="ml-auto h-3 w-12" />
+                  <Skeleton className="ms-auto h-3 w-12" />
                 </div>
                 <Skeleton className="mt-4 h-4 w-3/4" />
                 <Skeleton className="mt-2 h-4 w-1/2" />

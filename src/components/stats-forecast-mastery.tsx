@@ -1,9 +1,12 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import { useEffect, useMemo, useState } from "react";
 import { forecastDue, buildBundleMastery, type BundleMastery } from "@/lib/stats";
 import type { BundleRec, FlashcardRec } from "@/lib/db";
 
 export function ForecastCard({ cards }: { cards: FlashcardRec[] }) {
+  const t = useT();
   const f = useMemo(() => forecastDue(cards), [cards]);
   const stats = [
     { label: "Today", value: f.dueToday, color: f.dueToday > 0 ? "text-accent" : "text-muted-fg" },
@@ -34,6 +37,7 @@ export function BundleMasteryTable({
   bundles: BundleRec[];
   reviews: BundleMastery["bundleId"] extends never ? never : Parameters<typeof buildBundleMastery>[0];
 }) {
+  const t = useT();
   // wall clock — captured once in the mount effect (react-hooks/purity bans Date.now() in render)
   const [nowMs, setNowMs] = useState(0);
 
@@ -46,7 +50,7 @@ export function BundleMasteryTable({
 
   if (rows.length === 0) {
     return (
-      <p className="text-xs uppercase tracking-widest text-muted-fg">NO BUNDLES YET.</p>
+      <p className="text-xs uppercase tracking-widest text-muted-fg">{t("sfm.noBundles")}</p>
     );
   }
 
@@ -56,9 +60,9 @@ export function BundleMasteryTable({
         <thead>
           <tr className="border-b border-border text-[10px] font-mono uppercase tracking-widest text-muted-fg">
             <th className="py-2 pr-4">BUNDLE</th>
-            <th className="py-2 pr-4 text-right">CARDS</th>
+            <th className="py-2 pr-4 text-right">{t("sfm.cards")}</th>
             <th className="py-2 pr-4 text-right">DUE</th>
-            <th className="py-2 pr-4 text-right">LEECHES</th>
+            <th className="py-2 pr-4 text-right">{t("sfm.leeches")}</th>
             <th className="py-2 pr-4 text-right">ACCURACY</th>
           </tr>
         </thead>

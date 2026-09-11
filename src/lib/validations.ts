@@ -33,7 +33,7 @@ export type ResourceInput = z.infer<typeof resourceSchema>;
 
 // ─── Note ─────────────────────────────────────────────────────────
 export const noteSchema = z.object({
-  topicId: z.string().min(1),
+  topicId: z.string().min(1).nullable().default(null), // optional — standalone notes allowed
   title: z.string().min(1, "Title is required").max(200),
   content: z.string().default(""),
   explanation: z.string().max(50_000).nullable().optional(),

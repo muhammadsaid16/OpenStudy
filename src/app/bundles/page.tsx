@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useT } from "@/lib/i18n";
 import { Plus, Trash2, Pencil, Layers, Link2, Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,6 +22,7 @@ import { useLiveData } from "@/lib/use-live-data";
 type Bundle = Awaited<ReturnType<typeof getBundles>>[number];
 
 export default function BundlesPage() {
+  const t = useT();
   const router = useRouter();
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -143,9 +145,9 @@ export default function BundlesPage() {
       <div className="mb-8">
         <div className="flex items-end justify-between">
           <div>
-            <RevealHeading text="Bundles" className="text-4xl lg:text-6xl" />
+            <RevealHeading text={t("page.bundles")} className="text-4xl lg:text-6xl" />
             <ScrambleSubtitle
-              text="Flashcard decks for your study material"
+              text={t("page.bundles.subtitle")}
               className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>
@@ -215,7 +217,7 @@ export default function BundlesPage() {
               key={bundle.id}
               href={`/bundles/${bundle.id}/cards`}
               {...spotlightProps()}
-              className="spotlight-card group relative flex h-72 w-full max-w-xs flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-left transition-all duration-200 hover:-translate-y-1"
+              className="spotlight-card group relative flex h-72 w-full max-w-xs flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-1"
               style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
             >
 
@@ -231,7 +233,7 @@ export default function BundlesPage() {
                 >
                   {bundle.name.charAt(0)}
                 </div>
-                <div className="flex -mr-2 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100" onClick={(e) => e.preventDefault()}>
+                <div className="flex -me-2 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100" onClick={(e) => e.preventDefault()}>
                   <button
                     onClick={async (e) => {
                       e.stopPropagation();
@@ -288,8 +290,8 @@ export default function BundlesPage() {
                       e.preventDefault();
                       router.push(`/bundles/${bundle.id}/cards`);
                     }}
-                    aria-label="Manage cards"
-                    title="Manage cards"
+                    aria-label={t("bundles.manageCards")}
+                    title={t("bundles.manageCards")}
                     className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
                   >
                     <Layers size={13} />
@@ -304,7 +306,7 @@ export default function BundlesPage() {
                       setEditDesc(bundle.description || "");
                       setEditColor(bundle.color);
                     }}
-                    aria-label="Edit bundle"
+                    aria-label={t("bundles.editBundle")}
                     className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
                   >
                     <Pencil size={14} />
@@ -315,7 +317,7 @@ export default function BundlesPage() {
                       e.preventDefault();
                       setDeleteTarget(bundle);
                     }}
-                    aria-label="Delete bundle"
+                    aria-label={t("bundles.deleteBundle")}
                     className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger"
                   >
                     <Trash2 size={14} />
@@ -402,7 +404,7 @@ export default function BundlesPage() {
       </Modal>
 
       {/* Edit Modal */}
-      <Modal open={!!editBundle} onClose={() => setEditBundle(null)} title="Edit bundle">
+      <Modal open={!!editBundle} onClose={() => setEditBundle(null)} title={t("bundles.editBundle")}>
         {editBundle && (
           <div className="space-y-6">
             <Input label="Bundle name" value={editName} onChange={(e) => setEditName(e.target.value)} />
@@ -417,7 +419,7 @@ export default function BundlesPage() {
       </Modal>
 
       {/* Delete Confirmation */}
-      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete bundle">
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title={t("bundles.deleteBundle")}>
         {deleteTarget && (
           <div className="space-y-6">
             <p className="text-sm text-muted-fg">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useT } from "@/lib/i18n";
 import { InstallAppButton } from "@/components/install-app-button";
 import { useAppStore, type ThemeName } from "@/lib/store";
 import { RevealHeading } from "@/components/reveal-heading";
@@ -42,7 +43,7 @@ function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-border bg-bg p-5 text-left transition-colors hover:border-accent"
+      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-border bg-bg p-5 text-start transition-colors hover:border-accent"
     >
       <div>
         <p className="text-sm font-bold tracking-tight text-fg">{label}</p>
@@ -57,7 +58,7 @@ function Toggle({
         <span
           className={cn(
             "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all",
-            checked ? "left-[22px]" : "left-0.5"
+            checked ? "start-[22px]" : "start-0.5"
           )}
         />
       </span>
@@ -66,6 +67,7 @@ function Toggle({
 }
 
 export default function SettingsPage() {
+  const t = useT();
   const theme = useAppStore((s) => s.theme);
   const lang = useAppStore((s) => s.lang);
   const setLang = useAppStore((s) => s.setLang);
@@ -128,9 +130,9 @@ export default function SettingsPage() {
   return (
     <div className="p-8 lg:p-12">
       <div className="mb-8">
-        <RevealHeading text="Settings" className="text-4xl lg:text-6xl" />
+        <RevealHeading text={t("settings.title")} className="text-4xl lg:text-6xl" />
         <ScrambleSubtitle
-          text="Appearance & preferences"
+          text={t("settings.subtitle")}
           className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
         />
       </div>
@@ -138,11 +140,11 @@ export default function SettingsPage() {
       {/* Appearance — spec §8: theme picker stays (product identity) but
           lives under a clear section heading with Interface prefs. */}
       <section className="mb-12">
-        <h2 className="mb-1 text-lg font-bold tracking-tight text-fg">Appearance</h2>
+        <h2 className="mb-1 text-lg font-bold tracking-tight text-fg">{t("settings.appearance")}</h2>
         {/* Language (UI + direction): English LTR / العربية RTL */}
         <div className="mb-6 mt-3 rounded-2xl border border-border bg-bg-raised/60 p-4">
-          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-fg">Language</p>
-          <div className="inline-flex rounded-full border border-glass-border bg-glass p-1" role="group" aria-label="Language">
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-fg">{t("settings.language")}</p>
+          <div className="inline-flex rounded-full border border-glass-border bg-glass p-1" role="group" aria-label={t("settings.language")}>
             <button
               onClick={() => setLang("en")}
               aria-pressed={lang === "en"}
@@ -158,12 +160,12 @@ export default function SettingsPage() {
               العربية
             </button>
           </div>
-          <p className="mt-2 text-[11px] text-muted-fg">Arabic switches the whole interface to RTL العربية.</p>
+          <p className="mt-2 text-[11px] text-muted-fg">{t("settings.arabicHint")}</p>
           <div className="mt-3">
             <InstallAppButton />
           </div>
         </div>
-        <p className="mb-4 text-xs text-muted-fg">Theme — pick the mood; it applies instantly.</p>
+        <p className="mb-4 text-xs text-muted-fg">{t("settings.themeHint")}</p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {THEMES.map((t) => {
             const active = theme === t.id;
@@ -207,10 +209,10 @@ export default function SettingsPage() {
 
       {/* Interface — preferences under Appearance per spec IA */}
       <section className="max-w-2xl space-y-3">
-        <h2 className="mb-4 text-lg font-bold tracking-tight text-fg">Interface</h2>
+        <h2 className="mb-4 text-lg font-bold tracking-tight text-fg">{t("settings.interface")}</h2>
         <Toggle
-          label="Reduced motion"
-          description="Minimize animations and transitions"
+          label={t("settings.reducedMotion")}
+          description={t("settings.reducedMotionHint")}
           checked={reducedMotion}
           onChange={setReducedMotion}
         />
@@ -218,29 +220,29 @@ export default function SettingsPage() {
 
       {/* Data — spec §8: clear, calm, destructive-safe */}
       <section className="mt-12 max-w-2xl space-y-4">
-        <h2 className="mb-4 text-lg font-bold tracking-tight text-fg">Data</h2>
+        <h2 className="mb-4 text-lg font-bold tracking-tight text-fg">{t("settings.data")}</h2>
         <div className="space-y-3">
           <div className="rounded-2xl border border-border bg-bg p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-bold tracking-tight text-fg">Export your data</p>
-                <p className="mt-1 text-xs text-muted-fg">Download a full backup of subjects, notes, cards, and sessions.</p>
+                <p className="text-sm font-bold tracking-tight text-fg">{t("settings.exportData")}</p>
+                <p className="mt-1 text-xs text-muted-fg">{t("settings.exportDataHint")}</p>
               </div>
               <Button size="sm" onClick={handleExport} disabled={exportStatus === "exporting"}>
                 <Download size={14} />
-                {exportStatus === "exporting" ? "Exporting…" : "Export data"}
+                {exportStatus === "exporting" ? t("settings.exporting") : t("settings.exportDataBtn")}
               </Button>
             </div>
           </div>
           <div className="rounded-2xl border border-border bg-bg p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-bold tracking-tight text-fg">Import backup</p>
-                <p className="mt-1 text-xs text-muted-fg">Restore from an OpenStudy backup file. Existing data may be replaced.</p>
+                <p className="text-sm font-bold tracking-tight text-fg">{t("settings.importBackup")}</p>
+                <p className="mt-1 text-xs text-muted-fg">{t("settings.importBackupHint")}</p>
               </div>
               <Button size="sm" variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={importStatus === "importing"}>
                 <Upload size={14} />
-                {importStatus === "importing" ? "Importing…" : "Import data"}
+                {importStatus === "importing" ? t("settings.importing") : t("settings.importDataBtn")}
               </Button>
               <input
                 ref={fileInputRef}
@@ -260,14 +262,14 @@ export default function SettingsPage() {
                 aria-label="Confirm import"
                 className="mt-3 border border-warning/40 bg-warning/10 p-4"
               >
-                <p className="text-sm font-bold tracking-tight text-fg">Import backup?</p>
+                <p className="text-sm font-bold tracking-tight text-fg">{t("settings.importConfirm")}</p>
                 <p className="mt-1 text-xs text-muted-fg">
-                  Existing data may be replaced. File: {pendingFile.name}
+                  {t("settings.importConfirmHint")} {pendingFile.name}
                 </p>
                 <div className="mt-3 flex gap-2">
                   <Button size="sm" variant="danger" onClick={runImport}>
                     <Upload size={14} />
-                    Import backup
+                    {t("settings.importBackup")}
                   </Button>
                   <Button
                     size="sm"
@@ -277,7 +279,7 @@ export default function SettingsPage() {
                       setPendingFile(null);
                     }}
                   >
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                 </div>
               </div>

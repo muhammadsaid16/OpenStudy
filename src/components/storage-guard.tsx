@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { db } from "@/lib/db";
 import { exportAllData, importAllData } from "@/app/actions";
+import { useT } from "@/lib/i18n";
 
 const AUTO_KEY = "studymax:autobackup";
 const PROD_HOST = "openstudy-v1.vercel.app";
@@ -15,6 +16,7 @@ function isPreviewHost(host: string) {
 }
 
 export function StorageGuard() {
+  const t = useT();
   const [preview, setPreview] = useState(false);
   const [recoverable, setRecoverable] = useState(false);
   const [restoring, setRestoring] = useState(false);
@@ -105,18 +107,18 @@ export function StorageGuard() {
       {preview && (
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/30 bg-warning/15 px-4 py-3 text-sm backdrop-blur">
           <p className="font-medium text-fg">
-            Preview link — your data lives on <span className="font-bold">{PROD_HOST}</span>. This URL has its own empty storage.
+            {t("guard.previewLink").replace("{host}", PROD_HOST)}
           </p>
           <a href={`https://${PROD_HOST}`} className="rounded-full bg-fg px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-bg hover:opacity-90">
-            Open production
+            {t("guard.openProd")}
           </a>
         </div>
       )}
       {recoverable && (
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-accent/25 bg-accent-soft/50 px-4 py-3 text-sm backdrop-blur">
-          <p className="font-medium text-fg">Found a local backup — restore your subjects, cards and sessions?</p>
+          <p className="font-medium text-fg">{t("guard.foundBackup")}</p>
           <button onClick={restore} disabled={restoring} className="rounded-full bg-accent px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-fg disabled:opacity-50">
-            {restoring ? "Restoring…" : "Restore backup"}
+            {restoring ? t("guard.restoring") : t("guard.restoreBackup")}
           </button>
         </div>
       )}

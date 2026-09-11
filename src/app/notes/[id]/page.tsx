@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Pencil, Trash2, Pin, StickyNote, BookOpen, Calendar, Sparkles } from "lucide-react";
@@ -19,6 +21,7 @@ import { useLiveData } from "@/lib/use-live-data";
 type Note = Awaited<ReturnType<typeof getAllNotes>>[number];
 
 export default function NotePage() {
+  const t = useT();
   const params = useParams<{ id: string }>();
   const id = params.id;
   const router = useRouter();
@@ -80,11 +83,10 @@ export default function NotePage() {
       message: `Note "${snapshot.title}" deleted`,
       undo: async () => {
         const { createNote } = await import("@/app/actions");
-        if (!snapshot.topicId) return;
         await createNote({
           title: snapshot.title,
           content: snapshot.content || "",
-          topicId: snapshot.topicId,
+          topicId: snapshot.topicId || null,
           tags: snapshot.tags.map((t) => t.tag.name),
         });
       },
@@ -152,8 +154,8 @@ export default function NotePage() {
     return (
       <div className="p-8 lg:p-12 max-w-4xl mx-auto text-center">
         <StickyNote size={48} className="mx-auto mb-4 text-muted-fg" />
-        <h2 className="text-2xl font-bold tracking-tight">Note not found</h2>
-        <p className="mt-2 text-sm text-muted-fg">This note may have been deleted.</p>
+        <h2 className="text-2xl font-bold tracking-tight">{t("notesDetail.notFound")}</h2>
+        <p className="mt-2 text-sm text-muted-fg">{t("notesDetail.deleted")}</p>
         <Button className="mt-6" onClick={() => router.push("/notes")}>
           <ArrowLeft size={16} /> Back to notes
         </Button>
@@ -191,7 +193,7 @@ export default function NotePage() {
                   </span>
                   <span aria-hidden>›</span>
                   <span>{note.topic.name}</span>
-                  {note.isPinned && <span className="ml-1 inline-flex items-center gap-1 text-accent"><Pin size={10} /> Pinned</span>}
+                  {note.isPinned && <span className="ms-1 inline-flex items-center gap-1 text-accent"><Pin size={10} /> Pinned</span>}
                 </p>
               )}
               <h1 className="font-display text-3xl font-bold tracking-tight text-fg lg:text-4xl">
@@ -214,7 +216,7 @@ export default function NotePage() {
                 onClick={openEdit}
                 className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
                 title="Edit"
-                aria-label="Edit note"
+                aria-label={t("notesDetail.editNote")}
               >
                 <Pencil size={16} />
               </button>
@@ -311,7 +313,7 @@ export default function NotePage() {
       </Modal>
 
       {/* Edit Modal */}
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit note">
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title={t("notesDetail.editNote")}>
         <div className="space-y-6">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Title</label>

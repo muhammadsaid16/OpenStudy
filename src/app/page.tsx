@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/i18n";
 import { motion } from "framer-motion";
 import { BookOpen, Brain, Clock, Layers, Sparkles, Target, Zap } from "lucide-react";
 import Link from "next/link";
@@ -37,6 +38,7 @@ const item = {
 };
 
 export default function DashboardPage() {
+  const t = useT();
   const [stats, setStats] = useState<Stats | null>(null);
   const [weekly, setWeekly] = useState<Weekly | null>(null);
   const [today, setToday] = useState<Today | null>(null);
@@ -78,8 +80,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3">
                 <Zap size={20} className="text-accent" aria-hidden />
                 <p className="text-sm font-bold tracking-tight text-fg">
-                  {stats.dueCards} card{stats.dueCards === 1 ? "" : "s"} ready for review —
-                  keep the streak alive.
+                  {stats.dueCards} {t("dash.dueReady")}
                 </p>
               </div>
               <StudyAllDueButton />
@@ -138,12 +139,12 @@ export default function DashboardPage() {
                     <Link key={s.id} href="/subjects" aria-label={`Open ${s.name}`}>
                       <Card hover className="relative overflow-hidden !p-5">
                         <span
-                          className="absolute inset-y-0 left-0 w-1"
+                          className="absolute inset-y-0 start-0 w-1"
                           style={{ backgroundColor: s.color }}
                           aria-hidden
                         />
-                        <p className="truncate pl-2 font-semibold tracking-tight">{s.name}</p>
-                        <p className="mt-2 pl-2 font-mono text-xs tabular-nums text-muted-fg">
+                        <p className="truncate ps-2 font-semibold tracking-tight">{s.name}</p>
+                        <p className="mt-2 ps-2 font-mono text-xs tabular-nums text-muted-fg">
                           {s.cardCount} cards ·{" "}
                           {s.dueCount > 0 ? (
                             <span className="font-bold text-accent">{s.dueCount} due</span>
@@ -159,13 +160,13 @@ export default function DashboardPage() {
             )}
             <motion.div variants={item}>
               <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-fg">
-                Recent Sessions
+                {t("dash.recentSessions")}
               </p>
               {stats.recentSessions.length === 0 ? (
                 <Card className="py-12 text-center">
                   <Sparkles size={28} aria-hidden className="mx-auto mb-3 text-accent" />
                   <p className="text-sm text-muted-fg">
-                    No sessions yet — start your first Focus Zone timer above.
+                    {t("dash.noSessions")}
                   </p>
                 </Card>
               ) : (
@@ -296,7 +297,7 @@ export default function DashboardPage() {
               <Card className="space-y-4 !p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold tracking-tight">Review activity</p>
+                    <p className="font-semibold tracking-tight">{t("dash.reviewActivity")}</p>
                     <p className="text-[11px] uppercase tracking-widest text-muted-fg">
                       Daily review log · last 26 weeks
                     </p>
@@ -307,14 +308,14 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
             <motion.div variants={item}>
-              <Link href="/goals" aria-label="Open goals board">
+              <Link href="/goals" aria-label={t("dash.openGoals")}>
                 <Card hover className="flex flex-wrap items-center justify-between gap-4 !p-5">
                   <div className="flex items-center gap-3">
                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
                       <Target size={17} aria-hidden />
                     </span>
                     <div>
-                      <p className="font-semibold tracking-tight">Goals</p>
+                      <p className="font-semibold tracking-tight">{t("dash.goals")}</p>
                       <p className="text-[11px] uppercase tracking-widest text-muted-fg">
                         Long-term vision · kanban board
                       </p>

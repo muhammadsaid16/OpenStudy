@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useTransition, Suspense, useRef } from "react";
+import { useT } from "@/lib/i18n";
 import { Plus, Trash2, Pin, StickyNote, Pencil, Eye, BookOpen, Search, X, Download, Upload, Lightbulb, ClockAlert } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button, Modal, Input, EmptyState, Skeleton, Textarea } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
-import { getAllNotes, getSubjects, createNote, deleteNote, updateNote, getBundles, getAllTopics } from "@/app/actions";
+import { getAllNotes, getSubjects, createNote, deleteNote, updateNote, getBundles } from "@/app/actions";
 import { SubjectTopicSelect } from "@/components/subject-topic-select";
 import { TagInput } from "@/components/tag-input";
 import { Markdown } from "@/components/markdown";
@@ -23,6 +24,7 @@ type Note = Omit<Awaited<ReturnType<typeof getAllNotes>>[number], "topic"> & {
 };
 
 function NotesContent() {
+  const t = useT();
   const searchParams = useSearchParams();
   const router = useRouter();
   const topicFilter = searchParams.get("topic");
@@ -97,10 +99,10 @@ function NotesContent() {
     : null;
 
   const handleCreate = () => {
-    if (!title.trim() || !selectedTopicId) return;
+    if (!title.trim()) return;
     startTransition(async () => {
       await createNote({
-        topicId: selectedTopicId,
+        topicId: selectedTopicId || null,
         title: title.trim(),
         content: content.trim(),
         tags,
@@ -131,17 +133,10 @@ function NotesContent() {
       showUndo({
         message: `Note "${note.title}" deleted`,
         undo: async () => {
-          if (!note.topicId) {
-            // Shouldn't happen — notes always have a topic — but guard
-            // so undo doesn't throw a zod validation error.
-            const fresh = await getAllNotes();
-            setNotes(fresh as Note[]);
-            return;
-          }
           await createNote({
             title: note.title,
             content: note.content || "",
-            topicId: note.topicId,
+            topicId: note.topicId || null,
             tags: note.tags.map((t) => t.tag.name),
           });
           const n = await getAllNotes();
@@ -284,23 +279,13 @@ function NotesContent() {
         }
       }
       if (!items.length) { showToast("No valid notes found", "warning"); return; }
-      let topicsCache: any[] | null = null;
-      const getFallbackTopicId = async (): Promise<string | null> => {
-        if (topicsCache) return topicsCache[0]?.id ?? null;
-        try { topicsCache = await getAllTopics(); } catch { topicsCache = []; }
-        return topicsCache[0]?.id ?? null;
-      };
       let ok = 0, skipped = 0;
       for (const raw of items) {
         const title = String(raw.title ?? raw.name ?? "").trim();
         if (!title) { skipped++; continue; }
         const content = String(raw.content ?? raw.body ?? "").trim();
-        let topicId = String(raw.topicId ?? raw.topic ?? "").trim();
-        if (!topicId) {
-          const fb = await getFallbackTopicId();
-          if (!fb) { skipped++; continue; }
-          topicId = fb;
-        }
+        // Topic is optional — notes without one import as standalone.
+        const topicId = String(raw.topicId ?? raw.topic ?? "").trim() || null;
         let tagArr: string[] = [];
         if (Array.isArray(raw.tags)) tagArr = raw.tags.map((t: any) => String(t).trim()).filter(Boolean);
         else if (typeof raw.tags === "string" && raw.tags.trim()) tagArr = raw.tags.split(/[;,]/).map((t: string) => t.trim()).filter(Boolean);
@@ -328,9 +313,9 @@ function NotesContent() {
       <div className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <RevealHeading text="Notes" className="text-5xl lg:text-8xl" />
+            <RevealHeading text={t("notes.title")} className="text-5xl lg:text-8xl" />
             <ScrambleSubtitle
-              text="Your study notes and reference material"
+              text={t("notes.subtitle")}
               className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
             />
           </div>
@@ -346,11 +331,11 @@ function NotesContent() {
               {exportMenuOpen && (
                 <>
                   <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label="Close export menu" />
-                  <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
-                    <button onClick={exportAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                  <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
+                    <button onClick={exportAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                       <Download size={14} /> JSON
                     </button>
-                    <button onClick={exportAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-left">
+                    <button onClick={exportAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                       <Download size={14} /> CSV
                     </button>
                   </div>
@@ -387,18 +372,18 @@ function NotesContent() {
         {loaded && notes.length > 0 && (
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <div className="relative max-w-md flex-1">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
+              <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-fg" />
               <input
-                placeholder="Search notes..."
+                placeholder={t("notes.searchNotes")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
+                className="h-10 w-full rounded-xl border border-border bg-bg ps-10 pe-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
               />
             </div>
             {topicFilter && (
               <span className="inline-flex items-center gap-2 rounded-full border border-accent bg-accent px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-fg">
                 <BookOpen size={12} /> {activeTopicName}
-                <button onClick={() => router.push("/notes")} className="ml-1 hover:opacity-70" title="Clear topic filter">
+                <button onClick={() => router.push("/notes")} className="ms-1 hover:opacity-70" title="Clear topic filter">
                   <X size={12} />
                 </button>
               </span>
@@ -445,7 +430,7 @@ function NotesContent() {
               key={note.id}
               onClick={() => router.push("/notes/" + note.id)}
               {...spotlightProps()}
-              className="spotlight-card group relative flex h-[320px] w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-left transition-all duration-200 hover:-translate-y-1 cursor-pointer"
+              className="spotlight-card group relative flex h-[320px] w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-1 cursor-pointer"
               style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, color-mix(in srgb, ${accent} 8%, transparent), transparent 55%)` }}
             >
               {/* Header: icon + actions */}
@@ -461,7 +446,7 @@ function NotesContent() {
                   {isPinned ? <Pin size={18} className="fill-current" /> : <StickyNote size={18} />}
                 </div>
                 <div
-                  className="flex -mr-2 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100"
+                  className="flex -me-2 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
@@ -505,7 +490,7 @@ function NotesContent() {
                   <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
                     {note.topic.subject?.name ? `${note.topic.subject.name} › ` : ""}
                     {note.topic.name}
-                    {isPinned && <span className="ml-2 text-accent">· Pinned</span>}
+                    {isPinned && <span className="ms-2 text-accent">· Pinned</span>}
                   </p>
                 )}
                 <div className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-fg">
@@ -517,7 +502,7 @@ function NotesContent() {
                     <Lightbulb size={12} className={`mt-0.5 shrink-0 ${(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 ? "text-amber-600" : "text-accent"}`} />
                     <p className="line-clamp-2 text-xs leading-relaxed text-fg/75">
                       {(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 && (
-                        <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 mr-1"><ClockAlert size={10}/> Outdated ·</span>
+                        <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 me-1"><ClockAlert size={10}/> Outdated ·</span>
                       )}
                       {(note as any).explanation.replace(/\n/g, " ").slice(0, 130)}{(note as any).explanation.length > 130 ? "…" : ""}
                     </p>
@@ -550,7 +535,7 @@ function NotesContent() {
               </div>
 
               {/* AI Import — absolute subtle */}
-              <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                 <NoteAiImportButton noteId={note.id} noteTitle={note.title} availableBundles={bundles} />
               </div>
             </div>
@@ -580,33 +565,31 @@ function NotesContent() {
                 <X size={12} /> Remove
               </button>
             )}
-            {!selectedTopicId && subjects.length > 0 && (
-              <p className="text-[11px] uppercase tracking-widest text-warning">
-                Pick a subject above and click Use to link a topic before creating.
-              </p>
-            )}
+            <p className="text-[11px] uppercase tracking-widest text-muted-fg">
+              {selectedTopicId ? t("notes.linkedHint") : t("notes.optionalHint")}
+            </p>
           </div>
           <Input
-            label="Title"
-            placeholder="Note title"
+            label={t("notes.titleField")}
+            placeholder={t("notes.noteTitle")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <Textarea
-            label="Content"
-            placeholder="Write your notes... (Markdown supported)"
+            label={t("notes.contentField")}
+            placeholder={t("notes.writeHere")}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={8}
           />
-          <TagInput label="Tags" tags={tags} onChange={setTags} />
+          <TagInput label={t("notes.tags")} tags={tags} onChange={setTags} />
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
             <Button
               onClick={handleCreate}
-              disabled={isPending || !title.trim() || !selectedTopicId}
+              disabled={isPending || !title.trim()}
             >
               {isPending ? "Creating..." : "Create"}
             </Button>
@@ -638,22 +621,22 @@ function NotesContent() {
               )}
               {!editTopicId && subjects.length > 0 && (
                 <p className="text-[11px] uppercase tracking-widest text-warning">
-                  Pick a subject above and click Use to link a topic.
+                  {t("notes.pickSubject")}
                 </p>
               )}
             </div>
             <Input
-              label="Title"
+              label={t("notes.titleField")}
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
             />
             <Textarea
-              label="Content"
+              label={t("notes.contentField")}
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               rows={8}
             />
-            <TagInput label="Tags" tags={editTags} onChange={setEditTags} />
+            <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="ghost" onClick={() => { setEditNote(null); setEditTopicId(""); }}>
                 Cancel

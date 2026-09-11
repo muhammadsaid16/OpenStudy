@@ -73,7 +73,7 @@ export function ToastHost() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed bottom-6 left-1/2 z-[100] flex -translate-x-1/2 flex-col items-center gap-2"
+      className="pointer-events-none fixed bottom-6 start-1/2 z-[100] flex -translate-x-1/2 flex-col items-center gap-2"
     >
       {toasts.map((t) => {
         const isExiting = exiting.has(t.id);

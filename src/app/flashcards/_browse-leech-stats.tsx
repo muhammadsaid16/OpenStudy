@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // ─── Flashcards — BROWSE / LEECHES / STATS modes ─────────────────
 // Extracted from the monolith (browse ~1172-1380, leeches ~1383-1418,
 // stats ~1421-1472). Pure view components; state stays in the parent.
@@ -63,17 +65,18 @@ export interface BrowseModeProps<C extends BrowseCard> {
 }
 
 export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
+  const t = useT();
   const router = useRouter();
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
+          <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-fg" />
           <input
             placeholder={p.browseScope === "bundles" ? "Search bundles..." : "Search all cards..."}
             value={p.browseQuery}
             onChange={(e) => p.onQueryChange(e.target.value)}
-            className="h-10 w-full rounded-xl border border-border bg-bg pl-10 pr-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
+            className="h-10 w-full rounded-xl border border-border bg-bg ps-10 pe-3 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none"
           />
         </div>
         <select
@@ -82,8 +85,8 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
           aria-label="Search scope: cards or bundles"
           className="h-10 rounded-xl border border-border bg-bg px-3 text-xs text-fg focus:outline-none"
         >
-          <option value="cards" className="bg-bg text-fg">Search cards</option>
-          <option value="bundles" className="bg-bg text-fg">Search bundles</option>
+          <option value="cards" className="bg-bg text-fg">{t("browse.searchCards")}</option>
+          <option value="bundles" className="bg-bg text-fg">{t("browse.searchBundles")}</option>
         </select>
       </div>
 
@@ -138,7 +141,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
               key={bundle.id}
               onClick={() => p.onOpenBundle(bundle.id)}
               {...spotlightProps()}
-              className="spotlight-card group relative flex h-48 w-full flex-col justify-between rounded-2xl glass p-5 text-left transition-all duration-200 hover:-translate-y-0.5"
+              className="spotlight-card group relative flex h-48 w-full flex-col justify-between rounded-2xl glass p-5 text-start transition-all duration-200 hover:-translate-y-0.5"
               style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
             >
               <div
@@ -202,7 +205,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                   <div className="flex gap-1">
                     <button
                       onClick={(e) => { e.stopPropagation(); p.onEditCard(card); }}
-                      aria-label="Edit card"
+                      aria-label={t("browse.editCard")}
                       title="Edit"
                       className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent")}
                     >
@@ -210,7 +213,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); p.onDeleteCard(card); }}
-                      aria-label="Delete card"
+                      aria-label={t("browse.deleteCard")}
                       title="Delete"
                       className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-danger/10 hover:text-danger")}
                     >
@@ -279,11 +282,12 @@ export interface LeechesModeProps {
 }
 
 export function LeechesMode(p: LeechesModeProps) {
+  const t = useT();
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-danger/40 bg-danger/5 p-4">
         <p className="text-sm font-bold uppercase tracking-widest text-danger">
-          <AlertTriangle size={14} className="mr-2 inline" />
+          <AlertTriangle size={14} className="me-2 inline" />
           Leech protection
         </p>
         <p className="mt-1 text-xs text-muted-fg uppercase tracking-widest">

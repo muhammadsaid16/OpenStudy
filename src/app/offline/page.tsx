@@ -1,27 +1,30 @@
+"use client";
+
+// Offline fallback (served by the SW when a page isn't cached).
+// Client component so it localizes; the SW serves the cached shell so
+// the store/hook are available.
+
 import Link from "next/link";
+import { WifiOff } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
-export const metadata = { title: "Offline — OpenStudy" };
-
-/* Static offline fallback served by the service worker when a page
-   isn't cached yet. Themed via data-theme tokens, no JS needed. */
 export default function OfflinePage() {
+  const t = useT();
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center p-8 text-center">
       <div className="mb-6 rounded-2xl border border-border bg-bg px-6 py-3">
         <span className="text-4xl lg:text-6xl font-black tracking-tighter text-fg">
-          OFFLINE
+          {t("offline.badge")}
         </span>
       </div>
       <p className="max-w-md text-sm uppercase tracking-widest text-muted-fg">
-        You&apos;re offline and this page isn&apos;t cached yet. Your saved
-        cards &amp; notes are safe in this device&apos;s local storage —
-        previously visited pages still work.
+        {t("offline.body")}
       </p>
       <Link
         href="/"
-        className="mt-8 inline-block bg-accent px-6 py-3 text-sm font-bold uppercase tracking-widest text-accent-text transition-transform hover:scale-105"
+        className="mt-8 inline-block bg-accent px-6 py-3 text-sm font-bold uppercase tracking-widest text-accent-fg transition-transform hover:scale-105"
       >
-        GO HOME
+        {t("offline.goHome")}
       </Link>
     </div>
   );

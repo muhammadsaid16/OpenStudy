@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import { useState, type ChangeEvent } from "react";
 import { Tag, ArrowRight, RotateCcw, Trash2, X } from "lucide-react";
 import { Button, Modal, Input } from "./ui";
@@ -22,6 +24,7 @@ export function BulkActionBar({
   currentBundleId?: string;
   onCleared: () => void;
 }) {
+  const t = useT();
   const router = useRouter();
   const [tagOpen, setTagOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
@@ -116,7 +119,7 @@ export function BulkActionBar({
             type="button"
             onClick={onCleared}
             className="rounded-full p-1.5 text-muted-fg hover:bg-accent-soft hover:text-accent"
-            aria-label="Clear selection"
+            aria-label={t("bulk.clear")}
           >
             <X size={14} />
           </button>
@@ -124,7 +127,7 @@ export function BulkActionBar({
       </div>
 
       {/* TAG modal */}
-      <Modal open={tagOpen} onClose={() => setTagOpen(false)} title="Tag cards">
+      <Modal open={tagOpen} onClose={() => setTagOpen(false)} title={t("bulk.tag")}>
         <div className="space-y-4">
           <p className="text-sm text-muted-fg">
             Comma-separated tags. <span className="font-bold text-fg">{ids.length}</span> cards selected.
@@ -136,7 +139,7 @@ export function BulkActionBar({
             autoFocus
           />
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setTagOpen(false)}>CANCEL</Button>
+            <Button variant="secondary" size="sm" onClick={() => setTagOpen(false)}>{t("common.cancelUpper")}</Button>
             <Button size="sm" onClick={doTag} disabled={busy || !tagInput.trim()}>
               {busy ? "Tagging…" : "Apply"}
             </Button>
@@ -145,7 +148,7 @@ export function BulkActionBar({
       </Modal>
 
       {/* MOVE modal */}
-      <Modal open={moveOpen} onClose={() => setMoveOpen(false)} title="Move cards">
+      <Modal open={moveOpen} onClose={() => setMoveOpen(false)} title={t("bulk.move")}>
         <div className="space-y-4">
           <p className="text-sm text-muted-fg">
             Move <span className="font-bold text-fg">{ids.length}</span> cards to another bundle.
@@ -163,7 +166,7 @@ export function BulkActionBar({
             )}
           </select>
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setMoveOpen(false)}>CANCEL</Button>
+            <Button variant="secondary" size="sm" onClick={() => setMoveOpen(false)}>{t("common.cancelUpper")}</Button>
             <Button size="sm" onClick={doMove} disabled={busy || !effectiveMoveTarget}>
               {busy ? "Moving…" : "Move"}
             </Button>
@@ -172,7 +175,7 @@ export function BulkActionBar({
       </Modal>
 
       {/* DELETE confirm */}
-      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title="Delete cards">
+      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title={t("bulk.delete")}>
         <div className="space-y-4">
           <p className="text-sm text-fg">
             Delete <span className="font-bold text-danger">{ids.length}</span> cards? This cannot be undone.

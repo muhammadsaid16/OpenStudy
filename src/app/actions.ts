@@ -243,7 +243,7 @@ export async function getNotes(topicId: string) {
 }
 
 export async function createNote(data: {
-  topicId: string;
+  topicId?: string | null;
   title: string;
   content?: string;
   explanation?: string | null;

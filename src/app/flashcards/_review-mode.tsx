@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // ─── Flashcards — REVIEW mode ────────────────────────────────────
 // Extracted from the 1,683-line monolith (lines ~847-1169). Renders:
 // bundle overview, session run (flip card, MCQ, sprint, ratings),
@@ -68,6 +70,7 @@ export interface ReviewModeProps<C extends ReviewCard> {
 }
 
 export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
+  const t = useT();
   // No bundle selected → overview grid
   if (!p.selectedBundle && !p.allDue && !p.topicParam) {
     return (
@@ -94,7 +97,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                 key={bundle.id}
                 onClick={() => p.onSelectBundle(bundle.id)}
                 {...spotlightProps()}
-                className="spotlight-card group relative flex h-48 w-full flex-col justify-between rounded-2xl glass p-5 transition-all duration-200 hover:-translate-y-0.5 text-left"
+                className="spotlight-card group relative flex h-48 w-full flex-col justify-between rounded-2xl glass p-5 transition-all duration-200 hover:-translate-y-0.5 text-start"
                 style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
               >
                 <div
@@ -162,13 +165,13 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
       <div className="mx-auto max-w-2xl space-y-6 text-center">
         <div className="rounded-2xl border border-success bg-success/5 p-8">
           <Zap size={48} className="mx-auto mb-4 text-success" />
-          <p className="text-2xl font-bold uppercase tracking-tight">Session complete!</p>
+          <p className="text-2xl font-bold uppercase tracking-tight">{t("review.complete")}</p>
           <p className="mt-2 text-sm text-muted-fg uppercase tracking-widest">
             You reviewed {p.totalReviewed} card{p.totalReviewed !== 1 ? "s" : ""} this session
           </p>
         </div>
         <div className="flex justify-center gap-4">
-          <Button onClick={p.onStudyAgain}>Study again</Button>
+          <Button onClick={p.onStudyAgain}>{t("review.studyAgain")}</Button>
           <Button variant="secondary" onClick={p.onBackToBundles}>
             Back to bundles
           </Button>
@@ -186,7 +189,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
           {p.learningQueueLength > 0 && (
             <Badge variant="warning">Relearning × {p.learningQueueLength}</Badge>
           )}
-          <Badge variant="success"><Zap size={12} className="mr-1" />{p.totalDue} in queue</Badge>
+          <Badge variant="success"><Zap size={12} className="me-1" />{p.totalDue} in queue</Badge>
         </div>
       </div>
 

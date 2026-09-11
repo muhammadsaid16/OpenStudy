@@ -46,10 +46,10 @@
   --color-badge-mint: #6EE7B7;
   --color-badge-sky: #7DD3FC;
 
-  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-round: "Plus Jakarta Sans", "Inter", ui-sans-serif, sans-serif;
+  --font-round: "Plus Jakarta Sans", "Inter", "Noto Sans Arabic", "Segoe UI", ui-sans-serif, sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -566,10 +566,12 @@ select:disabled {
 .md-h3 { font-size: 1.1rem; }
 .md-h4, .md-h5, .md-h6 { font-size: 1rem; }
 .md-ul, .md-ol { margin: 0.5rem 0 0.5rem 1.25rem; display: flex; flex-direction: column; gap: 0.25rem; }
+[dir="rtl"] .md-ul, [dir="rtl"] .md-ol { margin: 0.5rem 1.25rem 0.5rem 0; }
 .md-ul { list-style: disc; }
 .md-ol { list-style: decimal; }
 .md-ul li, .md-ol li { line-height: 1.5; }
 .md-quote { border-left: 3px solid var(--color-accent); padding: 0.25rem 0 0.25rem 0.75rem; margin: 0.5rem 0; color: var(--color-muted-fg); }
+[dir="rtl"] .md-quote { border-left: none; border-right: 3px solid var(--color-accent); padding: 0.25rem 0.75rem 0.25rem 0; }
 .md-pre { background: var(--color-muted); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.75rem; overflow-x: auto; margin: 0.5rem 0; }
 .md-pre code, .md-code { font-family: var(--font-mono); font-size: 0.85em; }
 .md-code { background: var(--color-muted); padding: 0.1rem 0.35rem; border-radius: 4px; }
@@ -640,8 +642,52 @@ p.font-mono,
 }
 
 /* ─── RTL (Arabic UI) ─────────────────────────────────────────
-   dir=rtl flips flow automatically; fix the few physical utilities
-   that must mirror (sidebar border, chevrons handled per-component). */
+   dir=rtl flips flow automatically. Most layout now uses logical
+   Tailwind utilities (ms/me/ps/pe/start/end/text-start/border-s/e),
+   so this section only covers what CSS can't get from dir alone:
+   mirrored transforms, Arabic typography, and physical leftovers. */
+
+/* Icons/arrows/chevrons that must mirror in RTL. */
 [dir="rtl"] .rtl-flip {
   transform: scaleX(-1);
 }
+
+/* Latin-only decorative glyphs (kbd shortcuts, arrows in stats) keep
+   LTR flow even inside RTL paragraphs. */
+[dir="rtl"] kbd,
+[dir="rtl"] .ltr-inline {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Arabic typography: taller line metrics need more breathing room. */
+[dir="rtl"] body {
+  font-feature-settings: "kern" 1;
+  letter-spacing: 0 !important;
+}
+[dir="rtl"] .font-display,
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 {
+  letter-spacing: 0 !important;
+}
+/* tracking-widest/wider on Arabic labels breaks joined letterforms —
+   neutralize (spacing works fine for pure-Latin badges). */
+[dir="rtl"] .tracking-widest,
+[dir="rtl"] .tracking-wider {
+  letter-spacing: 0.02em;
+}
+/* Arabic numerals render smaller in Plus Jakarta; equalize slightly. */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  font-family: inherit;
+  text-align: start;
+}
+
+/* Loader bar / progress fills anchored with physical left. */
+[dir="rtl"] .loader-bar-fill {
+  left: auto;
+  right: 0;
+}
+
+/* Horizontally scrolling rows keep natural (LTR) scroll direction —
+   this matches Arabic reading of timeline content. */

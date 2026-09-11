@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useTransition } from "react";
+import { useT } from "@/lib/i18n";
 import { Play, Pause, Square, Clock, Timer, Trash2, SkipForward, Coffee, Brain, Save, X } from "lucide-react";
 import { Badge, EmptyState, Skeleton, Modal, Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ const PHASE_META = {
 } as const;
 
 export default function SessionsPage() {
+  const t = useT();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -308,9 +310,9 @@ export default function SessionsPage() {
     <div className="p-8 lg:p-12">
       {/* Header */}
       <div className="mb-10">
-        <RevealHeading text="Sessions" className="text-5xl lg:text-8xl" />
+        <RevealHeading text={t("sessions.title")} className="text-5xl lg:text-8xl" />
         <ScrambleSubtitle
-          text="Track your study time and progress"
+          text={t("sessions.subtitle")}
           className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
         />
       </div>
@@ -436,7 +438,7 @@ export default function SessionsPage() {
                         onClick={() => removePreset(p.id)}
                         disabled={pomo.running}
                         aria-label={`Delete preset ${p.name}`}
-                        className="border-l border-border px-2 py-2 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed"
+                        className="border-s border-border px-2 py-2 text-muted-fg transition-colors hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed"
                       >
                         <X size={12} />
                       </button>
@@ -575,7 +577,7 @@ export default function SessionsPage() {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
-                      className="absolute right-5 top-5 flex h-3 w-3"
+                      className="absolute end-5 top-5 flex h-3 w-3"
                     >
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger opacity-60" />
                       <span className="relative inline-flex h-3 w-3 rounded-full bg-danger" />

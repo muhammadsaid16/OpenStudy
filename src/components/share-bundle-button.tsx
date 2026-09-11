@@ -96,7 +96,7 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
             <Button variant="secondary" disabled={busy} onClick={download}>{busy ? "…" : "Save file"}</Button>
           </div>
           {link && (
-            <button type="button" onClick={copy} className="w-full break-all rounded-xl border border-accent bg-accent/10 p-3 text-left text-xs">
+            <button type="button" onClick={copy} className="w-full break-all rounded-xl border border-accent bg-accent/10 p-3 text-start text-xs">
               {link}
               <span className="mt-1 block font-bold uppercase tracking-widest">{copied ? "Copied ✓" : "Tap to copy"}</span>
             </button>

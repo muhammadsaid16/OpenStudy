@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // ─── Focus Zone — the signature widget ─────────────────────────────
 // Circular SVG Pomodoro with a breathing conic halo while running,
 // phase chips (focus / break / long break), built-in + saved custom
@@ -50,6 +52,7 @@ const PHASE_META = {
 } as const;
 
 export function FocusZone() {
+  const t = useT();
   const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
   const [presets, setPresets] = useState<PomoPresetRec[]>([]);
   const [dueCount, setDueCount] = useState(0);
@@ -176,7 +179,7 @@ export function FocusZone() {
           <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
             Focus Zone
           </p>
-          <h2 className="font-display text-xl font-bold tracking-tight">Pomodoro</h2>
+          <h2 className="font-display text-xl font-bold tracking-tight">{t("focus.pomodoro")}</h2>
         </div>
         <button
           onClick={() => {
@@ -338,7 +341,7 @@ export function FocusZone() {
         <input
           value={task}
           onChange={(e) => setTask(e.target.value)}
-          placeholder="What are you working on?"
+          placeholder={t("focus.workingOn")}
           disabled={pomo.running}
           className="w-full rounded-lg bg-transparent text-sm font-medium text-fg placeholder:text-muted-fg/60 outline-none disabled:opacity-60"
         />

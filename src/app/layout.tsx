@@ -44,7 +44,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "var map={onyx:'mono',void:'midnight',emerald:'matrix',magma:'ember',grape:'nebula'};" +
               "if(map[t]){t=map[t];try{var o=JSON.parse(p);o.theme=t;localStorage.setItem('study-prefs',JSON.stringify(o));}catch(e){}}" +
               "if(!['aurora','midnight','nebula','matrix','ember','rosewood','cyberpunk','arctic','sandstone','mono','light','paper'].includes(t))t='aurora';" +
-              "document.documentElement.setAttribute('data-theme',t||'aurora');}catch(e){document.documentElement.setAttribute('data-theme','aurora');}})();",
+              "document.documentElement.setAttribute('data-theme',t||'aurora');" +
+              "var l=p?JSON.parse(p).lang:'en';" +
+              "if(l!=='ar')l='en';" +
+              "document.documentElement.setAttribute('lang',l);" +
+              "document.documentElement.setAttribute('dir',l==='ar'?'rtl':'ltr');}catch(e){document.documentElement.setAttribute('data-theme','aurora');}})();",
           }}
         />
       </head>

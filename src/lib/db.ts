@@ -35,7 +35,7 @@ export interface ResourceRec {
 
 export interface NoteRec {
   id: string;
-  topicId: string;
+  topicId: string | null; // optional link — standalone notes allowed
   title: string;
   content: string;
   explanation?: string | null;

@@ -7,6 +7,7 @@
 // Wrapped by Next.js automatically when placed at app/error.tsx.
 
 import { useEffect } from "react";
+import { useT } from "@/lib/i18n";
 import { AlertTriangle, Home, RotateCcw } from "lucide-react";
 
 export default function RouteError({
@@ -16,6 +17,7 @@ export default function RouteError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useT();
   useEffect(() => {
     // Surface to console for debugging; digest identifies this error
     // instance in reports without leaking user content.
@@ -32,8 +34,7 @@ export default function RouteError({
           Something broke
         </h2>
         <p className="mt-2 max-w-sm text-sm text-muted-fg">
-          This screen hit an unexpected error. Your data is safe — IndexedDB
-          writes are local. Try again, or head back to the dashboard.
+          {t("err.body")}
         </p>
         {error?.digest && (
           <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-fg">
@@ -54,7 +55,7 @@ export default function RouteError({
           className="inline-flex items-center gap-2 rounded-full border border-glass-border bg-glass px-5 py-2.5 text-sm font-bold text-fg transition-colors hover:bg-accent-soft"
         >
           <Home size={14} aria-hidden />
-          Dashboard
+          {t("err.dashboard")}
         </a>
       </div>
     </div>

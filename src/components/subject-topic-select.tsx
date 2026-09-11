@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useEffect, useState } from "react";
 import { Plus, Check } from "lucide-react";
 import { Input } from "@/components/ui";
@@ -34,6 +36,7 @@ export function SubjectTopicSelect({
   /** Called after an inline subject creation so the parent list refreshes. */
   onSubjectsChange?: (subjects: Subject[]) => void;
 }) {
+  const t = useT();
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [topicName, setTopicName] = useState("");
   const [creating, setCreating] = useState(false);
@@ -134,17 +137,17 @@ export function SubjectTopicSelect({
                 setTopics([]);
                 if (e.target.value) void loadTopics(e.target.value);
               }}
-              aria-label="Select a subject"
+              aria-label={t("subjSelect.selectSubject")}
               className="flex h-10 w-full rounded-lg border border-border bg-bg px-2 text-sm font-bold text-fg focus:outline-none"
             >
-              <option value="" className="bg-bg text-fg">Select a subject…</option>
+              <option value="" className="bg-bg text-fg">{t("subjSelect.selectSubjectPh")}</option>
               {subjects.map((s) => (
                 <option key={s.id} value={s.id} className="bg-bg text-fg">{s.name}</option>
               ))}
             </select>
 
             {/* existing topics of that subject */}
-            {loadingTopics && <p className="text-xs text-muted-fg">Loading topics…</p>}
+            {loadingTopics && <p className="text-xs text-muted-fg">{t("subjSelect.loading")}</p>}
             {!loadingTopics && topics.length > 0 && (
               <div className="max-h-36 space-y-1 overflow-y-auto">
                 {topics.map((t) => (
@@ -165,14 +168,14 @@ export function SubjectTopicSelect({
               </div>
             )}
             {!loadingTopics && topics.length === 0 && selectedSubject && (
-              <p className="text-xs text-muted-fg">No topics in this subject yet.</p>
+              <p className="text-xs text-muted-fg">{t("subjSelect.noTopics")}</p>
             )}
 
             {/* new topic under selected subject */}
             {selectedSubject && (
               <div className="flex gap-2">
                 <Input
-                  placeholder="New topic name"
+                  placeholder={t("subjSelect.newTopicName")}
                   value={topicName}
                   onChange={(e) => setTopicName(e.target.value)}
                   onKeyDown={(e) => {
@@ -205,7 +208,7 @@ export function SubjectTopicSelect({
       <div className="space-y-2">
         <Input
           autoFocus
-          placeholder="Subject name (e.g. Biology)"
+          placeholder={t("subjSelect.subjectName")}
           value={newSubjectName}
           onChange={(e) => setNewSubjectName(e.target.value)}
           onKeyDown={(e) => {
@@ -239,7 +242,7 @@ export function SubjectTopicSelect({
           setSelectedSubject(e.target.value);
           setTopics(null); // menu below reloads for the new subject
         }}
-        aria-label="Select a subject"
+        aria-label={t("subjSelect.selectSubject")}
         className="flex h-12 w-full border-b border-border bg-bg px-0 py-2 text-lg font-bold uppercase tracking-tight text-fg focus:outline-none"
       >
         <option value="" className="bg-bg text-fg">

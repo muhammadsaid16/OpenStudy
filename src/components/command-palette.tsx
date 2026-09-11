@@ -145,7 +145,7 @@ export function CommandPalette() {
                   data-active={i === sel}
                   onMouseEnter={() => setSel(i)}
                   onClick={() => go(e)}
-                  className={cn("flex w-full flex-col gap-0.5 rounded-lg px-3 py-2 text-left", i === sel ? "bg-accent/15" : "hover:bg-accent/10")}
+                  className={cn("flex w-full flex-col gap-0.5 rounded-lg px-3 py-2 text-start", i === sel ? "bg-accent/15" : "hover:bg-accent/10")}
                 >
                   <span className="truncate text-sm font-bold uppercase">{e.title}</span>
                   {e.sub !== "" && <span className="truncate text-xs text-muted-fg">{e.sub}</span>}

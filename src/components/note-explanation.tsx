@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, Clipboard, ClipboardCheck, ExternalLink, Trash2, Pencil, Copy, Check, Loader2, Lightbulb, AlertTriangle, BookOpen, Download, FileDown, ClockAlert } from "lucide-react";
 import { Button, Skeleton } from "@/components/ui";
@@ -46,6 +48,7 @@ export function NoteExplanation({
   noteUpdatedAt?: Date | string | null;
   onSaved: (next: string | null) => void;
 }) {
+  const t = useT();
   const [generating, setGenerating] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
@@ -306,14 +309,14 @@ export function NoteExplanation({
               <span className="rounded-full bg-accent-soft px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent">AI</span>
             )}
             {isTyping && (
-              <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-fg animate-pulse">Typing…</span>
+              <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-fg animate-pulse">{t("noteExp.typing")}</span>
             )}
             {isStale && !isTyping && (
-              <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Outdated</span>
+              <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">{t("noteExp.outdated")}</span>
             )}
           </h2>
           <p className="mt-1 max-w-xl text-xs leading-relaxed text-muted-fg">
-            Two ways to get your study companion. <span className="font-semibold text-fg">Option 1</span> generates it here instantly.
+            Two ways to get your study companion. <span className="font-semibold text-fg">{t("noteExp.option1")}</span> generates it here instantly.
             <span className="font-semibold text-fg"> Option 2 — NotebookLM</span> is the backup when the lesson is very long or credits run out.
           </p>
           {explanationUpdatedAt && hasExplanation && (
@@ -333,10 +336,10 @@ export function NoteExplanation({
               <Button size="sm" variant="secondary" onClick={copyExp}>
                 {copiedExp ? <Check size={14} /> : <Copy size={14} />} {copiedExp ? "Copied" : "Copy"}
               </Button>
-              <Button size="sm" variant="secondary" onClick={downloadMarkdown} title="Download as Markdown">
+              <Button size="sm" variant="secondary" onClick={downloadMarkdown} title={t("noteExp.downloadMd")}>
                 <Download size={14} /> .md
               </Button>
-              <Button size="sm" variant="secondary" onClick={exportPdf} title="Save as PDF">
+              <Button size="sm" variant="secondary" onClick={exportPdf} title={t("noteExp.savePdf")}>
                 <FileDown size={14} /> PDF
               </Button>
               <Button size="sm" variant="ghost" onClick={doDelete} disabled={saving} className="text-muted-fg hover:text-danger">
@@ -354,7 +357,7 @@ export function NoteExplanation({
       {/* Edit */}
       {editing && (
         <div className="mt-6 rounded-2xl border border-glass-border bg-bg-raised p-4">
-          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">Edit explanation (Markdown)</label>
+          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("noteExp.editExpl")}</label>
           <textarea
             value={editText}
             onChange={(e) => setEditText(e.target.value)}

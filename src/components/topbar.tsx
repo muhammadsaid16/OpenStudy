@@ -5,15 +5,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
-function greetingFor(h: number) {
-  if (h < 5) return "Still up";
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
+function greetingFor(h: number, t: (k: string) => string) {
+  if (h < 5) return t("topbar.greeting.late");
+  if (h < 12) return t("topbar.greeting.morning");
+  if (h < 17) return t("topbar.greeting.afternoon");
+  return t("topbar.greeting.evening");
 }
 
 export function TopBar({ dueCards }: { dueCards: number }) {
+  const t = useT();
   const [now, setNow] = useState<Date | null>(null);
   const [q, setQ] = useState("");
   const router = useRouter();
@@ -61,10 +63,10 @@ export function TopBar({ dueCards }: { dueCards: number }) {
             : "\u00A0"}
         </p>
         <h1 className="font-display truncate text-2xl font-bold tracking-tight lg:text-3xl">
-          {now ? `${greetingFor(now.getHours())}, learner` : "Welcome back"}
+          {now ? `${greetingFor(now.getHours(), t)}, ${t("topbar.learner")}` : t("topbar.welcomeBack")}
           {dueCards > 0 && (
-            <span className="ml-3 inline-flex items-center rounded-full bg-accent-soft px-3 py-0.5 align-middle text-xs font-bold uppercase tracking-widest text-accent">
-              {dueCards} due
+            <span className="ms-3 inline-flex items-center rounded-full bg-accent-soft px-3 py-0.5 align-middle text-xs font-bold uppercase tracking-widest text-accent">
+              {dueCards} {t("topbar.due")}
             </span>
           )}
         </h1>
@@ -73,7 +75,7 @@ export function TopBar({ dueCards }: { dueCards: number }) {
       {/* Global search (audit §7): wider, names what it searches, and the
           kbd hint matches the user's OS instead of hardcoding ⌘K. */}
       <label className="glass-inset relative hidden h-11 w-full max-w-md items-center rounded-full sm:flex lg:w-96">
-        <Search size={15} aria-hidden className="absolute left-4 text-muted-fg" />
+        <Search size={15} aria-hidden className="absolute start-4 text-muted-fg" />
         <input
           id="global-search"
           value={q}
@@ -86,11 +88,11 @@ export function TopBar({ dueCards }: { dueCards: number }) {
               router.push(`/subjects?q=${encodeURIComponent(q.trim())}`);
             }
           }}
-          placeholder="Search notes, cards, decks…"
-          aria-label="Search notes, cards and decks"
-          className="w-full bg-transparent pl-10 pr-14 text-sm text-fg placeholder:text-muted-fg/60 outline-none"
+          placeholder={t("topbar.search")}
+          aria-label={t("topbar.search")}
+          className="w-full bg-transparent ps-10 pe-14 text-sm text-fg placeholder:text-muted-fg/60 outline-none"
         />
-        <kbd className="absolute right-4 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-fg">
+        <kbd className="absolute end-4 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-fg">
           {isMac ? "⌘K" : "Ctrl K"}
         </kbd>
       </label>

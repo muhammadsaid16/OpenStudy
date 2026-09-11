@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import { useState } from "react";
 import { RotateCcw, AlertTriangle, Check } from "lucide-react";
 import { Button, Modal } from "./ui";
@@ -18,6 +20,7 @@ export function HardestCardsTable({
   bundles: BundleRec[];
   limit?: number;
 }) {
+  const t = useT();
   const router = useRouter();
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -54,11 +57,11 @@ export function HardestCardsTable({
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border text-[10px] font-mono uppercase tracking-widest text-muted-fg">
-              <th className="py-2 pr-4">FRONT</th>
-              <th className="py-2 pr-4">BUNDLE</th>
-              <th className="py-2 pr-4 text-right">ACCURACY</th>
-              <th className="py-2 pr-4 text-right">REVIEWS</th>
-              <th className="py-2 pr-2 text-right">ACTION</th>
+              <th className="py-2 pr-4">{t("hardest.front")}</th>
+              <th className="py-2 pr-4">{t("hardest.bundle")}</th>
+              <th className="py-2 pr-4 text-right">{t("hardest.accuracy")}</th>
+              <th className="py-2 pr-4 text-right">{t("hardest.reviews")}</th>
+              <th className="py-2 pr-2 text-right">{t("hardest.action")}</th>
             </tr>
           </thead>
           <tbody>
@@ -98,7 +101,7 @@ export function HardestCardsTable({
         </table>
       </div>
 
-      <Modal open={confirmId !== null} onClose={() => setConfirmId(null)} title="Reset card progress">
+      <Modal open={confirmId !== null} onClose={() => setConfirmId(null)} title={t("hardest.reset")}>
         <div className="space-y-4">
           <div className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
             <AlertTriangle size={14} className="shrink-0 mt-0.5" />

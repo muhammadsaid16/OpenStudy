@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useT } from "@/lib/i18n";
 import { Card } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
@@ -98,6 +99,7 @@ function HourlyBars({ buckets }: { buckets: number[] }) {
 
 // ── page ─────────────────────────────────────────────────────────
 export default function StatsPage() {
+  const t = useT();
   const [reviews, setReviews] = useState<ReviewLogRec[] | null>(null);
   const [bundles, setBundles] = useState<BundleRec[] | null>(null);
   const [cards, setCards] = useState<FlashcardRec[] | null>(null);
@@ -224,8 +226,8 @@ export default function StatsPage() {
       {/* header */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <RevealHeading text="Stats" className="text-4xl lg:text-6xl" />
-          <ScrambleSubtitle text="Retention, forecast, and per-bundle mastery" className="mt-2 text-sm text-muted-fg uppercase tracking-widest" />
+          <RevealHeading text={t("stats.title")} className="text-4xl lg:text-6xl" />
+          <ScrambleSubtitle text={t("stats.subtitle")} className="mt-2 text-sm text-muted-fg uppercase tracking-widest" />
         </div>
         <div className="flex items-center gap-3">
           <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label="Period">
@@ -272,7 +274,7 @@ export default function StatsPage() {
           works, derived from real session + review data. */}
       <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Card className="!p-5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">Best study day</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("stats.bestDay")}</p>
           <p className="mt-1 font-display text-xl font-bold tracking-tight">
             {bestDay ? `${bestDay.label} — ${bestDay.label2}` : "No data yet"}
           </p>
@@ -281,7 +283,7 @@ export default function StatsPage() {
           </p>
         </Card>
         <Card className="!p-5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">Most studied subject</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("stats.mostStudied")}</p>
           <p className="mt-1 font-display text-xl font-bold tracking-tight">
             {topSubject ? topSubject.name : "No data yet"}
           </p>
@@ -305,8 +307,8 @@ export default function StatsPage() {
           </div>
           {daily.every((d) => d.count === 0) ? (
             <div className="flex h-[110px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20">
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">No activity yet</p>
-              <p className="mt-1 text-[11px] text-muted-fg">Start reviewing to see your activity</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("stats.noActivity")}</p>
+              <p className="mt-1 text-[11px] text-muted-fg">{t("stats.startReviewing")}</p>
             </div>
           ) : (
             <div className="flex items-end gap-[3px] h-[110px]">
@@ -340,7 +342,7 @@ export default function StatsPage() {
         </Card>
 
         <Card className="lg:col-span-4 !p-5">
-          <p className="font-semibold tracking-tight">Peak hours</p>
+          <p className="font-semibold tracking-tight">{t("stats.peakHours")}</p>
           <p className="mb-4 text-[11px] uppercase tracking-widest text-muted-fg">When you review · 24h distribution</p>
           <HourlyBars buckets={hourly} />
           <div className="mt-4 rounded-xl border border-border bg-muted/30 p-3 flex items-center justify-between">

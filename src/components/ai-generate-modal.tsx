@@ -438,7 +438,7 @@ export function AiGenerateModal({
                 <button
                   type="button"
                   onClick={clearImage}
-                  className="absolute right-2 top-2 rounded-full border border-border bg-bg/90 p-1 text-muted-fg hover:text-accent hover:bg-accent-soft"
+                  className="absolute end-2 top-2 rounded-full border border-border bg-bg/90 p-1 text-muted-fg hover:text-accent hover:bg-accent-soft"
                   aria-label="Remove image"
                 >
                   <X size={14} />
@@ -588,7 +588,7 @@ export function AiGenerateModal({
       )}
 
       {/* Card list */}
-      <ul className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+      <ul className="max-h-[420px] space-y-2 overflow-y-auto pe-1">
         {cards.map((c, i) => {
           const off = rejected.has(i);
           return (
