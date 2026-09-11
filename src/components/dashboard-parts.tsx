@@ -19,7 +19,7 @@ export function StudyAllDueButton() {
       className="inline-flex h-10 items-center gap-2 rounded-full bg-accent px-5 text-xs font-bold uppercase tracking-widest text-accent-fg transition-transform hover:scale-[1.03] active:scale-95 glow-accent"
     >
       <PlayCircle size={15} aria-hidden />
-      Review now
+      {t("dash.reviewNow")}
     </Link>
   );
 }
