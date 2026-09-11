@@ -36,7 +36,7 @@ import {
   batchTagCards,
   batchMoveCards,
   restoreFlashcard,
-  getFlashcardSnapshot,
+  getFlashcardSnapshot, getCardTagLinks,
 } from "@/app/actions";
 import { ReviewMode } from "./_review-mode";
 import { BrowseMode, LeechesMode, StatsMode } from "./_browse-leech-stats";
@@ -641,7 +641,7 @@ function FlashcardsContent() {
       // Snapshot everything needed for a faithful undo BEFORE deletion
       const [cardSnapshot, tagLinks] = await Promise.all([
         getFlashcardSnapshot(snapshot.id),
-        offlineDb.cardTags.where("cardId").equals(snapshot.id).toArray(),
+        getCardTagLinks(snapshot.id),
       ]);
       await deleteFlashcard(snapshot.id);
       setDeleteTarget(null);

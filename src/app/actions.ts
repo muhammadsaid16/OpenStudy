@@ -463,6 +463,10 @@ export async function deleteFlashcard(id: string) {
 
 /** Undo helper: reinsert an EXACT snapshot of a deleted card (id, SM-2
  * state, tags, topic/bundle links) so undo doesn't reset scheduling. */
+export async function getCardTagLinks(cardId: string) {
+  return db.cardTags.where("cardId").equals(cardId).toArray();
+}
+
 export async function restoreFlashcard(
   card: FlashcardRec,
   tagIds: { cardId: string; tagId: string }[]

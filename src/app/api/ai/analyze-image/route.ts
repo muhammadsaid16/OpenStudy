@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { parseAiCardsXml, type XmlCard } from "@/lib/ai-import/schema";
 
 // Image-to-cards. The client uploads a photo of notes / a textbook page
@@ -85,6 +86,9 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 export async function POST(req: Request) {
+  const rl = rateLimit(`ai:analyze-image:` + clientIp(req), 10, 60_000);
+  if (!rl.ok) return NextResponse.json({ error: "Too many requests — try again shortly." }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs/1000)) } });
+
   const t0 = Date.now();
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
