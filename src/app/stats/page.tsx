@@ -352,8 +352,8 @@ export default function StatsPage() {
           <div className="mt-4 space-y-2">
             <p className="text-[11px] font-bold uppercase tracking-widest text-muted-fg">Quick stats</p>
             <div className="flex justify-between text-sm"><span className="text-muted-fg">Due now</span><span className={`font-mono font-bold ${dueNow > 0 ? "text-accent" : "text-muted-fg"}`}>{dueNow}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-fg">Cards</span><span className="font-mono font-bold">{cards.length}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-fg">Bundles</span><span className="font-mono font-bold">{bundles.length}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-fg">{t("dash.tabs.cards")}</span><span className="font-mono font-bold">{cards.length}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-fg">{t("common.bundles")}</span><span className="font-mono font-bold">{bundles.length}</span></div>
           </div>
         </Card>
       </div>

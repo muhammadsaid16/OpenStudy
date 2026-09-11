@@ -228,7 +228,7 @@ export default function DashboardPage() {
             <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               {[
                 {
-                  label: "Subjects",
+                  label: t("dash.tabs.subjects"),
                   value: stats.totalSubjects,
                   icon: BookOpen,
                   // Empty state = next action (audit 3.1): each stat card
@@ -237,14 +237,14 @@ export default function DashboardPage() {
                   emptyHref: "/subjects",
                 },
                 {
-                  label: "Topics",
+                  label: t("dash.tabs.topics"),
                   value: stats.totalTopics,
                   icon: Layers,
                   emptyCta: "Create a topic",
                   emptyHref: "/subjects",
                 },
                 {
-                  label: "Cards",
+                  label: t("dash.tabs.cards"),
                   value: stats.totalFlashcards,
                   icon: Brain,
                   emptyCta: "Make flashcards",

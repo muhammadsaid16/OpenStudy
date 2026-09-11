@@ -32,19 +32,19 @@ const FALL_TRANSITION = { type: "spring" as const, stiffness: 420, damping: 18 }
 // normal-case; render sites style them as eyebrows via CSS.
 const PHASE_META = {
   work: {
-    label: "Focus",
+    label: t("sessions.phaseFocus"),
     cls: "border-accent/40 bg-accent-soft text-accent",
     ring: "var(--color-accent)",
     text: "text-accent",
   },
   break: {
-    label: "Break",
+    label: t("sessions.phaseBreak"),
     cls: "border-flow/40 bg-flow/10 text-flow",
     ring: "var(--color-flow)",
     text: "text-flow",
   },
   long: {
-    label: "Long break",
+    label: t("sessions.phaseLongBreak"),
     cls: "border-grow/40 bg-grow/10 text-grow",
     ring: "var(--color-grow)",
     text: "text-grow",
@@ -594,7 +594,7 @@ export default function SessionsPage() {
                   {formatTimer(timerSeconds)}
                 </p>
                 <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-fg">
-                  {timerRunning && !timerPaused ? "● Rec — focus" : timerRunning ? "Paused" : "Ready"}
+                  {timerRunning && !timerPaused ? "● Rec — focus" : timerRunning ? t("sessions.paused") : t("sessions.ready")}
                 </p>
               </div>
               <button
@@ -691,7 +691,7 @@ export default function SessionsPage() {
                           {formatClock(pomo.seconds)}
                         </p>
                         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-fg">
-                          {pomoActive ? `● ${PHASE_META[pomo.phase].label}` : pomo.paused ? "Paused" : "Ready"}
+                          {pomoActive ? `● ${PHASE_META[pomo.phase].label}` : pomo.paused ? t("sessions.paused") : t("sessions.ready")}
                         </p>
                         <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-widest tabular-nums text-muted-fg">
                           {pomo.cycles} cycle{pomo.cycles === 1 ? "" : "s"} • {formatClock(pomo.workSeconds)} focused
@@ -833,7 +833,7 @@ export default function SessionsPage() {
                       {session.title}
                     </p>
                     <p className="text-xs text-muted-fg uppercase tracking-widest">
-                      {session.subject?.name ?? "General"} •{" "}
+                      {session.subject?.name ?? t("sessions.general")} •{" "}
                       {formatDate(session.startedAt)}
                     </p>
                   </div>

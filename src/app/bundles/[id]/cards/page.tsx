@@ -272,7 +272,7 @@ export default function BundleCardsPage() {
         return;
       }
       const res = await importCardsIntoBundle(bundleId, parsed);
-      showToast(`Imported ${res.count} cards`, "success");
+      showToast(t("toast.importedNCards").replace("{n}", String(res.count)), "success");
       setLoaded(false);
       await load();
     } catch (e) {
@@ -327,7 +327,7 @@ export default function BundleCardsPage() {
           if (!hasLearning) {
             setIsReviewing(false);
             setLearningQueue([]);
-            showToast(`Reviewed ${reviewQueue.length} cards`, "success");
+            showToast(t("toast.reviewedNCards").replace("{n}", String(reviewQueue.length)), "success");
             setLoaded(false);
             await load();
           }
@@ -337,7 +337,7 @@ export default function BundleCardsPage() {
           const next = prev.slice(1);
           if (next.length === 0) {
             setIsReviewing(false);
-            showToast(`Reviewed ${reviewQueue.length + prev.length} cards`, "success");
+            showToast(t("toast.reviewedNCards").replace("{n}", String(reviewQueue.length + prev.length)), "success");
             setLoaded(false);
             load();
           }

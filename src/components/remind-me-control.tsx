@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import { useCallback, useEffect, useState } from "react";
 import { Bell, X } from "lucide-react";
 import { Button } from "./ui";
@@ -20,6 +22,7 @@ function fmtCountdown(ms: number): string {
 }
 
 export function RemindMeControl({ dueCount }: { dueCount: number }) {
+  const t = useT();
   const { requestPermission, schedule, cancel } = useNotificationScheduler();
   const [open, setOpen] = useState(false);
   const [remindAt, setRemindAt] = useState<Date | null>(null);

@@ -345,7 +345,7 @@ export function StatsMode(p: StatsModeProps) {
         </div>
         <div className="rounded-2xl border border-border bg-bg p-6 text-center">
           <p className="text-4xl font-bold tracking-tighter text-success">{p.leechCount}</p>
-          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">Leeches</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">{t("common.leeches")}</p>
         </div>
       </div>
 

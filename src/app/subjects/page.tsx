@@ -343,7 +343,7 @@ export default function SubjectsPage() {
             setIsReviewing(false);
             setLearningQueue([]);
             practiceRef.current = false;
-            showToast(`Reviewed ${completedThisRun.current} cards`, "success");
+            showToast(t("toast.reviewedNCurrent").replace("{n}", String(completedThisRun.current)), "success");
             loadDueCount();
             const bundles = await getBundles();
             setAllBundles(bundles as Bundle[]);
@@ -355,7 +355,7 @@ export default function SubjectsPage() {
           if (next.length === 0) {
             setIsReviewing(false);
             practiceRef.current = false;
-            showToast(`Reviewed ${completedThisRun.current} cards`, "success");
+            showToast(t("toast.reviewedNCurrent").replace("{n}", String(completedThisRun.current)), "success");
             loadDueCount();
             getBundles().then((bundles) => setAllBundles(bundles as Bundle[]));
           }

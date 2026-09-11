@@ -64,9 +64,9 @@ const CARD_VARIANTS = {
 };
 
 const COLUMNS: { id: GoalStatus; label: string; hint: string; dot: string }[] = [
-  { id: "backlog", label: "Backlog", hint: "Someday / not started", dot: "bg-muted-fg" },
-  { id: "in_progress", label: "In progress", hint: "Actively working on", dot: "bg-flow" },
-  { id: "done", label: "Done", hint: "Achieved", dot: "bg-grow" },
+  { id: "backlog", label: t("goals.col.backlog"), hint: "Someday / not started", dot: "bg-muted-fg" },
+  { id: "in_progress", label: t("goals.col.inProgress"), hint: "Actively working on", dot: "bg-flow" },
+  { id: "done", label: t("goals.col.done"), hint: "Achieved", dot: "bg-grow" },
 ];
 
 const PREV_STATUS: Partial<Record<GoalStatus, GoalStatus>> = {
@@ -405,9 +405,9 @@ export default function GoalsPage() {
       <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {(
           [
-            { label: "Total", value: stats.total, tone: "" },
-            { label: "Active", value: stats.active, tone: "text-flow" },
-            { label: "Done", value: stats.done, tone: "text-grow" },
+            { label: t("goals.col.total"), value: stats.total, tone: "" },
+            { label: t("goals.col.active"), value: stats.active, tone: "text-flow" },
+            { label: t("goals.col.done"), value: stats.done, tone: "text-grow" },
             { label: "Overdue", value: stats.overdue, tone: stats.overdue > 0 ? "text-danger" : "" },
           ] as const
         ).map((s) => (
@@ -427,7 +427,7 @@ export default function GoalsPage() {
         <div className="inline-flex rounded-full border border-glass-border bg-glass p-1">
           {(
             [
-              { id: "all", label: "All", icon: ListTodo },
+              { id: "all", label: t("goals.col.all"), icon: ListTodo },
               { id: "long", label: "Long-term", icon: Rocket },
               { id: "regular", label: "Todo", icon: ListTodo },
             ] as const
