@@ -19,8 +19,8 @@ function escapeHtml(s: string): string {
 function renderInline(text: string): string {
   let s = escapeHtml(text);
   s = s.replace(
-    /!\[([^\]]*)\]\((https?:\/\/[^\s)]+|\/[^\)]*|\.\.?\/[^\s)]*|data:image\/[^\s)]+)\)/gi,
-    '<img src="$2" alt="$1" class="md-img" style="max-width:100%;height:auto;border-radius:4px;" />'
+    /!\[([^\]]*)\]\((https?:\/\/[^\s)]+|\/[^\\)]*|\.\.?\/[^\s)]*|data:image\/(?:png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=]+)\)/gi,
+    '<img src="$2" alt="$1" class="md-img" loading="lazy" style="max-width:100%;height:auto;border-radius:4px;" />'
   );
   s = s.replace(/`([^`]+)`/g, '<code class="md-code">$1</code>');
   s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
