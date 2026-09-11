@@ -51,7 +51,7 @@ const DICT: Dict = {
   "topbar.greeting.late": { en: "Still up", ar: "سهرة أخرى؟" },
   "topbar.greeting.morning": { en: "Good morning", ar: "صباح الخير" },
   "topbar.learner": { en: "learner", ar: "أيها المتعلّم" },
-  "topbar.search": { en: "Search notes, cards, decks…", ar: "ابحث في الملاحظات والبطاقات والمجموعات…" },
+  "topbar.search": { en: "Search notes, cards, decks…", ar: "بحث في الملاحظات والبطاقات…" },
   "topbar.welcomeBack": { en: "Welcome back", ar: "أهلًا بعودتك" },
 
   // ─── dash ─────────────────────────────────────────────
