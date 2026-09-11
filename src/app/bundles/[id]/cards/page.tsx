@@ -455,7 +455,7 @@ export default function BundleCardsPage() {
               className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft disabled:opacity-50"
             >
               <Upload size={14} />
-              {importing ? "Importing..." : "Import"}
+              {importing ? t("common.importing") : t("common.import")}
             </button>
             <input
               id="csv-import"

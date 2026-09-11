@@ -497,6 +497,7 @@ const DICT: Dict = {
   "toast.importedGoals": { en: "Imported {n} goals", ar: "تم استيراد {n} أهداف" },
   "toast.importedNotes": { en: "Imported {n} notes", ar: "تم استيراد {n} ملاحظات" },
   "toast.skipped": { en: "skipped", ar: "تم تخطيها" },
+  "common.importing": { en: "Importing...", ar: "جارٍ الاستيراد…" },
 };
 
 export function useT() {
