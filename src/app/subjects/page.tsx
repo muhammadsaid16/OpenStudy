@@ -582,7 +582,7 @@ export default function SubjectsPage() {
   };
 
   return (
-    <div className="p-8 lg:p-12">
+    <div className="page-gutter cq">
       {/* Header — Library merges Subjects + Flashcards + Bundles */}
       <div className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -660,7 +660,7 @@ export default function SubjectsPage() {
 
       {activeTab === "subjects" && <>
       {!loaded ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="auto-grid">
           {Array.from({ length: 6 }).map((_, i) => (
            <div key={i} className="glass rounded-2xl p-6">
               <div className="flex items-start justify-between">
@@ -724,7 +724,7 @@ export default function SubjectsPage() {
           )}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="auto-grid">
           {subjects.map((subject) => (
             <Card
               key={subject.id}
@@ -835,7 +835,7 @@ export default function SubjectsPage() {
       {activeTab === "decks" && (
         <>
           {!loaded ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="auto-grid">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="glass rounded-2xl p-6">
                   <Skeleton className="h-12 w-12 mb-4" />

@@ -128,7 +128,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-8 lg:p-12">
+    <div className="page-gutter cq">
       <div className="mb-8">
         <RevealHeading text={t("settings.title")} className="text-4xl lg:text-6xl" />
         <ScrambleSubtitle

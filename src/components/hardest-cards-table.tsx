@@ -60,33 +60,34 @@ export function HardestCardsTable({
 
   return (
     <>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
+      {/* Desktop table — hidden on mobile */}
+      <div className="hidden md:block overflow-x-auto -mx-1">
+        <table className="w-full text-left text-sm min-w-[560px]">
           <thead>
             <tr className="border-b border-border text-[10px] font-mono uppercase tracking-widest text-muted-fg">
-              <th className="py-2 pr-4">{t("hardest.front")}</th>
-              <th className="py-2 pr-4">{t("hardest.bundle")}</th>
-              <th className="py-2 pr-4 text-right">{t("hardest.accuracy")}</th>
-              <th className="py-2 pr-4 text-right">{t("hardest.reviews")}</th>
-              <th className="py-2 pr-2 text-right">{t("hardest.action")}</th>
+              <th className="py-2 pe-4">{t("hardest.front")}</th>
+              <th className="py-2 pe-4">{t("hardest.bundle")}</th>
+              <th className="py-2 pe-4 text-end">{t("hardest.accuracy")}</th>
+              <th className="py-2 pe-4 text-end">{t("hardest.reviews")}</th>
+              <th className="py-2 ps-2 text-end">{t("hardest.action")}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.cardId} className="border-b border-border/60 last:border-0">
-                <td className="py-2.5 pr-4 max-w-[260px]">
-                  <p className="truncate text-fg">{r.front}</p>
+                <td className="py-2.5 pe-4 max-w-[min(34cqi,260px)]">
+                  <p className="truncate text-fg" style={{ fontSize: "clamp(0.85rem, 1.5cqi, 0.95rem)" }}>{r.front}</p>
                 </td>
-                <td className="py-2.5 pr-4 text-muted-fg">{r.bundleName}</td>
-                <td className="py-2.5 pr-4 text-right font-mono tabular-nums">
+                <td className="py-2.5 pe-4 text-muted-fg truncate max-w-[18ch]">{r.bundleName}</td>
+                <td className="py-2.5 pe-4 text-end font-mono tabular-nums">
                   <span className={r.accuracy < 0.5 ? "text-danger" : r.accuracy < 0.75 ? "text-warning" : "text-fg"}>
                     {Math.round(r.accuracy * 100)}%
                   </span>
                 </td>
-                <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-muted-fg">
+                <td className="py-2.5 pe-4 text-end font-mono tabular-nums text-muted-fg">
                   {r.reviewCount}
                 </td>
-                <td className="py-2.5 pr-2 text-right">
+                <td className="py-2.5 ps-2 text-end">
                   {doneId === r.cardId ? (
                     <span className="inline-flex items-center gap-1 text-success text-xs font-bold uppercase">
                       <Check size={12} />{t("ui.reset")}</span>
@@ -94,6 +95,7 @@ export function HardestCardsTable({
                     <Button
                       size="sm"
                       variant="secondary"
+                      className="tap-target"
                       onClick={() => setConfirmId(r.cardId)}
                       aria-label={`Reset progress on card: ${r.front}`}
                     >
@@ -104,6 +106,25 @@ export function HardestCardsTable({
             ))}
           </tbody>
         </table>
+      </div>
+      {/* Mobile cards — visible below md */}
+      <div className="md:hidden space-y-3 cq" role="list">
+        {rows.map((r) => (
+          <div key={r.cardId} className="rounded-2xl border border-border bg-muted/30 p-4 flex flex-col gap-3" role="listitem">
+            <p className="font-medium leading-snug line-clamp-2" style={{ fontSize: "var(--text-sm)" }}>{r.front}</p>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="rounded-full bg-muted px-2.5 py-1 font-mono text-muted-fg max-w-[20ch] truncate">{r.bundleName}</span>
+              <span className={`rounded-full px-2.5 py-1 font-mono font-bold ${r.accuracy < 0.5 ? "bg-danger/15 text-danger" : r.accuracy < 0.75 ? "bg-warning/15 text-warning" : "bg-success/15 text-success"}`}>{Math.round(r.accuracy * 100)}% · {r.reviewCount} {t("hardest.reviews").toLowerCase()}</span>
+            </div>
+            <div className="flex justify-end">
+              {doneId === r.cardId ? (
+                <span className="inline-flex items-center gap-1 text-success text-xs font-bold uppercase"><Check size={12} />{t("ui.reset")}</span>
+              ) : (
+                <Button size="sm" variant="secondary" className="tap-target w-full sm:w-auto justify-center" onClick={() => setConfirmId(r.cardId)} aria-label={`Reset progress on card: ${r.front}`}><RotateCcw size={12} />{t("ui.reset")}</Button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
       <Modal open={confirmId !== null} onClose={() => setConfirmId(null)} title={t("hardest.reset")}>

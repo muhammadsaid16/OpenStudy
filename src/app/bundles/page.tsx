@@ -172,12 +172,12 @@ export default function BundlesPage() {
   };
 
   return (
-    <div className="p-8 lg:p-12">
+    <div className="page-gutter cq">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-end justify-between">
           <div>
-            <RevealHeading text={t("page.bundles")} className="text-4xl lg:text-6xl" />
+            <RevealHeading text={t("page.bundles")} className="text-4xl" />
             <ScrambleSubtitle
               text={t("page.bundles.subtitle")}
               className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
@@ -217,7 +217,7 @@ export default function BundlesPage() {
 
       {/* Grid */}
       {!loaded ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="auto-grid">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="glass rounded-2xl p-6">
               <Skeleton className="h-12 w-12 mb-4" />
@@ -239,13 +239,13 @@ export default function BundlesPage() {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+        <div className="auto-grid">
           {bundles.map((bundle) => (
             <Link
               key={bundle.id}
               href={`/bundles/${bundle.id}/cards`}
               {...spotlightProps()}
-              className="spotlight-card group relative flex h-72 w-full max-w-xs flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-1"
+              className="spotlight-card cq-card group relative flex h-72 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-1"
               style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
             >
 

@@ -127,13 +127,13 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
       )}
 
       {!p.browseLoaded ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="auto-grid">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-48 w-full" />
           ))}
         </div>
       ) : p.browseScope === "bundles" ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="auto-grid">
           {p.bundles.map((bundle) => (
             <button
               key={bundle.id}
@@ -173,7 +173,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="auto-grid">
           {p.browseFilteredCards.map((card) => {
             const flipped = p.browseFlipped.has(card.id);
             const selected = p.browseSelected.has(card.id);

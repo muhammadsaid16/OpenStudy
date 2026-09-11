@@ -96,7 +96,7 @@ export default function NotePage() {
   if (!loaded) {
     return (
       <div className="min-h-screen bg-bg">
-        <div className="max-w-4xl mx-auto p-8 lg:p-12">
+        <div className="max-w-4xl mx-auto page-gutter cq">
           {/* Back — matches mb-8 flex gap-2 text-xs */}
           <Skeleton className="h-4 w-28 mb-8 rounded-full" />
           {/* Header — mirrors glass rounded-3xl p-8 */}
@@ -152,7 +152,7 @@ export default function NotePage() {
 
   if (notFound || !note) {
     return (
-      <div className="p-8 lg:p-12 max-w-4xl mx-auto text-center">
+      <div className="page-gutter cq max-w-4xl mx-auto text-center">
         <StickyNote size={48} className="mx-auto mb-4 text-muted-fg" />
         <h2 className="text-2xl font-bold tracking-tight">{t("notesDetail.notFound")}</h2>
         <p className="mt-2 text-sm text-muted-fg">{t("notesDetail.deleted")}</p>
@@ -167,7 +167,7 @@ export default function NotePage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <div className="max-w-4xl mx-auto p-8 lg:p-12">
+      <div className="max-w-4xl mx-auto page-gutter cq">
         {/* Back */}
         <button
           onClick={() => router.push("/notes")}

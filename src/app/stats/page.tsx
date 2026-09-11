@@ -250,7 +250,7 @@ export default function StatsPage() {
       </div>
 
       {/* KPI strip */}
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-6">
+      <div className="mb-6 auto-grid--dense">
         {[
           { icon: Layers, labelKey: "stats.totalReviews", value: totalReviews.toLocaleString(), sub: `${avgPerDay}/day`, color: "var(--color-accent)" },
           { icon: Trophy, labelKey: "stats.accuracy", value: `${acc}%`, sub: `${reviews.filter(r => (r.quality ?? 0) >= 3).length} correct`, color: "var(--color-grow)" },

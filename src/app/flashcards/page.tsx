@@ -734,7 +734,7 @@ function FlashcardsContent() {
   }, [totalDue, completedCount, t]);
 
   return (
-    <div className="p-8 lg:p-12">
+    <div className="page-gutter cq">
       {/* Header */}
       <div className="mb-6">
         <RevealHeading text={t("page.flashcards")} className="text-4xl lg:text-6xl" />
@@ -1282,7 +1282,7 @@ function FlashcardsContent() {
 
 export default function FlashcardsPage() {
   return (
-    <Suspense fallback={<div className="p-8 lg:p-12"><Skeleton className="h-[400px] w-full" /></div>}>
+    <Suspense fallback={<div className="page-gutter cq"><Skeleton className="h-[400px] w-full" /></div>}>
       <FlashcardsContent />
     </Suspense>
   );

@@ -88,7 +88,7 @@ export default function DashboardPage() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 cq">
           {/* Left Column */}
           <div className="space-y-6 lg:col-span-2">
             <motion.div variants={item}>

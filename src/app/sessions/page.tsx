@@ -307,7 +307,7 @@ export default function SessionsPage() {
   const pomoActive = pomo.active;
 
   return (
-    <div className="p-8 lg:p-12">
+    <div className="page-gutter cq">
       {/* Header */}
       <div className="mb-10">
         <RevealHeading text={t("sessions.title")} className="text-5xl lg:text-8xl" />
@@ -351,7 +351,7 @@ export default function SessionsPage() {
       </div>
 
       {/* Timer */}
-      <div className="mb-12 grid grid-cols-1 gap-6 lg:grid-cols-5">
+      <div className="mb-12 grid grid-cols-1 gap-6 lg:grid-cols-5 cq">
         {/* Form fields — 3 cols */}
         <div className="space-y-6 lg:col-span-3">
           <div>

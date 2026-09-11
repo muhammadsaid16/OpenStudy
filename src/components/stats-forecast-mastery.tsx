@@ -55,7 +55,7 @@ export function BundleMasteryTable({
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto cq -mx-1">
       <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b border-border text-[10px] font-mono uppercase tracking-widest text-muted-fg">

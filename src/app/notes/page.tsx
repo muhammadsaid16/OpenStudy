@@ -308,7 +308,7 @@ function NotesContent() {
   };
 
   return (
-    <div className="p-8 lg:p-12">
+    <div className="page-gutter cq">
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -392,7 +392,7 @@ function NotesContent() {
       </div>
 
       {!loaded ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="auto-grid">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="glass rounded-2xl p-6">
               <Skeleton className="h-6 w-2/3" />
@@ -641,7 +641,7 @@ function NotesContent() {
 
 function NotesPageSuspenseFallback() {
   return (
-    <div className="p-8 lg:p-12">
+    <div className="page-gutter cq">
       <Skeleton className="h-12 w-48" />
       <Skeleton className="h-64 w-full mt-8" />
     </div>

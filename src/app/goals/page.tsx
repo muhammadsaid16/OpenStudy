@@ -336,7 +336,7 @@ export default function GoalsPage() {
   };
 
   return (
-    <div className="p-8 lg:p-12">
+    <div className="page-gutter cq">
       {/* Header */}
       <div className="mb-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -399,7 +399,7 @@ export default function GoalsPage() {
       </div>
 
       {/* Stats row */}
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mb-8 auto-grid--dense">
         {(
           [
             { label: t("goals.col.total"), value: stats.total, tone: "" },
