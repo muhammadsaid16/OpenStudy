@@ -329,7 +329,7 @@ export default function GoalsPage() {
         try { await createMilestone(goalId, mTitle); if(m.done) { /* milestones are created undone; leave as is */ } msOk++; } catch {}
       }
       await refresh();
-      if(ok) showToast(t("toast.importedGoals").replace("{n}", String(ok))${msOk?` + ${msOk} milestones`:""}${skipped?`, ${skipped} skipped`:""}`, "success");
+      if(ok) showToast(`${t("toast.importedGoals").replace("{n}", String(ok))}${msOk?` + ${msOk} milestones`:""}${skipped?`, ${skipped} skipped`:""}`, "success");
       else showToast("No goals imported","warning");
     } catch(e){ console.error(e); showToast("Import failed: invalid file","danger"); }
     finally { setImporting(false); if(importInputRef.current) importInputRef.current.value=""; }
