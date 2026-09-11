@@ -754,8 +754,8 @@ export default function SubjectsPage() {
                   </div>
                 </div>
               <div className="mt-6 flex flex-wrap gap-x-6 gap-y-1 text-xs font-bold uppercase tracking-widest text-muted-fg">
-                <span>{topicCounts[subject.id] ?? subject._count.topics} TOPICS</span>
-                <span>{subject._count.flashcards} CARDS</span>
+                <span>{t("subj.cardTopics").replace("{n}", String(topicCounts[subject.id] ?? subject._count.topics))}</span>
+                <span>{t("subj.cardCards").replace("{n}", String(subject._count.flashcards))}</span>
                 <span>{formatDuration(subject._count.minutes ?? 0)}</span>
               </div>
 
@@ -785,8 +785,8 @@ export default function SubjectsPage() {
                 </div>
                 <p className="mt-2 text-[10px] uppercase tracking-widest text-muted-fg">
                   {subject._count.lastStudiedAt
-                    ? `Last studied ${formatRelative(subject._count.lastStudiedAt)}`
-                    : "Not studied yet"}
+                    ? `${t("subj.lastStudied")} ${formatRelative(subject._count.lastStudiedAt)}`
+                    : t("subj.notStudiedYet")}
                 </p>
               </div>
 
