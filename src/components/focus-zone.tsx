@@ -353,7 +353,7 @@ export function FocusZone() {
             disabled={pomo.running}
             className="shrink-0 cursor-pointer rounded-full bg-transparent text-xs text-muted-fg outline-none disabled:opacity-60"
           >
-            <option value="">General</option>
+            <option value="">{t("common.general")}</option>
             {subjects.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}

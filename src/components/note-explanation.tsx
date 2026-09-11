@@ -366,7 +366,7 @@ export function NoteExplanation({
             placeholder="Edit the explanation…"
           />
           <div className="mt-3 flex justify-end gap-2">
-            <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
+            <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>{t("common.cancel")}</Button>
             <Button size="sm" onClick={doSaveEdit} disabled={saving || !editText.trim()}>{saving ? <Loader2 size={14} className="animate-spin" /> : null} Save</Button>
           </div>
         </div>

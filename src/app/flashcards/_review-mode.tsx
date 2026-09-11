@@ -81,7 +81,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
         {p.bundles.length === 0 ? (
           <EmptyState
             icon={<Layers size={48} />}
-            title="No bundles yet"
+            title={t("flashcards.noBundles")}
             description="Create your first bundle to organize flashcards."
             action={
               <Button onClick={() => p.onOpenBundleCreate()}>
@@ -148,7 +148,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
     return (
       <EmptyState
         icon={<Brain size={48} />}
-        title="No cards yet"
+        title={t("flashcards.noCardsYet")}
         description="Create your first flashcard to start studying."
         action={
           <Button onClick={() => p.onOpenCreate()}>
@@ -251,7 +251,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                   {p.ttsSupported && p.activeCard && (
                     <button
                       type="button"
-                      aria-label="Read question aloud"
+                      aria-label={t("flashcards.readQuestion")}
                       onClick={(e) => {
                         e.stopPropagation();
                         e.currentTarget.blur();
@@ -325,7 +325,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                 {p.ttsSupported && (
                   <button
                     type="button"
-                    aria-label="Read answer aloud"
+                    aria-label={t("flashcards.readAnswer")}
                     onClick={(e) => {
                       e.stopPropagation();
                       e.currentTarget.blur();

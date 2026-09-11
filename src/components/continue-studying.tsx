@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // ─── Continue Studying — resume the last touched thread ──────────
 // Spec §1: "What am I currently working on?" — the dashboard should
 // surface the most recent session's subject/topic as a one-click
@@ -17,6 +19,7 @@ export interface ContinueTarget {
 }
 
 export function ContinueStudying({ target }: { target: ContinueTarget | null }) {
+  const t = useT();
   return (
     <div className="glass rounded-3xl p-6">
       <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">

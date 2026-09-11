@@ -358,7 +358,7 @@ export default function GoalsPage() {
               </button>
               {exportMenuOpen && (
                 <>
-                  <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label="Close export menu" />
+                  <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label={t("common.closeExport")} />
                   <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
                     <button onClick={exportGoalsAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
                       <Download size={14} /> JSON
@@ -408,7 +408,7 @@ export default function GoalsPage() {
             { label: t("goals.col.total"), value: stats.total, tone: "" },
             { label: t("goals.col.active"), value: stats.active, tone: "text-flow" },
             { label: t("goals.col.done"), value: stats.done, tone: "text-grow" },
-            { label: "Overdue", value: stats.overdue, tone: stats.overdue > 0 ? "text-danger" : "" },
+            { label: t("goals.overdue"), value: stats.overdue, tone: stats.overdue > 0 ? "text-danger" : "" },
           ] as const
         ).map((s) => (
           <div key={s.label} className="glass rounded-2xl p-4">
@@ -428,8 +428,8 @@ export default function GoalsPage() {
           {(
             [
               { id: "all", label: t("goals.col.all"), icon: ListTodo },
-              { id: "long", label: "Long-term", icon: Rocket },
-              { id: "regular", label: "Todo", icon: ListTodo },
+              { id: "long", label: t("goals.longTerm"), icon: Rocket },
+              { id: "regular", label: t("goals.todo"), icon: ListTodo },
             ] as const
           ).map(({ id, label, icon: Icon }) => (
             <button
@@ -714,7 +714,7 @@ export default function GoalsPage() {
                                   </span>
                                   <button
                                     type="button"
-                                    aria-label="Delete step"
+                                    aria-label={t("goals.deleteStep")}
                                     onClick={async () => {
                                       await deleteMilestone(m.id);
                                       await refresh();

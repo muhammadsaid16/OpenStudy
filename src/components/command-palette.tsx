@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAllFlashcards, getAllNotes, getBundles, getSubjects } from "@/app/actions";
@@ -18,6 +20,7 @@ function hay(e: Entry): string {
 }
 
 export function CommandPalette() {
+  const t = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");

@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { exportBundle } from "@/app/actions";
@@ -17,6 +19,7 @@ function toHash(json: string): string {
 }
 
 export default function ShareBundlePage() {
+  const t = useT();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [status, setStatus] = useState<"loading" | "not_found">("loading");

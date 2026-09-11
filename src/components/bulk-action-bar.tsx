@@ -181,7 +181,7 @@ export function BulkActionBar({
             Delete <span className="font-bold text-danger">{ids.length}</span> cards? This cannot be undone.
           </p>
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setDeleteOpen(false)}>Cancel</Button>
+            <Button variant="secondary" size="sm" onClick={() => setDeleteOpen(false)}>{t("common.cancel")}</Button>
             <Button variant="danger" size="sm" onClick={doDelete} disabled={busy}>
               {busy ? "Deleting…" : "Delete"}
             </Button>

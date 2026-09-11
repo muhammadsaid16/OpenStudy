@@ -215,7 +215,7 @@ export default function NotePage() {
               <button
                 onClick={openEdit}
                 className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
-                title="Edit"
+                title={t("common.edit")}
                 aria-label={t("notesDetail.editNote")}
               >
                 <Pencil size={16} />

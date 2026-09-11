@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // ─── Upcoming — goal deadlines near the top of the dashboard ──────
 // Spec §1 "UPCOMING": real goal due dates (not derived due-card
 // proxies only) with an add path. Falls back to the derived card
@@ -27,6 +29,7 @@ function fmtDue(d: Date | string): string {
 }
 
 export function Upcoming({ items }: { items: UpcomingItem[] }) {
+  const t = useT();
   const next = items
     .filter((g) => !["done", "completed"].includes(String(g.status ?? "")))
     .filter((g) => new Date(g.dueDate).getTime() > 0) // epoch-0 = no due date

@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import { useState } from "react";
 import { Clipboard, Sparkles, Check, AlertTriangle, Loader2, ExternalLink } from "lucide-react";
 import { Button, Modal } from "./ui";
@@ -25,6 +27,7 @@ export function AiImportModal({
   onClose: () => void;
   onImported?: () => void | Promise<void>;
 }) {
+  const t = useT();
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const [phase, setPhase] = useState<Phase>("idle");

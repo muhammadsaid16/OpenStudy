@@ -126,7 +126,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
             type="button"
             onClick={() => setOpen(false)}
             className="rounded-full p-1.5 text-muted-fg hover:bg-accent-soft hover:text-accent"
-            aria-label="Cancel"
+            aria-label={t("common.cancel")}
           >
             <X size={11} />
           </button>

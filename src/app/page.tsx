@@ -251,7 +251,7 @@ export default function DashboardPage() {
                   emptyHref: "/subjects",
                 },
                 {
-                  label: "Study time",
+                  label: t("dash.studyTime"),
                   value: stats.totalMinutes > 0 ? formatDuration(stats.totalMinutes) : "0m",
                   icon: Clock,
                   // Value is a string once non-zero; show CTA only when truly empty.

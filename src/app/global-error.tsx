@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // Global error boundary — the last line of defense. Catches errors the
 // root layout itself throws. Next.js requires html/body tags here.
 // Reads lang/dir from localStorage prefs (theme-init format) so the
@@ -36,6 +38,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useT();
   const lang = readLang();
   const s = ERR[lang];
   return (

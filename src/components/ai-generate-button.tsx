@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 // "Generate from text" — direct Gemini call. Sibling to AiImportButton
 // (NotebookLM paste flow). Both add cards to a bundle; this one creates
 // them server-side instead of asking the user to copy/paste into a chat LLM.
@@ -22,6 +24,7 @@ export function AiGenerateButton({
   defaultBundleId?: string;
   onCreated?: () => void | Promise<void>;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   return (
     <>

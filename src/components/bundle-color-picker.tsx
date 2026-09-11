@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { BUNDLE_COLORS } from "@/lib/bundle-colors";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +17,7 @@ export function BundleColorPicker({
   value: string;
   onChange: (c: string) => void;
 }) {
+  const t = useT();
   const selected = (value || "").toUpperCase();
   const isCustom = !!value && !BUNDLE_COLORS.some((c) => c.toUpperCase() === selected);
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
@@ -25,6 +27,7 @@ function decodeFromHash(hash: string): SharedState {
 }
 
 export default function SharePage() {
+  const t = useT();
   const router = useRouter();
   const [shared, setShared] = useState<SharedState>(() => {
     if (typeof window === "undefined") return { empty: true };
@@ -131,7 +134,7 @@ export default function SharePage() {
       {error !== "" && <p className="mt-3 text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
       <div className="mt-6 flex gap-2">
         <Button disabled={busy} onClick={doImport}>{busy ? "Importing…" : `Import ${bundle.cards.length} cards`}</Button>
-        <Button variant="secondary" onClick={() => router.push("/subjects")}>Cancel</Button>
+        <Button variant="secondary" onClick={() => router.push("/subjects")}>{t("common.cancel")}</Button>
       </div>
       <div className="mt-8 border-t border-border pt-6">
         <p className="text-xs uppercase tracking-widest text-muted-fg">Or import a .studymax-bundle.json file instead</p>

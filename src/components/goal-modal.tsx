@@ -149,8 +149,8 @@ function GoalForm({
           <div className="inline-flex w-full rounded-full border border-glass-border bg-glass p-1">
             {(
               [
-                { id: "long", label: "Long-term", icon: Rocket },
-                { id: "regular", label: "Todo", icon: ListTodo },
+                { id: "long", label: t("goals.longTerm"), icon: Rocket },
+                { id: "regular", label: t("goals.todo"), icon: ListTodo },
               ] as const
             ).map(({ id, label, icon: Icon }) => (
               <button

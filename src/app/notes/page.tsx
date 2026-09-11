@@ -459,7 +459,7 @@ function NotesContent() {
                   </button>
                   <button
                     onClick={() => openEdit(note)}
-                    aria-label="Edit"
+                    aria-label={t("common.edit")}
                     className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-accent"
                   >
                     <Pencil size={14} />
@@ -473,7 +473,7 @@ function NotesContent() {
                   </button>
                   <button
                     onClick={() => handleDelete(note)}
-                    aria-label="Delete"
+                    aria-label={t("common.delete")}
                     className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-danger"
                   >
                     <Trash2 size={14} />

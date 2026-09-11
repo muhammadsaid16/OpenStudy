@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/subjects", label: "Library", icon: Library },
-  { href: "/notes", label: "Notes", icon: StickyNote },
+  { href: "/notes", label: t("common.notesLabel"), icon: StickyNote },
   { href: "/sessions", label: "Sessions", icon: Timer },
   { href: "/goals", label: "Goals", icon: Target },
   { href: "/stats", label: "Stats", icon: BarChart3 },
@@ -94,7 +94,7 @@ export function Sidebar() {
         {sidebarOpen && (
           <Link href="/" aria-label="OpenStudy home">
             <span className="font-display text-xl font-bold tracking-tight text-fg">
-              Open<span className="text-accent">Study</span>
+              Open<span className="text-accent">{t("common.study")}</span>
             </span>
           </Link>
         )}

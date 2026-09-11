@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 // ─── Dashboard parts: re-exports + review CTA ──────────────────────
 
 export { Card } from "@/components/ui";
@@ -10,6 +12,7 @@ import { PlayCircle } from "lucide-react";
 
 // Review CTA used in the due-cards alert banner.
 export function StudyAllDueButton() {
+  const t = useT();
   return (
     <Link
       href="/subjects"

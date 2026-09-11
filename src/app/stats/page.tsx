@@ -256,7 +256,7 @@ export default function StatsPage() {
         {[
           { icon: Layers, label: "Total reviews", value: totalReviews.toLocaleString(), sub: `${avgPerDay}/day`, color: "var(--color-accent)" },
           { icon: Trophy, label: "Accuracy", value: `${acc}%`, sub: `${reviews.filter(r => (r.quality ?? 0) >= 3).length} correct`, color: "var(--color-grow)" },
-          { icon: Timer, label: "Study time", value: `${totalHours}h`, sub: `${sessions.length} sessions`, color: "var(--color-flow)" },
+          { icon: Timer, label: t("dash.studyTime"), value: `${totalHours}h`, sub: `${sessions.length} sessions`, color: "var(--color-flow)" },
           { icon: Flame, label: "Streak", value: `${streak} days`, sub: streak === 0 ? "start today" : "keep it up", color: "var(--color-accent)" },
           { icon: Activity, label: "Mastered", value: `${mastered}`, sub: `${cards.length} cards`, color: "var(--color-grow)" },
           { icon: AlertTriangle, label: "Due / leeches", value: `${dueNow}`, sub: `${leeches} leeches`, color: dueNow > 20 ? "var(--color-danger)" : "var(--color-warning)" },

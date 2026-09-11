@@ -206,7 +206,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                     <button
                       onClick={(e) => { e.stopPropagation(); p.onEditCard(card); }}
                       aria-label={t("browse.editCard")}
-                      title="Edit"
+                      title={t("common.edit")}
                       className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent")}
                     >
                       <Pencil size={13} />
@@ -214,7 +214,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                     <button
                       onClick={(e) => { e.stopPropagation(); p.onDeleteCard(card); }}
                       aria-label={t("browse.deleteCard")}
-                      title="Delete"
+                      title={t("common.delete")}
                       className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-danger/10 hover:text-danger")}
                     >
                       <Trash2 size={13} />
@@ -299,7 +299,7 @@ export function LeechesMode(p: LeechesModeProps) {
           {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
         </div>
       ) : p.leechCards.length === 0 ? (
-        <EmptyState icon={<AlertTriangle size={48} />} title="No leeches" description="No cards have been flagged yet. Keep studying!" />
+        <EmptyState icon={<AlertTriangle size={48} />} title={t("flashcards.noLeeches")} description="No cards have been flagged yet. Keep studying!" />
       ) : (
         <div className="space-y-3">
           {p.leechCards.map((card) => (

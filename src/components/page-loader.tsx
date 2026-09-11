@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -419,6 +421,7 @@ export function PageLoader({
   titleW?: string;
   testId?: string;
 }) {
+  const t = useT();
   const lang = useAppStore((s) => s.lang);
   return (
     <div className="rise-in p-8 lg:p-12" data-loader={testId}>

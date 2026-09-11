@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/lib/i18n";
 import {
   BookOpen,
   Brain,
@@ -42,6 +44,7 @@ export function SubjectIconPicker({
   onChange: (name: string) => void;
   className?: string;
 }) {
+  const t = useT();
   return (
     <div className={cn("space-y-2", className)}>
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">

@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n";
+
 import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui";
@@ -15,6 +17,7 @@ type BIPEvent = Event & {
 };
 
 export function InstallAppButton() {
+  const t = useT();
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
   const [installed, setInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
