@@ -23,7 +23,7 @@ const PERIODS: { key: Period; label: string; weeks: number }[] = [
   { key: "30", label: "30D", weeks: 5 },
   { key: "90", label: "90D", weeks: 13 },
   { key: "365", label: "1Y", weeks: 52 },
-  { key: "all", label: t("stats.allPeriod"), weeks: 52 },
+  { key: "all", labelKey: "stats.allPeriod", weeks: 52 },
 ];
 
 // ── helpers ───────────────────────────────────────────────────────
@@ -242,7 +242,7 @@ export default function StatsPage() {
                   disabled={isEmpty}
                   className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${active ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"} ${isEmpty ? "opacity-40 cursor-not-allowed hover:text-muted-fg" : ""}`}
                 >
-                  {p.label}
+                  {t(p.labelKey)}
                 </button>
               );
             })}
@@ -254,12 +254,12 @@ export default function StatsPage() {
       {/* KPI strip */}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-6">
         {[
-          { icon: Layers, label: t("stats.totalReviews"), value: totalReviews.toLocaleString(), sub: `${avgPerDay}/day`, color: "var(--color-accent)" },
-          { icon: Trophy, label: t("stats.accuracy"), value: `${acc}%`, sub: `${reviews.filter(r => (r.quality ?? 0) >= 3).length} correct`, color: "var(--color-grow)" },
-          { icon: Timer, label: t("dash.studyTime"), value: `${totalHours}h`, sub: `${sessions.length} sessions`, color: "var(--color-flow)" },
-          { icon: Flame, label: t("stats.streakLabel"), value: `${streak} days`, sub: streak === 0 ? "start today" : "keep it up", color: "var(--color-accent)" },
-          { icon: Activity, label: t("stats.masteredLabel"), value: `${mastered}`, sub: `${cards.length} cards`, color: "var(--color-grow)" },
-          { icon: AlertTriangle, label: t("stats.dueLeeches"), value: `${dueNow}`, sub: `${leeches} leeches`, color: dueNow > 20 ? "var(--color-danger)" : "var(--color-warning)" },
+          { icon: Layers, labelKey: "stats.totalReviews", value: totalReviews.toLocaleString(), sub: `${avgPerDay}/day`, color: "var(--color-accent)" },
+          { icon: Trophy, labelKey: "stats.accuracy", value: `${acc}%`, sub: `${reviews.filter(r => (r.quality ?? 0) >= 3).length} correct`, color: "var(--color-grow)" },
+          { icon: Timer, labelKey: "dash.studyTime", value: `${totalHours}h`, sub: `${sessions.length} sessions`, color: "var(--color-flow)" },
+          { icon: Flame, labelKey: "stats.streakLabel", value: `${streak} days`, sub: streak === 0 ? "start today" : "keep it up", color: "var(--color-accent)" },
+          { icon: Activity, labelKey: "stats.masteredLabel", value: `${mastered}`, sub: `${cards.length} cards`, color: "var(--color-grow)" },
+          { icon: AlertTriangle, labelKey: "stats.dueLeeches", value: `${dueNow}`, sub: `${leeches} leeches`, color: dueNow > 20 ? "var(--color-danger)" : "var(--color-warning)" },
         ].map(k => (
           <Card key={k.label} className="!p-4 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg"><k.icon size={12} style={{ color: k.color }} /> {k.label}</div>

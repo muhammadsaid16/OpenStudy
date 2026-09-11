@@ -48,7 +48,7 @@ export function BundleColorPicker({
         {/* Custom color — rainbow affordance, shows the picked color when active */}
         <label
           title={t("common.customColor")}
-          aria-label=t("common.customColor")
+          aria-label={t("common.customColor")}
           className={cn(
             "relative h-7 w-7 cursor-pointer rounded-full border border-glass-border transition-transform hover:scale-110",
             isCustom && "ring-2 ring-accent ring-offset-2 ring-offset-bg-raised"

@@ -1099,7 +1099,7 @@ export default function SubjectsPage() {
               description="Add your first topic above — then create a bundle for it to start making cards."
             />
           ) : filteredTopics.length === 0 ? (
-            <EmptyState icon={<Search size={40} />} title={t("common.noMatch")} description=t("common.tryDifferent") />
+            <EmptyState icon={<Search size={40} />} title={t("common.noMatch")} description={t("common.tryDifferent")} />
           ) : (
             <div className="max-h-[58vh] space-y-3 overflow-y-auto pe-1">
               {filteredTopics.map((topic) => {
