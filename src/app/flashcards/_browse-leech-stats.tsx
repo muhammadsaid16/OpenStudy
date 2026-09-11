@@ -332,6 +332,7 @@ export interface StatsModeProps {
 }
 
 export function StatsMode(p: StatsModeProps) {
+  const t = useT();
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-3 gap-4">

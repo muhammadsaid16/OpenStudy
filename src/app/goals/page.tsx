@@ -63,10 +63,10 @@ const CARD_VARIANTS = {
   }),
 };
 
-const COLUMNS: { id: GoalStatus; label: string; hint: string; dot: string }[] = [
-  { id: "backlog", label: t("goals.col.backlog"), hint: "Someday / not started", dot: "bg-muted-fg" },
-  { id: "in_progress", label: t("goals.col.inProgress"), hint: "Actively working on", dot: "bg-flow" },
-  { id: "done", label: t("goals.col.done"), hint: "Achieved", dot: "bg-grow" },
+const COLUMNS: { id: GoalStatus; labelKey: string; hint: string; dot: string }[] = [
+  { id: "backlog", labelKey: "goals.col.backlog", hint: "Someday / not started", dot: "bg-muted-fg" },
+  { id: "in_progress", labelKey: "goals.col.inProgress", hint: "Actively working on", dot: "bg-flow" },
+  { id: "done", labelKey: "goals.col.done", hint: "Achieved", dot: "bg-grow" },
 ];
 
 const PREV_STATUS: Partial<Record<GoalStatus, GoalStatus>> = {
@@ -518,7 +518,7 @@ export default function GoalsPage() {
                 <div className="mb-3 flex items-center gap-2 px-1">
                   <span className={cn("h-1.5 w-1.5 rounded-full", col.dot)} />
                   <span className="text-[11px] font-bold uppercase tracking-widest text-muted-fg">
-                    {col.label}
+                    {t(col.labelKey)}
                   </span>
                   <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-fg">
                     {cards.length}

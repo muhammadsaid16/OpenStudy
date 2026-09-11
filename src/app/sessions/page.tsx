@@ -32,19 +32,19 @@ const FALL_TRANSITION = { type: "spring" as const, stiffness: 420, damping: 18 }
 // normal-case; render sites style them as eyebrows via CSS.
 const PHASE_META = {
   work: {
-    label: t("sessions.phaseFocus"),
+    labelKey: "sessions.phaseFocus",
     cls: "border-accent/40 bg-accent-soft text-accent",
     ring: "var(--color-accent)",
     text: "text-accent",
   },
   break: {
-    label: t("sessions.phaseBreak"),
+    labelKey: "sessions.phaseBreak",
     cls: "border-flow/40 bg-flow/10 text-flow",
     ring: "var(--color-flow)",
     text: "text-flow",
   },
   long: {
-    label: t("sessions.phaseLongBreak"),
+    labelKey: "sessions.phaseLongBreak",
     cls: "border-grow/40 bg-grow/10 text-grow",
     ring: "var(--color-grow)",
     text: "text-grow",
@@ -646,7 +646,7 @@ export default function SessionsPage() {
                 {pomo.phase === "work" ? <Brain size={13} /> : <Coffee size={13} />}
                 <GravityFall
                   key={pomo.phase}
-                  text={PHASE_META[pomo.phase].label}
+                  text={t(PHASE_META[pomo.phase].labelKey)}
                   tag="span"
                   split="char"
                   startY={-220}
@@ -691,7 +691,7 @@ export default function SessionsPage() {
                           {formatClock(pomo.seconds)}
                         </p>
                         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-fg">
-                          {pomoActive ? `● ${PHASE_META[pomo.phase].label}` : pomo.paused ? t("sessions.paused") : t("sessions.ready")}
+                          {pomoActive ? `● ${t(PHASE_META[pomo.phase].labelKey)}` : pomo.paused ? t("sessions.paused") : t("sessions.ready")}
                         </p>
                         <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-widest tabular-nums text-muted-fg">
                           {pomo.cycles} cycle{pomo.cycles === 1 ? "" : "s"} • {formatClock(pomo.workSeconds)} focused
