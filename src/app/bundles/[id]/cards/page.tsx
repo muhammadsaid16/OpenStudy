@@ -412,7 +412,7 @@ export default function BundleCardsPage() {
                   style={{ backgroundColor: bundleColor }}
                 />
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-                  {bundleTopicLabel ? bundleTopicLabel : "Manage cards"}
+                  {bundleTopicLabel ? bundleTopicLabel : t("cards.manageTitle")}
                 </p>
               </div>
               <RevealHeading
@@ -497,12 +497,12 @@ export default function BundleCardsPage() {
               className="flex h-10 items-center gap-2 rounded-full border border-accent/60 bg-accent-soft px-3 text-xs font-bold uppercase tracking-widest text-accent transition-colors hover:border-accent"
             >
               {copied ? <Check size={14} /> : <Link2 size={14} />}
-              {copied ? "Copied!" : "Share bundle"}
+              {copied ? t("cards.copied") : t("cards.shareBundleBtn")}
             </button>
             <ShareBundleButton bundleId={bundleId} bundleName={bundleName} />
             <Button onClick={() => setCreateOpen(true)}>
               <Plus size={16} />
-              Add card
+              {t("cards.addCard")}
             </Button>
           </div>
         </div>
@@ -570,9 +570,7 @@ export default function BundleCardsPage() {
             aria-label={t("cards.filterByTag")}
             className="h-10 rounded-xl border border-border bg-bg px-3 text-sm text-fg focus:outline-none"
           >
-            <option value="all" className="bg-bg text-fg">
-              All tags
-            </option>
+            <option value="all" className="bg-bg text-fg">{t("cards.allTags")}</option>
             {allTags.map((t) => (
               <option key={t} value={t} className="bg-bg text-fg">
                 {t}
@@ -624,7 +622,7 @@ export default function BundleCardsPage() {
             title={cards.length === 0 ? t("cards.noCardsYet") : t("cards.noCardsFound")}
             description={
               cards.length === 0
-                ? "Add your first flashcard to this bundle."
+                ? t("cards.addFirstDesc")
                 : "Try a different search or filter."
             }
           />

@@ -483,6 +483,12 @@ const DICT: Dict = {
   "cards.questionFront": { en: "Question (front)", ar: "السؤال (الواجهة)" },
   "cards.selectAll": { en: "Select all visible cards", ar: "تحديد كل البطاقات الظاهرة" },
   "cards.exit": { en: "Exit", ar: "خروج" },
+  "cards.addCard": { en: "Add card", ar: "إضافة بطاقة" },
+  "cards.addFirstDesc": { en: "Add your first flashcard to this bundle.", ar: "أضف أول بطاقة تعليمية لهذه المجموعة." },
+  "cards.allTags": { en: "All tags", ar: "كل الوسوم" },
+  "cards.copied": { en: "Copied!", ar: "تم النسخ!" },
+  "cards.manageTitle": { en: "Manage cards", ar: "إدارة البطاقات" },
+  "cards.shareBundleBtn": { en: "Share bundle", ar: "مشاركة المجموعة" },
 };
 
 export function useT() {
