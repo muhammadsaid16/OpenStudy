@@ -19,13 +19,7 @@ export function TopBar({ dueCards }: { dueCards: number }) {
   const [now, setNow] = useState<Date | null>(null);
   const [q, setQ] = useState("");
   const router = useRouter();
-  // OS-aware shortcut hint (audit §7): ⌘K on Apple, Ctrl K elsewhere.
-  // Determined once after mount (SSR-safe: renders t("ui.ctrl_k") on server,
-  // corrects to ⌘K on the client before paint in practice).
-  const [isMac, setIsMac] = useState(false);
-  useEffect(() => {
-    setIsMac(navigator.platform.toLowerCase().includes("mac"));
-  }, []);
+
 
   useEffect(() => {
     // rAF defers the first tick past the effect's sync phase — silences
@@ -90,11 +84,8 @@ export function TopBar({ dueCards }: { dueCards: number }) {
           }}
           placeholder={t("topbar.search")}
           aria-label={t("topbar.search")}
-          className="w-full bg-transparent ps-10 pe-14 text-sm text-fg placeholder:text-muted-fg/60 outline-none"
+          className="w-full bg-transparent ps-10 pe-4 text-sm text-fg placeholder:text-muted-fg/60 outline-none"
         />
-        <kbd className="absolute end-4 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-fg">
-          {isMac ? "⌘K" : t("ui.ctrl_k")}
-        </kbd>
       </label>
     </div>
   );
