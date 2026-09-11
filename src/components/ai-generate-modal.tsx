@@ -38,7 +38,7 @@ type Phase =
 
 const MAX_CHARS = 8_000;
 const MIN_CHARS = 20;
-const GEN_STAGES = ["Reading source", "ui.extracting_concepts", "Writing cards"] as const;
+const GEN_STAGES = ["ui.reading_source", "ui.extracting_concepts", "ui.writing_cards"] as const;
 
 interface ApiSuccess {
   ok: true;

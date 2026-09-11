@@ -123,7 +123,7 @@ function GoalForm({
   };
 
   return (
-    <Modal open onClose={onClose} title={goal ? "ui.edit_goal" : "New goal"}>
+    <Modal open onClose={onClose} title={goal ? "ui.edit_goal" : t("goal.newGoal")}>
       <div className="space-y-4">
         <Input
           placeholder={"modal.exampleGoal"}
@@ -261,7 +261,7 @@ function GoalForm({
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="secondary" onClick={onClose}>{"common.cancel"}</Button>
           <Button onClick={handleSubmit} disabled={!title.trim() || saving}>
-            {saving ? "fc.saving" : goal ? "Save changes" : "ui.create_goal"}
+            {saving ? "fc.saving" : goal ? t("common.saveChanges") : "ui.create_goal"}
           </Button>
         </div>
       </div>

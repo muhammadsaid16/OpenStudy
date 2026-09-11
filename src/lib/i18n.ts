@@ -805,6 +805,8 @@ const DICT: Dict = {
   "ui.start_focus_session": { en: "Start focus session", ar: "ابدأ جلسة تركيز" },
   "ui.stop_and_log_session": { en: "Stop and log session", ar: "أوقف وسجّل الجلسة" },
   "ui.achieved": { en: "Achieved", ar: "تم الإنجاز" },
+  "ui.reading_source": { en: "Reading source", ar: "قراءة المصدر" },
+  "ui.writing_cards": { en: "Writing cards", ar: "كتابة البطاقات" },
 };
 
 export function useT() {
