@@ -379,12 +379,32 @@ export default function SubjectsPage() {
 
   // Realtime: subjects + bundles + due badge re-fetch on ANY table change.
   const live = useLiveData(() => Promise.all([getSubjects(), getBundles(), getAllDueFlashcards()]), []);
+  // Pending deck deletes survive refresh
+  const DECK_PENDING_KEY = "openstudy:pendingDeckDeletes";
+  const deckPendingRef = useState(() => {
+    try {
+      const raw = localStorage.getItem(DECK_PENDING_KEY);
+      return new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch { return new Set<string>(); }
+  })[0];
+  const persistDeckPending = (s: Set<string>) => {
+    try { localStorage.setItem(DECK_PENDING_KEY, JSON.stringify([...s])); } catch {}
+  };
+  useEffect(() => {
+    if (deckPendingRef.size === 0) return;
+    const ids = [...deckPendingRef];
+    const tm = setTimeout(async () => {
+      for (const id of ids) { try { await deleteBundle(id); } catch {} deckPendingRef.delete(id); }
+      persistDeckPending(deckPendingRef);
+    }, 600);
+    return () => clearTimeout(tm);
+  }, []);
   useEffect(() => {
     if (!live) return;
     const [s, b, due] = live;
     setSubjects(s);
     setTopicCounts(Object.fromEntries(s.map((x) => [x.id, x._count.topics])));
-    setAllBundles(b as Bundle[]);
+    setAllBundles((b as Bundle[]).filter((x) => !deckPendingRef.has(x.id)));
     setDueCount(Array.isArray(due) ? due.length : 0);
     setLoaded(true);
   }, [live]);
@@ -497,19 +517,26 @@ export default function SubjectsPage() {
     if (!deckDeleteTarget) return;
     const snapshot = deckDeleteTarget;
     setDeckDeleteTarget(null);
+    deckPendingRef.add(snapshot.id);
+    persistDeckPending(deckPendingRef);
     setAllBundles((prev) => prev.filter((b) => b.id !== snapshot.id));
     showUndo({
       message: `Deck "${snapshot.name}" deleted`,
       duration: 5000,
       undo: async () => {
+        deckPendingRef.delete(snapshot.id);
+        persistDeckPending(deckPendingRef);
         const fresh = await getBundles();
-        setAllBundles(fresh as Bundle[]);
+        setAllBundles((fresh as Bundle[]).filter((b) => !deckPendingRef.has(b.id)));
       },
       onCommit: async () => {
         try {
           await deleteBundle(snapshot.id);
         } catch (e) {
           console.error("Failed to delete deck:", e);
+        } finally {
+          deckPendingRef.delete(snapshot.id);
+          persistDeckPending(deckPendingRef);
         }
       },
     });

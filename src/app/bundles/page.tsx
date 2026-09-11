@@ -51,14 +51,42 @@ export default function BundlesPage() {
 
 
   // Realtime: bundles + subjects re-fetch on ANY table change.
+  // Pending deletes survive refresh — hide bundles whose delete is still within the 5s undo window.
+  const PENDING_KEY = "openstudy:pendingBundleDeletes";
+  const pendingRef = useState(() => {
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      return new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch { return new Set<string>(); }
+  })[0];
+  const persistPending = (set: Set<string>) => {
+    try { localStorage.setItem(PENDING_KEY, JSON.stringify([...set])); } catch {}
+  };
   const live = useLiveData(() => Promise.all([getBundles(), getSubjects()]), []);
   useEffect(() => {
     if (!live) return;
     const [b, s] = live;
-    setBundles(b);
+    setBundles(b.filter((x) => !pendingRef.has(x.id)));
     setSubjects(s);
     setLoaded(true);
   }, [live]);
+
+  // If the user refreshed during the 5s undo window, the timer is gone —
+  // commit the pending deletes now (undo is no longer possible after reload).
+  useEffect(() => {
+    if (pendingRef.size === 0) return;
+    const ids = [...pendingRef];
+    const toCommit = async () => {
+      for (const id of ids) {
+        try { await deleteBundle(id); } catch {}
+        pendingRef.delete(id);
+      }
+      persistPending(pendingRef);
+    };
+    // give the live query a tick to hide them, then commit
+    const tm = setTimeout(toCommit, 600);
+    return () => clearTimeout(tm);
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -117,23 +145,27 @@ export default function BundlesPage() {
     if (!deleteTarget) return;
     const snapshot = deleteTarget;
     setDeleteTarget(null); // close modal immediately
-    // Optimistically remove from UI. The real DB delete fires via the
-    // toast's onCommit (module-scoped timer) so UNDO cancels it reliably
-    // even if you navigate away — no page-closure cancellation bug.
+    // Keep pending deletes in localStorage so a refresh before the 5s commit keeps the bundle hidden
+    pendingRef.add(snapshot.id);
+    persistPending(pendingRef);
     setBundles((prev) => prev.filter((b) => b.id !== snapshot.id));
     showUndo({
       message: `Bundle "${snapshot.name}" deleted`,
       duration: 5000,
       undo: async () => {
-        // Restore into UI list (re-fetch to get fresh state)
+        pendingRef.delete(snapshot.id);
+        persistPending(pendingRef);
         const fresh = await getBundles();
-        setBundles(fresh);
+        setBundles(fresh.filter((b) => !pendingRef.has(b.id)));
       },
       onCommit: async () => {
         try {
           await deleteBundle(snapshot.id);
         } catch (e) {
           console.error("Failed to delete bundle:", e);
+        } finally {
+          pendingRef.delete(snapshot.id);
+          persistPending(pendingRef);
         }
       },
     });
