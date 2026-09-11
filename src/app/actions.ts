@@ -2008,5 +2008,7 @@ export async function batchResetCardProgress(ids: string[]): Promise<number> {
     isLeech: false,
     updatedAt: now,
   });
+  // Clear review history so the card drops from Hardest cards (accuracy is computed from logs).
+  await db.reviewLogs.where("flashcardId").anyOf(ids).delete();
   return ids.length;
 }

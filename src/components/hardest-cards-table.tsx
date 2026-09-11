@@ -6,6 +6,7 @@ import { RotateCcw, AlertTriangle, Check } from "lucide-react";
 import { Button, Modal } from "./ui";
 import { findHardestCards } from "@/lib/stats";
 import { batchResetCardProgress } from "@/app/actions";
+import { showToast } from "./toast";
 import type { BundleRec, FlashcardRec, ReviewLogRec } from "@/lib/db";
 import { useRouter } from "next/navigation";
 
@@ -42,9 +43,15 @@ export function HardestCardsTable({
       const n = await batchResetCardProgress([cardId]);
       if (n > 0) {
         setDoneId(cardId);
+        showToast("Card reset — queued as new", "success");
         setTimeout(() => setDoneId(null), 1800);
         router.refresh();
+      } else {
+        showToast("No card was reset", "warning");
       }
+    } catch (e) {
+      console.error("Reset failed", e);
+      showToast("Reset failed", "danger");
     } finally {
       setBusy(false);
       setConfirmId(null);
@@ -104,9 +111,9 @@ export function HardestCardsTable({
           <div className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
             <AlertTriangle size={14} className="shrink-0 mt-0.5" />
             <p>
-              This resets the card to &quot;new&quot;: ease factor 2.5, 1-day interval, all
-              review history on this card is kept (for stats) but the card will
-              show up in your review queue starting today.
+              This resets the card to &quot;new&quot;: ease factor 2.5, 1-day
+              interval. Review history for this card will be cleared so it
+              drops from Hardest and re-queues as new starting today.
             </p>
           </div>
           <p className="text-sm text-fg">
