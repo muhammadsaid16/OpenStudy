@@ -728,6 +728,7 @@ const DICT: Dict = {
   "review.range.week": { en: "Week", ar: "أسبوع" },
   "review.range.month": { en: "Month", ar: "شهر" },
   "review.range.all": { en: "All", ar: "الكل" },
+  "review.allTime": { en: "All Time", ar: "كل الوقت" },
   "review.prev": { en: "Previous", ar: "السابق" },
   "review.next": { en: "Next", ar: "التالي" },
   "review.totalTime": { en: "Total study time", ar: "إجمالي وقت الدراسة" },

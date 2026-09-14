@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getStudyTimeStats, formatHMS, formatHuman, dayBounds, weekBounds, monthBounds } from "./review-stats";
+import { getStudyTimeStats, formatHMS } from "./review-stats";
 
 function sess(id:string, start:Date, durMin:number, subjectId?:string|null){
   return { id, subjectId: subjectId ?? null, title:"t", durationMin: durMin, startedAt: start, endedAt: new Date(start.getTime()+durMin*60000) };
