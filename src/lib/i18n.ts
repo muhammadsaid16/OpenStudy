@@ -735,7 +735,7 @@ const DICT: Dict = {
   "review.currentlyStudying": { en: "Currently studying", ar: "يدرس الآن" },
   "review.empty": { en: "No study time yet", ar: "لا يوجد وقت دراسة بعد" },
   "review.emptyHint": { en: "Start a focus session to see your time here.", ar: "ابدأ جلسة تركيز لترى وقتك هنا." },
-  "review.startSession": { en: "Start session", ar: "ابدأ جلسة" },
+  "review.startSession": { en: "Start", ar: "ابدأ" },
   "review.uncategorized": { en: "Uncategorized", ar: "غير مصنف" },
   "review.dailyActivity": { en: "Daily activity", ar: "النشاط اليومي" },
   "ui.m3_3v18h18": { en: "M3 3v18h18", ar: "M3 3v18h18" },
