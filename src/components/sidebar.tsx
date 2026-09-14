@@ -11,6 +11,7 @@ import {
   Target,
   Settings,
   BarChart3,
+  Clock,
   ChevronLeft,
   ChevronRight,
   Sun,
@@ -55,6 +56,7 @@ const navGroups: { headingKey: string; items: typeof navItems }[] = [
     headingKey: "nav.insights",
     items: [
       { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/review", labelKey: "nav.review", icon: Clock },
       { href: "/stats", labelKey: "nav.stats", icon: BarChart3 },
     ],
   },

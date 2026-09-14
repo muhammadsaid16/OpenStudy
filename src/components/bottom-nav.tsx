@@ -11,6 +11,7 @@ import {
   Timer,
   Target,
   BarChart3,
+  Clock,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/notes", label: "nav.notes", icon: StickyNote },
   { href: "/sessions", label: "nav.sessions", icon: Timer },
   { href: "/goals", label: "nav.goals", icon: Target },
+  { href: "/review", label: "nav.review", icon: Clock },
   { href: "/stats", label: "nav.stats", icon: BarChart3 },
   { href: "/settings", label: "nav.settings", icon: Settings },
 ];
