@@ -15,7 +15,6 @@ import { createStudySession, getSubjects, getPomoPresets, getDueCount } from "@/
 import { usePomodoro, phaseSeconds, BUILTIN_PRESETS } from "@/lib/pomodoro";
 import { soundscape, type SoundscapeName } from "@/lib/soundscape";
 import { RemindMeControl } from "./remind-me-control";
-import { SpotifyPlayer } from "./spotify-player";
 import { showUndo } from "./undo-toast";
 import type { PomoPresetRec } from "@/lib/db";
 
@@ -193,11 +192,6 @@ export function FocusZone() {
           {soundscapeName}
         </button>
       </div>
-
-      {/* Spotify — sits inside the Focus Zone so music + timer share one
-          calm surface. Self-contained: handles connect / premium SDK /
-          free embed fallback internally. */}
-      <SpotifyPlayer />
 
       {/* Timer ring */}
       <div className="relative mx-auto mb-6 w-fit">

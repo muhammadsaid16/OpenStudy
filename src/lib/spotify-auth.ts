@@ -257,3 +257,97 @@ export async function finishSpotifyAuth(code: string, state: string | null): Pro
   }
   return returnTo;
 }
+
+
+// ─── Web API: browse + play (used by the dedicated Spotify tab) ──────
+export interface SpotifyTrack {
+  id: string;
+  name: string;
+  artist: string;
+  album: string;
+  albumArt: string | null;
+  uri: string;
+}
+
+export interface SpotifyPlaylist {
+  id: string;
+  name: string;
+  trackCount: number;
+  cover: string | null;
+}
+
+async function spotifyGet<T>(path: string, params?: Record<string, string>): Promise<T> {
+  const token = await getValidToken();
+  const url = new URL(`${SPOTIFY_API}${path}`);
+  if (params) for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(`Spotify request failed (${res.status})`);
+  return res.json() as Promise<T>;
+}
+
+function trackFromItem(item: {
+  id: string;
+  name: string;
+  artists: { name: string }[];
+  album: { name: string; images: { url: string }[] };
+  uri: string;
+}): SpotifyTrack {
+  return {
+    id: item.id,
+    name: item.name,
+    artist: item.artists.map((a) => a.name).join(", "),
+    album: item.album.name,
+    albumArt: item.album.images?.[0]?.url ?? null,
+    uri: item.uri,
+  };
+}
+
+export async function searchSpotify(query: string, limit = 20): Promise<SpotifyTrack[]> {
+  if (!query.trim()) return [];
+  const data = await spotifyGet<{ tracks: { items: Parameters<typeof trackFromItem>[0][] } }>(
+    "/search",
+    { q: query, type: "track", limit: String(limit) }
+  );
+  return (data.tracks?.items ?? []).map(trackFromItem);
+}
+
+export async function getSavedTracks(limit = 20): Promise<SpotifyTrack[]> {
+  const data = await spotifyGet<{ items: { track: Parameters<typeof trackFromItem>[0] }[] }>(
+    "/me/tracks",
+    { limit: String(limit) }
+  );
+  return (data.items ?? []).map((i) => trackFromItem(i.track));
+}
+
+export async function getPlaylists(limit = 20): Promise<SpotifyPlaylist[]> {
+  const data = await spotifyGet<{ items: { id: string; name: string; tracks: { total: number }; images: { url: string }[] }[] }>(
+    "/me/playlists",
+    { limit: String(limit) }
+  );
+  return (data.items ?? []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    trackCount: p.tracks?.total ?? 0,
+    cover: p.images?.[0]?.url ?? null,
+  }));
+}
+
+export async function getRecentlyPlayed(limit = 20): Promise<SpotifyTrack[]> {
+  const data = await spotifyGet<{ items: { track: Parameters<typeof trackFromItem>[0] }[] }>(
+    "/me/player/recently-played",
+    { limit: String(limit) }
+  );
+  return (data.items ?? []).map((i) => trackFromItem(i.track));
+}
+
+// Play a track URI on the active device. Premium uses the in-app SDK device;
+// Free routes to the user's last Spotify app device (or fails gracefully).
+export async function playTrack(uri: string): Promise<void> {
+  const token = await getValidToken();
+  const res = await fetch(`${SPOTIFY_API}/me/player/play`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ uris: [uri] }),
+  });
+  if (!res.ok && res.status !== 204) throw new Error(`Spotify play failed (${res.status})`);
+}

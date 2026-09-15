@@ -17,6 +17,7 @@ import {
   Sun,
   Moon,
   Sparkles,
+  Music2,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -44,6 +45,10 @@ const navGroups: { headingKey: string; items: { href: string; labelKey: string; 
       { href: "/review", labelKey: "nav.review", icon: Clock },
       { href: "/stats", labelKey: "nav.stats", icon: BarChart3 },
     ],
+  },
+  {
+    headingKey: "nav.music",
+    items: [{ href: "/spotify", labelKey: "nav.spotify", icon: Music2 }],
   },
   {
     headingKey: "nav.system",
