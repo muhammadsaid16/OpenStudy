@@ -16,7 +16,7 @@ import { encodeShare, parseSharedBundle, SHARE_URL_LIMIT } from "@/lib/share";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
 import { themeAccent } from "@/lib/bundle-colors";
 import { useAppStore } from "@/lib/store";
-import { spotlightProps } from "@/lib/interactions";
+import { spotlightProps, tiltHandlers } from "@/lib/interactions";
 import { useLiveData } from "@/lib/use-live-data";
 import { usePendingDeletes } from "@/hooks/usePendingDeletes";
 
@@ -235,7 +235,8 @@ export default function BundlesPage() {
               key={bundle.id}
               href={`/bundles/${bundle.id}/cards`}
               {...spotlightProps()}
-              className="spotlight-card cq-card group relative flex h-72 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-1"
+              {...tiltHandlers(5)}
+              className="spotlight-card cq-card group relative flex h-72 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-1 will-change-transform"
               style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
             >
 

@@ -884,7 +884,8 @@ export default function SubjectsPage() {
                 .map((bundle) => (
                 <div
                   key={bundle.id}
-                  className="group relative flex h-64 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 transition-all duration-200 hover:-translate-y-1"
+                  {...tiltHandlers(5)}
+                  className="group relative flex h-64 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 transition-all duration-200 hover:-translate-y-1 will-change-transform"
                   style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
                 >
                   <button onClick={() => router.push(`/bundles/${bundle.id}/cards`)} className="flex flex-1 flex-col justify-between text-start w-full">
