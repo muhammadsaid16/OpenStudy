@@ -66,7 +66,12 @@ export async function createPkcePair(): Promise<{ verifier: string; challenge: s
   return { verifier, challenge };
 }
 
+// Redirect URI is derived from the current origin so the SAME build works
+// on localhost and on the deployed domain. Override with
+// NEXT_PUBLIC_SPOTIFY_REDIRECT_URI if you proxy callbacks through another host.
 export function getRedirectUri(): string {
+  const override = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI;
+  if (override) return override;
   if (typeof window === "undefined") return "";
   return `${window.location.origin}/callback`;
 }
