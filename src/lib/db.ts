@@ -157,6 +157,32 @@ export interface MilestoneRec {
   createdAt: Date;
 }
 
+// ─── Settings (key/value) — home for the Spotify OAuth tokens ──────
+// Single-row table. The Spotify row holds the ONLY long-lived secrets
+// in this accountless app, so they live in IndexedDB (per-device, never
+// synced, never in git) rather than in a cookie or localStorage.
+export type SpotifyProduct = "premium" | "free" | "open" | null;
+
+export interface SpotifyTokens {
+  id: "spotify"; // fixed key — one connection per device
+  accessToken: string;
+  refreshToken: string | null;
+  // Epoch ms when the access token expires. We refresh ~60s early.
+  expiresAt: number;
+  scope: string | null;
+  // Account tier, learned post-auth from /me. Drives SDK vs embed mode.
+  product: SpotifyProduct;
+  updatedAt: number;
+}
+
+// Generic settings bucket for future key/value prefs (theme overrides,
+// feature flags, etc.). Typed loosely on purpose.
+export interface SettingRec {
+  key: string;
+  value: unknown;
+  updatedAt: number;
+}
+
 // ─── The database ────────────────────────────────────────────────
 // Dexie/IndexedDB is the SINGLE source of truth — fully local,
 // fully offline, per-device. No server database anywhere.
@@ -175,6 +201,8 @@ class OpenStudyDB extends Dexie {
   pomoPresets!: Table<PomoPresetRec, string>;
   goals!: Table<GoalRec, string>;
   milestones!: Table<MilestoneRec, string>;
+  settings!: Table<SettingRec, string>;
+  spotify!: Table<SpotifyTokens, string>;
 
   constructor() {
     super("studymax");
@@ -211,6 +239,11 @@ class OpenStudyDB extends Dexie {
     // v6: note explanation — AI-generated explanation stored alongside the lesson (additive, nullable)
     this.version(6).stores({
       notes: "id, topicId, updatedAt, isPinned",
+    });
+    // v7: settings key/value + Spotify OAuth tokens (additive)
+    this.version(7).stores({
+      settings: "key",
+      spotify: "id",
     });
   }
 }
@@ -269,4 +302,42 @@ export async function getCachedBundleCards(bundleId: string) {
 
 export async function getCachedBundles() {
   return db.bundles.toArray();
+}
+
+// ─── Spotify token storage (IndexedDB, per-device) ────────────────
+// Tokens never touch localStorage (XSS-readable) or cookies. IndexedDB
+// is origin-scoped and not readable from a stolen token in another tab's
+// fetch context without JS execution in this origin.
+export async function getSpotifyTokens(): Promise<SpotifyTokens | undefined> {
+  return db.spotify.get("spotify");
+}
+
+// Upsert: keep the prior refresh token when Spotify omits it (it does on
+// silent refresh), so the connection never silently dies.
+export async function saveSpotifyTokens(tokens: SpotifyTokens): Promise<void> {
+  const existing = await db.spotify.get("spotify");
+  const merged: SpotifyTokens = {
+    id: "spotify",
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken ?? existing?.refreshToken ?? null,
+    expiresAt: tokens.expiresAt,
+    scope: tokens.scope ?? existing?.scope ?? null,
+    product: tokens.product ?? existing?.product ?? null,
+    updatedAt: Date.now(),
+  };
+  await db.spotify.put(merged);
+}
+
+export async function clearSpotifyTokens(): Promise<void> {
+  await db.spotify.delete("spotify");
+}
+
+// Generic key/value settings read/write (used for misc prefs).
+export async function getSetting<T = unknown>(key: string): Promise<T | undefined> {
+  const row = await db.settings.get(key);
+  return row?.value as T | undefined;
+}
+
+export async function setSetting(key: string, value: unknown): Promise<void> {
+  await db.settings.put({ key, value, updatedAt: Date.now() });
 }
