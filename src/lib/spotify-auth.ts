@@ -102,6 +102,10 @@ export async function beginSpotifyAuth(returnTo = "/"): Promise<string> {
     code_challenge: challenge,
     state,
     scope: SCOPES,
+    // Force Spotify to re-show the consent screen every time. Without this,
+    // Spotify silently reuses a previously approved token that lacks any
+    // newly-added scopes (e.g. library access) → 403 on /me/* calls.
+    show_dialog: "true",
   });
   return `${SPOTIFY_AUTH_ENDPOINT}?${params.toString()}`;
 }
