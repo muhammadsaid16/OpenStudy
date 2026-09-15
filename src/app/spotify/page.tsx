@@ -114,6 +114,7 @@ export default function SpotifyPage() {
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [recent, setRecent] = useState<SpotifyTrack[]>([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [libError, setLibError] = useState<"" | "scope" | "generic">("");
 
   const playerRef = useRef<SDKPlayer | null>(null);
   const deviceIdRef = useRef<string | null>(null);
@@ -213,8 +214,16 @@ export default function SpotifyPage() {
       setSaved(s);
       setPlaylists(p);
       setRecent(r);
-    } catch {
-      /* leave lists empty */
+      setLibError("");
+    } catch (e) {
+      // 403 = token lacks scope (e.g. connected before scopes changed).
+      // A re-consent fixes it.
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("403")) {
+        setLibError("scope");
+      } else {
+        setLibError("generic");
+      }
     } finally {
       setLoadingData(false);
     }
@@ -382,6 +391,25 @@ export default function SpotifyPage() {
           {loadingData && (
             <div className="flex items-center gap-2 text-muted-fg">
               <Loader2 size={14} className="animate-spin" aria-hidden /> {t("spotify.connectingTitle")}
+            </div>
+          )}
+
+          {libError === "scope" && (
+            <div className="glass-inset flex items-center gap-3 rounded-2xl px-4 py-3 text-danger">
+              <AlertTriangle size={16} aria-hidden />
+              <span className="text-xs">Missing Spotify permission — reconnect to grant library access.</span>
+              <button
+                onClick={disconnect}
+                className="ml-auto rounded-full border border-glass-border px-3 py-1 text-xs font-bold text-fg hover:text-accent"
+              >
+                Reconnect
+              </button>
+            </div>
+          )}
+          {libError === "generic" && (
+            <div className="glass-inset flex items-center gap-3 rounded-2xl px-4 py-3 text-danger">
+              <AlertTriangle size={16} aria-hidden />
+              <span className="text-xs">Couldn't load your library. Try again.</span>
             </div>
           )}
 

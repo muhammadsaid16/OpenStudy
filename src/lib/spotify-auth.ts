@@ -16,14 +16,18 @@ const SPOTIFY_AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const SPOTIFY_TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
 const SPOTIFY_API = "https://api.spotify.com/v1";
 
-// Scopes required for the Web Playback SDK (in-app playback) + reading the
-// current track. Trim these if you only need the embed fallback.
+// Scopes required: Web Playback SDK (in-app playback) + reading the user's
+// library (saved tracks, playlists, recently played) for the Spotify tab.
 const SCOPES = [
   "streaming",
   "user-read-playback-state",
   "user-modify-playback-state",
   "user-read-currently-playing",
   "app-remote-control",
+  "user-library-read",          // GET /me/tracks (saved tracks)
+  "playlist-read-private",      // GET /me/playlists
+  "playlist-read-collaborative",// shared playlists
+  "user-read-recently-played",  // GET /me/player/recently-played
 ].join(" ");
 
 // Ephemeral PKCE/state material — kept in localStorage ONLY for the
