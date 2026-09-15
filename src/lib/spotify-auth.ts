@@ -289,7 +289,11 @@ async function spotifyGet<T>(path: string, params?: Record<string, string>): Pro
   const url = new URL(`${SPOTIFY_API}${path}`);
   if (params) for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) throw new Error(`Spotify request failed (${res.status})`);
+  if (!res.ok) {
+    let detail = "";
+    try { detail = (await res.json())?.error?.message ?? ""; } catch { /* ignore */ }
+    throw new Error(`Spotify ${res.status}: ${detail || res.statusText}`);
+  }
   return res.json() as Promise<T>;
 }
 

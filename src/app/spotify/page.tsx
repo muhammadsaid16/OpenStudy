@@ -115,6 +115,7 @@ export default function SpotifyPage() {
   const [recent, setRecent] = useState<SpotifyTrack[]>([]);
   const [loadingData, setLoadingData] = useState(false);
   const [libError, setLibError] = useState<"" | "scope" | "generic">("");
+  const [libErrorMsg, setLibErrorMsg] = useState("");
 
   const playerRef = useRef<SDKPlayer | null>(null);
   const deviceIdRef = useRef<string | null>(null);
@@ -219,6 +220,7 @@ export default function SpotifyPage() {
       // 403 = token lacks scope (e.g. connected before scopes changed).
       // A re-consent fixes it.
       const msg = e instanceof Error ? e.message : "";
+      setLibErrorMsg(msg);
       if (msg.includes("403")) {
         setLibError("scope");
       } else {
@@ -397,7 +399,7 @@ export default function SpotifyPage() {
           {libError === "scope" && (
             <div className="glass-inset flex items-center gap-3 rounded-2xl px-4 py-3 text-danger">
               <AlertTriangle size={16} aria-hidden />
-              <span className="text-xs">Missing Spotify permission — reconnect to grant library access.</span>
+              <span className="text-xs">Missing Spotify permission — reconnect to grant library access. {libErrorMsg && <span className="opacity-70">({libErrorMsg})</span>}</span>
               <button
                 onClick={disconnect}
                 className="ml-auto rounded-full border border-glass-border px-3 py-1 text-xs font-bold text-fg hover:text-accent"
