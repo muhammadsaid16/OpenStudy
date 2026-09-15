@@ -66,12 +66,12 @@ export async function createPkcePair(): Promise<{ verifier: string; challenge: s
   return { verifier, challenge };
 }
 
-// Redirect URI is derived from the current origin so the SAME build works
-// on localhost and on the deployed domain. Override with
-// NEXT_PUBLIC_SPOTIFY_REDIRECT_URI if you proxy callbacks through another host.
+// Redirect URI = current origin + /callback. It MUST match the origin the
+// user is browsing, because the PKCE verifier lives in that origin's
+// localStorage and is read back on the callback. Deriving it from the live
+// origin (instead of a hardcoded override) keeps localStorage + redirect on
+// the same domain after Spotify bounces the user back.
 export function getRedirectUri(): string {
-  const override = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI;
-  if (override) return override;
   if (typeof window === "undefined") return "";
   return `${window.location.origin}/callback`;
 }
