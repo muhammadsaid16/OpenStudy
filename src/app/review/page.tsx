@@ -6,8 +6,6 @@ import { useAppStore } from "@/lib/store";
 import { useLiveData } from "@/lib/use-live-data";
 import { getStudySessions, getSubjects } from "@/app/actions";
 import { usePomodoro } from "@/lib/pomodoro";
-import { RevealHeading } from "@/components/reveal-heading";
-import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import {
   getStudyTimeStats,
   formatHMS,
@@ -127,8 +125,9 @@ export default function ReviewPage() {
     <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <RevealHeading text={t("review.title")} className="text-2xl font-bold tracking-tight" />
-          <ScrambleSubtitle text={t("review.subtitle")} className="text-sm text-muted-fg" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.insights")}</p>
+          <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-fg sm:text-3xl">{t("review.title")}</h1>
+          <p className="mt-1.5 text-sm text-muted-fg">{t("review.subtitle")}</p>
         </div>
         <Link href="/settings" aria-label={t("nav.settings")} className="rounded-full p-2 text-muted-fg hover:bg-glass hover:text-fg">
           <Settings2 size={18} />

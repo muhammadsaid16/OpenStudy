@@ -4,8 +4,6 @@ import { useState, useRef } from "react";
 import { useT } from "@/lib/i18n";
 import { InstallAppButton } from "@/components/install-app-button";
 import { useAppStore, type ThemeName } from "@/lib/store";
-import { RevealHeading } from "@/components/reveal-heading";
-import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { exportAllData, importAllData } from "@/app/actions";
@@ -130,11 +128,9 @@ export default function SettingsPage() {
   return (
     <div className="page-gutter cq">
       <div className="mb-8">
-        <RevealHeading text={t("settings.title")} className="text-4xl lg:text-6xl" />
-        <ScrambleSubtitle
-          text={t("settings.subtitle")}
-          className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
-        />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.system")}</p>
+        <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.settings")}</h1>
+        <p className="mt-2 text-sm text-muted-fg">{t("page.settings.subtitle")}</p>
       </div>
 
       {/* Appearance — spec §8: theme picker stays (product identity) but

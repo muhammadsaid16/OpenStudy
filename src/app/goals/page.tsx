@@ -341,11 +341,9 @@ export default function GoalsPage() {
       <div className="mb-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <RevealHeading text={t("goals.title")} className="text-5xl lg:text-8xl" />
-            <ScrambleSubtitle
-              text={t("goals.subtitle")}
-              className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
-            />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.focus")}</p>
+            <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.goals")}</h1>
+            <p className="mt-2 text-sm text-muted-fg">{t("page.goals.subtitle")}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
@@ -412,7 +410,7 @@ export default function GoalsPage() {
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
               {s.label}
             </p>
-            <p className={cn("font-display mt-1 text-3xl font-bold tabular-nums", s.tone)}>
+            <p className={cn("font-sans mt-1 text-3xl font-bold tabular-nums", s.tone)}>
               {s.value}
             </p>
           </div>

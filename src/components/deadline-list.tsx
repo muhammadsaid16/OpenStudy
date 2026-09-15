@@ -43,7 +43,7 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
   const t = useT();
   if (deadlines.length === 0) {
     return (
-      <div className="glass rounded-3xl p-6">
+      <div className="glass rounded-2xl p-6">
         <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.deadlines")}</p>
         <div className="flex flex-col items-center py-6 text-center">
           <p className="text-sm text-muted-fg">Nothing due — your queue is clear. ✦</p>

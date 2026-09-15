@@ -13,11 +13,11 @@ import {
 import { createPortal } from "react-dom";
 
 /* ════════════════════════════════════════════════════════════════
-   OPENSTUDY v2 UI PRIMITIVES — t("ui.aurora_glass")
-   Glass surfaces, generous radii, token-driven color only.
+   OPENSTUDY UI PRIMITIVES — "Quietly Premium"
+   Flat surfaces, 1px borders, restrained radius, no glass shine.
    ════════════════════════════════════════════════════════════════ */
 
-// ─── Button (pill radius, shine sweep) ────────────────────────────
+// ─── Button ───────────────────────────────────────────────────────
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md" | "lg";
@@ -29,26 +29,24 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center gap-2 font-semibold tracking-tight transition-all duration-200",
-          "rounded-full",
+          "inline-flex items-center justify-center gap-2 font-semibold tracking-tight transition-all duration-150",
+          "rounded-lg",
           "disabled:pointer-events-none disabled:opacity-50",
-          "active:scale-95",
-          "relative overflow-hidden",
-          "before:absolute before:inset-0 before:-translate-x-full before:bg-white/10 before:transition-transform before:duration-300 hover:before:translate-x-0",
+          "active:scale-[0.98]",
           {
-            "bg-accent text-accent-fg hover:shadow-[0_0_32px_-8px_var(--color-accent)]":
+            "bg-accent text-accent-fg shadow-[0_1px_2px_rgb(0_0_0/0.3)] hover:brightness-110":
               variant === "primary",
-            "border border-glass-border bg-glass text-fg backdrop-blur-md hover:bg-accent-soft hover:border-accent/20":
+            "border border-border bg-surface text-fg hover:border-accent/40 hover:bg-surface-hover":
               variant === "secondary",
-            "text-muted-fg hover:text-accent":
+            "text-muted-fg hover:text-accent hover:bg-surface-hover":
               variant === "ghost",
             "border border-danger/40 bg-danger/10 text-danger hover:bg-danger hover:text-on-color":
               variant === "danger",
           },
           {
-            "h-9 px-4 text-xs": size === "sm",
-            "h-11 px-6 text-sm": size === "md",
-            "h-13 px-8 text-base": size === "lg",
+            "h-9 px-3.5 text-xs": size === "sm",
+            "h-10 px-5 text-sm": size === "md",
+            "h-11 px-6 text-sm": size === "lg",
           },
           className
         )}
@@ -70,10 +68,10 @@ export function Card({ className, hover, glow, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "glass rounded-2xl p-6 transition-all duration-300",
+        "glass rounded-xl p-5 transition-all duration-200",
         hover &&
-          "cursor-pointer group hover:-translate-y-1 hover:scale-[1.01] hover:border-accent/40 hover:glow-accent",
-        glow && "border-accent/30 shadow-[0_0_48px_-16px_var(--color-accent-soft,var(--color-accent))]",
+          "cursor-pointer group hover:-translate-y-0.5 hover:border-accent/30",
+        glow && "border-accent/25",
         className
       )}
       {...props}
@@ -94,11 +92,11 @@ export function Badge({ children, variant = "default", className }: BadgeProps) 
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest",
         {
-          "bg-muted/80 text-muted-fg": variant === "default",
-          "bg-grow/10 text-grow": variant === "success",
-          "bg-warning/10 text-warning": variant === "warning",
-          "bg-danger/10 text-danger": variant === "danger",
-          "bg-flow/10 text-flow": variant === "flow",
+          "bg-muted text-muted-fg": variant === "default",
+          "bg-grow/12 text-grow": variant === "success",
+          "bg-warning/12 text-warning": variant === "warning",
+          "bg-danger/12 text-danger": variant === "danger",
+          "bg-flow/12 text-flow": variant === "flow",
           "bg-accent-soft text-accent": variant === "accent",
         },
         className
@@ -109,7 +107,7 @@ export function Badge({ children, variant = "default", className }: BadgeProps) 
   );
 }
 
-// ─── Input (glass-inset well) ────────────────────────────────────
+// ─── Input ────────────────────────────────────────────────────────
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
@@ -127,10 +125,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           className={cn(
-            "glass-inset flex h-12 w-full rounded-xl px-4 py-2 text-base font-medium tracking-tight",
+            "glass-inset flex h-11 w-full rounded-lg px-3.5 py-2 text-sm font-medium tracking-tight",
             "text-fg placeholder:text-muted-fg/60",
-            "focus:outline-none focus:!border-accent/20",
-            "transition-colors duration-200",
+            "focus:outline-none focus:border-accent/50",
+            "transition-colors duration-150",
             error && "!border border-danger",
             className
           )}
@@ -159,10 +157,10 @@ export function Textarea({ className, label, error, ...props }: TextareaProps) {
       )}
       <textarea
         className={cn(
-          "glass-inset flex w-full rounded-xl px-4 py-3 text-base font-medium tracking-tight",
+          "glass-inset flex w-full rounded-lg px-3.5 py-3 text-sm font-medium tracking-tight",
           "text-fg placeholder:text-muted-fg/60",
-          "focus:outline-none focus:!border-accent/20 resize-none",
-          "transition-colors duration-200",
+          "focus:outline-none focus:border-accent/50 resize-none",
+          "transition-colors duration-150",
           error && "!border border-danger",
           className
         )}
@@ -182,23 +180,17 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, children }: ModalProps) {
-  // SSR-safe "are we in the browser" probe without useEffect+setState
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
     () => false
   );
-  // Focus-trap refs: dialog shell (for programmatic focus fallback) and
-  // the element that had focus when the modal opened (restored on close).
   const dialogRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
-  // Autofocus first focusable on open, remember the trigger, restore on close.
   useEffect(() => {
     if (!open) return;
     restoreFocusRef.current = document.activeElement as HTMLElement | null;
-    // Focus first field/button inside the dialog after the portal mounts.
-    // rAF: the portal content isn't in the DOM yet during this effect pass.
     const raf = requestAnimationFrame(() => {
       const dialog = dialogRef.current;
       if (!dialog) return;
@@ -209,13 +201,10 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
     });
     return () => {
       cancelAnimationFrame(raf);
-      // Heuristic #9 (error recovery): return the user exactly where they
-      // were — the trigger keeps its place in the tab order.
       restoreFocusRef.current?.focus?.();
     };
   }, [open]);
 
-  // Escape closes (universal close affordance, WCAG 2.1.2) + Tab trap.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -230,8 +219,8 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         const focusables = Array.from(
           dialog.querySelectorAll<HTMLElement>(
             'input, textarea, select, button, [href], [tabindex]:not([tabindex="-1"])'
-        )
-      ).filter((el) => !el.hasAttribute("disabled"));
+          )
+        ).filter((el) => !el.hasAttribute("disabled"));
         if (focusables.length === 0) {
           e.preventDefault();
           return;
@@ -257,7 +246,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-md animate-[rise_0.2s_ease-out]"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-[rise_0.2s_ease-out]"
         onClick={onClose}
       />
       <div
@@ -266,14 +255,14 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="modal-pop rise-in relative w-full max-w-md rounded-3xl border border-glass-border bg-bg-raised p-6 shadow-2xl ring-1 ring-white/5"
+        className="modal-pop relative w-full max-w-md rounded-2xl border border-border-strong glass-raised p-6 shadow-2xl"
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-display text-xl font-bold tracking-tight">{title}</h2>
+          <h2 className="text-xl font-bold tracking-tight">{title}</h2>
           <button
             onClick={onClose}
             aria-label={"common.close"}
-            className="rounded-full p-2 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
+            className="rounded-lg p-2 text-muted-fg transition-colors hover:bg-surface-hover hover:text-fg"
           >
             ✕
           </button>
@@ -295,12 +284,14 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-20 text-center">
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-accent-soft text-accent">
         {icon}
       </div>
-      <h3 className="font-display mb-2 text-2xl font-bold tracking-tight">{title}</h3>
-      <p className="mb-8 max-w-sm text-sm text-muted-fg">{description}</p>
+      <h3 className="text-lg font-bold tracking-tight text-fg">{title}</h3>
+      <p className="mb-6 mt-1.5 max-w-sm text-sm leading-relaxed text-muted-fg">
+        {description}
+      </p>
       {action}
     </div>
   );
@@ -308,24 +299,20 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
 
 // ─── Skeleton ─────────────────────────────────────────────────────
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("skeleton rounded-xl", className)} />;
+  return <div className={cn("skeleton rounded-lg", className)} />;
 }
 
 // ─── RingProgress (anime.js-driven SVG progress ring) ─────────────
-// Animates stroke-dashoffset on mount / value change via anime.js.
-// Pure data-viz: no state, no re-render churn.
 interface RingProgressProps {
-  /** 0..100 */
   value: number;
   size?: number;
   stroke?: number;
-  /** gradient start/end colors; default accent→flow */
   fromColor?: string;
   toColor?: string;
   trackColor?: string;
   children?: React.ReactNode;
   className?: string;
-  label?: string; // aria-label summary
+  label?: string;
 }
 
 export function RingProgress({
@@ -347,13 +334,11 @@ export function RingProgress({
   useEffect(() => {
     const el = circleRef.current;
     if (!el) return;
-    let cleanup: (() => void) | undefined;
     let cancelled = false;
     import("animejs")
       .then((mod) => {
         if (cancelled) return;
         const { animate, eases } = mod as typeof import("animejs");
-        // anime.js v4: params and tween options live in ONE object
         animate(el, {
           strokeDashoffset: [c, c - (c * clamped) / 100],
           duration: 1400,
@@ -361,14 +346,12 @@ export function RingProgress({
         });
       })
       .catch(() => {
-        // anime.js failed to load — set the final value directly
         if (!cancelled && el) {
           el.style.strokeDashoffset = String(c - (c * clamped) / 100);
         }
       });
     return () => {
       cancelled = true;
-      cleanup?.();
     };
   }, [clamped, c]);
 
@@ -386,14 +369,7 @@ export function RingProgress({
             <stop offset="100%" stopColor={toColor} />
           </linearGradient>
         </defs>
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke={trackColor}
-          strokeWidth={stroke}
-        />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={trackColor} strokeWidth={stroke} />
         <circle
           ref={circleRef}
           cx={size / 2}

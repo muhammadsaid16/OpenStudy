@@ -6,8 +6,6 @@ import { Plus, Trash2, BookOpen, Pencil, Layers, FileText, ExternalLink, Link2, 
 import { useRouter } from "next/navigation";
 import { Card, Button, Modal, Input, EmptyState, Skeleton } from "@/components/ui";
 import { formatDuration, formatRelative } from "@/lib/utils";
-import { RevealHeading } from "@/components/reveal-heading";
-import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import {
   getSubjects,
   createSubject,
@@ -579,11 +577,9 @@ export default function SubjectsPage() {
       <div className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <RevealHeading text={t("page.subjects")} className="text-5xl lg:text-8xl" />
-            <ScrambleSubtitle
-              text={t("page.subjects.subtitle")}
-              className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
-            />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.learn")}</p>
+            <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.subjects")}</h1>
+            <p className="mt-2 text-sm text-muted-fg">{t("page.subjects.subtitle")}</p>
           </div>
           {activeTab === "subjects" && !(loaded && subjects.length === 0) && (
             <Button onClick={() => setModalOpen(true)}>
@@ -974,7 +970,7 @@ export default function SubjectsPage() {
               <div className="w-full h-1.5 overflow-hidden rounded-full bg-muted">
                 <div className="h-full bg-accent transition-all" style={{ width: `${(completed / Math.max(initialTotal, 1)) * 100}%`}} />
               </div>
-                  <div className="glass rounded-3xl p-8 min-h-[280px] flex flex-col">
+                  <div className="glass rounded-2xl p-8 min-h-[280px] flex flex-col">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted-fg mb-3">
                       {(activeCard as any).topic?.subject?.name ? `${(activeCard as any).topic.subject.name} › ${(activeCard as any).topic.name}` : (activeCard as any).topic?.name || t("ui.general")}
                     </p>

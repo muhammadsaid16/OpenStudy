@@ -55,7 +55,7 @@ export function WeeklyAnalytics({ data }: { data: WeekDay[] }) {
   // not a row of dead bars. Keeps the card useful even before first use.
   if (totalMin === 0) {
     return (
-      <div className="glass rounded-3xl p-6" role="img" aria-label={t("ui.no_study_sessions_this_week")}>
+      <div className="glass rounded-2xl p-6" role="img" aria-label={t("ui.no_study_sessions_this_week")}>
         <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.thisWeek")}</p>
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-flow/10 text-flow">
@@ -78,12 +78,12 @@ export function WeeklyAnalytics({ data }: { data: WeekDay[] }) {
   }
 
   return (
-    <div className="glass rounded-3xl p-6" role="img"
+    <div className="glass rounded-2xl p-6" role="img"
       aria-label={`Weekly study: ${fmtH(totalMin)} total across 7 days`}>
       <div className="mb-5 flex items-baseline justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.thisWeek")}</p>
-          <p className="font-display text-2xl font-bold tabular-nums tracking-tight">
+          <p className="font-sans text-2xl font-bold tabular-nums tracking-tight">
             {fmtH(totalMin)}
           </p>
         </div>

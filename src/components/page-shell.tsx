@@ -1,6 +1,4 @@
 "use client";
-import { RevealHeading } from "@/components/reveal-heading";
-import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import { useT } from "@/lib/i18n";
 
 export function PageShell({
@@ -19,8 +17,8 @@ export function PageShell({
     <div className="page-gutter cq">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <RevealHeading text={t(titleKey)} className="text-4xl" />
-          {subtitleKey ? <ScrambleSubtitle text={t(subtitleKey)} className="mt-2 text-sm text-muted-fg" /> : null}
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t(titleKey)}</p>
+          {subtitleKey ? <p className="mt-1.5 text-sm text-muted-fg">{t(subtitleKey)}</p> : null}
         </div>
         {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </div>

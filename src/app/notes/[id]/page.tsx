@@ -196,7 +196,7 @@ export default function NotePage() {
                   {note.isPinned && <span className="ms-1 inline-flex items-center gap-1 text-accent"><Pin size={10} />{t("notesDetail.pinned")}</span>}
                 </p>
               )}
-              <h1 className="font-display text-3xl font-bold tracking-tight text-fg lg:text-4xl">
+              <h1 className="text-3xl font-bold tracking-tight text-fg lg:text-4xl">
                 {note.title}
               </h1>
               <p className="mt-3 flex items-center gap-2 text-xs text-muted-fg">

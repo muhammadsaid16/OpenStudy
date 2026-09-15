@@ -224,8 +224,9 @@ export default function StatsPage() {
       {/* header */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <RevealHeading text={t("stats.title")} className="text-4xl lg:text-6xl" />
-          <ScrambleSubtitle text={t("stats.subtitle")} className="mt-2 text-sm text-muted-fg uppercase tracking-widest" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.insights")}</p>
+          <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.stats")}</h1>
+          <p className="mt-2 text-sm text-muted-fg">{t("page.stats.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex rounded-full border border-border bg-bg-raised/60 p-1" role="group" aria-label={t("stats.periodLabel")}>
@@ -273,7 +274,7 @@ export default function StatsPage() {
       <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Card className="!p-5">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("stats.bestDay")}</p>
-          <p className="mt-1 font-display text-xl font-bold tracking-tight">
+          <p className="mt-1 font-sans text-xl font-bold tracking-tight">
             {bestDay ? `${bestDay.label} — ${bestDay.label2}` : t("ui.no_data_yet")}
           </p>
           <p className="mt-1 text-xs text-muted-fg">
@@ -282,7 +283,7 @@ export default function StatsPage() {
         </Card>
         <Card className="!p-5">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("stats.mostStudied")}</p>
-          <p className="mt-1 font-display text-xl font-bold tracking-tight">
+          <p className="mt-1 font-sans text-xl font-bold tracking-tight">
             {topSubject ? topSubject.name : t("ui.no_data_yet")}
           </p>
           <p className="mt-1 text-xs text-muted-fg">

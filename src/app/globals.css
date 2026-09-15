@@ -4,7 +4,6 @@
 @import "@fontsource/inter/600.css";
 @import "@fontsource/inter/700.css";
 @import "@fontsource/inter/800.css";
-@import "@fontsource/inter/900.css";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/700.css";
@@ -14,53 +13,64 @@
 @import "@fontsource/plus-jakarta-sans/700.css";
 
 /* ════════════════════════════════════════════════════════════════
-   OPENSTUDY v2 — "AURORA GLASS" DESIGN SYSTEM
-   See DESIGN.md for the full specification.
+   OPENSTUDY — "QUIETLY PREMIUM" DESIGN SYSTEM (v3)
+   Linear-like precision · Notion-like organization · Apple-like restraint
+   - Neutral charcoal surfaces, no glassmorphism
+   - One accent per theme, used sparingly
+   - Subtle 1px borders, 8/12/16 radius, 150–220ms motion
+   - Visible focus, full RTL, all 12 themes share one base
    ════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ─── Core semantic tokens (default = AURORA theme) ──────────── */
-  --color-bg: #0B0F17;            /* deep matte slate */
-  --color-bg-raised: #111827;     /* sidebar / topbar surface */
-  --color-muted: #1F293D;         /* interactive surface */
-  --color-fg: #E7EDF7;            /* primary text */
-  --color-muted-fg: #94A3B8;      /* secondary text */
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-accent: #FF7A72;        /* signal coral — softened (audit) */
-  --color-accent-soft: rgba(255, 122, 114, 0.14);
-  --color-accent-fg: #1A0505;
-  --color-flow: #00E5FF;          /* progress & flow — cyan */
-  --color-grow: #10B981;          /* growth / streaks — mint */
-  --color-danger: #FB4A55;
-  --color-success: #10B981;
-  --color-warning: #FCD34D;
-  --color-on-color: #0B0F17;
-  --color-glass: rgba(255, 255, 255, 0.05);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
-  --color-glass-hover: rgba(255, 255, 255, 0.09);
+  /* ─── Core neutral surface ramp (shared by every dark theme) ──── */
+  --color-bg: #0B0C0F;             /* near-black neutral charcoal */
+  --color-surface: #141519;        /* card / panel surface */
+  --color-surface-raised: #1B1D23; /* elevated: modals, dropdowns */
+  --color-surface-hover: #23262D;  /* interactive hover surface */
+  --color-muted: #23262D;          /* chips, wells, dividers bg */
+  --color-fg: #ECEDEF;             /* primary text */
+  --color-muted-fg: #9BA1AC;       /* secondary text */
+  --color-border: rgba(255, 255, 255, 0.07);
+  --color-border-strong: rgba(255, 255, 255, 0.13);
 
-  /* subject badge pastels */
+  --color-accent: #FF7A72;         /* OpenStudy signal coral (Aurora) */
+  --color-accent-soft: rgba(255, 122, 114, 0.12);
+  --color-accent-fg: #1A0505;
+
+  --color-flow: #38BDF8;           /* progress / active session */
+  --color-grow: #34D399;           /* growth / streaks */
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #60A5FA;
+  --color-on-color: #0B0C0F;
+
+  /* solid (non-glass) surfaces — used directly as bg-* utilities */
+  --color-glass: #141519;
+  --color-glass-border: rgba(255, 255, 255, 0.07);
+  --color-glass-hover: #23262D;
+
+  /* subject badge pastels (kept for chips) */
   --color-badge-lavender: #C084FC;
-  --color-badge-yellow: #FCD34D;
+  --color-badge-yellow: #F5B544;
   --color-badge-rose: #FDA4AF;
   --color-badge-mint: #6EE7B7;
   --color-badge-sky: #7DD3FC;
 
-  --font-display: "Space Grotesk", "Inter", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-round: "Plus Jakarta Sans", "Inter", "Noto Sans Arabic", "Segoe UI", ui-sans-serif, sans-serif;
+  --font-round: "Plus Jakarta Sans", "Inter", "Noto Sans Arabic", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-xl: 20px;
 
-  /* motion tokens */
+  /* motion tokens — restrained, 150–220ms where used */
   --animate-shimmer: shimmer 1.6s linear infinite;
   --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-loader: loader-slide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  --animate-breathe: breathe 4s ease-in-out infinite;
   --animate-pulse-dot: pulse-dot 1.6s ease-in-out infinite;
 }
 
@@ -75,15 +85,6 @@
 @keyframes rise {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fall {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(12px); }
-}
-/* Focus Zone breathing conic glow */
-@keyframes breathe {
-  0%, 100% { opacity: 0.35; transform: scale(0.96); }
-  50% { opacity: 0.7; transform: scale(1.04); }
 }
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 45%, transparent); }
@@ -100,93 +101,70 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Heading reveal: one-shot masked rise (CSS only, no per-char JS) ── */
+/* ─── Heading reveal: subtle one-shot rise (no blur/scale drama) ── */
 .heading-reveal {
-  animation: heading-reveal-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: heading-reveal-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes heading-reveal-in {
-  from { opacity: 0; clip-path: inset(0 0 45% 0); transform: translateY(18px); filter: blur(6px); }
-  60% { filter: blur(0); }
-  to { opacity: 1; clip-path: inset(0 0 -10% 0); transform: translateY(0); filter: blur(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Due-banner attention pulse (kept from v1, token-driven) */
+/* Due-banner attention pulse (token-driven) */
 @keyframes pulse-border {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 45%, transparent); }
-  50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-accent) 0%, transparent); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 40%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent) 0%, transparent); }
 }
 
 /* ─── Route transition ─────────────────────────────────────────── */
 @keyframes page-enter {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .page-enter {
-  animation: page-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* ════════════════════════════════════════════════════════════════
-   GLASS SURFACE SYSTEM (§4 of DESIGN.md)
+   SURFACE SYSTEM — flat, bordered, subtly elevated (no glass)
    ════════════════════════════════════════════════════════════════ */
 
-/* Standard glass card */
+/* Standard surface card */
 @utility glass {
-  background: var(--color-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--color-glass-border);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 8px 24px -12px rgb(0 0 0 / 0.5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
 }
 
-/* Raised glass — hover elevation */
+/* Raised surface — modals, popovers */
 @utility glass-raised {
-  background: var(--color-glass-hover);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid color-mix(in srgb, var(--color-fg) 12%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    0 16px 40px -16px rgb(0 0 0 / 0.6);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 0 12px 40px -16px rgb(0 0 0 / 0.55);
 }
 
-/* Neumorphic pressed well (inputs, wells) */
+/* Inset well (inputs, fields) */
 @utility glass-inset {
-  background: color-mix(in srgb, var(--color-bg) 60%, var(--color-muted));
-  border: 1px solid var(--color-glass-border);
-  box-shadow:
-    inset 0 2px 6px rgb(0 0 0 / 0.35),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
-/* Accent glow ring for interactive hover */
+/* Soft accent ring for selected / focus-within (NOT a glow) */
 @utility glow-accent {
-  box-shadow: 0 0 40px -8px color-mix(in srgb, var(--color-accent) 25%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent);
 }
 
-/* Breathing conic halo behind the running Focus Zone timer */
+/* Legacy class kept for any remaining reference — static, no breathing */
 .focus-halo {
   position: absolute;
-  inset: -12%;
-  border-radius: 9999px;
+  inset: 0;
+  border-radius: inherit;
   pointer-events: none;
-  background: conic-gradient(
-    from 0deg,
-    color-mix(in srgb, var(--color-accent) 30%, transparent),
-    color-mix(in srgb, var(--color-flow) 22%, transparent),
-    transparent 65%
-  );
-  filter: blur(28px);
-  animation: var(--animate-breathe);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 24%, transparent);
 }
 
-/* ════════════════════════════════════════════════════════════════
-   Spotlight card (kept from v1 — token-driven, recolors per theme)
-   ════════════════════════════════════════════════════════════════ */
-.spotlight-card {
-  position: relative;
-}
+/* ─── Spotlight card — refined radial on hover only ────────────── */
+.spotlight-card { position: relative; }
 .spotlight-card::after {
   content: "";
   position: absolute;
@@ -197,288 +175,226 @@
   transition: opacity 300ms ease;
   background: radial-gradient(
     340px circle at var(--sx, 50%) var(--sy, 50%),
-    color-mix(in srgb, var(--color-accent) 10%, transparent),
+    color-mix(in srgb, var(--color-accent) 7%, transparent),
     transparent 65%
   );
 }
-.spotlight-card:hover::after {
-  opacity: 1;
-}
+.spotlight-card:hover::after { opacity: 1; }
 
 /* ─── Modal pop ─────────────────────────────────────────────────── */
 @keyframes modal-pop {
-  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .modal-pop {
-  animation: modal-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: modal-pop 0.28s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 
-/* ─── True-3D flashcard flip (unchanged mechanics) ──────────────── */
-.flip-scene {
-  perspective: 1600px;
-}
+/* ─── True-3D flashcard flip (mechanics preserved) ─────────────── */
+.flip-scene { perspective: 1600px; }
 .flip-card {
   transform-style: preserve-3d;
   transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.flip-card[data-flipped="true"] {
-  transform: rotateY(180deg);
-}
-.flip-face {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.flip-back {
-  position: absolute;
-  inset: 0;
-  transform: rotateY(180deg);
-}
+.flip-card[data-flipped="true"] { transform: rotateY(180deg); }
+.flip-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip-back { position: absolute; inset: 0; transform: rotateY(180deg); }
 
 /* ════════════════════════════════════════════════════════════════
-   THEME PRESETS (12) — override only --color-*; see DESIGN.md §2
+   THEME PRESETS (12) — same neutral base, accent variation only.
+   Light themes override the neutral ramp for AA contrast.
    ════════════════════════════════════════════════════════════════ */
 
-/* AURORA — coral on deep slate (DEFAULT) */
+/* AURORA — coral signal on charcoal (DEFAULT) */
 [data-theme="aurora"] {
-  --color-bg: #0B0F17;
-  --color-bg-raised: #111827;
-  --color-muted: #1F293D;
-  --color-fg: #E7EDF7;
-  --color-muted-fg: #94A3B8;
-  --color-border: rgba(255, 255, 255, 0.08);
   --color-accent: #FF7A72;
-  --color-accent-soft: rgba(255, 122, 114, 0.14);
+  --color-accent-soft: rgba(255, 122, 114, 0.12);
   --color-accent-fg: #1A0505;
-  --color-flow: #00E5FF;
-  --color-grow: #10B981;
-  --color-glass: rgba(255, 255, 255, 0.05);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
-  --color-glass-hover: rgba(255, 255, 255, 0.09);
+  --color-flow: #38BDF8;
+  --color-grow: #34D399;
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #60A5FA;
 }
 
-/* MIDNIGHT — classic blue night */
+/* MIDNIGHT — blue night */
 [data-theme="midnight"] {
-  --color-bg: #030712;
-  --color-bg-raised: #0B1220;
-  --color-muted: #16233B;
-  --color-fg: #E4EDFF;
-  --color-muted-fg: #8CA3C7;
-  --color-border: rgba(147, 180, 255, 0.1);
   --color-accent: #60A5FA;
-  --color-accent-soft: rgba(96, 165, 250, 0.14);
+  --color-accent-soft: rgba(96, 165, 250, 0.12);
   --color-accent-fg: #030A1A;
   --color-flow: #22D3EE;
   --color-grow: #34D399;
-  --color-glass: rgba(148, 180, 255, 0.06);
-  --color-glass-border: rgba(147, 180, 255, 0.1);
-  --color-glass-hover: rgba(148, 180, 255, 0.1);
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #818CF8;
 }
 
 /* NEBULA — violet cosmos */
 [data-theme="nebula"] {
-  --color-bg: #0D0716;
-  --color-bg-raised: #171029;
-  --color-muted: #241738;
-  --color-fg: #F2E9FF;
-  --color-muted-fg: #A794C4;
-  --color-border: rgba(192, 132, 252, 0.12);
   --color-accent: #C084FC;
-  --color-accent-soft: rgba(192, 132, 252, 0.14);
+  --color-accent-soft: rgba(192, 132, 252, 0.12);
   --color-accent-fg: #150A26;
   --color-flow: #F0ABFC;
   --color-grow: #6EE7B7;
-  --color-glass: rgba(192, 132, 252, 0.06);
-  --color-glass-border: rgba(192, 132, 252, 0.12);
-  --color-glass-hover: rgba(192, 132, 252, 0.1);
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #A78BFA;
 }
 
 /* MATRIX — terminal mint */
 [data-theme="matrix"] {
-  --color-bg: #02100B;
-  --color-bg-raised: #04180F;
-  --color-muted: #06281A;
-  --color-fg: #E4FFF1;
-  --color-muted-fg: #7FBFA2;
-  --color-border: rgba(52, 211, 153, 0.12);
   --color-accent: #34D399;
-  --color-accent-soft: rgba(52, 211, 153, 0.14);
+  --color-accent-soft: rgba(52, 211, 153, 0.12);
   --color-accent-fg: #02120A;
   --color-flow: #A7F3D0;
-  --color-grow: #FCD34D;
-  --color-glass: rgba(52, 211, 153, 0.05);
-  --color-glass-border: rgba(52, 211, 153, 0.12);
-  --color-glass-hover: rgba(52, 211, 153, 0.09);
+  --color-grow: #F5B544;
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #6EE7B7;
 }
 
 /* EMBER — warm hearth */
 [data-theme="ember"] {
-  --color-bg: #140808;
-  --color-bg-raised: #1E0E0C;
-  --color-muted: #2C1512;
-  --color-fg: #FFF0E7;
-  --color-muted-fg: #C99B8A;
-  --color-border: rgba(251, 146, 60, 0.12);
   --color-accent: #FB923C;
-  --color-accent-soft: rgba(251, 146, 60, 0.14);
+  --color-accent-soft: rgba(251, 146, 60, 0.12);
   --color-accent-fg: #1A0A02;
-  --color-flow: #FCD34D;
+  --color-flow: #F5B544;
   --color-grow: #34D399;
-  --color-glass: rgba(251, 146, 60, 0.05);
-  --color-glass-border: rgba(251, 146, 60, 0.12);
-  --color-glass-hover: rgba(251, 146, 60, 0.09);
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #FB923C;
 }
 
 /* ROSEWOOD — soft red-pink */
 [data-theme="rosewood"] {
-  --color-bg: #12070C;
-  --color-bg-raised: #1C0D14;
-  --color-muted: #2A121C;
-  --color-fg: #FFEAF1;
-  --color-muted-fg: #C793A8;
-  --color-border: rgba(251, 113, 133, 0.12);
   --color-accent: #FB7185;
-  --color-accent-soft: rgba(251, 113, 133, 0.14);
+  --color-accent-soft: rgba(251, 113, 133, 0.12);
   --color-accent-fg: #1A060B;
   --color-flow: #FDA4AF;
   --color-grow: #6EE7B7;
-  --color-glass: rgba(251, 113, 133, 0.05);
-  --color-glass-border: rgba(251, 113, 133, 0.12);
-  --color-glass-hover: rgba(251, 113, 133, 0.09);
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #F472B6;
 }
 
-/* CYBERPUNK — acid yellow neon city */
+/* CYBERPUNK — acid yellow neon */
 [data-theme="cyberpunk"] {
-  --color-bg: #0A0A12;
-  --color-bg-raised: #10101C;
-  --color-muted: #181828;
-  --color-fg: #F2F2FF;
-  --color-muted-fg: #8F92B8;
-  --color-border: rgba(252, 238, 10, 0.14);
   --color-accent: #FCEE0A;
-  --color-accent-soft: rgba(252, 238, 10, 0.12);
+  --color-accent-soft: rgba(252, 238, 10, 0.10);
   --color-accent-fg: #12120A;
   --color-flow: #00E5FF;
   --color-grow: #34D399;
-  --color-glass: rgba(252, 238, 10, 0.04);
-  --color-glass-border: rgba(252, 238, 10, 0.14);
-  --color-glass-hover: rgba(252, 238, 10, 0.08);
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #00E5FF;
 }
 
 /* ARCTIC — ice blue-teal */
 [data-theme="arctic"] {
-  --color-bg: #07111E;
-  --color-bg-raised: #0C1A2C;
-  --color-muted: #12263C;
-  --color-fg: #E8F6FF;
-  --color-muted-fg: #8FB0C9;
-  --color-border: rgba(56, 189, 248, 0.12);
   --color-accent: #38BDF8;
-  --color-accent-soft: rgba(38, 189, 248, 0.14);
+  --color-accent-soft: rgba(56, 189, 248, 0.12);
   --color-accent-fg: #04121E;
   --color-flow: #99F6E4;
   --color-grow: #6EE7B7;
-  --color-glass: rgba(56, 189, 248, 0.05);
-  --color-glass-border: rgba(56, 189, 248, 0.12);
-  --color-glass-hover: rgba(56, 189, 248, 0.09);
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #38BDF8;
 }
 
 /* SANDSTONE — warm library paper */
 [data-theme="sandstone"] {
-  --color-bg: #151210;
-  --color-bg-raised: #1E1915;
-  --color-muted: #2A231D;
-  --color-fg: #F7EFE3;
-  --color-muted-fg: #B8A68D;
-  --color-border: rgba(232, 180, 92, 0.14);
   --color-accent: #E8B45C;
-  --color-accent-soft: rgba(232, 180, 92, 0.14);
+  --color-accent-soft: rgba(232, 180, 92, 0.12);
   --color-accent-fg: #1A1206;
   --color-flow: #A5B48C;
   --color-grow: #86B87E;
-  --color-glass: rgba(232, 180, 92, 0.05);
-  --color-glass-border: rgba(232, 180, 92, 0.14);
-  --color-glass-hover: rgba(232, 180, 92, 0.09);
+  --color-danger: #FB4A55;
+  --color-success: #34D399;
+  --color-warning: #F5B544;
+  --color-info: #C8A26A;
 }
 
-/* MONO — pure grayscale focus (was ONYX) */
+/* MONO — pure grayscale focus */
 [data-theme="mono"] {
-  --color-bg: #09090B;
-  --color-bg-raised: #111113;
-  --color-muted: #1B1B1F;
-  --color-fg: #FAFAFA;
-  --color-muted-fg: #A1A1AA;
-  --color-border: rgba(255, 255, 255, 0.09);
   --color-accent: #FFFFFF;
-  --color-accent-soft: rgba(255, 255, 255, 0.1);
+  --color-accent-soft: rgba(255, 255, 255, 0.10);
   --color-accent-fg: #09090B;
   --color-flow: #D4D4D8;
   --color-grow: #A1A1AA;
-  --color-glass: rgba(255, 255, 255, 0.05);
-  --color-glass-border: rgba(255, 255, 255, 0.09);
-  --color-glass-hover: rgba(255, 255, 255, 0.09);
+  --color-danger: #FB4A55;
+  --color-success: #A1A1AA;
+  --color-warning: #F5B544;
+  --color-info: #D4D4D8;
 }
 
-/* LIGHT — clean daylight */
+/* LIGHT — clean daylight (overrides neutral ramp) */
 [data-theme="light"] {
-  --color-bg: #F1F5F9;
-  --color-bg-raised: #FFFFFF;
-  --color-muted: #E2E8F0;
+  --color-bg: #F6F7F9;
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-hover: #EEF1F5;
+  --color-muted: #EAEef2;
   --color-fg: #0F172A;
-  --color-muted-fg: #475569; /* slate-600: 6.9:1 on bg, 7.6:1 on cards */
-  --color-border: rgba(15, 23, 42, 0.1);
-  --color-accent: #B91C1C;   /* red-700: 5.9:1 as text on bg, 6.5:1 white-on-fill */
-  --color-accent-soft: rgba(185, 28, 28, 0.1);
+  --color-muted-fg: #5A6675;
+  --color-border: rgba(15, 23, 42, 0.10);
+  --color-border-strong: rgba(15, 23, 42, 0.16);
+  --color-accent: #B91C1C;
+  --color-accent-soft: rgba(185, 28, 28, 0.10);
   --color-accent-fg: #FFFFFF;
-  --color-flow: #0E7490;     /* cyan-700: 4.9:1 on bg — AA as small text */
-  --color-grow: #047857;     /* emerald-700: 5.4:1 on white/glass */
-  /* status colors must ALSO be overridden here: components read these
-     tokens directly (text-success / text-danger / text-warning), and the
-     static @theme values are tuned for dark surfaces only. */
+  --color-flow: #0E7490;
+  --color-grow: #047857;
+  --color-danger: #BE123C;
   --color-success: #047857;
-  --color-warning: #B45309;  /* amber-700: ~4.8:1 on white */
-  --color-danger: #BE123C;   /* rose-700: ~5.9:1 on white */
-  --color-glass: rgba(255, 255, 255, 0.65);
-  --color-glass-border: rgba(15, 23, 42, 0.08);
-  --color-glass-hover: rgba(255, 255, 255, 0.9);
+  --color-warning: #B45309;
+  --color-info: #1D4ED8;
+  --color-glass: #FFFFFF;
+  --color-glass-border: rgba(15, 23, 42, 0.10);
+  --color-glass-hover: #EEF1F5;
   color-scheme: light;
 }
 
-/* PAPER — warm cream study desk */
+/* PAPER — warm cream study desk (overrides neutral ramp) */
 [data-theme="paper"] {
   --color-bg: #FAF7F2;
-  --color-bg-raised: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-hover: #F1EADD;
   --color-muted: #EFE9DF;
   --color-fg: #292018;
-  --color-muted-fg: #6E604E; /* 5.7:1 on bg, 6.1:1 on cards */
+  --color-muted-fg: #6E604E;
   --color-border: rgba(41, 32, 24, 0.12);
-  --color-accent: #9A3412;   /* burnt sienna-800: 6.8:1 as text, 7.3:1 white-on-fill */
-  --color-accent-soft: rgba(154, 52, 18, 0.1);
+  --color-border-strong: rgba(41, 32, 24, 0.18);
+  --color-accent: #9A3412;
+  --color-accent-soft: rgba(154, 52, 18, 0.10);
   --color-accent-fg: #FFFFFF;
   --color-flow: #0F766E;
   --color-grow: #15803D;
-  --color-success: #15803D;
-  --color-warning: #A16207;  /* yellow-700: ~4.6:1 on cream */
   --color-danger: #BE123C;
-  --color-glass: rgba(255, 255, 255, 0.7);
-  --color-glass-border: rgba(41, 32, 24, 0.1);
-  --color-glass-hover: rgba(255, 255, 255, 0.95);
+  --color-success: #15803D;
+  --color-warning: #A16207;
+  --color-info: #1D4ED8;
+  --color-glass: #FFFFFF;
+  --color-glass-border: rgba(41, 32, 24, 0.12);
+  --color-glass-hover: #F1EADD;
   color-scheme: light;
 }
 
-/* ─── Legacy theme-name mapping (localStorage compat) ────────────
-   Old prefs: onyx→mono, void→midnight, emerald→matrix, magma→ember,
-   grape→nebula. Handled by the theme-init script in layout.tsx. */
-
 /* ─── Tailwind color-name aliases (legacy class compat) ──────────
-   Components across the app use zinc-* / yellow-* / red-* / green-*
-   utility classes. Alias them to live theme tokens so ALL pages
-   recolor with the theme without touching every file. */
+   Components use zinc-* / yellow-* / red-* / green-* utilities.
+   Alias them to live theme tokens so ALL pages recolor with the theme. */
 @theme {
   --color-black: var(--color-bg);
   --color-white: var(--color-fg);
   --color-zinc-950: var(--color-bg);
-  --color-zinc-900: var(--color-muted);
+  --color-zinc-900: var(--color-surface);
   --color-zinc-800: var(--color-border);
   --color-zinc-700: var(--color-border);
   --color-zinc-600: var(--color-muted-fg);
@@ -496,7 +412,7 @@
   --color-green-400: var(--color-grow);
   --color-blue-500: var(--color-flow);
   --color-slate-950: var(--color-bg);
-  --color-slate-900: var(--color-bg-raised);
+  --color-slate-900: var(--color-surface);
   --color-slate-800: var(--color-muted);
   --color-slate-700: var(--color-border);
   --color-slate-600: var(--color-muted-fg);
@@ -507,7 +423,7 @@
 * {
   font-family: var(--font-sans);
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
+  scrollbar-color: var(--color-border-strong) transparent;
 }
 
 ::selection {
@@ -532,9 +448,9 @@ body {
 @utility skeleton {
   background: linear-gradient(
     90deg,
-    var(--color-muted) 25%,
-    color-mix(in srgb, var(--color-muted) 65%, var(--color-fg)) 37%,
-    var(--color-muted) 63%
+    var(--color-surface-hover) 25%,
+    color-mix(in srgb, var(--color-surface-hover) 65%, var(--color-fg)) 37%,
+    var(--color-surface-hover) 63%
   );
   background-size: 200% 100%;
   animation: var(--animate-shimmer);
@@ -546,11 +462,11 @@ body {
 
 /* ─── Global select/option theming ─────────────────────────────── */
 select {
-  background-color: var(--color-muted);
+  background-color: var(--color-surface);
   color: var(--color-fg);
 }
 select option {
-  background-color: var(--color-bg-raised);
+  background-color: var(--color-surface-raised);
   color: var(--color-fg);
 }
 select:disabled {
@@ -560,7 +476,7 @@ select:disabled {
 
 /* ─── Markdown rendering (notes + card backs) ──────────────────── */
 .md-p { margin: 0.5rem 0; line-height: 1.6; }
-.md-h { font-weight: 800; letter-spacing: -0.02em; margin: 1rem 0 0.5rem; line-height: 1.2; }
+.md-h { font-weight: 700; letter-spacing: -0.01em; margin: 1rem 0 0.5rem; line-height: 1.25; }
 .md-h1 { font-size: 1.5rem; }
 .md-h2 { font-size: 1.25rem; }
 .md-h3 { font-size: 1.1rem; }
@@ -572,9 +488,9 @@ select:disabled {
 .md-ul li, .md-ol li { line-height: 1.5; }
 .md-quote { border-left: 3px solid var(--color-accent); padding: 0.25rem 0 0.25rem 0.75rem; margin: 0.5rem 0; color: var(--color-muted-fg); }
 [dir="rtl"] .md-quote { border-left: none; border-right: 3px solid var(--color-accent); padding: 0.25rem 0.75rem 0.25rem 0; }
-.md-pre { background: var(--color-muted); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.75rem; overflow-x: auto; margin: 0.5rem 0; }
+.md-pre { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.75rem; overflow-x: auto; margin: 0.5rem 0; }
 .md-pre code, .md-code { font-family: var(--font-mono); font-size: 0.85em; }
-.md-code { background: var(--color-muted); padding: 0.1rem 0.35rem; border-radius: 4px; }
+.md-code { background: var(--color-surface); padding: 0.1rem 0.35rem; border-radius: 4px; }
 .md-pre code { background: transparent; padding: 0; }
 .md-link { color: var(--color-accent); text-decoration: underline; }
 .md-link:hover { opacity: 0.8; }
@@ -587,50 +503,33 @@ p.font-mono,
   font-variant-numeric: tabular-nums;
 }
 
-/* ─── Focus ring: removed by user request (no focus borders) ───── */
+/* ─── Global keyboard focus ring (WCAG 2.4.7) ─────────────────────
+   Visible only for keyboard / AT users. Accent-tinted, 2px, offset. */
 @layer base {
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-    outline: none;
-    box-shadow: none;
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 }
 
-/* ─── Reduced motion (manual toggle + OS preference) ───────────── */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-  .skeleton {
-    animation: none;
-  }
-}
-
-/* ─── Global keyboard focus ring ──────────────────────────────────
-   WCAG 2.4.7: every interactive element gets a visible focus
-   indicator in the active theme's accent. Applies to ALL focusable
-   elements (buttons, links, selects, custom controls) without
-   needing per-component focus-visible classes. Mouse users never
-   see it (:focus-visible only fires for keyboard/AT navigation). */
-/* Focus ring disabled per user request — no outline on focus (inputs stay borderless) */
-:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
-
-/* ─── Expanded hit area for small visual controls ────────────────
-   Pattern: keep the visual size, grow the tap target to 44px.
-   Used by theme dots etc. Padding pushes the clickable area out;
-   negative margin cancels the layout shift so spacing is unchanged. */
+/* ─── Expanded hit area for small visual controls ──────────────── */
 .hit-target {
   padding: 12px;
   margin: -12px;
   box-sizing: content-box;
   width: 20px;
   height: 20px;
+}
+
+/* ─── Reduced motion (manual toggle + OS preference) ───────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .skeleton { animation: none; }
 }
 
 [data-reduced-motion="true"] *,
@@ -641,26 +540,18 @@ p.font-mono,
   transition-duration: 0.01ms !important;
 }
 
-/* ─── RTL (Arabic UI) ─────────────────────────────────────────
-   dir=rtl flips flow automatically. Most layout now uses logical
-   Tailwind utilities (ms/me/ps/pe/start/end/text-start/border-s/e),
-   so this section only covers what CSS can't get from dir alone:
-   mirrored transforms, Arabic typography, and physical leftovers. */
+/* ════════════════════════════════════════════════════════════════
+   RTL (Arabic UI) — dir=rtl flips flow; this covers CSS-only bits:
+   mirrored transforms, Arabic typography, physical leftovers.
+   ════════════════════════════════════════════════════════════════ */
+[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
 
-/* Icons/arrows/chevrons that must mirror in RTL. */
-[dir="rtl"] .rtl-flip {
-  transform: scaleX(-1);
-}
-
-/* Latin-only decorative glyphs (kbd shortcuts, arrows in stats) keep
-   LTR flow even inside RTL paragraphs. */
 [dir="rtl"] kbd,
 [dir="rtl"] .ltr-inline {
   direction: ltr;
   unicode-bidi: isolate;
 }
 
-/* Arabic typography: taller line metrics need more breathing room. */
 [dir="rtl"] body {
   font-feature-settings: "kern" 1;
   letter-spacing: 0 !important;
@@ -669,35 +560,19 @@ p.font-mono,
 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 {
   letter-spacing: 0 !important;
 }
-/* tracking-widest/wider on Arabic labels breaks joined letterforms —
-   neutralize (spacing works fine for pure-Latin badges). */
 [dir="rtl"] .tracking-widest,
-[dir="rtl"] .tracking-wider {
-  letter-spacing: 0.02em;
-}
-/* Arabic numerals render smaller in Plus Jakarta; equalize slightly. */
+[dir="rtl"] .tracking-wider { letter-spacing: 0.02em; }
 [dir="rtl"] input,
 [dir="rtl"] textarea,
 [dir="rtl"] select {
   font-family: inherit;
   text-align: start;
 }
+[dir="rtl"] .loader-bar-fill { left: auto; right: 0; }
 
-/* Loader bar / progress fills anchored with physical left. */
-[dir="rtl"] .loader-bar-fill {
-  left: auto;
-  right: 0;
-}
-
-/* Horizontally scrolling rows keep natural (LTR) scroll direction —
-   this matches Arabic reading of timeline content. */
-
-/* ═══════════════════════════════════════════════════════════════════
-   RESPONSIVE-DESIGN SKILL — fluid type/space + container queries
-   Mobile-first, content-based breakpoints, no fixed px widths.
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* Fluid type scale (320 → 1280 viewport) */
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — fluid type/space + container queries
+   ════════════════════════════════════════════════════════════════ */
 :root {
   --text-xs: clamp(0.70rem, 0.64rem + 0.30vw, 0.875rem);
   --text-sm: clamp(0.80rem, 0.74rem + 0.30vw, 1rem);
@@ -717,11 +592,9 @@ p.font-mono,
   --content-max: min(100% - 1.25rem, 80rem);
 }
 
-/* Container query contexts — Tailwind v4 @container equivalent */
 .cq, .card-cq, .grid-cq { container-type: inline-size; }
 .cq-card { container: card / inline-size; }
 
-/* Intrinsic auto-fit grids — no viewport breakpoints needed */
 .auto-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
@@ -729,7 +602,7 @@ p.font-mono,
 }
 .auto-grid--dense {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: var(--space-sm);
 }
 .auto-grid--wide {
@@ -738,24 +611,19 @@ p.font-mono,
   gap: var(--space-md);
 }
 
-/* Container-query card internals: stack → row when its own width allows */
 @container card (min-width: 380px) {
   .cq-row { flex-direction: row; align-items: flex-start; }
   .cq-row .cq-media { width: 42%; flex-shrink: 0; }
 }
 
-/* Fluid page gutter */
-.heading-reveal { font-size: var(--text-4xl); }
 .page-gutter {
   padding-inline: clamp(1rem, 0.6rem + 1.8vw, 3rem);
   padding-block: clamp(1.25rem, 0.9rem + 1.2vw, 3rem);
 }
 
-/* Touch targets: ensure 44px minimum where needed (mobile) */
 @media (pointer: coarse) {
   .tap-target { min-height: 44px; min-width: 44px; }
 }
 
-/* Viewport height fix: dvh accounts for mobile browser chrome */
 .min-dvh { min-height: 100dvh; }
 .h-dvh { height: 100dvh; }

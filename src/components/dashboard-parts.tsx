@@ -16,7 +16,7 @@ export function StudyAllDueButton() {
   return (
     <Link
       href="/subjects"
-      className="inline-flex h-10 items-center gap-2 rounded-full bg-accent px-5 text-xs font-bold uppercase tracking-widest text-accent-fg transition-transform hover:scale-[1.03] active:scale-95 glow-accent"
+      className="inline-flex h-9 items-center gap-2 rounded-lg bg-accent px-4 text-xs font-bold uppercase tracking-widest text-accent-fg transition-colors hover:brightness-110"
     >
       <PlayCircle size={15} aria-hidden />
       {t("dash.reviewNow")}

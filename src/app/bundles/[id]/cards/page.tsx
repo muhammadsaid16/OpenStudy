@@ -420,7 +420,7 @@ export default function BundleCardsPage() {
               </div>
               <RevealHeading
                 text={bundleName || t("fc.bundle")}
-                className="text-2xl font-bold uppercase tracking-tight text-fg"
+                className="text-2xl font-bold tracking-tight text-fg"
               />
               {bundleTopicLabel && (
                 <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-muted-fg">
@@ -530,7 +530,7 @@ export default function BundleCardsPage() {
             {(() => {
               const card = activeCard;
               return (
-                <div className="glass rounded-3xl p-8 min-h-[280px] flex flex-col">
+                <div className="glass rounded-2xl p-8 min-h-[280px] flex flex-col">
                   <div className="flex-1 flex flex-col justify-center text-center">
                     <p className="text-xl font-bold tracking-tight leading-relaxed">{isFlipped ? card.back : card.front}</p>
                     {isFlipped ? (((card as any).backDescription ?? (card as any).description) && <p className="mt-3 text-sm text-muted-fg">{(card as any).backDescription ?? (card as any).description}</p>) : (((card as any).frontDescription) && <p className="mt-3 text-sm text-muted-fg/80">{(card as any).frontDescription}</p>)}

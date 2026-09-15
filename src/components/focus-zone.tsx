@@ -171,13 +171,13 @@ export function FocusZone() {
   const circ = 2 * Math.PI * r;
 
   return (
-    <div className="glass relative overflow-hidden rounded-3xl p-8">
+    <div className="glass relative overflow-hidden rounded-2xl p-7 sm:p-8">
       {/* Header row — timer name + compact soundscape (secondary control,
           audit §2: one primary action, everything else recedes) */}
       <div className="mb-6 flex items-center justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.focusZone")}</p>
-          <h2 className="font-display text-xl font-bold tracking-tight">{t("focus.pomodoro")}</h2>
+          <h2 className="text-xl font-bold tracking-tight">{t("focus.pomodoro")}</h2>
         </div>
         <button
           onClick={() => {
@@ -246,7 +246,7 @@ export function FocusZone() {
           <button
             onClick={start}
             aria-label={t("ui.start_focus_session")}
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg transition-transform hover:scale-105 active:scale-95 glow-accent"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg transition-transform hover:scale-105 active:scale-95"
           >
             <Play size={22} className="ml-0.5" />
           </button>

@@ -313,11 +313,9 @@ function NotesContent() {
       <div className="mb-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <RevealHeading text={t("notes.title")} className="text-5xl lg:text-8xl" />
-            <ScrambleSubtitle
-              text={t("notes.subtitle")}
-              className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
-            />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.learn")}</p>
+            <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.notes")}</h1>
+            <p className="mt-2 text-sm text-muted-fg">{t("page.notes.subtitle")}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative">

@@ -16,28 +16,13 @@ import {
   ChevronRight,
   Sun,
   Moon,
+  Sparkles,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-// Flat list kept for typing; navGroups above drives the render.
-const navItems = [
-  { href: "/", labelKey: "ui.dashboard", icon: LayoutDashboard },
-  { href: "/subjects", labelKey: "ui.library", icon: Library },
-  { href: "/notes", labelKey: "ui.notes", icon: StickyNote },
-  { href: "/sessions", labelKey: "ui.sessions", icon: Timer },
-  { href: "/goals", labelKey: "ui.goals", icon: Target },
-  { href: "/stats", labelKey: "ui.stats", icon: BarChart3 },
-  { href: "/settings", labelKey: "ui.settings", icon: Settings },
-];
-
-// Nav groups — spec mental model: LEARN (content) / FOCUS (time) /
-// INSIGHTS (reflection) / SYSTEM. Library merges Subjects + Flashcards +
-// Bundles (one hierarchy: Subject → Topic → Deck → Cards). This fixes the
-// duplicate "two pages for same purpose" reported on /subjects vs /flashcards.
-// Labels are i18n keys rendered through useT() (src/lib/i18n.ts).
-const navGroups: { headingKey: string; items: typeof navItems }[] = [
+const navGroups: { headingKey: string; items: { href: string; labelKey: string; icon: typeof Library }[] }[] = [
   {
     headingKey: "nav.learn",
     items: [
@@ -68,12 +53,8 @@ const navGroups: { headingKey: string; items: typeof navItems }[] = [
 
 function isLibraryActive(pathname: string, href: string) {
   if (href !== "/subjects") return pathname === href || (href !== "/" && pathname.startsWith(href));
-  // Library is active for its canonical route + legacy deck routes that now redirect to it
   return pathname === "/subjects" || pathname.startsWith("/subjects") || pathname.startsWith("/flashcards") || pathname.startsWith("/bundles");
 }
-
-// Full theme picker lives in Settings (src/app/settings/page.tsx) — the
-// sidebar exposes only Dark/Light + an "All →" link (audit §6).
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -87,34 +68,38 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative hidden h-screen shrink-0 flex-col border-e border-border bg-bg-raised/80 backdrop-blur-xl transition-all duration-300 md:flex",
+        "relative hidden h-screen shrink-0 flex-col border-e border-border bg-bg transition-[width] duration-200 ease-out md:flex",
         sidebarOpen ? "w-60" : "w-[68px]"
       )}
     >
-      {/* Wordmark */}
+      {/* Wordmark + collapse */}
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         {sidebarOpen && (
-          <Link href="/" aria-label={t("ui.openstudy_home")}>
-            <span className="font-display text-xl font-bold tracking-tight text-fg">Open<span className="text-accent">Study</span>
+          <Link href="/" aria-label={t("ui.openstudy_home")} className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-fg">
+              <Sparkles size={15} aria-hidden />
+            </span>
+            <span className="text-base font-bold tracking-tight text-fg">
+              Open<span className="text-accent">Study</span>
             </span>
           </Link>
         )}
         <button
           onClick={toggleSidebar}
           aria-label={sidebarOpen ? t("ui.collapse_sidebar") : "Expand sidebar"}
-          className="rounded-full p-2 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
+          className="rounded-lg p-2 text-muted-fg transition-colors hover:bg-surface-hover hover:text-fg"
         >
           {sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-5 overflow-y-auto p-3" aria-label="Main">
+      <nav className="flex-1 space-y-6 overflow-y-auto p-3" aria-label="Main">
         {navGroups.map((group) => (
           <div key={t(group.headingKey)}>
             {sidebarOpen && (
-              <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-fg/70">
-                {t(t(group.headingKey))}
+              <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-fg/60">
+                {t(group.headingKey)}
               </p>
             )}
             <div className="space-y-1">
@@ -126,10 +111,10 @@ export function Sidebar() {
                     href={href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "group relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium tracking-tight transition-colors duration-200",
+                      "group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium tracking-tight transition-colors duration-150",
                       isActive
                         ? "bg-accent-soft text-accent"
-                        : "text-muted-fg hover:bg-accent-soft hover:text-accent",
+                        : "text-muted-fg hover:bg-surface-hover hover:text-fg",
                       !sidebarOpen && "justify-center px-0"
                     )}
                   >
@@ -137,13 +122,11 @@ export function Sidebar() {
                       <motion.span
                         layoutId="sidebar-pill"
                         transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                        className="absolute inset-0 rounded-xl bg-accent-soft"
+                        className="absolute inset-y-1.5 start-0 w-0.5 rounded-full bg-accent"
                       />
                     )}
-                    <span className="relative z-10 flex items-center gap-3">
-                      <Icon size={18} aria-hidden />
-                      {sidebarOpen && <span>{t(labelKey)}</span>}
-                    </span>
+                    <Icon size={18} aria-hidden className="shrink-0" />
+                    {sidebarOpen && <span className="truncate">{t(labelKey)}</span>}
                   </Link>
                 );
               })}
@@ -152,52 +135,57 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Appearance (audit §6): 2 quick modes + link to full picker in
-          Settings. The 12-dot showcase read as a design-system demo, not
-          an app control; full picker stays in Settings for power users. */}
-      <div className="border-t border-border p-4">
+      {/* Bottom: theme switcher + version */}
+      <div className="border-t border-border p-3">
         {sidebarOpen ? (
           <>
-            <div className="mb-1.5 flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+            <div className="mb-3 flex items-center justify-between px-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-fg/60">
                 {t("nav.appearance")}
               </p>
               <Link
                 href="/settings"
                 aria-label={t("ui.all_themes_in_settings")}
-                className="text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-accent"
+                className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-fg transition-colors hover:text-accent"
               >
                 {t("nav.all")}
               </Link>
             </div>
-            <div className="inline-flex w-full rounded-full border border-glass-border bg-glass p-1" role="group" aria-label="Theme">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setTheme("light")}
                 aria-pressed={isLight}
-                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${isLight ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
+                className={cn(
+                  "flex h-9 items-center justify-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors",
+                  isLight
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-border text-muted-fg hover:bg-surface-hover hover:text-fg"
+                )}
               >
-                {isLight && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
-                <span className="relative flex items-center gap-1.5"><Sun size={13} aria-hidden /> {t("nav.light")}</span>
+                <Sun size={13} aria-hidden /> {t("nav.light")}
               </button>
               <button
                 onClick={() => setTheme("aurora")}
                 aria-pressed={isDark}
-                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${isDark ? "text-accent-fg" : "text-muted-fg hover:text-accent"}`}
+                className={cn(
+                  "flex h-9 items-center justify-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors",
+                  isDark
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-border text-muted-fg hover:bg-surface-hover hover:text-fg"
+                )}
               >
-                {isDark && <span className="absolute inset-0 rounded-full bg-accent" aria-hidden />}
-                <span className="relative flex items-center gap-1.5"><Moon size={13} aria-hidden /> {t("nav.dark")}</span>
+                <Moon size={13} aria-hidden /> {t("nav.dark")}
               </button>
             </div>
-            <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
-              v2.0 · Aurora Glass
+            <p className="mt-3 px-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-fg/50">
+              v2.0 · OpenStudy
             </p>
           </>
         ) : (
-          /* collapsed rail: toggle dark/light */
           <button
             onClick={() => setTheme(isLight ? "aurora" : "light")}
             aria-label={isLight ? t("ui.switch_to_dark_mode") : t("ui.switch_to_light_mode")}
-            className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl border border-glass-border text-muted-fg transition-colors hover:text-accent"
+            className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-fg transition-colors hover:bg-surface-hover hover:text-fg"
           >
             {isLight ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
           </button>

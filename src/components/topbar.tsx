@@ -4,8 +4,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { useAppStore } from "@/lib/store";
 
 function greetingFor(h: number, t: (k: string) => string) {
   if (h < 5) return t("topbar.greeting.late");
@@ -16,14 +17,12 @@ function greetingFor(h: number, t: (k: string) => string) {
 
 export function TopBar({ dueCards }: { dueCards: number }) {
   const t = useT();
+  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const [now, setNow] = useState<Date | null>(null);
   const [q, setQ] = useState("");
   const router = useRouter();
 
-
   useEffect(() => {
-    // rAF defers the first tick past the effect's sync phase — silences
-    // react-hooks set-state-in-effect (cascading render) without behavior change.
     const raf = requestAnimationFrame(() => setNow(new Date()));
     const iv = setInterval(() => setNow(new Date()), 30_000);
     return () => {
@@ -32,7 +31,6 @@ export function TopBar({ dueCards }: { dueCards: number }) {
     };
   }, []);
 
-  // ⌘K / Ctrl+K focuses the search field
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -46,17 +44,24 @@ export function TopBar({ dueCards }: { dueCards: number }) {
 
   return (
     <div className="mb-8 flex flex-wrap items-center gap-4">
+      <button
+        onClick={toggleSidebar}
+        aria-label={t("ui.open_sidebar")}
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-fg transition-colors hover:bg-surface-hover hover:text-fg md:hidden"
+      >
+        <Menu size={16} />
+      </button>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-fg/70">
           {now
             ? now.toLocaleDateString(undefined, {
                 weekday: "long",
                 month: "long",
                 day: "numeric",
               })
-            : "\u00A0"}
+            : " "}
         </p>
-        <h1 className="font-display truncate text-2xl font-bold tracking-tight lg:text-3xl">
+        <h1 className="truncate text-2xl font-bold tracking-tight text-fg lg:text-3xl">
           {now ? `${greetingFor(now.getHours(), t)}, ${t("topbar.learner")}` : t("topbar.welcomeBack")}
           {dueCards > 0 && (
             <span className="ms-3 inline-flex items-center rounded-full bg-accent-soft px-3 py-0.5 align-middle text-xs font-bold uppercase tracking-widest text-accent">
@@ -66,18 +71,13 @@ export function TopBar({ dueCards }: { dueCards: number }) {
         </h1>
       </div>
 
-      {/* Global search (audit §7): wider, names what it searches, and the
-          kbd hint matches the user's OS instead of hardcoding ⌘K. */}
-      <label className="glass-inset relative hidden h-11 w-full max-w-md items-center rounded-full sm:flex lg:w-96">
-        <Search size={15} aria-hidden className="absolute start-4 text-muted-fg" />
+      <label className="glass-inset relative hidden h-10 w-full max-w-md items-center rounded-lg sm:flex lg:w-96">
+        <Search size={15} aria-hidden className="absolute start-3.5 text-muted-fg" />
         <input
           id="global-search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => {
-            // Global search now goes somewhere: Enter jumps to the flashcards
-            // browse tab (search all cards) pre-filtered with the query.
-            // Previously this wrote to a store field nothing ever read.
             if (e.key === "Enter" && q.trim()) {
               router.push(`/subjects?q=${encodeURIComponent(q.trim())}`);
             }

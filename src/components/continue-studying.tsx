@@ -21,7 +21,7 @@ export interface ContinueTarget {
 export function ContinueStudying({ target }: { target: ContinueTarget | null }) {
   const t = useT();
   return (
-    <div className="glass rounded-3xl p-6">
+    <div className="glass rounded-2xl p-6">
       <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.continueStudying")}</p>
       {target ? (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">

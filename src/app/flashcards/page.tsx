@@ -737,11 +737,9 @@ function FlashcardsContent() {
     <div className="page-gutter cq">
       {/* Header */}
       <div className="mb-6">
-        <RevealHeading text={t("page.flashcards")} className="text-4xl lg:text-6xl" />
-        <ScrambleSubtitle
-          text={t("page.flashcards.subtitle")}
-          className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
-        />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.learn")}</p>
+        <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.flashcards")}</h1>
+        <p className="mt-2 text-sm text-muted-fg">{t("page.flashcards.subtitle")}</p>
       </div>
 
       {/* Toolbar */}

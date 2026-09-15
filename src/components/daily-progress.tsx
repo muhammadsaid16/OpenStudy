@@ -122,7 +122,7 @@ export function DailyProgress({ data }: { data: DailyProgressData }) {
   }, [data.cardsReviewed, data.minutesToday, data.streakDays]);
 
   return (
-    <div className="glass flex flex-col gap-4 rounded-3xl p-6 sm:flex-row sm:items-center sm:gap-6" role="img"
+    <div className="glass flex flex-col gap-4 rounded-2xl p-6 sm:flex-row sm:items-center sm:gap-6" role="img"
       aria-label={t("dailyProgress.aria").replace("{c}", String(data.cardsReviewed)).replace("{cg}", String(data.cardsGoal)).replace("{m}", String(data.minutesToday)).replace("{mg}", String(data.minutesGoal)).replace("{s}", String(data.streakDays))}>
       <div className="relative mx-auto h-[140px] w-[140px] shrink-0 sm:mx-0">
         {/* outer → inner: cards (accent), minutes (flow), streak (grow).

@@ -168,7 +168,7 @@ export default function DashboardPage() {
                   </p>
                 </Card>
               ) : (
-                <div className="glass divide-y divide-border overflow-hidden rounded-3xl">
+                <div className="glass divide-y divide-border overflow-hidden rounded-2xl">
                   {stats.recentSessions.map((session) => (
                     <div
                       key={session.id}

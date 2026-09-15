@@ -5,8 +5,6 @@ import { useT } from "@/lib/i18n";
 import { Play, Pause, Square, Clock, Timer, Trash2, SkipForward, Coffee, Brain, Save, X } from "lucide-react";
 import { Badge, EmptyState, Skeleton, Modal, Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { RevealHeading } from "@/components/reveal-heading";
-import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import GravityFall from "@/components/originkit/ui/falling-text";
 import { magneticHandlers } from "@/lib/interactions";
 import { SubjectTopicMenu } from "@/components/subject-topic-menu";
@@ -310,11 +308,9 @@ export default function SessionsPage() {
     <div className="page-gutter cq">
       {/* Header */}
       <div className="mb-10">
-        <RevealHeading text={t("sessions.title")} className="text-5xl lg:text-8xl" />
-        <ScrambleSubtitle
-          text={t("sessions.subtitle")}
-          className="mt-4 text-sm text-muted-fg uppercase tracking-widest"
-        />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.focus")}</p>
+        <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.sessions")}</h1>
+        <p className="mt-2 text-sm text-muted-fg">{t("page.sessions.subtitle")}</p>
       </div>
 
       {/* Mode toggle — sliding pill */}

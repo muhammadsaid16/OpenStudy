@@ -169,11 +169,9 @@ export default function BundlesPage() {
       <div className="mb-8">
         <div className="flex items-end justify-between">
           <div>
-            <RevealHeading text={t("page.bundles")} className="text-4xl" />
-            <ScrambleSubtitle
-              text={t("page.bundles.subtitle")}
-              className="mt-2 text-sm text-muted-fg uppercase tracking-widest"
-            />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.learn")}</p>
+            <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.bundles")}</h1>
+            <p className="mt-2 text-sm text-muted-fg">{t("page.bundles.subtitle")}</p>
           </div>
           {!(loaded && bundles.length === 0) && (
             <div className="flex gap-2">
