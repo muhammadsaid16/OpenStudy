@@ -29,7 +29,11 @@ export function SpotifyAudioSource() {
       id={FRAME_ID}
       title="Spotify audio"
       src={src}
-      style={{ position: "absolute", width: 0, height: 0, border: 0, pointerEvents: "none" }}
+      // Off-screen but rendered (not 0×0): a zero-size iframe is often not
+      // loaded/executed by browsers, so postMessage + playback silently fail
+      // and the play/pause button does nothing. Keeping it sized-but-hidden
+      // makes the controls reliable.
+      style={{ position: "absolute", left: "-9999px", top: 0, width: "300px", height: "380px", border: 0, pointerEvents: "none" }}
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
     />
   );
@@ -50,9 +54,10 @@ export function SpotifyMiniPlayer() {
   useEffect(() => {
     function onMsg(e: MessageEvent) {
       try {
-        const d = e.data as { type?: string; isPlaying?: boolean };
-        if (d?.type === "player_update" && typeof d.isPlaying === "boolean") {
-          setPlaying(d.isPlaying);
+        const d = e.data as { type?: string; isPlaying?: boolean; data?: { isPlaying?: boolean } };
+        if (d?.type === "player_update") {
+          const playing = d.isPlaying ?? d.data?.isPlaying;
+          if (typeof playing === "boolean") setPlaying(playing);
         }
       } catch {
         /* ignore */
@@ -66,7 +71,9 @@ export function SpotifyMiniPlayer() {
 
   const toggle = () => {
     spotifyCommand("toggle");
-    setPlaying(!isPlaying); // optimistic; corrected by the message listener
+    // Reconcile from the real iframe state via the message listener; this
+    // optimistic flip just keeps the UI responsive if the message is slow.
+    setPlaying(!isPlaying);
   };
 
   return (
