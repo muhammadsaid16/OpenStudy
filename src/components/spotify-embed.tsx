@@ -226,6 +226,34 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
     setValid(true);
   }, [input, setTrack]);
 
+  const [pasteTracks, setPasteTracks] = useState<PlaylistTrack[]>([]);
+  const [pasteLoading, setPasteLoading] = useState(false);
+  const [pasteInspected, setPasteInspected] = useState(false);
+  const inspectPasted = useCallback(async () => {
+    const embed = toSpotifyEmbedUrl(input);
+    if (!embed || !input.includes("playlist")) {
+      setValid(false);
+      return;
+    }
+    const m = input.match(/playlist\/([A-Za-z0-9]{22})/);
+    const pid = m?.[1];
+    if (!pid) {
+      setValid(false);
+      return;
+    }
+    setPasteLoading(true);
+    setPasteInspected(true);
+    try {
+      const r = await fetch(`/api/spotify/playlist?id=${encodeURIComponent(pid)}`);
+      const j = (await r.json()) as { tracks: PlaylistTrack[] };
+      setPasteTracks(j.tracks ?? []);
+    } catch {
+      setPasteTracks([]);
+    } finally {
+      setPasteLoading(false);
+    }
+  }, [input]);
+
   const playResult = (r: SearchResult) => {
     if (!r.embedUrl) {
       window.open(r.webUrl, "_blank", "noreferrer");
@@ -384,6 +412,8 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                 onChange={(e) => {
                   setInput(e.target.value);
                   setValid(true);
+                  setPasteInspected(false);
+                  setPasteTracks([]);
                 }}
                 onKeyDown={(e) => e.key === "Enter" && onUse()}
                 placeholder="Paste a Spotify playlist or track link…"
@@ -394,10 +424,38 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
             <button onClick={onUse} className="shrink-0 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg hover:opacity-90 active:scale-[0.98]">
               Load
             </button>
+            {input.includes("playlist") && (
+              <button onClick={inspectPasted} className="shrink-0 rounded-xl border border-border bg-surface px-3 text-xs font-bold text-fg hover:bg-muted">
+                <ListMusic size={14} className="inline -mt-0.5 mr-1" /> Inspect
+              </button>
+            )}
           </div>
           {!valid && <p className="text-xs text-danger">That doesn&apos;t look like a Spotify link. Paste a playlist or track URL/URI.</p>}
+          {pasteLoading && (
+            <p className="flex items-center justify-center gap-2 py-4 text-sm text-muted-fg">
+              <Loader2 size={16} className="animate-spin" /> Loading tracks…
+            </p>
+          )}
+          {pasteInspected && !pasteLoading && pasteTracks.length === 0 && <p className="rounded-xl border border-border bg-bg px-4 py-4 text-center text-sm text-muted-fg">No tracks found or playlist is private.</p>}
+          {pasteTracks.length > 0 && (
+            <ul className="max-h-[45vh] space-y-1 overflow-y-auto pr-1">
+              {pasteTracks.map((t) => (
+                <li key={t.id} className="flex items-center gap-3 rounded-xl border border-transparent bg-bg px-2 py-2 hover:border-border hover:bg-surface">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {t.image ? <img src={t.image} alt="" className="h-9 w-9 rounded-lg object-cover" /> : <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-fg"><Music2 size={14} /></span>}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-fg">{t.name}</p>
+                    <p className="truncate text-xs text-muted-fg">{t.artist}</p>
+                  </div>
+                  <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
+                    <Play size={14} className="ml-0.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
           <p className="text-xs leading-relaxed text-muted-fg">
-            Only <b className="text-fg">public</b> playlists &amp; tracks can be embedded. If it shows &quot;Page not found&quot;, make the playlist Public and Share → Copy link again.
+            Only <b className="text-fg">public</b> playlists &amp; tracks can be embedded. Tip: paste a playlist → <b className="text-fg">Inspect</b> to see and play any song inside it. Search playlists need a Spotify Client Secret (see note below).
           </p>
         </div>
       )}
