@@ -338,29 +338,33 @@ export default function SettingsPage() {
                   ))}
                 </div>
               ) : wpResults.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {wpResults.map((item) => {
-                    const active = wallpaperId === item.fullUrl;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setWallpaper("static", item.fullUrl)}
-                        className={cn(
-                          "group relative h-28 overflow-hidden rounded-xl border text-start transition-all",
-                          active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
-                        )}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={item.thumbUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-                        {active && (
-                          <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
-                            <Check size={12} strokeWidth={3} />
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                <div className="max-h-[50vh] overflow-y-auto pr-1 space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{wpResults.length} Wallpapers — scroll to explore all</p>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {wpResults.map((item) => {
+                      const active = wallpaperId === item.fullUrl;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setWallpaper("static", item.fullUrl)}
+                          className={cn(
+                            "group relative h-28 overflow-hidden rounded-xl border text-start transition-all",
+                            active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
+                          )}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={item.thumbUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+                          <span className="absolute bottom-1.5 left-2 max-w-[85%] truncate text-[10px] font-bold text-white drop-shadow">{item.title}</span>
+                          {active && (
+                            <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
+                              <Check size={12} strokeWidth={3} />
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               ) : (
                 <p className="rounded-xl border border-border bg-bg p-4 text-center text-xs text-muted-fg">No wallpapers found for &quot;{wpQuery}&quot;.</p>
