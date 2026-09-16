@@ -28,6 +28,10 @@ export function WallpaperHost() {
 
   if (wallpaperType === "none") return null;
 
+  const isLiveVideoUrl =
+    wallpaperType === "live" &&
+    (wallpaperId.startsWith("http://") || wallpaperId.startsWith("https://"));
+
   return (
     <div
       aria-hidden="true"
@@ -37,7 +41,10 @@ export function WallpaperHost() {
         filter: wallpaperBlur > 0 ? `blur(${wallpaperBlur}px)` : undefined,
       }}
     >
-      {wallpaperType === "live" && (
+      {wallpaperType === "live" && isLiveVideoUrl && (
+        <VideoWallpaper url={wallpaperId} />
+      )}
+      {wallpaperType === "live" && !isLiveVideoUrl && (
         <LiveCanvas preset={wallpaperId} reducedMotion={reducedMotion} />
       )}
       {wallpaperType === "static" && (
@@ -49,6 +56,7 @@ export function WallpaperHost() {
     </div>
   );
 }
+
 
 function StaticWallpaper({ preset }: { preset: string }) {
   const isUrl = preset.startsWith("http://") || preset.startsWith("https://") || preset.startsWith("/");
@@ -65,6 +73,21 @@ function StaticWallpaper({ preset }: { preset: string }) {
     <div
       className="h-full w-full bg-cover bg-center transition-all duration-700"
       style={{ background: item.bg }}
+    />
+  );
+}
+
+function VideoWallpaper({ url }: { url: string }) {
+  if (!url) return null;
+  return (
+    <video
+      key={url}
+      src={url}
+      autoPlay
+      loop
+      muted
+      playsInline
+      className="h-full w-full object-cover"
     />
   );
 }

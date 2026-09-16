@@ -93,6 +93,14 @@ export default function SettingsPage() {
   const [wpHasMore, setWpHasMore] = useState(true);
   const [wpLoadingMore, setWpLoadingMore] = useState(false);
 
+  // Live video wallpaper state
+  const [vidQuery, setVidQuery] = useState("nature");
+  const [vidResults, setVidResults] = useState<Array<{ id: string; thumbUrl: string; videoUrl: string; title: string }>>([]);
+  const [vidLoading, setVidLoading] = useState(false);
+  const [vidPage, setVidPage] = useState(1);
+  const [vidHasMore, setVidHasMore] = useState(true);
+  const [vidLoadingMore, setVidLoadingMore] = useState(false);
+
   useEffect(() => {
     if (wallpaperType !== "static") return;
     let cancelled = false;
@@ -122,6 +130,35 @@ export default function SettingsPage() {
     };
   }, [wpQuery, wallpaperType]);
 
+  useEffect(() => {
+    if (wallpaperType !== "live") return;
+    let cancelled = false;
+    setVidLoading(true);
+    setVidPage(1);
+    setVidHasMore(true);
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/wallpapers/videos?q=${encodeURIComponent(vidQuery || "nature")}&page=1`);
+        const data = await res.json();
+        if (!cancelled && data.videos) {
+          setVidResults(data.videos);
+          setVidHasMore(data.hasMore && data.videos.length > 0);
+        }
+      } catch {
+        if (!cancelled) {
+          setVidResults([]);
+          setVidHasMore(false);
+        }
+      } finally {
+        if (!cancelled) setVidLoading(false);
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [vidQuery, wallpaperType]);
+
   const loadMoreWallpapers = async () => {
     if (wpLoadingMore || !wpHasMore) return;
     setWpLoadingMore(true);
@@ -144,6 +181,31 @@ export default function SettingsPage() {
       setWpHasMore(false);
     } finally {
       setWpLoadingMore(false);
+    }
+  };
+
+  const loadMoreVideos = async () => {
+    if (vidLoadingMore || !vidHasMore) return;
+    setVidLoadingMore(true);
+    const nextPage = vidPage + 1;
+    try {
+      const res = await fetch(`/api/wallpapers/videos?q=${encodeURIComponent(vidQuery || "nature")}&page=${nextPage}`);
+      const data = await res.json();
+      if (data.videos && data.videos.length > 0) {
+        setVidResults((prev) => {
+          const existingIds = new Set(prev.map((v) => v.id));
+          const newItems = data.videos.filter((v: { id: string }) => !existingIds.has(v.id));
+          return [...prev, ...newItems];
+        });
+        setVidPage(nextPage);
+        setVidHasMore(data.hasMore);
+      } else {
+        setVidHasMore(false);
+      }
+    } catch {
+      setVidHasMore(false);
+    } finally {
+      setVidLoadingMore(false);
     }
   };
 
@@ -302,55 +364,104 @@ export default function SettingsPage() {
             })}
           </div>
 
-          {/* Live Wallpapers Grid */}
+          {/* Live Wallpapers — Canvas Presets + API Video Wallpapers */}
           {wallpaperType === "live" && (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {LIVE_WALLPAPERS.map((wp) => {
-                const active = wallpaperId === wp.id;
-                return (
-                  <button
-                    key={wp.id}
-                    onClick={() => setWallpaper("live", wp.id)}
-                    className={cn(
-                      "flex flex-col gap-2 rounded-xl border p-3 text-start transition-all",
-                      active ? "border-accent bg-accent-soft/30 ring-2 ring-accent" : "border-border bg-bg hover:border-accent"
+            <div className="space-y-5">
+              {/* Canvas Presets */}
+              <div>
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg">Canvas Animations</p>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {LIVE_WALLPAPERS.map((wp) => {
+                    const active = wallpaperId === wp.id;
+                    return (
+                      <button
+                        key={wp.id}
+                        onClick={() => setWallpaper("live", wp.id)}
+                        className={cn(
+                          "flex flex-col gap-2 rounded-xl border p-3 text-start transition-all",
+                          active ? "border-accent bg-accent-soft/30 ring-2 ring-accent" : "border-border bg-bg hover:border-accent"
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <Sparkles size={16} className={active ? "text-accent" : "text-muted-fg"} />
+                          {active && <Check size={14} className="text-accent" />}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-fg">{wp.name}</p>
+                          <p className="text-[10px] text-muted-fg">{wp.desc}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* API Video Wallpapers */}
+              <div className="space-y-3 border-t border-border pt-4">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">Live Video Wallpapers</p>
+                <div className="relative">
+                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
+                  <input
+                    type="text"
+                    value={vidQuery}
+                    onChange={(e) => setVidQuery(e.target.value)}
+                    placeholder="Search videos (e.g. rain, forest, city, ocean)..."
+                    className="h-9 w-full rounded-xl border border-border bg-bg pl-8 pr-8 text-xs text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none"
+                  />
+                  {vidLoading && <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-fg" />}
+                </div>
+
+                {vidLoading ? (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />
+                    ))}
+                  </div>
+                ) : vidResults.length > 0 ? (
+                  <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      {vidResults.map((item) => {
+                        const active = wallpaperId === item.videoUrl;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setWallpaper("live", item.videoUrl)}
+                            className={cn(
+                              "group relative h-28 overflow-hidden rounded-xl border text-start transition-all",
+                              active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
+                            )}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={item.thumbUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+                            <span className="absolute bottom-1.5 left-2 max-w-[85%] truncate text-[10px] font-bold text-white drop-shadow">{item.title}</span>
+                            {active && (
+                              <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
+                                <Check size={12} strokeWidth={3} />
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {vidHasMore && (
+                      <div className="pt-2 text-center">
+                        <Button size="sm" variant="secondary" onClick={loadMoreVideos} disabled={vidLoadingMore} className="w-full sm:w-auto">
+                          {vidLoadingMore ? <><Loader2 size={14} className="animate-spin" /> Loading More...</> : "Load More Videos"}
+                        </Button>
+                      </div>
                     )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <Sparkles size={16} className={active ? "text-accent" : "text-muted-fg"} />
-                      {active && <Check size={14} className="text-accent" />}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-fg">{wp.name}</p>
-                      <p className="text-[10px] text-muted-fg">{wp.desc}</p>
-                    </div>
-                  </button>
-                );
-              })}
+                  </div>
+                ) : (
+                  <p className="rounded-xl border border-border bg-bg p-4 text-center text-xs text-muted-fg">No videos found for &quot;{vidQuery}&quot;.</p>
+                )}
+              </div>
             </div>
           )}
 
           {/* API Photo Wallpapers Grid */}
           {wallpaperType === "static" && (
             <div className="space-y-4">
-              {/* Topic Pills */}
-              <div className="flex flex-wrap gap-1.5">
-                {["Space", "Nature", "Cyberpunk", "Minimalist", "Anime", "Dark"].map((topic) => (
-                  <button
-                    key={topic}
-                    onClick={() => setWpQuery(topic)}
-                    className={cn(
-                      "rounded-full border px-3 py-1 text-[11px] font-semibold transition-all",
-                      wpQuery.toLowerCase() === topic.toLowerCase()
-                        ? "border-accent bg-accent/15 text-accent"
-                        : "border-border bg-bg text-muted-fg hover:border-accent hover:text-fg"
-                    )}
-                  >
-                    {topic}
-                  </button>
-                ))}
-              </div>
-
               {/* Search Input */}
               <div className="relative">
                 <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
