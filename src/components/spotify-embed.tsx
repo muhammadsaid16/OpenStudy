@@ -89,6 +89,22 @@ export function SpotifyMiniPlayer() {
     if (previewRef.current) previewRef.current.volume = volume;
   }, [volume, previewUrl]);
 
+  useEffect(() => {
+    if (!isYoutube) return;
+    const handleMsg = (ev: MessageEvent) => {
+      try {
+        const data = typeof ev.data === "string" ? JSON.parse(ev.data) : ev.data;
+        if (data && data.event === "infoDelivery" && data.info && typeof data.info.playerState === "number") {
+          const st = data.info.playerState;
+          if (st === 1) setPlaying(true);
+          else if (st === 2 || st === 0) setPlaying(false);
+        }
+      } catch {}
+    };
+    window.addEventListener("message", handleMsg);
+    return () => window.removeEventListener("message", handleMsg);
+  }, [isYoutube, setPlaying]);
+
   if (!url && !previewUrl) return null;
 
   const toggle = () => {
