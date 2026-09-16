@@ -15,29 +15,36 @@ import {
   Loader2,
   Volume2,
   VolumeX,
+  ListMusic,
+  ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toSpotifyEmbedUrl, toSpotifyWebUrl } from "@/lib/spotify-embed";
 import { useSpotify } from "@/lib/spotify-store";
 
 const FRAME_ID = "spotify-audio-frame";
+const VISIBLE_FRAME_ID = "spotify-visible-frame";
 
 function spotifyCommand(command: "play" | "pause" | "toggle" | "volume", volume?: number) {
   if (typeof document === "undefined") return;
-  const frame = document.getElementById(FRAME_ID) as HTMLIFrameElement | null;
-  if (!frame?.contentWindow) return;
-  if (command === "volume" && typeof volume === "number") {
-    frame.contentWindow.postMessage({ command: "volume", volume }, "*");
-  } else {
-    frame.contentWindow.postMessage({ command }, "*");
+  // Try both frames (hidden + visible) — only one is mounted at a time
+  for (const id of [FRAME_ID, VISIBLE_FRAME_ID]) {
+    const frame = document.getElementById(id) as HTMLIFrameElement | null;
+    if (!frame?.contentWindow) continue;
+    if (command === "volume" && typeof volume === "number") {
+      frame.contentWindow.postMessage({ command: "volume", volume }, "*");
+    } else {
+      frame.contentWindow.postMessage({ command }, "*");
+    }
   }
 }
 
-// ─── Global audio source (mounted once in the root layout) ──────────
+// ─── Hidden background source (only when mini-player is collapsed) ──
 export function SpotifyAudioSource() {
   const url = useSpotify((s) => s.url);
+  const expanded = useSpotify((s) => s.expanded);
   const volume = useSpotify((s) => s.volume);
-  if (!url) return null;
+  if (!url || expanded) return null; // visible frame owns playback when expanded
   const sep = url.includes("?") ? "&" : "?";
   const src = `${url}${sep}autoplay=1`;
   return (
@@ -45,17 +52,14 @@ export function SpotifyAudioSource() {
       id={FRAME_ID}
       title="Spotify audio"
       src={src}
-      onLoad={() => {
-        // Apply persisted volume once the frame is ready
-        setTimeout(() => spotifyCommand("volume", volume), 600);
-      }}
-      style={{ position: "absolute", left: "-9999px", top: 0, width: "300px", height: "380px", border: 0, pointerEvents: "none" }}
+      onLoad={() => setTimeout(() => spotifyCommand("volume", volume), 600)}
+      style={{ position: "absolute", left: "-9999px", top: 0, width: "300px", height: "80px", border: 0, pointerEvents: "none" }}
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
     />
   );
 }
 
-// ─── Persistent mini-player / vinyl bar (also in the layout) ─────────
+// ─── Persistent mini-player (in the layout) ─────────────────────────
 export function SpotifyMiniPlayer() {
   const url = useSpotify((s) => s.url);
   const webUrl = useSpotify((s) => s.webUrl);
@@ -70,23 +74,24 @@ export function SpotifyMiniPlayer() {
 
   if (!url) return null;
 
+  const isPlaylist = url.includes("/playlist/");
   const toggle = () => {
-    // Explicit play/pause avoids desync; toggle is fallback.
     spotifyCommand(isPlaying ? "pause" : "play");
-    // Fallback to toggle if embed ignores play/pause (older embeds)
     setTimeout(() => spotifyCommand("toggle"), 80);
     setPlaying(!isPlaying);
   };
-
   const onVolume = (v: number) => {
     setVolume(v);
     spotifyCommand("volume", v);
   };
+  const sep = url.includes("?") ? "&" : "?";
+  const visibleSrc = `${url}${sep}autoplay=1`;
 
   return (
-    <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 md:bottom-4 md:inset-x-auto md:right-4 md:w-80">
-      <div className="glass-inset mx-3 rounded-2xl border border-glass-border p-3 md:mx-0">
-        <div className="flex items-center gap-3">
+    <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 md:bottom-4 md:inset-x-auto md:right-4 md:w-[360px]">
+      <div className="glass-inset mx-3 overflow-hidden rounded-2xl border border-glass-border md:mx-0">
+        {/* Compact bar — always visible */}
+        <div className="flex items-center gap-3 p-3">
           <Vinyl spinning={isPlaying} />
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{isPlaying ? "Now Spinning" : "Paused"}</p>
@@ -114,40 +119,31 @@ export function SpotifyMiniPlayer() {
             <X size={16} />
           </button>
         </div>
+
+        {/* Expanded: visible Spotify embed so clicks actually start audio */}
         {expanded && (
-          <div className="mt-3 space-y-2">
+          <div className="space-y-2 border-t border-glass-border p-3">
+            <iframe
+              id={VISIBLE_FRAME_ID}
+              title="Spotify player"
+              src={visibleSrc}
+              onLoad={() => setTimeout(() => spotifyCommand("volume", volume), 600)}
+              className="w-full rounded-xl border-0"
+              style={{ height: isPlaylist ? 352 : 80 }}
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            />
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => onVolume(volume === 0 ? 0.8 : 0)}
-                aria-label={volume === 0 ? "Unmute" : "Mute"}
-                className="text-muted-fg hover:text-fg"
-              >
+              <button onClick={() => onVolume(volume === 0 ? 0.8 : 0)} aria-label={volume === 0 ? "Unmute" : "Mute"} className="text-muted-fg hover:text-fg">
                 {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
               </button>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.05}
-                value={volume}
-                onChange={(e) => onVolume(parseFloat(e.target.value))}
-                className="h-1 flex-1 accent-[var(--color-accent)]"
-                aria-label="Volume"
-              />
+              <input type="range" min={0} max={1} step={0.05} value={volume} onChange={(e) => onVolume(parseFloat(e.target.value))} className="h-1 flex-1 accent-[var(--color-accent)]" aria-label="Volume" />
               {webUrl && (
-                <a
-                  href={webUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline"
-                >
+                <a href={webUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
                   <ExternalLink size={13} aria-hidden /> Open
                 </a>
               )}
             </div>
-            <p className="text-[11px] leading-relaxed text-muted-fg">
-              Private playlists show &quot;Page not found&quot; — make the playlist Public and Share → Copy link again.
-            </p>
           </div>
         )}
       </div>
@@ -166,6 +162,15 @@ type SearchResult = {
   webUrl: string;
 };
 
+type PlaylistTrack = {
+  id: string;
+  name: string;
+  artist: string;
+  image: string | null;
+  embedUrl: string;
+  webUrl: string;
+};
+
 export function SpotifyEmbedPicker({ className }: { className?: string }) {
   const [tab, setTab] = useState<"search" | "paste">("search");
   const [query, setQuery] = useState("");
@@ -174,10 +179,13 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
   const [searched, setSearched] = useState(false);
   const [input, setInput] = useState("");
   const [valid, setValid] = useState(true);
+  // Playlist drill-down
+  const [activePlaylist, setActivePlaylist] = useState<SearchResult | null>(null);
+  const [tracks, setTracks] = useState<PlaylistTrack[]>([]);
+  const [tracksLoading, setTracksLoading] = useState(false);
   const setTrack = useSpotify((s) => s.setTrack);
   const debounceRef = useRef<number | null>(null);
 
-  // Debounced search
   useEffect(() => {
     const q = query.trim();
     if (debounceRef.current) window.clearTimeout(debounceRef.current);
@@ -219,93 +227,153 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
   }, [input, setTrack]);
 
   const playResult = (r: SearchResult) => {
+    if (!r.embedUrl) {
+      window.open(r.webUrl, "_blank", "noreferrer");
+      return;
+    }
     setTrack(r.embedUrl, r.webUrl, `${r.name} — ${r.artist}`);
+  };
+
+  const openPlaylist = async (r: SearchResult) => {
+    setActivePlaylist(r);
+    setTracks([]);
+    setTracksLoading(true);
+    try {
+      const res = await fetch(`/api/spotify/playlist?id=${encodeURIComponent(r.id)}`);
+      const j = (await res.json()) as { tracks: PlaylistTrack[] };
+      setTracks(j.tracks ?? []);
+    } catch {
+      setTracks([]);
+    } finally {
+      setTracksLoading(false);
+    }
   };
 
   return (
     <div className={cn("rounded-2xl border border-glass-border bg-surface p-4", className)}>
-      {/* Tabs */}
       <div className="mb-4 flex gap-1.5 rounded-full bg-muted p-1">
         <button
-          onClick={() => setTab("search")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition",
-            tab === "search" ? "bg-accent text-accent-fg shadow" : "text-muted-fg hover:text-fg"
-          )}
+          onClick={() => {
+            setTab("search");
+            setActivePlaylist(null);
+          }}
+          className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition", tab === "search" ? "bg-accent text-accent-fg shadow" : "text-muted-fg hover:text-fg")}
         >
           <Search size={14} /> Search
         </button>
-        <button
-          onClick={() => setTab("paste")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition",
-            tab === "paste" ? "bg-accent text-accent-fg shadow" : "text-muted-fg hover:text-fg"
-          )}
-        >
+        <button onClick={() => setTab("paste")} className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition", tab === "paste" ? "bg-accent text-accent-fg shadow" : "text-muted-fg hover:text-fg")}>
           <Link2 size={14} /> Paste Link
         </button>
       </div>
 
       {tab === "search" ? (
-        <div className="space-y-3">
-          <div className="relative">
-            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search songs, artists, playlists…"
-              className="h-10 w-full rounded-xl border border-border bg-bg pl-9 pr-9 text-sm text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none"
-              aria-label="Search Spotify"
-            />
-            {loading && <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-fg" />}
-          </div>
-
-          {!searched && !loading && query.trim().length < 2 && (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-bg/50 px-4 py-8 text-center">
-              <Music2 size={20} className="text-muted-fg" />
-              <p className="text-sm font-semibold text-fg">Search Spotify without leaving OpenStudy</p>
-              <p className="max-w-xs text-xs text-muted-fg">Type a song, artist, or playlist — tap any result to play it in the background while you study. No Premium or login needed.</p>
+        activePlaylist ? (
+          <div className="space-y-3">
+            <button onClick={() => setActivePlaylist(null)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline">
+              <ArrowLeft size={14} /> Back to results
+            </button>
+            <div className="flex items-center gap-3 rounded-xl border border-border bg-bg p-3">
+              {activePlaylist.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={activePlaylist.image} alt="" className="h-12 w-12 rounded-lg object-cover" />
+              ) : (
+                <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-muted-fg">
+                  <ListMusic size={18} />
+                </span>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-fg">{activePlaylist.name}</p>
+                <p className="truncate text-xs text-muted-fg">{activePlaylist.artist}</p>
+              </div>
+              <button onClick={() => playResult(activePlaylist)} className="shrink-0 rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-fg hover:opacity-90">
+                Play all
+              </button>
             </div>
-          )}
+            {tracksLoading ? (
+              <p className="flex items-center justify-center gap-2 py-6 text-sm text-muted-fg">
+                <Loader2 size={16} className="animate-spin" /> Loading tracks…
+              </p>
+            ) : tracks.length === 0 ? (
+              <p className="rounded-xl border border-border bg-bg px-4 py-6 text-center text-sm text-muted-fg">No tracks found or playlist is private.</p>
+            ) : (
+              <ul className="max-h-[50vh] space-y-1 overflow-y-auto pr-1">
+                {tracks.map((t) => (
+                  <li key={t.id} className="flex items-center gap-3 rounded-xl border border-transparent bg-bg px-2 py-2 hover:border-border hover:bg-surface">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    {t.image ? <img src={t.image} alt="" className="h-9 w-9 rounded-lg object-cover" /> : <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-fg"><Music2 size={14} /></span>}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-fg">{t.name}</p>
+                      <p className="truncate text-xs text-muted-fg">{t.artist}</p>
+                    </div>
+                    <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
+                      <Play size={14} className="ml-0.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="relative">
+              <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search songs, artists, playlists…" className="h-10 w-full rounded-xl border border-border bg-bg pl-9 pr-9 text-sm text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none" aria-label="Search Spotify" />
+              {loading && <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-fg" />}
+            </div>
 
-          {searched && results.length === 0 && !loading && (
-            <p className="rounded-xl border border-border bg-bg px-4 py-6 text-center text-sm text-muted-fg">No results — try another search.</p>
-          )}
-
-          {results.length > 0 && (
-            <ul className="max-h-[50vh] space-y-1.5 overflow-y-auto pr-1">
-              {results.map((r) => (
-                <li
-                  key={`${r.type}:${r.id}`}
-                  className="flex items-center gap-3 rounded-xl border border-transparent bg-bg px-2 py-2 transition hover:border-border hover:bg-surface"
-                >
-                  {r.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={r.image} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
-                  ) : (
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-fg">
-                      <Music2 size={16} />
-                    </span>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-fg">{r.name}</p>
-                    <p className="truncate text-xs text-muted-fg">
-                      <span className="mr-1 inline-flex rounded bg-muted px-1 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-fg">{r.type}</span>
-                      {r.artist}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => playResult(r)}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95"
-                    aria-label={`Play ${r.name}`}
-                  >
-                    <Play size={14} className="ml-0.5" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+            {!searched && !loading && query.trim().length < 2 && (
+              <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-bg/50 px-4 py-8 text-center">
+                <Music2 size={20} className="text-muted-fg" />
+                <p className="text-sm font-semibold text-fg">Search Spotify without leaving OpenStudy</p>
+                <p className="max-w-xs text-xs text-muted-fg">Type a song, artist, or playlist — tap a track to play it, or open a playlist to pick a specific song. No Premium or login needed.</p>
+              </div>
+            )}
+            {searched && results.length === 0 && !loading && <p className="rounded-xl border border-border bg-bg px-4 py-6 text-center text-sm text-muted-fg">No results — try another search.</p>}
+            {results.length > 0 && (
+              <ul className="max-h-[50vh] space-y-1.5 overflow-y-auto pr-1">
+                {results.map((r) => (
+                  <li key={`${r.type}:${r.id}`} className="flex items-center gap-3 rounded-xl border border-transparent bg-bg px-2 py-2 transition hover:border-border hover:bg-surface">
+                    {r.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={r.image} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                    ) : (
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-fg">
+                        <Music2 size={16} />
+                      </span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-fg">{r.name}</p>
+                      <p className="truncate text-xs text-muted-fg">
+                        <span className="mr-1 inline-flex rounded bg-muted px-1 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-fg">{r.type}</span>
+                        {r.artist}
+                      </p>
+                    </div>
+                    {r.type === "playlist" ? (
+                      <div className="flex shrink-0 gap-1">
+                        <button onClick={() => openPlaylist(r)} className="rounded-full border border-border bg-surface px-2.5 py-1.5 text-xs font-bold text-fg hover:bg-muted" aria-label={`View tracks in ${r.name}`}>
+                          <ListMusic size={14} />
+                        </button>
+                        <button onClick={() => playResult(r)} className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${r.name}`}>
+                          <Play size={14} className="ml-0.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => playResult(r)}
+                        disabled={!r.embedUrl}
+                        className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95 disabled:opacity-40")}
+                        aria-label={r.embedUrl ? `Play ${r.name}` : `Open ${r.name} in Spotify`}
+                        title={r.embedUrl ? undefined : "No preview — opens in Spotify"}
+                      >
+                        {r.embedUrl ? <Play size={14} className="ml-0.5" /> : <ExternalLink size={14} />}
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )
       ) : (
         <div className="space-y-3">
           <div className="flex gap-2">
@@ -319,17 +387,11 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                 }}
                 onKeyDown={(e) => e.key === "Enter" && onUse()}
                 placeholder="Paste a Spotify playlist or track link…"
-                className={cn(
-                  "h-10 w-full rounded-xl border bg-bg pl-9 pr-3 text-sm text-fg placeholder:text-muted-fg focus:outline-none",
-                  valid ? "border-border focus:border-accent" : "border-danger focus:border-danger"
-                )}
+                className={cn("h-10 w-full rounded-xl border bg-bg pl-9 pr-3 text-sm text-fg placeholder:text-muted-fg focus:outline-none", valid ? "border-border focus:border-accent" : "border-danger focus:border-danger")}
                 aria-label="Paste Spotify link"
               />
             </div>
-            <button
-              onClick={onUse}
-              className="shrink-0 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg hover:opacity-90 active:scale-[0.98]"
-            >
+            <button onClick={onUse} className="shrink-0 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg hover:opacity-90 active:scale-[0.98]">
               Load
             </button>
           </div>
@@ -359,18 +421,11 @@ function Vinyl({ spinning }: { spinning: boolean }) {
         <div className="absolute inset-0 m-auto h-7 w-7 rounded-full border border-white/10 bg-[#0b0f17]" />
         <div className="absolute inset-0 m-auto h-2.5 w-2.5 rounded-full bg-white/70" />
       </div>
-      {spinning && (
-        <motion.span
-          className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent"
-          animate={{ opacity: [1, 0.3, 1] }}
-          transition={{ duration: 1, repeat: Infinity }}
-        />
-      )}
+      {spinning && <motion.span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1, repeat: Infinity }} />}
     </div>
   );
 }
 
-// Shared spin logic so the vinyl keeps rotating smoothly across re-renders.
 function useVinylSpin(ref: React.RefObject<HTMLDivElement | null>, spinning: boolean) {
   useEffect(() => {
     const el = ref.current;

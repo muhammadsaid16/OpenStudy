@@ -111,8 +111,9 @@ export async function GET(req: NextRequest) {
         artist: t.artistName,
         type: "track" as const,
         image: t.artworkUrl100 ?? null,
-        // iTunes has no Spotify embed — link to Spotify search for that track
-        embedUrl: `https://open.spotify.com/embed/search/${query}?theme=0`,
+        // No Spotify ID available from iTunes — no direct embed. UI will
+        // show "Open in Spotify" search instead of a broken embed.
+        embedUrl: "",
         webUrl: `https://open.spotify.com/search/${query}`,
       };
     });
