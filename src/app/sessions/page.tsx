@@ -91,7 +91,9 @@ export default function SessionsPage() {
   const [, startTransition] = useTransition();
 
   // Realtime: sessions/subjects/presets re-fetch on ANY table change.
-  const live = useLiveData(() => Promise.all([getStudySessions(), getSubjects(), getPomoPresets()]), []);
+  // 1000 = same ceiling the review page reads, so the history count and the
+  // insights page can't disagree about how much the user has studied.
+  const live = useLiveData(() => Promise.all([getStudySessions(1000), getSubjects(), getPomoPresets()]), []);
   useEffect(() => {
     if (!live) return;
     const [s, sub, p] = live;
@@ -144,8 +146,15 @@ export default function SessionsPage() {
     setTimerPaused(false);
   };
 
+  const savingRef = useRef(false);
   const persistSession = (title: string, seconds: number, startedAt: Date | null) => {
     if (seconds < 3) return; // ignore accidental taps
+    // Re-entrancy guard: a double-tap on "Stop & save" (or stop firing while
+    // a previous save is still in flight) must not write the same elapsed
+    // time twice. The list itself is updated by the Dexie liveQuery, so
+    // there is no manual prepend to duplicate the row either way.
+    if (savingRef.current) return;
+    savingRef.current = true;
     const duration = Math.max(1, Math.round(seconds / 60));
     // startedAt fallback: true start (now − elapsed) instead of the end
     // timestamp, so day-bucketing attributes midnight-crossing sessions
@@ -153,7 +162,7 @@ export default function SessionsPage() {
     const effectiveStart = startedAt ?? new Date(Date.now() - seconds * 1000);
     startTransition(async () => {
       try {
-        const session = await createStudySession({
+        await createStudySession({
           subjectId: selectedSubjectId || undefined,
           topicId: selectedTopicId || undefined,
           title,
@@ -161,23 +170,24 @@ export default function SessionsPage() {
           completed: true,
           startedAt: effectiveStart,
         });
-        setSessions((prev) => [
-          {
-            ...session,
-            subject: subjects.find((s) => s.id === selectedSubjectId) ?? null,
-            topic: null,
-          },
-          ...prev,
-        ]);
+        // No optimistic prepend: the liveQuery above re-emits the sessions
+        // table after this write, and prepending on top of its result is
+        // exactly what produced duplicate history rows.
         setSessionTitle("");
         setTimerSeconds(0);
         setSaveError("");
       } catch {
-        // Storage write failed: keep the title + elapsed time on screen so
-        // the user can retry instead of silently losing the session.
+        // Storage write failed: put the timer back in its running state (with
+        // its original start time) so "Stop & save" reappears and the retry
+        // is actually possible instead of a lost session.
+        setTimerRunning(true);
+        setTimerPaused(false);
         setTimerSeconds(seconds);
         setSessionTitle(title);
+        timerStartedAtRef.current = startedAt;
         setSaveError("Could not save this session — try stopping again.");
+      } finally {
+        savingRef.current = false;
       }
     });
   };
