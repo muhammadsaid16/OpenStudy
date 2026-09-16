@@ -223,6 +223,14 @@ const DICT: Dict = {
   "settings.subtitle": { en: "Appearance & preferences", ar: "المظهر والتفضيلات" },
   "settings.themeHint": { en: "Theme — pick the mood; it applies instantly.", ar: "السمة — اختر الجو؛ تُطبَّق فورًا." },
   "settings.title": { en: "Settings", ar: "الإعدادات" },
+  "settings.wallpapers": { en: "Wallpapers", ar: "خلفيات الشاشة" },
+  "settings.wallpapersHint": { en: "Optional Live & Static backgrounds. Custom opacity & blur controls.", ar: "خلفيات اختيارية متحركة وثابتة مع التحكم في الشفافية والضبابية." },
+  "settings.wpNone": { en: "None (Theme Default)", ar: "بدون (افتراضي السمة)" },
+  "settings.wpLive": { en: "Live Wallpapers", ar: "خلفيات حية" },
+  "settings.wpStatic": { en: "Static Wallpapers", ar: "خلفيات ثابتة" },
+  "settings.wpCustom": { en: "Custom URL", ar: "رابط مخصص" },
+  "settings.wpOpacity": { en: "Wallpaper Opacity", ar: "شفافية الخلفية" },
+  "settings.wpBlur": { en: "Wallpaper Blur", ar: "ضبابية الخلفية" },
 
   // ─── share ─────────────────────────────────────────────
   "share.backToLibrary": { en: "Back to library", ar: "العودة إلى المكتبة" },

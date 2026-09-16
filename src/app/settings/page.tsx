@@ -4,11 +4,12 @@ import { useState, useRef } from "react";
 import { useT } from "@/lib/i18n";
 import { InstallAppButton } from "@/components/install-app-button";
 import { useAppStore, type ThemeName } from "@/lib/store";
+import { LIVE_WALLPAPERS, STATIC_WALLPAPERS } from "@/components/wallpaper-host";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { exportAllData, importAllData } from "@/app/actions";
 import { showToast } from "@/components/toast";
-import { Download, Upload, Check, AlertTriangle } from "lucide-react";
+import { Download, Upload, Check, AlertTriangle, Sparkles } from "lucide-react";
 
 const THEMES: { id: ThemeName; name: string; nameKey?: string; bg: string; accent: string; fg: string }[] = [
   { id: "aurora", name: "Aurora", bg: "#0B0F17", accent: "#FF7A72", fg: "#E7EDF7" },
@@ -70,6 +71,13 @@ export default function SettingsPage() {
   const lang = useAppStore((s) => s.lang);
   const setLang = useAppStore((s) => s.setLang);
   const setTheme = useAppStore((s) => s.setTheme);
+  const wallpaperType = useAppStore((s) => s.wallpaperType);
+  const wallpaperId = useAppStore((s) => s.wallpaperId);
+  const wallpaperOpacity = useAppStore((s) => s.wallpaperOpacity);
+  const wallpaperBlur = useAppStore((s) => s.wallpaperBlur);
+  const setWallpaper = useAppStore((s) => s.setWallpaper);
+  const setWallpaperOpacity = useAppStore((s) => s.setWallpaperOpacity);
+  const setWallpaperBlur = useAppStore((s) => s.setWallpaperBlur);
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const setReducedMotion = useAppStore((s) => s.setReducedMotion);
   const [exportStatus, setExportStatus] = useState<"idle" | "exporting">("idle");
@@ -198,6 +206,147 @@ export default function SettingsPage() {
               </button>
             );
           })}
+        </div>
+      </section>
+
+      {/* Wallpapers (Optional: Live, Static, Custom) */}
+      <section className="mb-12">
+        <div className="mb-4">
+          <h2 className="text-lg font-bold tracking-tight text-fg">{t("settings.wallpapers")}</h2>
+          <p className="mt-1 text-xs text-muted-fg">{t("settings.wallpapersHint")}</p>
+        </div>
+
+        <div className="space-y-6 rounded-2xl border border-border bg-bg-raised/60 p-5">
+          {/* Wallpaper Type Switcher */}
+          <div className="flex flex-wrap gap-2">
+            {[
+              { type: "none" as const, label: t("settings.wpNone") },
+              { type: "live" as const, label: t("settings.wpLive") },
+              { type: "static" as const, label: t("settings.wpStatic") },
+              { type: "custom" as const, label: t("settings.wpCustom") },
+            ].map((tab) => {
+              const active = wallpaperType === tab.type;
+              return (
+                <button
+                  key={tab.type}
+                  onClick={() => setWallpaper(tab.type, tab.type === "live" ? "aurora" : tab.type === "static" ? "deep-space" : wallpaperId)}
+                  className={cn(
+                    "rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                    active ? "bg-accent text-accent-fg shadow-sm" : "border border-border bg-bg text-muted-fg hover:text-fg"
+                  )}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Live Wallpapers Grid */}
+          {wallpaperType === "live" && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {LIVE_WALLPAPERS.map((wp) => {
+                const active = wallpaperId === wp.id;
+                return (
+                  <button
+                    key={wp.id}
+                    onClick={() => setWallpaper("live", wp.id)}
+                    className={cn(
+                      "flex flex-col gap-2 rounded-xl border p-3 text-start transition-all",
+                      active ? "border-accent bg-accent-soft/30 ring-2 ring-accent" : "border-border bg-bg hover:border-accent"
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Sparkles size={16} className={active ? "text-accent" : "text-muted-fg"} />
+                      {active && <Check size={14} className="text-accent" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-fg">{wp.name}</p>
+                      <p className="text-[10px] text-muted-fg">{wp.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Static Wallpapers Grid */}
+          {wallpaperType === "static" && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              {STATIC_WALLPAPERS.map((wp) => {
+                const active = wallpaperId === wp.id;
+                return (
+                  <button
+                    key={wp.id}
+                    onClick={() => setWallpaper("static", wp.id)}
+                    className={cn(
+                      "group flex flex-col gap-3 rounded-xl border p-3 text-start transition-all",
+                      active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
+                    )}
+                    style={{ background: wp.bg }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="h-6 w-6 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm" />
+                      {active && <Check size={14} className="text-white" />}
+                    </div>
+                    <span className="text-xs font-bold text-white drop-shadow">{wp.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Custom URL Input */}
+          {wallpaperType === "custom" && (
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">Custom Wallpaper Image or Video URL</label>
+              <input
+                type="url"
+                value={wallpaperId}
+                onChange={(e) => setWallpaper("custom", e.target.value)}
+                placeholder="Paste image/GIF/video URL (e.g. https://...)"
+                className="h-10 w-full rounded-xl border border-border bg-bg px-3 text-xs text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none"
+              />
+            </div>
+          )}
+
+          {/* Adjustments: Opacity & Blur Sliders */}
+          {wallpaperType !== "none" && (
+            <div className="space-y-4 border-t border-border pt-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold text-fg">
+                    <span>{t("settings.wpOpacity")}</span>
+                    <span>{Math.round(wallpaperOpacity * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0.1}
+                    max={1.0}
+                    step={0.05}
+                    value={wallpaperOpacity}
+                    onChange={(e) => setWallpaperOpacity(parseFloat(e.target.value))}
+                    className="h-1.5 w-full accent-[var(--color-accent)]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold text-fg">
+                    <span>{t("settings.wpBlur")}</span>
+                    <span>{wallpaperBlur}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={20}
+                    step={1}
+                    value={wallpaperBlur}
+                    onChange={(e) => setWallpaperBlur(parseInt(e.target.value, 10))}
+                    className="h-1.5 w-full accent-[var(--color-accent)]"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

@@ -12,6 +12,7 @@ import { GlobalFocusChip } from "@/components/global-focus-chip";
 import { StorageGuard } from "@/components/storage-guard";
 import { VitalsGuard } from "@/components/vitals-guard";
 import { SpotifyAudioSource, SpotifyMiniPlayer } from "@/components/spotify-embed";
+import { WallpaperHost } from "@/components/wallpaper-host";
 
 export const metadata: Metadata = {
   title: "OpenStudy — Learn Smarter",
@@ -54,7 +55,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-bg text-fg antialiased">
-        <div className="flex h-screen overflow-hidden">
+        <WallpaperHost />
+        <div className="relative z-10 flex h-screen overflow-hidden">
           <Sidebar />
           <main className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
             <StorageGuard />
