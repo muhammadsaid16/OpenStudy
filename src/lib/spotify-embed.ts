@@ -16,7 +16,7 @@ export function toSpotifyEmbedUrl(input: string): string | null {
 
   // spotify:playlist:ID  /  spotify:track:ID  etc.
   const uri = raw.match(/^spotify:(playlist|track|album|episode|show|artist):([A-Za-z0-9]+)/);
-  if (uri) return `https://open.spotify.com/embed/${uri[1]}/${uri[2]}`;
+  if (uri) return `https://open.spotify.com/embed/${uri[1]}/${uri[2]}?theme=0`;
 
   try {
     const url = new URL(raw);
@@ -24,10 +24,13 @@ export function toSpotifyEmbedUrl(input: string): string | null {
       const parts = url.pathname.split("/").filter(Boolean);
       const [kind, id] = parts;
       if (KINDS.includes(kind as EmbedKind) && id) {
-        return `https://open.spotify.com/embed/${kind}/${id}`;
+        // strip ?si=... noise, force dark theme (?theme=0)
+        return `https://open.spotify.com/embed/${kind}/${id}?theme=0`;
       }
-      // already an embed url — pass through
-      if (kind === "embed" && parts[1] && parts[2]) return raw;
+      // already an embed url — pass through (ensure theme=0)
+      if (kind === "embed" && parts[1] && parts[2]) {
+        return raw.includes("theme=") ? raw : `${raw}${raw.includes("?") ? "&" : "?"}theme=0`;
+      }
     }
   } catch {
     /* not a URL */
