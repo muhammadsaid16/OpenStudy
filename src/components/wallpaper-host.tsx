@@ -51,6 +51,15 @@ export function WallpaperHost() {
 }
 
 function StaticWallpaper({ preset }: { preset: string }) {
+  const isUrl = preset.startsWith("http://") || preset.startsWith("https://") || preset.startsWith("/");
+  if (isUrl) {
+    return (
+      <div
+        className="h-full w-full bg-cover bg-center transition-all duration-700"
+        style={{ backgroundImage: `url(${preset})` }}
+      />
+    );
+  }
   const item = STATIC_WALLPAPERS.find((w) => w.id === preset) ?? STATIC_WALLPAPERS[0];
   return (
     <div

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useT } from "@/lib/i18n";
 import { InstallAppButton } from "@/components/install-app-button";
 import { useAppStore, type ThemeName } from "@/lib/store";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { exportAllData, importAllData } from "@/app/actions";
 import { showToast } from "@/components/toast";
-import { Download, Upload, Check, AlertTriangle, Sparkles } from "lucide-react";
+import { Download, Upload, Check, AlertTriangle, Sparkles, Search, Loader2 } from "lucide-react";
 
 const THEMES: { id: ThemeName; name: string; nameKey?: string; bg: string; accent: string; fg: string }[] = [
   { id: "aurora", name: "Aurora", bg: "#0B0F17", accent: "#FF7A72", fg: "#E7EDF7" },
@@ -85,6 +85,33 @@ export default function SettingsPage() {
   const [importMessage, setImportMessage] = useState("");
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [wpQuery, setWpQuery] = useState("space");
+  const [wpResults, setWpResults] = useState<Array<{ id: string; thumbUrl: string; fullUrl: string; title: string }>>([]);
+  const [wpLoading, setWpLoading] = useState(false);
+
+  useEffect(() => {
+    if (wallpaperType !== "static") return;
+    let cancelled = false;
+    setWpLoading(true);
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "dark space")}`);
+        const data = await res.json();
+        if (!cancelled && data.wallpapers) {
+          setWpResults(data.wallpapers);
+        }
+      } catch {
+        if (!cancelled) setWpResults([]);
+      } finally {
+        if (!cancelled) setWpLoading(false);
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [wpQuery, wallpaperType]);
 
   const handleExport = async () => {
     setExportStatus("exporting");
@@ -269,29 +296,75 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Static Wallpapers Grid */}
+          {/* API Photo Wallpapers Grid */}
           {wallpaperType === "static" && (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-              {STATIC_WALLPAPERS.map((wp) => {
-                const active = wallpaperId === wp.id;
-                return (
+            <div className="space-y-4">
+              {/* Topic Pills */}
+              <div className="flex flex-wrap gap-1.5">
+                {["Space", "Nature", "Cyberpunk", "Minimalist", "Anime", "Dark"].map((topic) => (
                   <button
-                    key={wp.id}
-                    onClick={() => setWallpaper("static", wp.id)}
+                    key={topic}
+                    onClick={() => setWpQuery(topic)}
                     className={cn(
-                      "group flex flex-col gap-3 rounded-xl border p-3 text-start transition-all",
-                      active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
+                      "rounded-full border px-3 py-1 text-[11px] font-semibold transition-all",
+                      wpQuery.toLowerCase() === topic.toLowerCase()
+                        ? "border-accent bg-accent/15 text-accent"
+                        : "border-border bg-bg text-muted-fg hover:border-accent hover:text-fg"
                     )}
-                    style={{ background: wp.bg }}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="h-6 w-6 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm" />
-                      {active && <Check size={14} className="text-white" />}
-                    </div>
-                    <span className="text-xs font-bold text-white drop-shadow">{wp.name}</span>
+                    {topic}
                   </button>
-                );
-              })}
+                ))}
+              </div>
+
+              {/* Search Input */}
+              <div className="relative">
+                <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
+                <input
+                  type="text"
+                  value={wpQuery}
+                  onChange={(e) => setWpQuery(e.target.value)}
+                  placeholder="Search 4K wallpapers (e.g. rain, mountains, lofi, galaxy)..."
+                  className="h-9 w-full rounded-xl border border-border bg-bg pl-8 pr-8 text-xs text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none"
+                />
+                {wpLoading && <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-fg" />}
+              </div>
+
+              {/* Photo Results Grid */}
+              {wpLoading ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />
+                  ))}
+                </div>
+              ) : wpResults.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {wpResults.map((item) => {
+                    const active = wallpaperId === item.fullUrl;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setWallpaper("static", item.fullUrl)}
+                        className={cn(
+                          "group relative h-28 overflow-hidden rounded-xl border text-start transition-all",
+                          active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
+                        )}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.thumbUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+                        {active && (
+                          <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
+                            <Check size={12} strokeWidth={3} />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="rounded-xl border border-border bg-bg p-4 text-center text-xs text-muted-fg">No wallpapers found for &quot;{wpQuery}&quot;.</p>
+              )}
             </div>
           )}
 
