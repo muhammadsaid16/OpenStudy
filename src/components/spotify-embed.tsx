@@ -69,7 +69,7 @@ export function SpotifyAudioSource() {
   return (
     <iframe
       id={FRAME_ID}
-      title="Spotify audio"
+      title="Sounds audio"
       src={src}
       onLoad={() => setTimeout(() => spotifyCommand("volume", volume), 600)}
       style={{ position: "absolute", left: "-9999px", top: 0, width: "300px", height: "80px", border: 0, pointerEvents: "none" }}
@@ -135,7 +135,7 @@ export function SpotifyMiniPlayer() {
           <Vinyl spinning={isPlaying} />
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{isPlaying ? "Now Spinning" : "Paused"}</p>
-            <p className="truncate text-sm font-semibold text-fg">{title ?? "Spotify"}</p>
+            <p className="truncate text-sm font-semibold text-fg">{title ?? "Sounds"}</p>
           </div>
           <button
             onClick={toggle}
@@ -185,7 +185,7 @@ export function SpotifyMiniPlayer() {
             ) : (
               <iframe
                 id={VISIBLE_FRAME_ID}
-                title="Spotify player"
+                title="Sounds player"
                 src={visibleSrc}
                 onLoad={() => setTimeout(() => spotifyCommand("volume", volume), 600)}
                 className="w-full rounded-xl border-0"
@@ -236,9 +236,9 @@ type PlaylistTrack = {
 function typeMeta(type: SearchResult["type"]) {
   switch (type) {
     case "playlist":
-      return { label: "PLAYLIST", icon: ListMusic, color: "bg-emerald-500/15 text-emerald-500 border-emerald-500/20" };
+      return { label: "LIST", icon: ListMusic, color: "bg-emerald-500/15 text-emerald-500 border-emerald-500/20" };
     case "album":
-      return { label: "ALBUM", icon: Music2, color: "bg-orange-500/15 text-orange-500 border-orange-500/20" };
+      return { label: "LIST", icon: ListMusic, color: "bg-orange-500/15 text-orange-500 border-orange-500/20" };
     case "episode":
       return { label: "EPISODE", icon: Music2, color: "bg-purple-500/15 text-purple-500 border-purple-500/20" };
     case "show":
@@ -246,7 +246,7 @@ function typeMeta(type: SearchResult["type"]) {
     case "artist":
       return { label: "ARTIST", icon: Music2, color: "bg-zinc-500/15 text-zinc-400 border-zinc-500/20" };
     default:
-      return { label: "TRACK", icon: Music2, color: "bg-sky-500/15 text-sky-500 border-sky-500/20" };
+      return { label: "SOUND", icon: Music2, color: "bg-sky-500/15 text-sky-500 border-sky-500/20" };
   }
 }
 
@@ -459,15 +459,15 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
           <div className="space-y-3">
             <div className="relative">
               <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search songs, artists, playlists…" className="h-10 w-full rounded-xl border border-border bg-bg pl-9 pr-9 text-sm text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none" aria-label="Search Spotify" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search…" className="h-10 w-full rounded-xl border border-border bg-bg pl-9 pr-9 text-sm text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none" aria-label="Search" />
               {loading && <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-fg" />}
             </div>
 
             {!searched && !loading && query.trim().length < 2 && (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-bg/50 px-4 py-8 text-center">
                 <Music2 size={20} className="text-muted-fg" />
-                <p className="text-sm font-semibold text-fg">Search Spotify without leaving OpenStudy</p>
-                <p className="max-w-xs text-xs text-muted-fg">Type a song, artist, or playlist — tap a track to play it, or open a playlist to pick a specific song. No Premium or login needed.</p>
+                <p className="text-sm font-semibold text-fg">Search without leaving OpenStudy</p>
+                <p className="max-w-xs text-xs text-muted-fg">Type anything — tap to play, or open a collection to pick a specific sound. No Premium or login needed.</p>
               </div>
             )}
             {searched && results.length === 0 && !loading && <p className="rounded-xl border border-border bg-bg px-4 py-6 text-center text-sm text-muted-fg">No results — try another search.</p>}
@@ -534,7 +534,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                   setPasteTracks([]);
                 }}
                 onKeyDown={(e) => e.key === "Enter" && onUse()}
-                placeholder="Paste a Spotify playlist or track link…"
+                placeholder="Paste any link…"
                 className={cn("h-10 w-full rounded-xl border bg-bg pl-9 pr-3 text-sm text-fg placeholder:text-muted-fg focus:outline-none", valid ? "border-border focus:border-accent" : "border-danger focus:border-danger")}
                 aria-label="Paste Spotify link"
               />
@@ -548,7 +548,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
               </button>
             )}
           </div>
-          {!valid && <p className="text-xs text-danger">That doesn&apos;t look like a Spotify link. Paste a playlist or track URL/URI.</p>}
+          {!valid && <p className="text-xs text-danger">That doesn&apos;t look like a valid link. Paste any URL.</p>}
           {pasteLoading && (
             <p className="flex items-center justify-center gap-2 py-4 text-sm text-muted-fg">
               <Loader2 size={16} className="animate-spin" /> Loading tracks…
