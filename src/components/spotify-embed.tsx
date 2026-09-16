@@ -42,9 +42,28 @@ function spotifyCommand(command: "play" | "pause" | "toggle" | "volume", volume?
 // ─── Hidden background source (only when mini-player is collapsed) ──
 export function SpotifyAudioSource() {
   const url = useSpotify((s) => s.url);
+  const previewUrl = useSpotify((s) => s.previewUrl);
   const expanded = useSpotify((s) => s.expanded);
   const volume = useSpotify((s) => s.volume);
-  if (!url || expanded) return null; // visible frame owns playback when expanded
+  const isPlaying = useSpotify((s) => s.isPlaying);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a || !previewUrl) return;
+    if (isPlaying) a.play().catch(() => {});
+    else a.pause();
+  }, [isPlaying, previewUrl]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume;
+  }, [volume]);
+
+  if (expanded) return null;
+  if (previewUrl) {
+    return <audio ref={audioRef} src={previewUrl} autoPlay={isPlaying} onEnded={() => useSpotify.getState().setPlaying(false)} crossOrigin="anonymous" style={{ position: "absolute", left: "-9999px" }} />;
+  }
+  if (!url) return null; // visible frame owns playback when expanded
   const sep = url.includes("?") ? "&" : "?";
   const src = `${url}${sep}autoplay=1`;
   return (
@@ -62,6 +81,7 @@ export function SpotifyAudioSource() {
 // ─── Persistent mini-player (in the layout) ─────────────────────────
 export function SpotifyMiniPlayer() {
   const url = useSpotify((s) => s.url);
+  const previewUrl = useSpotify((s) => s.previewUrl);
   const webUrl = useSpotify((s) => s.webUrl);
   const title = useSpotify((s) => s.title);
   const isPlaying = useSpotify((s) => s.isPlaying);
@@ -71,21 +91,39 @@ export function SpotifyMiniPlayer() {
   const setExpanded = useSpotify((s) => s.setExpanded);
   const setVolume = useSpotify((s) => s.setVolume);
   const clear = useSpotify((s) => s.clear);
+  const previewRef = useRef<HTMLAudioElement | null>(null);
 
-  if (!url) return null;
+  if (!url && !previewUrl) return null;
 
-  const isPlaylist = url.includes("/playlist/");
+  const isPlaylist = !!url && url.includes("/playlist/");
+  const isPreview = !!previewUrl && !url;
+
+  useEffect(() => {
+    const a = previewRef.current;
+    if (!a || !previewUrl) return;
+    if (isPlaying) a.play().catch(() => {});
+    else a.pause();
+  }, [isPlaying, previewUrl]);
+
+  useEffect(() => {
+    if (previewRef.current) previewRef.current.volume = volume;
+  }, [volume, previewUrl]);
+
   const toggle = () => {
+    if (isPreview) {
+      setPlaying(!isPlaying);
+      return;
+    }
     spotifyCommand(isPlaying ? "pause" : "play");
     setTimeout(() => spotifyCommand("toggle"), 80);
     setPlaying(!isPlaying);
   };
   const onVolume = (v: number) => {
     setVolume(v);
-    spotifyCommand("volume", v);
+    if (!isPreview) spotifyCommand("volume", v);
+    if (previewRef.current) previewRef.current.volume = v;
   };
-  const sep = url.includes("?") ? "&" : "?";
-  const visibleSrc = `${url}${sep}autoplay=1`;
+  const visibleSrc = url ? `${url}${url.includes("?") ? "&" : "?"}autoplay=1` : "";
 
   return (
     <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 md:bottom-4 md:inset-x-auto md:right-4 md:w-[360px]">
@@ -120,19 +158,29 @@ export function SpotifyMiniPlayer() {
           </button>
         </div>
 
-        {/* Expanded: visible Spotify embed so clicks actually start audio */}
+        {/* Expanded: visible Spotify embed or preview audio */}
         {expanded && (
           <div className="space-y-2 border-t border-glass-border p-3">
-            <iframe
-              id={VISIBLE_FRAME_ID}
-              title="Spotify player"
-              src={visibleSrc}
-              onLoad={() => setTimeout(() => spotifyCommand("volume", volume), 600)}
-              className="w-full rounded-xl border-0"
-              style={{ height: isPlaylist ? 352 : 80 }}
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-            />
+            {isPreview && previewUrl ? (
+              <div className="rounded-xl bg-bg p-3">
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-500">30s Preview</span>
+                  <span className="text-xs text-muted-fg">iTunes preview — open in Spotify for full song</span>
+                </div>
+                <audio ref={previewRef} src={previewUrl} controls autoPlay={isPlaying} onEnded={() => setPlaying(false)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} className="w-full" />
+              </div>
+            ) : (
+              <iframe
+                id={VISIBLE_FRAME_ID}
+                title="Spotify player"
+                src={visibleSrc}
+                onLoad={() => setTimeout(() => spotifyCommand("volume", volume), 600)}
+                className="w-full rounded-xl border-0"
+                style={{ height: isPlaylist ? 352 : 80 }}
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+              />
+            )}
             <div className="flex items-center gap-2">
               <button onClick={() => onVolume(volume === 0 ? 0.8 : 0)} aria-label={volume === 0 ? "Unmute" : "Mute"} className="text-muted-fg hover:text-fg">
                 {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
@@ -273,36 +321,28 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
     }
   }, [input]);
 
-  const previewRef = useRef<HTMLAudioElement | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
+  const setPreview = useSpotify((s) => s.setPreview);
+  const storePreviewUrl = useSpotify((s) => s.previewUrl);
+  const isPreviewPlayingGlobal = useSpotify((s) => s.isPlaying && !!s.previewUrl);
+  useEffect(() => { if (!storePreviewUrl) setPreviewId(null); }, [storePreviewUrl]);
 
   const playResult = (r: SearchResult) => {
     // Spotify native embed -> mini-player + background iframe
     if (r.embedUrl) {
       setTrack(r.embedUrl, r.webUrl, `${r.name} — ${r.artist}`);
-      // Stop any preview audio
-      if (previewRef.current) {
-        previewRef.current.pause();
-        setPreviewId(null);
-      }
+      setPreviewId(null);
       return;
     }
-    // iTunes 30s preview fallback (when no Spotify token) — play inline audio
+    // iTunes 30s preview fallback — global preview audio (no blank iframe)
     if (r.previewUrl) {
-      if (previewRef.current) {
-        if (previewId === r.id) {
-          previewRef.current.pause();
-          setPreviewId(null);
-          return;
-        }
-        previewRef.current.src = r.previewUrl;
-        previewRef.current.play().catch(() => window.open(r.webUrl, "_blank"));
-        setPreviewId(r.id);
-        // Show in mini-player area as "Preview"
-        setTrack(r.webUrl, r.webUrl, `${r.name} — ${r.artist} (Preview)`);
-      } else {
-        window.open(r.webUrl, "_blank");
+      if (previewId === r.id) {
+        // Toggle pause for same track
+        useSpotify.getState().setPlaying(!useSpotify.getState().isPlaying);
+        return;
       }
+      setPreview(r.previewUrl, `${r.name} — ${r.artist} (Preview)`, r.webUrl);
+      setPreviewId(r.id);
       return;
     }
     window.open(r.webUrl, "_blank");
@@ -325,7 +365,6 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
 
   return (
     <div className={cn("rounded-2xl border border-glass-border bg-surface p-4", className)}>
-      <audio ref={previewRef} onEnded={() => setPreviewId(null)} preload="none" className="hidden" />
       <div className="mb-4 flex gap-1.5 rounded-full bg-muted p-1">
         <button
           onClick={() => {
@@ -410,7 +449,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                   const meta = typeMeta(r.type);
                   const MetaIcon = meta.icon;
                   const isPlayable = !!(r.embedUrl || r.previewUrl);
-                  const isPreviewPlaying = previewId === r.id;
+                  const isPreviewPlaying = previewId === r.id && isPreviewPlayingGlobal;
                   const canInspect = r.type === "playlist" || r.type === "album" || r.type === "show";
                   return (
                   <li key={`${r.type}:${r.id}`} className="flex items-center gap-3 rounded-xl border border-transparent bg-bg px-2 py-2 transition hover:border-border hover:bg-surface">
