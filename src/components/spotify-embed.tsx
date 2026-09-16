@@ -29,23 +29,27 @@ function mediaCommand(url: string | null, command: "play" | "pause" | "volume", 
   const frame = document.getElementById(MEDIA_FRAME_ID) as HTMLIFrameElement | null;
   if (!frame?.contentWindow) return;
 
-  const isYoutube = url.includes("youtube.com") || url.includes("youtu.be");
-  if (isYoutube) {
-    if (command === "play") {
-      frame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*");
-    } else if (command === "pause") {
-      frame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*");
-    } else if (command === "volume" && typeof volume === "number") {
-      const vol100 = Math.round(volume * 100);
-      frame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "setVolume", args: [vol100] }), "*");
-    }
-  } else {
-    // Spotify iframe protocol
-    if (command === "volume" && typeof volume === "number") {
-      frame.contentWindow.postMessage({ command: "volume", volume }, "*");
+  try {
+    const isYoutube = url.includes("youtube.com") || url.includes("youtu.be");
+    if (isYoutube) {
+      if (command === "play") {
+        frame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*");
+      } else if (command === "pause") {
+        frame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*");
+      } else if (command === "volume" && typeof volume === "number") {
+        const vol100 = Math.round(volume * 100);
+        frame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "setVolume", args: [vol100] }), "*");
+      }
     } else {
-      frame.contentWindow.postMessage({ command }, "*");
+      // Spotify iframe protocol
+      if (command === "volume" && typeof volume === "number") {
+        frame.contentWindow.postMessage({ command: "volume", volume }, "*");
+      } else {
+        frame.contentWindow.postMessage({ command }, "*");
+      }
     }
+  } catch (e) {
+    console.error("[OpenStudy Media] Command error:", e);
   }
 }
 
@@ -483,7 +487,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
             {results.length > 0 && (
               <ul className="max-h-[50vh] space-y-1.5 overflow-y-auto pr-1">
                 {results.map((r) => {
-                  const isYtMusic = !!(r as any)._source || r.embedUrl.includes("youtube.com");
+                  const isYtMusic = !!(r as any)._source || !!(r.embedUrl && r.embedUrl.includes("youtube.com"));
                   const meta = isYtMusic ? { label: "YOUTUBE MUSIC", icon: Music2, color: "bg-red-500/15 text-red-500 border-red-500/20" } : typeMeta(r.type);
                   const MetaIcon = meta.icon;
                   const isPlayable = !!(r.embedUrl || r.previewUrl);
