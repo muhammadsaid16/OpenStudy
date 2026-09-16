@@ -2,31 +2,54 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-// Cached Spotify web-player token (no client_secret needed — same token
-// open.spotify.com itself uses). Refreshed ~50min.
 let cachedToken: string | null = null;
 let cachedExp = 0;
 
 async function getSpotifyToken(): Promise<string | null> {
   const now = Date.now();
   if (cachedToken && now < cachedExp - 60_000) return cachedToken;
-  try {
-    const r = await fetch(
-      "https://open.spotify.com/get_access_token?reason=transport&productType=web_player",
-      { headers: { "User-Agent": "Mozilla/5.0" }, cache: "no-store" }
-    );
-    if (!r.ok) return null;
-    const j = (await r.json()) as {
-      accessToken?: string;
-      accessTokenExpirationTimestampMs?: number;
-    };
-    if (!j.accessToken) return null;
-    cachedToken = j.accessToken;
-    cachedExp = j.accessTokenExpirationTimestampMs ?? now + 3_500_000;
-    return cachedToken;
-  } catch {
-    return null;
+
+  // 1) Preferred: Client Credentials (needs SPOTIFY_CLIENT_SECRET in Vercel env)
+  const id = process.env.SPOTIFY_CLIENT_ID ?? process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
+  const secret = process.env.SPOTIFY_CLIENT_SECRET;
+  if (id && secret) {
+    try {
+      const r = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString("base64")}`,
+        },
+        body: "grant_type=client_credentials",
+        cache: "no-store",
+      });
+      if (r.ok) {
+        const j = (await r.json()) as { access_token: string; expires_in: number };
+        if (j.access_token) {
+          cachedToken = j.access_token;
+          cachedExp = now + j.expires_in * 1000;
+          return cachedToken;
+        }
+      }
+    } catch {}
   }
+
+  // 2) Anonymous web-player token (blocked on some networks — try anyway)
+  try {
+    const r = await fetch("https://open.spotify.com/get_access_token?reason=transport&productType=web_player", {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      cache: "no-store",
+    });
+    if (r.ok) {
+      const j = (await r.json()) as { accessToken?: string; accessTokenExpirationTimestampMs?: number };
+      if (j.accessToken) {
+        cachedToken = j.accessToken;
+        cachedExp = j.accessTokenExpirationTimestampMs ?? now + 3_500_000;
+        return cachedToken;
+      }
+    }
+  } catch {}
+  return null;
 }
 
 type Result = {
@@ -41,20 +64,13 @@ type Result = {
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
-  if (!q || q.length < 2) {
-    return NextResponse.json({ results: [] as Result[] });
-  }
+  if (!q || q.length < 2) return NextResponse.json({ results: [] as Result[] });
 
-  // Try Spotify first
   const token = await getSpotifyToken();
   if (token) {
     try {
-      const url =
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track,playlist&limit=12&market=US`;
-      const r = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
-      });
+      const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track,playlist&limit=12&market=US`;
+      const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
       if (r.ok) {
         const j = (await r.json()) as {
           tracks?: { items: Array<{ id: string; name: string; artists: { name: string }[]; album: { images: { url: string }[] } }> };
@@ -86,38 +102,24 @@ export async function GET(req: NextRequest) {
         }
         if (results.length) return NextResponse.json({ results, source: "spotify" });
       }
-    } catch {
-      /* fall through to iTunes */
-    }
+    } catch {}
   }
 
-  // Fallback: iTunes Search (no key, public) — keeps search working even
-  // when Spotify token is rate-limited. Maps to Spotify search links so
-  // user can still play via embed.
+  // Fallback: iTunes (keeps search working when token absent — no playlists)
   try {
-    const r = await fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=12`,
-      { cache: "no-store" }
-    );
+    const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=12`, { cache: "no-store" });
     if (!r.ok) return NextResponse.json({ results: [] as Result[] });
-    const j = (await r.json()) as {
-      results: Array<{ trackId: number; trackName: string; artistName: string; artworkUrl100: string }>;
-    };
-    const results: Result[] = (j.results ?? []).map((t) => {
-      const query = encodeURIComponent(`${t.trackName} ${t.artistName}`);
-      return {
-        id: String(t.trackId),
-        name: t.trackName,
-        artist: t.artistName,
-        type: "track" as const,
-        image: t.artworkUrl100 ?? null,
-        // No Spotify ID available from iTunes — no direct embed. UI will
-        // show "Open in Spotify" search instead of a broken embed.
-        embedUrl: "",
-        webUrl: `https://open.spotify.com/search/${query}`,
-      };
-    });
-    return NextResponse.json({ results, source: "itunes" });
+    const j = (await r.json()) as { results: Array<{ trackId: number; trackName: string; artistName: string; artworkUrl100: string }> };
+    const results: Result[] = (j.results ?? []).map((t) => ({
+      id: String(t.trackId),
+      name: t.trackName,
+      artist: t.artistName,
+      type: "track" as const,
+      image: t.artworkUrl100 ?? null,
+      embedUrl: "",
+      webUrl: `https://open.spotify.com/search/${encodeURIComponent(`${t.trackName} ${t.artistName}`)}`,
+    }));
+    return NextResponse.json({ results, source: "itunes", note: "Add SPOTIFY_CLIENT_SECRET in Vercel env for full Spotify playlists" });
   } catch {
     return NextResponse.json({ results: [] as Result[] });
   }
