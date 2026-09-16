@@ -92,24 +92,28 @@ export default function SettingsPage() {
   const [wpPage, setWpPage] = useState(1);
   const [wpHasMore, setWpHasMore] = useState(true);
   const [wpLoadingMore, setWpLoadingMore] = useState(false);
+  // Random start pages so every open shows a fresh slice of wallpapers
+  const wpStartPage = useRef(Math.floor(Math.random() * 40) + 1);
 
   // Live video wallpaper state
-  const [vidQuery, setVidQuery] = useState("nature");
+  const [vidQuery, setVidQuery] = useState("space");
   const [vidResults, setVidResults] = useState<Array<{ id: string; thumbUrl: string; videoUrl: string; title: string }>>([]);
   const [vidLoading, setVidLoading] = useState(false);
   const [vidPage, setVidPage] = useState(1);
   const [vidHasMore, setVidHasMore] = useState(true);
   const [vidLoadingMore, setVidLoadingMore] = useState(false);
+  const vidStartPage = useRef(Math.floor(Math.random() * 30) + 1);
 
   useEffect(() => {
     if (wallpaperType !== "static") return;
     let cancelled = false;
     setWpLoading(true);
-    setWpPage(1);
+    const startPage = wpStartPage.current;
+    setWpPage(startPage);
     setWpHasMore(true);
     const t = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "dark space")}&page=1`);
+        const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "space")}&page=${startPage}`);
         const data = await res.json();
         if (!cancelled && data.wallpapers) {
           setWpResults(data.wallpapers);
@@ -130,15 +134,22 @@ export default function SettingsPage() {
     };
   }, [wpQuery, wallpaperType]);
 
+  // Randomize start page each time the query changes
+  const handleWpQueryChange = (q: string) => {
+    wpStartPage.current = Math.floor(Math.random() * 40) + 1;
+    setWpQuery(q);
+  };
+
   useEffect(() => {
     if (wallpaperType !== "live") return;
     let cancelled = false;
     setVidLoading(true);
-    setVidPage(1);
+    const startPage = vidStartPage.current;
+    setVidPage(startPage);
     setVidHasMore(true);
     const t = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/wallpapers/videos?q=${encodeURIComponent(vidQuery || "nature")}&page=1`);
+        const res = await fetch(`/api/wallpapers/videos?q=${encodeURIComponent(vidQuery || "space")}&page=${startPage}`);
         const data = await res.json();
         if (!cancelled && data.videos) {
           setVidResults(data.videos);
@@ -159,12 +170,18 @@ export default function SettingsPage() {
     };
   }, [vidQuery, wallpaperType]);
 
+  // Randomize start page each time the query changes
+  const handleVidQueryChange = (q: string) => {
+    vidStartPage.current = Math.floor(Math.random() * 30) + 1;
+    setVidQuery(q);
+  };
+
   const loadMoreWallpapers = async () => {
     if (wpLoadingMore || !wpHasMore) return;
     setWpLoadingMore(true);
     const nextPage = wpPage + 1;
     try {
-      const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "dark space")}&page=${nextPage}`);
+      const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "space")}&page=${nextPage}`);
       const data = await res.json();
       if (data.wallpapers && data.wallpapers.length > 0) {
         setWpResults((prev) => {
@@ -189,7 +206,7 @@ export default function SettingsPage() {
     setVidLoadingMore(true);
     const nextPage = vidPage + 1;
     try {
-      const res = await fetch(`/api/wallpapers/videos?q=${encodeURIComponent(vidQuery || "nature")}&page=${nextPage}`);
+      const res = await fetch(`/api/wallpapers/videos?q=${encodeURIComponent(vidQuery || "space")}&page=${nextPage}`);
       const data = await res.json();
       if (data.videos && data.videos.length > 0) {
         setVidResults((prev) => {
