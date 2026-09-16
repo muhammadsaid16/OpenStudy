@@ -77,6 +77,9 @@ export function SpotifyEmbedPlayer({ className }: SpotifyEmbedPlayerProps) {
             That doesn&apos;t look like a Spotify link. Paste a playlist or track URL/URI.
           </p>
         )}
+        <p className="mt-1.5 text-xs text-muted-fg">
+          Only public playlists &amp; tracks can be embedded. If it shows “Page not found”, the link is private or invalid.
+        </p>
       </div>
 
       {/* Embed iframe */}
