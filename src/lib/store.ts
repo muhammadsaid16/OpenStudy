@@ -10,7 +10,7 @@ import { UI_OPACITY_DEFAULT, clampUiOpacity } from "@/lib/ui-opacity";
 export type { ThemeName };
 export { normalizeTheme };
 
-export type WallpaperType = "none" | "static" | "live" | "custom";
+export type WallpaperType = "none" | "static" | "live" | "custom" | "upload";
 
 interface AppState {
   sidebarOpen: boolean;

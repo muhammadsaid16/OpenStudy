@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useAppStore } from "@/lib/store";
+import { db } from "@/lib/db";
 
 export const LIVE_WALLPAPERS = [
   { id: "aurora", name: "Aurora Waves", desc: "Flowing ambient gradient waves" },
@@ -29,11 +30,37 @@ export const STATIC_WALLPAPERS = [
   { id: "bg-09", name: "Background 09", src: "/bgs/bg-09.jpg" },
   { id: "bg-10", name: "Background 10", src: "/bgs/bg-10.jpg" },
   { id: "bg-11", name: "Background 11", src: "/bgs/bg-11.jpg" },
+  { id: "bg-12", name: "Background 12", src: "/bgs/bg-12.jpg" },
+  { id: "bg-13", name: "Background 13", src: "/bgs/bg-13.jpg" },
+  { id: "bg-14", name: "Background 14", src: "/bgs/bg-14.jpg" },
+  { id: "bg-15", name: "Background 15", src: "/bgs/bg-15.jpg" },
+  { id: "bg-16", name: "Background 16", src: "/bgs/bg-16.jpg" },
+  { id: "bg-17", name: "Background 17", src: "/bgs/bg-17.jpg" },
+  { id: "bg-18", name: "Background 18", src: "/bgs/bg-18.jpg" },
+  { id: "bg-19", name: "Background 19", src: "/bgs/bg-19.jpg" },
+  { id: "bg-20", name: "Background 20", src: "/bgs/bg-20.jpg" },
+  { id: "bg-21", name: "Background 21", src: "/bgs/bg-21.jpg" },
+  { id: "bg-22", name: "Background 22", src: "/bgs/bg-22.jpg" },
+  { id: "bg-23", name: "Background 23", src: "/bgs/bg-23.jpg" },
+  { id: "bg-24", name: "Background 24", src: "/bgs/bg-24.jpg" },
+  { id: "bg-25", name: "Background 25", src: "/bgs/bg-25.jpg" },
+  { id: "bg-26", name: "Background 26", src: "/bgs/bg-26.jpg" },
   { id: "hello-kitty", name: "Hello Kitty", src: "/bgs/hello-kitty.jpg" },
   { id: "linviena", name: "Linviena", src: "/bgs/linviena.jpg" },
   { id: "saule", name: "Saule", src: "/bgs/saule.jpg" },
   { id: "fondo-de-pantalla", name: "Fondo de Pantalla", src: "/bgs/fondo-de-pantalla.jpg" },
   { id: "hd-4k", name: "HD 4K", src: "/bgs/hd-4k.jpg" },
+  { id: "study", name: "Study", src: "/bgs/study.jpg" },
+  { id: "study-lofi-sakura", name: "Lofi Sakura Bus Stop", src: "/bgs/study-lofi-sakura.jpg" },
+  { id: "remind", name: "Remind", src: "/bgs/remind.jpg" },
+  { id: "snoopy-journey", name: "Snoopy's Journey", src: "/bgs/snoopy-journey.jpg" },
+  { id: "gumball-and-darwin", name: "Gumball & Darwin", src: "/bgs/gumball-and-darwin.jpg" },
+  { id: "iris-cabin", name: "Iris Cabin", src: "/bgs/iris-cabin.jpg" },
+  { id: "desktop-wallpaper", name: "Desktop", src: "/bgs/desktop-wallpaper.jpg" },
+  { id: "laptop-wallpaper", name: "Laptop", src: "/bgs/laptop-wallpaper.jpg" },
+  { id: "d-wallpaper", name: "D Wallpaper", src: "/bgs/d-wallpaper.jpg" },
+  { id: "download-4", name: "Download 4", src: "/bgs/download-4.jpg" },
+  { id: "made-to-fit-macbook", name: "Macbook Fit", src: "/bgs/made-to-fit-macbook.jpg" },
 ];
 
 /**
@@ -92,10 +119,35 @@ export function WallpaperHost() {
       {wallpaperType === "custom" && (
         <CustomWallpaper url={wallpaperId} rotation={wallpaperRotation} animate={!reducedMotion} />
       )}
+      {wallpaperType === "upload" && (
+        <UploadedWallpaper id={wallpaperId} rotation={wallpaperRotation} animate={!reducedMotion} />
+      )}
     </div>
   );
 }
 
+
+/**
+ * Theme-tinted scrim between a photo background and the UI. Mixing the active
+ * theme's surface token over the image is what makes any photo — whatever its
+ * palette — read as part of the app: the glass panels are built from the same
+ * `--color-surface` token (see .glass in globals.css), so background and
+ * panels share one tint. The mix strength also scales with the interface
+ * opacity slider: the more transparent the UI, the more the background shows
+ * through — and the more it is tinted toward the theme to stay readable.
+ */
+function ThemeScrim() {
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute inset-0 transition-all duration-700"
+      style={{
+        background:
+          "color-mix(in srgb, var(--color-surface) calc((1 - var(--ui-alpha, 1)) * 35% + 25%), transparent)",
+      }}
+    />
+  );
+}
 
 function StaticWallpaper({ preset, rotation, animate }: { preset: string; rotation: number; animate: boolean }) {
   // A path/URL is still honoured so a choice saved from the removed API search
@@ -110,6 +162,7 @@ function StaticWallpaper({ preset, rotation, animate }: { preset: string; rotati
         className="h-full w-full bg-cover bg-center transition-all duration-700"
         style={{ backgroundImage: `url(${src})` }}
       />
+      <ThemeScrim />
     </RotatedLayer>
   );
 }
@@ -139,6 +192,49 @@ function CustomWallpaper({ url, rotation, animate }: { url: string; rotation: nu
         className="h-full w-full bg-cover bg-center transition-all duration-700"
         style={{ backgroundImage: `url(${url})` }}
       />
+      <ThemeScrim />
+    </RotatedLayer>
+  );
+}
+
+/**
+ * A wallpaper the user uploaded from their device. The blob lives in the
+ * `wallpapers` IndexedDB table; an object URL is created for rendering and
+ * revoked when the id changes or the component unmounts, so gallery-sized
+ * images don't leak memory. Falls back to nothing while loading or if the
+ * record was deleted out from under a saved preference.
+ */
+function UploadedWallpaper({ id, rotation, animate }: { id: string; rotation: number; animate: boolean }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    let objectUrl: string | null = null;
+    let alive = true;
+    db.wallpapers
+      .get(id)
+      .then((rec) => {
+        if (!alive || !rec?.blob) return;
+        objectUrl = URL.createObjectURL(rec.blob);
+        setUrl(objectUrl);
+      })
+      .catch(() => {
+        /* record gone or storage unavailable — render nothing rather than break */
+      });
+    return () => {
+      alive = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [id]);
+
+  if (!url) return <div className="h-full w-full bg-bg" />;
+  return (
+    <RotatedLayer deg={rotation} animate={animate}>
+      <div
+        className="h-full w-full bg-cover bg-center transition-all duration-700"
+        style={{ backgroundImage: `url(${url})` }}
+      />
+      <ThemeScrim />
     </RotatedLayer>
   );
 }

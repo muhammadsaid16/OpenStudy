@@ -165,6 +165,18 @@ export interface SettingRec {
   updatedAt: number;
 }
 
+// ─── User-uploaded wallpapers ────────────────────────────────────
+// Blobs live in IndexedDB (no size budget beyond disk quota, survives
+// reloads, works offline). The blob holds its own MIME type, so renderers
+// can build object URLs without guessing.
+export interface WallpaperRec {
+  id: string;
+  name: string;
+  type: string; // e.g. "image/jpeg", "image/png", "image/webp"
+  blob: Blob;
+  createdAt: Date;
+}
+
 // ─── The database ────────────────────────────────────────────────
 // Dexie/IndexedDB is the SINGLE source of truth — fully local,
 // fully offline, per-device. No server database anywhere.
@@ -184,6 +196,7 @@ class OpenStudyDB extends Dexie {
   goals!: Table<GoalRec, string>;
   milestones!: Table<MilestoneRec, string>;
   settings!: Table<SettingRec, string>;
+  wallpapers!: Table<WallpaperRec, string>;
 
   constructor() {
     super("studymax");
@@ -236,6 +249,10 @@ class OpenStudyDB extends Dexie {
     });
     this.version(10).stores({
       spotify: null,
+    });
+    // v11: user-uploaded wallpapers — blobs stored locally (additive)
+    this.version(11).stores({
+      wallpapers: "id, createdAt",
     });
   }
 }

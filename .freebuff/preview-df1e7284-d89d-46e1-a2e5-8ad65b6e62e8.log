@@ -1,0 +1,489 @@
+
+> openstudy@0.1.0 dev
+> next dev -p 3000
+
+▲ Next.js 16.3.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.37:3000
+- Environments: .env.local
+✓ Ready in 204ms
+✓ Running next.config.ts took 23ms
+
+ GET /settings 200 in 388ms (next.js: 118ms, application-code: 270ms)
+ GET /settings 200 in 49ms (next.js: 3ms, application-code: 47ms)
+ GET / 200 in 72ms (next.js: 11ms, application-code: 61ms)
+ GET / 200 in 62ms (next.js: 4ms, application-code: 57ms)
+ GET /settings 200 in 60ms (next.js: 8ms, application-code: 53ms)
+ GET / 200 in 43ms (next.js: 2ms, application-code: 40ms)
+ GET /settings 200 in 46ms (next.js: 2ms, application-code: 44ms)
+ GET /settings 200 in 55ms (next.js: 3ms, application-code: 52ms)
+ GET /settings 200 in 55ms (next.js: 4ms, application-code: 51ms)
+ GET / 200 in 38ms (next.js: 3ms, application-code: 36ms)
+ GET /settings 200 in 44ms (next.js: 1.7ms, application-code: 42ms)
+ GET /notes 200 in 565ms (next.js: 499ms, application-code: 66ms)
+ GET /subjects 200 in 362ms (next.js: 307ms, application-code: 55ms)
+⚠ Fast Refresh had to perform a full reload when ./src/components/wallpaper-host.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 257ms
+ GET /settings 200 in 26ms (next.js: 5ms, application-code: 21ms)
+ GET /settings 200 in 89ms (next.js: 8ms, application-code: 80ms)
+ GET /settings 200 in 22ms (next.js: 6ms, application-code: 16ms)
+ GET /settings 200 in 25ms (next.js: 5ms, application-code: 20ms)
+✓ Compiled in 78ms
+ GET /settings 200 in 28ms (next.js: 7ms, application-code: 21ms)
+✓ Compiled in 66ms
+ GET /settings 200 in 21ms (next.js: 4ms, application-code: 16ms)
+✓ Compiled in 110ms
+ GET /settings 200 in 158ms (next.js: 109ms, application-code: 49ms)
+ GET /settings 200 in 40ms (next.js: 3ms, application-code: 37ms)
+ GET /settings 200 in 22ms (next.js: 3ms, application-code: 18ms)
+ GET /settings 200 in 46ms (next.js: 3ms, application-code: 43ms)
+ GET /settings 200 in 38ms (next.js: 2ms, application-code: 36ms)
+ GET /settings 200 in 25ms (next.js: 4ms, application-code: 21ms)
+ GET /settings 200 in 41ms (next.js: 5ms, application-code: 36ms)
+ GET /settings 200 in 21ms (next.js: 3ms, application-code: 19ms)
+ GET /settings 200 in 46ms (next.js: 5ms, application-code: 42ms)
+ GET /settings 200 in 43ms (next.js: 3ms, application-code: 40ms)
+ GET /settings 200 in 44ms (next.js: 2ms, application-code: 42ms)
+ GET /settings 200 in 25ms (next.js: 5ms, application-code: 20ms)
+ GET /settings 200 in 41ms (next.js: 4ms, application-code: 37ms)
+ GET /settings 200 in 25ms (next.js: 4ms, application-code: 21ms)
+ GET /settings 200 in 22ms (next.js: 4ms, application-code: 18ms)
+ GET /settings 200 in 41ms (next.js: 3ms, application-code: 38ms)
+ GET /settings 200 in 44ms (next.js: 2ms, application-code: 42ms)
+ GET /settings 200 in 45ms (next.js: 4ms, application-code: 41ms)
+ GET /settings 200 in 23ms (next.js: 4ms, application-code: 19ms)
+ GET /settings 200 in 37ms (next.js: 2ms, application-code: 35ms)
+ GET /settings 200 in 40ms (next.js: 2ms, application-code: 38ms)
+ GET /settings 200 in 48ms (next.js: 4ms, application-code: 44ms)
+ GET /settings 200 in 45ms (next.js: 4ms, application-code: 41ms)
+ GET /settings 200 in 25ms (next.js: 4ms, application-code: 21ms)
+ GET /settings 200 in 21ms (next.js: 4ms, application-code: 17ms)
+ GET /settings 200 in 20ms (next.js: 3ms, application-code: 16ms)
+ GET /settings 200 in 19ms (next.js: 2ms, application-code: 17ms)
+ GET /settings 200 in 29ms (next.js: 10ms, application-code: 19ms)
+ GET /settings 200 in 18ms (next.js: 3ms, application-code: 15ms)
+ GET /settings 200 in 17ms (next.js: 2ms, application-code: 15ms)
+ GET /settings 200 in 18ms (next.js: 2.0ms, application-code: 16ms)
+ GET /settings 200 in 42ms (next.js: 2.0ms, application-code: 40ms)
+ GET /settings 200 in 40ms (next.js: 3ms, application-code: 37ms)
+ GET /settings 200 in 23ms (next.js: 4ms, application-code: 19ms)
+ GET /settings 200 in 52ms (next.js: 2ms, application-code: 50ms)
+ GET /settings 200 in 22ms (next.js: 2ms, application-code: 19ms)
+ GET /settings 200 in 46ms (next.js: 4ms, application-code: 42ms)
+ GET /settings 200 in 19ms (next.js: 2ms, application-code: 17ms)
+ GET /settings 200 in 22ms (next.js: 2ms, application-code: 20ms)
+ GET /settings 200 in 25ms (next.js: 4ms, application-code: 21ms)
+ GET /settings 200 in 22ms (next.js: 4ms, application-code: 18ms)
+ GET /settings 200 in 42ms (next.js: 3ms, application-code: 39ms)
+ GET /settings 200 in 21ms (next.js: 4ms, application-code: 18ms)
+ GET /settings 200 in 22ms (next.js: 3ms, application-code: 18ms)
+ GET /settings 200 in 20ms (next.js: 2ms, application-code: 18ms)
+ GET /settings 200 in 48ms (next.js: 2ms, application-code: 46ms)
+ GET /settings 200 in 51ms (next.js: 3ms, application-code: 49ms)
+ GET /settings 200 in 54ms (next.js: 4ms, application-code: 50ms)
+ GET /settings 200 in 51ms (next.js: 15ms, application-code: 36ms)
+ GET /settings 200 in 22ms (next.js: 3ms, application-code: 18ms)
+ GET /settings 200 in 23ms (next.js: 5ms, application-code: 18ms)
+ GET /settings 200 in 19ms (next.js: 2ms, application-code: 17ms)
+ GET /settings 200 in 40ms (next.js: 2ms, application-code: 38ms)
+ GET /settings 200 in 42ms (next.js: 5ms, application-code: 38ms)
+ GET /settings 200 in 23ms (next.js: 4ms, application-code: 19ms)
+ GET /settings 200 in 18ms (next.js: 2ms, application-code: 16ms)
+ GET /settings 200 in 19ms (next.js: 2.0ms, application-code: 17ms)
+ GET /settings 200 in 47ms (next.js: 3ms, application-code: 45ms)
+ GET /settings 200 in 21ms (next.js: 4ms, application-code: 17ms)
+ GET /settings 200 in 210ms (next.js: 4ms, application-code: 206ms)
+ GET / 200 in 64ms (next.js: 13ms, application-code: 50ms)
+ GET /settings 200 in 45ms (next.js: 4ms, application-code: 40ms)
+ GET /notes 200 in 74ms (next.js: 14ms, application-code: 60ms)
+ GET /settings 200 in 44ms (next.js: 3ms, application-code: 41ms)
+ GET /settings 200 in 50ms (next.js: 3ms, application-code: 48ms)
+ GET /settings 200 in 50ms (next.js: 3ms, application-code: 47ms)
+ GET /settings 200 in 20ms (next.js: 5ms, application-code: 15ms)
+✓ Compiled in 59ms
+ GET /settings 200 in 30ms (next.js: 13ms, application-code: 17ms)
+✓ Compiled in 661ms
+ GET /settings 200 in 28ms (next.js: 8ms, application-code: 20ms)
+✓ Compiled in 176ms
+⚠ Fast Refresh had to perform a full reload when ./src/lib/i18n.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 63ms
+ GET /settings 200 in 89ms (next.js: 4ms, application-code: 85ms)
+ GET /settings 200 in 70ms (next.js: 2ms, application-code: 68ms)
+ GET /settings 200 in 24ms (next.js: 4ms, application-code: 20ms)
+✓ Compiled in 54ms
+ GET / 200 in 57ms (next.js: 6ms, application-code: 51ms)
+⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "127.0.0.1".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['127.0.0.1'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET / 200 in 51ms (next.js: 2ms, application-code: 49ms)
+ GET / 200 in 38ms (next.js: 1.9ms, application-code: 36ms)
+ GET / 200 in 50ms (next.js: 4ms, application-code: 46ms)
+ GET / 200 in 19ms (next.js: 5ms, application-code: 14ms)
+✓ Compiled in 62ms
+ GET / 200 in 23ms (next.js: 5ms, application-code: 18ms)
+✓ Compiled in 70ms
+ GET / 200 in 52ms (next.js: 4ms, application-code: 49ms)
+ GET / 200 in 43ms (next.js: 3ms, application-code: 40ms)
+ GET / 200 in 44ms (next.js: 4ms, application-code: 40ms)
+ GET / 200 in 45ms (next.js: 4ms, application-code: 41ms)
+ GET / 200 in 44ms (next.js: 1.7ms, application-code: 42ms)
+[browser] [OpenStudy] Route error: c.nextReview.getTime is not a function 
+    at RouteError.useEffect (src/app/error.tsx:24:13)
+  22 |     // Surface to console for debugging; digest identifies this error
+  23 |     // instance in reports without leaking user content.
+> 24 |     console.error("[OpenStudy] Route error:", error?.digest ?? error?.message);
+     |             ^
+  25 |   }, [error]);
+  26 |
+  27 |   return ( (src/app/error.tsx:24:13)
+[browser] [OpenStudy] Route error: c.nextReview.getTime is not a function 
+    at RouteError.useEffect (src/app/error.tsx:24:13)
+  22 |     // Surface to console for debugging; digest identifies this error
+  23 |     // instance in reports without leaking user content.
+> 24 |     console.error("[OpenStudy] Route error:", error?.digest ?? error?.message);
+     |             ^
+  25 |   }, [error]);
+  26 |
+  27 |   return ( (src/app/error.tsx:24:13)
+⚠ Fast Refresh had to perform a full reload when ./src/lib/store.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 84ms
+ GET / 200 in 71ms (next.js: 5ms, application-code: 65ms)
+ GET / 200 in 46ms (next.js: 3ms, application-code: 43ms)
+⚠ Fast Refresh had to perform a full reload when ./src/lib/store.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 84ms
+ GET / 200 in 60ms (next.js: 7ms, application-code: 53ms)
+ GET / 200 in 38ms (next.js: 1.6ms, application-code: 36ms)
+⚠ Fast Refresh had to perform a full reload when ./src/components/wallpaper-host.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 89ms
+ GET / 200 in 65ms (next.js: 8ms, application-code: 56ms)
+ GET / 200 in 40ms (next.js: 4ms, application-code: 36ms)
+⚠ Fast Refresh had to perform a full reload when ./src/lib/i18n.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 86ms
+ GET / 200 in 91ms (next.js: 7ms, application-code: 84ms)
+ GET / 200 in 68ms (next.js: 2ms, application-code: 66ms)
+✓ Compiled in 237ms
+[browser] ./src/app/settings/page.tsx:423:12
+Error: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  421 |               </div>
+  422 |             </div>
+> 423 |           )}
+      |            ^
+  424 |         </div>
+  425 |       </section>
+  426 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/settings/page.tsx [Client Component Browser]
+    ./src/app/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/settings/page.tsx [Client Component SSR]
+    ./src/app/settings/page.tsx [Server Component] 
+[browser] ./src/app/settings/page.tsx:423:12
+Error: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  421 |               </div>
+  422 |             </div>
+> 423 |           )}
+      |            ^
+  424 |         </div>
+  425 |       </section>
+  426 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/settings/page.tsx [Client Component Browser]
+    ./src/app/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/settings/page.tsx [Client Component SSR]
+    ./src/app/settings/page.tsx [Server Component] 
+ GET / 200 in 21ms (next.js: 4ms, application-code: 17ms)
+ GET /settings 200 in 62ms (next.js: 7ms, application-code: 55ms)
+ GET /settings 200 in 26ms (next.js: 8ms, application-code: 18ms)
+✓ Compiled in 488ms
+ GET /settings 200 in 20ms (next.js: 4ms, application-code: 16ms)
+✓ Compiled in 82ms
+ GET /settings 200 in 22ms (next.js: 4ms, application-code: 18ms)
+✓ Compiled in 83ms
+[Server HMR] Update failed, full reload needed: SyntaxError: Identifier 'studySessionSchema' has already been declared
+    at eval (<anonymous>)
+✓ Compiled in 111ms
+[browser] ./src/lib/validations.ts:138:14
+Error: the name `studySessionSchema` is defined multiple times
+  136 | // import, or a stale tab can't land a 0/negative-length session that silently
+  137 | // drags totals and averages down.
+> 138 | export const studySessionSchema = z.object({
+      |              ^^^^^^^^^^^^^^^^^^
+  139 |   title: z.string().min(1, "Session title is required").max(200),
+  140 |   durationMin: z.number().min(1, "Session must be at least 1 minute").max(24 * 60),
+  141 |   notes: z.string().max(2000).nullable().optional(),
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/validations.ts [Client Component Browser]
+    ./src/app/actions.ts [Client Component Browser]
+    ./src/components/storage-guard.tsx [Client Component Browser]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/validations.ts [Client Component SSR]
+    ./src/app/actions.ts [Client Component SSR]
+    ./src/components/storage-guard.tsx [Client Component SSR]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] 
+✓ Compiled in 67ms
+[browser] ./src/lib/validations.ts:138:14
+Error: the name `studySessionSchema` is defined multiple times
+  136 | // import, or a stale tab can't land a 0/negative-length session that silently
+  137 | // drags totals and averages down.
+> 138 | export const studySessionSchema = z.object({
+      |              ^^^^^^^^^^^^^^^^^^
+  139 |   title: z.string().min(1, "Session title is required").max(200),
+  140 |   durationMin: z.number().min(1, "Session must be at least 1 minute").max(24 * 60),
+  141 |   notes: z.string().max(2000).nullable().optional(),
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/validations.ts [Client Component Browser]
+    ./src/app/actions.ts [Client Component Browser]
+    ./src/components/storage-guard.tsx [Client Component Browser]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/validations.ts [Client Component SSR]
+    ./src/app/actions.ts [Client Component SSR]
+    ./src/components/storage-guard.tsx [Client Component SSR]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] 
+✓ Compiled in 64ms
+[browser] ./src/lib/validations.ts:138:14
+Error: the name `studySessionSchema` is defined multiple times
+  136 | // import, or a stale tab can't land a 0/negative-length session that silently
+  137 | // drags totals and averages down.
+> 138 | export const studySessionSchema = z.object({
+      |              ^^^^^^^^^^^^^^^^^^
+  139 |   title: z.string().min(1, "Session title is required").max(200),
+  140 |   durationMin: z.number().min(1, "Session must be at least 1 minute").max(24 * 60),
+  141 |   notes: z.string().max(2000).nullable().optional(),
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/validations.ts [Client Component Browser]
+    ./src/app/actions.ts [Client Component Browser]
+    ./src/components/storage-guard.tsx [Client Component Browser]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/validations.ts [Client Component SSR]
+    ./src/app/actions.ts [Client Component SSR]
+    ./src/components/storage-guard.tsx [Client Component SSR]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] 
+✓ Compiled in 67ms
+ GET /settings 200 in 92ms (next.js: 52ms, application-code: 40ms)
+ GET /settings 200 in 23ms (next.js: 5ms, application-code: 18ms)
+✓ Compiled in 62ms
+[browser] ./src/lib/validations.ts:138:14
+Error: the name `studySessionSchema` is defined multiple times
+  136 | // import, or a stale tab can't land a 0/negative-length session that silently
+  137 | // drags totals and averages down.
+> 138 | export const studySessionSchema = z.object({
+      |              ^^^^^^^^^^^^^^^^^^
+  139 |   title: z.string().min(1, "Session title is required").max(200),
+  140 |   durationMin: z.number().min(1, "Session must be at least 1 minute").max(24 * 60),
+  141 |   notes: z.string().max(2000).nullable().optional(),
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/validations.ts [Client Component Browser]
+    ./src/app/actions.ts [Client Component Browser]
+    ./src/components/storage-guard.tsx [Client Component Browser]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/validations.ts [Client Component SSR]
+    ./src/app/actions.ts [Client Component SSR]
+    ./src/components/storage-guard.tsx [Client Component SSR]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] 
+[browser] ./src/lib/validations.ts:138:14
+Error: the name `studySessionSchema` is defined multiple times
+  136 | // import, or a stale tab can't land a 0/negative-length session that silently
+  137 | // drags totals and averages down.
+> 138 | export const studySessionSchema = z.object({
+      |              ^^^^^^^^^^^^^^^^^^
+  139 |   title: z.string().min(1, "Session title is required").max(200),
+  140 |   durationMin: z.number().min(1, "Session must be at least 1 minute").max(24 * 60),
+  141 |   notes: z.string().max(2000).nullable().optional(),
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/validations.ts [Client Component Browser]
+    ./src/app/actions.ts [Client Component Browser]
+    ./src/components/storage-guard.tsx [Client Component Browser]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/validations.ts [Client Component SSR]
+    ./src/app/actions.ts [Client Component SSR]
+    ./src/components/storage-guard.tsx [Client Component SSR]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] 
+[browser] ./src/lib/validations.ts:138:14
+Error: the name `studySessionSchema` is defined multiple times
+  136 | // import, or a stale tab can't land a 0/negative-length session that silently
+  137 | // drags totals and averages down.
+> 138 | export const studySessionSchema = z.object({
+      |              ^^^^^^^^^^^^^^^^^^
+  139 |   title: z.string().min(1, "Session title is required").max(200),
+  140 |   durationMin: z.number().min(1, "Session must be at least 1 minute").max(24 * 60),
+  141 |   notes: z.string().max(2000).nullable().optional(),
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/validations.ts [Client Component Browser]
+    ./src/app/actions.ts [Client Component Browser]
+    ./src/components/storage-guard.tsx [Client Component Browser]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/validations.ts [Client Component SSR]
+    ./src/app/actions.ts [Client Component SSR]
+    ./src/components/storage-guard.tsx [Client Component SSR]
+    ./src/components/storage-guard.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] 
+ GET /stats 200 in 47ms (next.js: 33ms, application-code: 14ms)
+ GET /goals 200 in 642ms (next.js: 622ms, application-code: 20ms)
+ GET /goals 200 in 16ms (next.js: 3ms, application-code: 13ms)
+ GET /stats 200 in 17ms (next.js: 4ms, application-code: 13ms)
+ GET /goals 200 in 15ms (next.js: 4ms, application-code: 11ms)
+ GET /notes 200 in 30ms (next.js: 14ms, application-code: 16ms)
+ GET /review 200 in 593ms (next.js: 575ms, application-code: 17ms)
+ GET /review 200 in 17ms (next.js: 2.0ms, application-code: 15ms)
+ GET /review 200 in 20ms (next.js: 4ms, application-code: 16ms)
+ GET /sessions 200 in 412ms (next.js: 393ms, application-code: 19ms)
+ GET /subjects 200 in 38ms (next.js: 25ms, application-code: 13ms)
+ GET / 200 in 24ms (next.js: 13ms, application-code: 11ms)
+✓ Compiled in 516ms
+⚠ Fast Refresh had to perform a full reload when ./src/lib/store.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 200 in 263ms (next.js: 238ms, application-code: 25ms)
+ GET / 200 in 290ms (next.js: 8ms, application-code: 283ms)
+⚠ Fast Refresh had to perform a full reload when ./src/lib/store.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 396ms
+ GET / 200 in 29ms (next.js: 12ms, application-code: 17ms)
+ GET / 200 in 100ms (next.js: 7ms, application-code: 93ms)
+ GET / 200 in 48ms (next.js: 3ms, application-code: 45ms)
+ GET /review 200 in 53ms (next.js: 4ms, application-code: 50ms)
+ GET /goals 200 in 73ms (next.js: 4ms, application-code: 69ms)
+ GET /goals 200 in 56ms (next.js: 4ms, application-code: 52ms)
+ GET /sessions 200 in 68ms (next.js: 11ms, application-code: 57ms)
+✓ Compiled in 128ms
+ GET /sessions 200 in 27ms (next.js: 6ms, application-code: 22ms)
+ GET /sessions 200 in 25ms (next.js: 7ms, application-code: 18ms)
+✓ Compiled in 71ms
+✓ Compiled in 471ms
+⚠ Fast Refresh had to perform a full reload when ./src/lib/store.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /sessions 200 in 134ms (next.js: 89ms, application-code: 44ms)
+ GET /sessions 200 in 143ms (next.js: 12ms, application-code: 130ms)
+✓ Compiled in 350ms
+⚠ Fast Refresh had to perform a full reload when ./src/lib/store.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /sessions 200 in 73ms (next.js: 53ms, application-code: 20ms)
+ GET /sessions 200 in 83ms (next.js: 7ms, application-code: 76ms)
+ GET /sessions 200 in 60ms (next.js: 7ms, application-code: 53ms)
+⚠ Fast Refresh had to perform a full reload when ./src/components/wallpaper-host.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 70ms
+ GET /sessions 200 in 63ms (next.js: 4ms, application-code: 59ms)
+ GET /sessions 200 in 46ms (next.js: 1.7ms, application-code: 44ms)
+⚠ Fast Refresh had to perform a full reload when ./src/components/wallpaper-host.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 70ms
+ GET /sessions 200 in 59ms (next.js: 4ms, application-code: 55ms)
+ GET /sessions 200 in 40ms (next.js: 1.7ms, application-code: 38ms)
+⚠ Fast Refresh had to perform a full reload when ./src/components/wallpaper-host.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 68ms
+ GET /sessions 200 in 71ms (next.js: 8ms, application-code: 63ms)
+ GET /sessions 200 in 48ms (next.js: 2ms, application-code: 46ms)
+⚠ Fast Refresh had to perform a full reload when ./src/components/wallpaper-host.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 79ms
+ GET /sessions 200 in 56ms (next.js: 39ms, application-code: 16ms)
+ GET /sessions 200 in 67ms (next.js: 7ms, application-code: 60ms)
+ GET /settings 200 in 66ms (next.js: 5ms, application-code: 61ms)
+ GET /settings 200 in 67ms (next.js: 3ms, application-code: 64ms)
+ GET /review 200 in 21ms (next.js: 8ms, application-code: 13ms)
+ GET / 200 in 16ms (next.js: 6ms, application-code: 10ms)
+ GET /goals 200 in 24ms (next.js: 10ms, application-code: 14ms)
+ GET /sessions 200 in 16ms (next.js: 4ms, application-code: 12ms)
+ GET /goals 200 in 17ms (next.js: 2ms, application-code: 15ms)
+ GET /goals 200 in 25ms (next.js: 7ms, application-code: 18ms)
+✓ Compiled in 88ms
+[browser] Another connection wants to upgrade database 'studymax'. Closing db now to resume the upgrade.
+⚠ Fast Refresh had to perform a full reload when ./src/components/wallpaper-host.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 179ms
+ GET /goals 200 in 18ms (next.js: 3ms, application-code: 16ms)
+ GET /goals 200 in 82ms (next.js: 6ms, application-code: 75ms)
+ GET /settings 200 in 19ms (next.js: 6ms, application-code: 14ms)
+ GET /settings 200 in 21ms (next.js: 5ms, application-code: 16ms)
+ GET /settings 200 in 22ms (next.js: 5ms, application-code: 17ms)
+ GET /settings 200 in 26ms (next.js: 5ms, application-code: 21ms)
+[browser] ./src/app/settings/page.tsx:413:19
+Error: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+  411 |                     <Button variant="danger" onClick={() => confirmDeleteUpload(deleteUpl...
+  412 |                   </div>
+> 413 |                div>
+      |                   ^
+  414 |                 </div>
+  415 |               )}
+  416 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/settings/page.tsx [Client Component Browser]
+    ./src/app/settings/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/settings/page.tsx [Client Component SSR]
+    ./src/app/settings/page.tsx [Server Component] 
+ GET /settings 200 in 26ms (next.js: 5ms, application-code: 20ms)
+ GET /settings 200 in 26ms (next.js: 7ms, application-code: 19ms)
+✓ Compiled in 190ms
+⚠ Fast Refresh had to perform a full reload when ./src/lib/i18n.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 76ms
+ GET /settings 200 in 70ms (next.js: 5ms, application-code: 65ms)
+ GET /settings 200 in 48ms (next.js: 4ms, application-code: 45ms)
+ GET /settings 200 in 23ms (next.js: 4ms, application-code: 18ms)
+✓ Compiled in 63ms
+ GET /settings 200 in 62ms (next.js: 5ms, application-code: 57ms)
+ GET /settings 200 in 41ms (next.js: 3ms, application-code: 37ms)
+[?25h

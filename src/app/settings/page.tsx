@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useT } from "@/lib/i18n";
 import { InstallAppButton } from "@/components/install-app-button";
 import { useAppStore } from "@/lib/store";
@@ -10,8 +10,9 @@ import { LIVE_WALLPAPERS, STATIC_WALLPAPERS } from "@/components/wallpaper-host"
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { exportAllData, importAllData } from "@/app/actions";
+import { db, uid, type WallpaperRec } from "@/lib/db";
 import { showToast } from "@/components/toast";
-import { Download, Upload, Check, AlertTriangle, Sparkles } from "lucide-react";
+import { Download, Upload, Check, AlertTriangle, Sparkles, Trash2, ImageIcon } from "lucide-react";
 
 function Toggle({
   label,
@@ -52,6 +53,51 @@ function Toggle({
   );
 }
 
+/**
+ * Thumbnail for one user-uploaded wallpaper. The blob can't be used as an
+ * <img> src directly, so an object URL is created on mount and revoked on
+ * unmount — never persisted to the DOM longer than the tile lives.
+ */
+function UploadTile({ rec, active, onSelect, onDelete }: {
+  rec: WallpaperRec;
+  active: boolean;
+  onSelect: () => void;
+  onDelete: () => void;
+}) {
+  // Lazy useState initializer creates the object URL during the first render
+  // (no setState-in-effect cascade); the returned teardown revokes it.
+  const [url] = useState(() => URL.createObjectURL(rec.blob));
+  useEffect(() => {
+    return () => URL.revokeObjectURL(url);
+  }, [url]);
+
+  return (
+    <div className={cn(
+      "group relative h-28 overflow-hidden rounded-xl border transition-all",
+      active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
+    )}>
+      {url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={url} alt={rec.name} className="h-full w-full cursor-pointer object-cover" onClick={onSelect} />
+      )}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+      <span className="pointer-events-none absolute bottom-1.5 left-2 max-w-[75%] truncate text-[10px] font-bold text-white drop-shadow">{rec.name}</span>
+      {active && (
+        <span className="pointer-events-none absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
+          <Check size={12} strokeWidth={3} />
+        </span>
+      )}
+      <button
+        onClick={onDelete}
+        aria-label={`${rec.name} delete`}
+        className="absolute right-1.5 bottom-1.5 rounded-lg bg-black/50 p-1.5 text-white opacity-0 transition-opacity hover:bg-danger group-hover:opacity-100"
+      >
+        <Trash2 size={12} />
+      </button>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const t = useT();
   const theme = useAppStore((s) => s.theme);
@@ -76,6 +122,65 @@ export default function SettingsPage() {
   const [importMessage, setImportMessage] = useState("");
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── User-uploaded wallpapers ────────────────────────────────
+  const [uploads, setUploads] = useState<WallpaperRec[]>([]);
+  const [deleteUploadId, setDeleteUploadId] = useState<string | null>(null);
+  const wallpaperInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let alive = true;
+    db.wallpapers.orderBy("createdAt").toArray()
+      .then((rows) => { if (alive) setUploads(rows); })
+      .catch(() => { /* uploads list simply stays empty */ });
+    return () => { alive = false; };
+  }, []);
+
+  const handleWallpaperFiles = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const MAX_BYTES = 8 * 1024 * 1024;
+    const OK_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+    const saved: WallpaperRec[] = [];
+    for (const file of Array.from(files)) {
+      if (!OK_TYPES.includes(file.type)) {
+        showToast(t("settings.wpUploadBadType").replace("{name}", file.name));
+        continue;
+      }
+      if (file.size > MAX_BYTES) {
+        showToast(t("settings.wpUploadTooBig").replace("{name}", file.name));
+        continue;
+      }
+      const rec: WallpaperRec = {
+        id: uid(),
+        name: file.name.replace(/\.[^.]+$/, "").slice(0, 60) || "Wallpaper",
+        type: file.type,
+        blob: file,
+        createdAt: new Date(),
+      };
+      try {
+        await db.wallpapers.put(rec);
+        saved.push(rec);
+      } catch {
+        showToast(t("settings.wpUploadFailed").replace("{name}", file.name));
+      }
+    }
+    if (saved.length > 0) {
+      setUploads((prev) => [...prev, ...saved]);
+      // Apply the last image of the batch immediately — the common case is
+      // picking one photo and wanting it on screen now.
+      const last = saved[saved.length - 1];
+      setWallpaper("upload", last.id);
+      showToast(t("settings.wpUploadDone").replace("{n}", String(saved.length)));
+    }
+    if (wallpaperInputRef.current) wallpaperInputRef.current.value = "";
+  }, [t, setWallpaper]);
+
+  const confirmDeleteUpload = useCallback(async (id: string) => {
+    await db.wallpapers.delete(id);
+    setUploads((prev) => prev.filter((u) => u.id !== id));
+    if (wallpaperId === id) setWallpaper("none");
+    setDeleteUploadId(null);
+  }, [wallpaperId, setWallpaper]);
 
   const handleExport = async () => {
     setExportStatus("exporting");
@@ -215,6 +320,7 @@ export default function SettingsPage() {
               { type: "live" as const, label: t("settings.wpLive") },
               { type: "static" as const, label: t("settings.wpStatic") },
               { type: "custom" as const, label: t("settings.wpCustom") },
+              { type: "upload" as const, label: t("settings.wpUpload") },
             ].map((tab) => {
               const active = wallpaperType === tab.type;
               return (
@@ -299,6 +405,67 @@ export default function SettingsPage() {
                   })}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Uploaded Wallpapers — stored locally in IndexedDB */}
+          {wallpaperType === "upload" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("settings.wpUploadGrid")}</p>
+                <Button variant="primary" onClick={() => wallpaperInputRef.current?.click()}>
+                  <Upload size={14} /> {t("settings.wpUploadAdd")}
+                </Button>
+              </div>
+
+              {uploads.length === 0 ? (
+                <button
+                  onClick={() => wallpaperInputRef.current?.click()}
+                  className="flex h-36 w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-muted-fg transition-colors hover:border-accent hover:text-fg"
+                >
+                  <ImageIcon size={22} />
+                  <span className="text-xs font-bold">{t("settings.wpUploadEmpty")}</span>
+                  <span className="text-[10px]">{t("settings.wpUploadEmptyHint")}</span>
+                </button>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <button
+                    onClick={() => wallpaperInputRef.current?.click()}
+                    className="flex h-28 flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-border text-muted-fg transition-colors hover:border-accent hover:text-fg"
+                  >
+                    <Upload size={16} />
+                    <span className="text-[10px] font-bold">{t("settings.wpUploadAdd")}</span>
+                  </button>
+                  {uploads.map((rec) => (
+                    <UploadTile
+                      key={rec.id}
+                      rec={rec}
+                      active={wallpaperId === rec.id}
+                      onSelect={() => setWallpaper("upload", rec.id)}
+                      onDelete={() => setDeleteUploadId(rec.id)}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {deleteUploadId && (
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3">
+                  <span className="text-xs font-semibold text-danger">{t("settings.wpUploadDeleteConfirm")}</span>
+                  <div className="flex shrink-0 gap-2">
+                    <Button variant="ghost" onClick={() => setDeleteUploadId(null)}>{t("common.cancel")}</Button>
+                    <Button variant="danger" onClick={() => confirmDeleteUpload(deleteUploadId)}>{t("common.delete")}</Button>
+                  </div>
+                </div>
+              )}
+
+              <input
+                ref={wallpaperInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                multiple
+                className="hidden"
+                onChange={(e) => handleWallpaperFiles(e.target.files)}
+              />
             </div>
           )}
 
