@@ -231,6 +231,7 @@ const DICT: Dict = {
   "settings.wpCustom": { en: "Custom URL", ar: "رابط مخصص" },
   "settings.wpOpacity": { en: "Wallpaper Opacity", ar: "شفافية الخلفية" },
   "settings.wpBlur": { en: "Wallpaper Blur", ar: "ضبابية الخلفية" },
+  "settings.wpRotation": { en: "Rotation", ar: "الدوران" },
   "settings.uiOpacity": { en: "Interface Opacity", ar: "شفافية الواجهة" },
   "settings.uiOpacityHint": { en: "Let the wallpaper show through the app background and cards", ar: "دع الخلفية تظهر من خلف واجهة التطبيق والبطاقات" },
 
@@ -274,10 +275,17 @@ const DICT: Dict = {
   "offline.goHome": { en: "GO HOME", ar: "العودة للرئيسية" },
 
   // ─── guard ─────────────────────────────────────────────
+  "guard.dismiss": { en: "Dismiss", ar: "تجاهل" },
+  "guard.downloadCopy": { en: "Download copy", ar: "تنزيل النسخة" },
   "guard.foundBackup": { en: "Found a local backup — restore your subjects, cards and sessions?", ar: "توجد نسخة احتياطية محلية — هل تريد استعادة موادك وبطاقاتك وجلساتك؟" },
+  "guard.nothingToRestore": { en: "No restorable copy was found.", ar: "لم يتم العثور على نسخة قابلة للاستعادة." },
   "guard.openProd": { en: "Open production", ar: "افتح النسخة الرئيسية" },
   "guard.previewLink": { en: "Preview link — your data lives on {host}. This URL has its own empty storage.", ar: "رابط معاينة — بياناتك موجودة على {host}. هذا الرابط له تخزينه الخاص الفارغ." },
+  "guard.resetCopySaved": { en: "A copy of your previous data was saved before the reset — restore it, or download it first.", ar: "تم حفظ نسخة من بياناتك السابقة قبل إعادة الضبط — يمكنك استعادتها أو تنزيلها أولاً." },
+  "guard.resetNoCopy": { en: "No copy could be recovered from this device. Import a backup file if you have one.", ar: "لم يتمكن التطبيق من استعادة أي نسخة من هذا الجهاز. استورد ملفًا احتياطيًا إن كان لديك." },
+  "guard.resetTitle": { en: "Local data was reset after a version mismatch.", ar: "تمت إعادة ضبط البيانات المحلية بعد تعارض في الإصدار." },
   "guard.restoreBackup": { en: "Restore backup", ar: "استعادة النسخة" },
+  "guard.restoreOld": { en: "Restore my data", ar: "استعادة بياناتي" },
   "guard.restoring": { en: "Restoring…", ar: "جارٍ الاستعادة…" },
 
   // ─── fc ─────────────────────────────────────────────

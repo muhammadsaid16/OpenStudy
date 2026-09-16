@@ -1,4 +1,5 @@
 import Dexie, { type Table } from "dexie";
+import { rescueBeforeReset } from "@/lib/safety-net";
 
 // ─── Record types (mirror the previous Prisma models 1:1) ───────
 export interface SubjectRec {
@@ -243,13 +244,29 @@ export const db = new OpenStudyDB();
 
 db.on("versionchange", () => db.close());
 
-// Auto-recover from IndexedDB version mismatch (e.g., from downgraded deploys)
+// Auto-recover when Dexie cannot open the database at all — a failed or
+// half-applied upgrade, a schema it cannot reconcile, a blocked delete. (A
+// database from a NEWER build is not one of those: Dexie 4 opens it without
+// complaint, which is a documented hazard of its own, covered by the "newer
+// on-disk schema" test in lib/safety-net.test.ts.)
+//
+// This database is the user's only copy of their work, so the reset is the LAST
+// resort rather than the first move: rescueBeforeReset() captures the data into
+// a separate database first — a raw dump of the unopenable database plus the
+// rolling snapshot — and records that a reset happened so the UI can hand the
+// copy back. See lib/safety-net.ts for why it has to live elsewhere.
 if (typeof window !== "undefined") {
   db.open().catch(async (err) => {
     console.error("[OpenStudy DB] Open error:", err);
     if (err?.name === "VersionError" || err?.name === "UpgradeError" || err?.name === "SchemaError") {
-      console.warn("[OpenStudy DB] IndexedDB version mismatch detected. Resetting database to clean v10 schema...");
+      console.warn("[OpenStudy DB] IndexedDB version mismatch detected. Capturing a recovery copy before reset...");
+      const rescued = await rescueBeforeReset();
+      console.warn("[OpenStudy DB] Recovery copy:", rescued);
       try {
+        // Close first: an open connection can otherwise hold the delete back
+        // with a `blocked` event, leaving the app hung on a database that will
+        // never open.
+        db.close();
         await db.delete();
         await db.open();
         console.log("[OpenStudy DB] Reset database successfully.");
