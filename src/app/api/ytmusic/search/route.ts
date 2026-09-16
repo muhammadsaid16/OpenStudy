@@ -24,7 +24,8 @@ const INVIDIOUS = [
 async function searchInvidious(q: string): Promise<YTResult[]> {
   for (const base of INVIDIOUS) {
     try {
-      const url = `${base}/api/v1/search?q=${encodeURIComponent(q)}&type=video&sort_by=relevance`;
+      const musicQ = q.toLowerCase().includes("music") || q.toLowerCase().includes("song") ? q : `${q} music`;
+      const url = `${base}/api/v1/search?q=${encodeURIComponent(musicQ)}&type=video&sort_by=relevance`;
       const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, cache: "no-store", signal: AbortSignal.timeout(4000) });
       if (!r.ok) continue;
       const j = (await r.json()) as Array<{
@@ -54,7 +55,8 @@ async function searchInvidious(q: string): Promise<YTResult[]> {
 
 async function searchYoutubeScrape(q: string): Promise<YTResult[]> {
   try {
-    const html = await fetch(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, {
+    const musicQ2 = q.toLowerCase().includes("music") || q.toLowerCase().includes("song") ? q : `${q} music`;
+    const html = await fetch(`https://www.youtube.com/results?search_query=${encodeURIComponent(musicQ2)}`, {
       headers: { "User-Agent": "Mozilla/5.0" },
       cache: "no-store",
     }).then((r) => (r.ok ? r.text() : ""));
