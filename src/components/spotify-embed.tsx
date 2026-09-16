@@ -201,6 +201,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
   const [activePlaylist, setActivePlaylist] = useState<SearchResult | null>(null);
   const [tracks, setTracks] = useState<PlaylistTrack[]>([]);
   const [tracksLoading, setTracksLoading] = useState(false);
+  const [lightbox, setLightbox] = useState<string | null>(null);
   const setTrack = useSpotify((s) => s.setTrack);
   const debounceRef = useRef<number | null>(null);
 
@@ -349,7 +350,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
             <div className="flex items-center gap-3 rounded-xl border border-border bg-bg p-3">
               {activePlaylist.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={activePlaylist.image} alt="" className="h-12 w-12 rounded-lg object-cover" />
+                <img src={activePlaylist.image} alt="" onClick={() => setLightbox(activePlaylist.image!)} className="h-12 w-12 cursor-pointer rounded-lg object-cover hover:opacity-80" title="View full image" />
               ) : (
                 <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-muted-fg">
                   <ListMusic size={18} />
@@ -374,7 +375,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                 {tracks.map((t) => (
                   <li key={t.id} className="flex items-center gap-3 rounded-xl border border-transparent bg-bg px-2 py-2 hover:border-border hover:bg-surface">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {t.image ? <img src={t.image} alt="" className="h-9 w-9 rounded-lg object-cover" /> : <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-fg"><Music2 size={14} /></span>}
+                    {t.image ? <img src={t.image} alt="" onClick={() => setLightbox(t.image!)} className="h-9 w-9 cursor-pointer rounded-lg object-cover hover:opacity-80" title="View full image" /> : <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-fg"><Music2 size={14} /></span>}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-fg">{t.name}</p>
                       <p className="truncate text-xs text-muted-fg">{t.artist}</p>
@@ -415,7 +416,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                   <li key={`${r.type}:${r.id}`} className="flex items-center gap-3 rounded-xl border border-transparent bg-bg px-2 py-2 transition hover:border-border hover:bg-surface">
                     {r.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={r.image} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                      <img src={r.image} alt="" onClick={() => setLightbox(r.image!)} className="h-10 w-10 shrink-0 cursor-pointer rounded-lg object-cover hover:opacity-80" title="View full image" />
                     ) : (
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-fg">
                         <MetaIcon size={16} />
@@ -491,7 +492,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
               {pasteTracks.map((t) => (
                 <li key={t.id} className="flex items-center gap-3 rounded-xl border border-transparent bg-bg px-2 py-2 hover:border-border hover:bg-surface">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {t.image ? <img src={t.image} alt="" className="h-9 w-9 rounded-lg object-cover" /> : <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-fg"><Music2 size={14} /></span>}
+                  {t.image ? <img src={t.image} alt="" onClick={() => setLightbox(t.image!)} className="h-9 w-9 cursor-pointer rounded-lg object-cover hover:opacity-80" title="View full image" /> : <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-fg"><Music2 size={14} /></span>}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-fg">{t.name}</p>
                     <p className="truncate text-xs text-muted-fg">{t.artist}</p>
@@ -506,6 +507,13 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
           <p className="text-xs leading-relaxed text-muted-fg">
             Only <b className="text-fg">public</b> playlists &amp; tracks can be embedded. Tip: paste a playlist → <b className="text-fg">Inspect</b> to see and play any song inside it. Search playlists need a Spotify Client Secret (see note below).
           </p>
+        </div>
+      )}
+      {lightbox && (
+        <div onClick={() => setLightbox(null)} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={lightbox} alt="Full cover" className="max-h-[85vh] max-w-[85vw] rounded-2xl object-contain shadow-2xl" />
+          <button onClick={() => setLightbox(null)} className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         </div>
       )}
     </div>

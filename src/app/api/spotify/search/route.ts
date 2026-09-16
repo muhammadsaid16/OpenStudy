@@ -164,7 +164,7 @@ export async function GET(req: NextRequest) {
       name: t.trackName,
       artist: t.artistName,
       type: (t.kind === "podcast" ? "episode" : "track") as Result["type"],
-      image: t.artworkUrl100 ?? null,
+      image: t.artworkUrl100 ? t.artworkUrl100.replace("100x100bb.jpg", "600x600bb.jpg").replace("100x100bb", "600x600bb") : null,
       embedUrl: "",
       webUrl: `https://open.spotify.com/search/${encodeURIComponent(`${t.trackName} ${t.artistName}`)}`,
       previewUrl: t.previewUrl ?? null,
