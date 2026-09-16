@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useT } from "@/lib/i18n";
+import { escapeCsvField } from "@/lib/import-export/csv";
 import { motion } from "framer-motion";
 import {
   getGoals,
@@ -208,7 +209,6 @@ export default function GoalsPage() {
   const subjectOf = (id?: string | null) => subjects.find((s) => s.id === id);
 
   // ─── Export / Import ────────────────────────────────────────
-  const csvEsc = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
   function splitCsvLine(line: string, delimiter: string): string[] {
     const cells: string[] = [];
     let cur = ""; let inQuotes = false;
@@ -247,7 +247,7 @@ export default function GoalsPage() {
       const header = ["title","description","horizon","status","dueDate","milestoneTitles"];
       const rows = (allGoals as any[]).map((g)=>{
         const milestoneTitles = (allMilestones as any[]).filter((m)=>m.goalId===g.id).map((m)=>m.title).join(";");
-        return [csvEsc(g.title), csvEsc(g.description ?? ""), csvEsc(g.horizon ?? "regular"), csvEsc(String(g.status ?? "backlog").toUpperCase()), csvEsc(g.dueDate ? new Date(g.dueDate).toISOString().slice(0,10) : ""), csvEsc(milestoneTitles)].join(",");
+        return [escapeCsvField(g.title), escapeCsvField(g.description ?? ""), escapeCsvField(g.horizon ?? "regular"), escapeCsvField(String(g.status ?? "backlog").toUpperCase()), escapeCsvField(g.dueDate ? new Date(g.dueDate).toISOString().slice(0,10) : ""), escapeCsvField(milestoneTitles)].join(",");
       });
       const csv = [header.join(","), ...rows].join("\n");
       const blob = new Blob([csv], { type: "text/csv" });

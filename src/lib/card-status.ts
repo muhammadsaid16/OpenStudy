@@ -1,23 +1,15 @@
 // ─── Flashcards shared helpers ────────────────────────────────────
 // Hoisted from the former 1,683-line monolith so each mode component
-// (review / browse / leeches / stats) imports the same status logic.
-//
-// Source strings are normal-case: every render site styles them with
-// the eyebrow `uppercase` treatment via CSS (also lets screen readers
-// read words instead of spelling letters).
+// (review / browse / leeches / stats) imports the same rating scale.
 
-export interface CardStatusLike {
-  reviewCount: number;
-  nextReview: Date | string;
-}
-
-export function getCardStatus(card: CardStatusLike, nowMs: number) {
-  const rc = card.reviewCount;
-  const isDue = new Date(card.nextReview).getTime() <= nowMs;
-  if (rc === 0) return { label: "New", dot: "bg-muted-fg" };
-  if (isDue) return { label: "Due", dot: "bg-danger" };
-  if (rc <= 3) return { label: "Learning", dot: "bg-warning" };
-  return { label: "Mature", dot: "bg-success" };
+/**
+ * The one definition of "the user got it right". Quality runs 0…5, and 3 is
+ * the pass boundary. Accuracy, retention curves, per-bundle mastery and the
+ * in-session correct counter all read from here, so moving the threshold is
+ * a one-line change instead of eight coordinated edits.
+ */
+export function isCorrect(quality: number | null | undefined): boolean {
+  return (quality ?? 0) >= 3;
 }
 
 // SRS rating scale — shared by the review keyboard handler and UI.

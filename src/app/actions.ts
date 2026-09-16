@@ -24,6 +24,9 @@ import {
   type CardKind,
 } from "@/lib/db";
 import { cardKind, cleanChoices, isCloze } from "@/lib/card-kinds";
+import { byDueDateAsc, filterDueCards, isDueCard } from "@/lib/review-queue";
+import { isCorrect } from "@/lib/card-status";
+import { isMastered } from "@/lib/stats/mastery";
 import {
   subjectSchema,
   topicSchema,
@@ -78,6 +81,63 @@ async function noteTagsInclude(noteId: string) {
   return out;
 }
 
+// ─── Batched Include helpers ─────────────────────────────────────
+// The per-card `topicInclude`/`bundleInclude` fan-out cost 2 IndexedDB
+// round-trips per card plus 1 per bundle — roughly 6,000 transactions for the
+// 2,000-card "Study All Due" slice. These resolve a whole page of cards with
+// a fixed number of bulk reads and join in memory.
+
+type TopicLite = {
+  id: string;
+  name: string;
+  subject: { id: string; name: string; color: string } | null;
+} | null;
+
+type BundleLite = { id: string; name: string; color: string } | null;
+
+async function topicIncludeBatch(
+  topicIds: (string | null | undefined)[]
+): Promise<Map<string, TopicLite>> {
+  const ids = [...new Set(topicIds.filter((id): id is string => !!id))];
+  const topics = await db.topics.bulkGet(ids);
+  const subjectIds = [
+    ...new Set(topics.map((t) => t?.subjectId).filter((id): id is string => !!id)),
+  ];
+  const subjects = await db.subjects.bulkGet(subjectIds);
+  const subjectById = new Map(
+    subjects.filter((s): s is NonNullable<typeof s> => !!s).map((s) => [s.id, s])
+  );
+
+  const out = new Map<string, TopicLite>();
+  ids.forEach((id, i) => {
+    const topic = topics[i];
+    if (!topic) {
+      out.set(id, null);
+      return;
+    }
+    const subject = topic.subjectId ? subjectById.get(topic.subjectId) : undefined;
+    out.set(id, {
+      id: topic.id,
+      name: topic.name,
+      subject: subject ? { id: subject.id, name: subject.name, color: subject.color } : null,
+    });
+  });
+  return out;
+}
+
+async function bundleIncludeBatch(
+  bundleIds: (string | null | undefined)[]
+): Promise<Map<string, BundleLite>> {
+  const ids = [...new Set(bundleIds.filter((id): id is string => !!id))];
+  const bundles = await db.bundles.bulkGet(ids);
+  const out = new Map<string, BundleLite>();
+  ids.forEach((id, i) => {
+    const b = bundles[i];
+    out.set(id, b ? { id: b.id, name: b.name, color: b.color } : null);
+  });
+  return out;
+}
+
 async function subjectCounts(subjectId: string) {
   const [topics, flashcards, studySessions, sessionRecs, cardRecs] = await Promise.all([
     db.topics.where("subjectId").equals(subjectId).count(),
@@ -99,7 +159,7 @@ async function subjectCounts(subjectId: string) {
           null
         )
       : null,
-    mastered: cardRecs.filter((c) => (c.intervalDays ?? 0) >= 21).length,
+    mastered: cardRecs.filter(isMastered).length,
   };
 }
 
@@ -315,38 +375,41 @@ export async function deleteNote(id: string) {
 
 // ─── Flashcards ───────────────────────────────────────────────────
 export async function getFlashcards(topicId?: string, subjectId?: string) {
-  let cards = await db.flashcards.toArray();
-  if (topicId) cards = cards.filter((c) => c.topicId === topicId);
+  // topicId goes through its index; subjectId stays in memory to preserve the
+  // original AND semantics when both are supplied.
+  let cards = topicId
+    ? await db.flashcards.where("topicId").equals(topicId).toArray()
+    : await db.flashcards.toArray();
   if (subjectId) cards = cards.filter((c) => c.subjectId === subjectId);
-  cards.sort((a, b) => a.nextReview.getTime() - b.nextReview.getTime());
-  return Promise.all(cards.map(async (c) => ({ ...c, topic: await topicInclude(c.topicId) })));
+  cards.sort(byDueDateAsc);
+  const topics = await topicIncludeBatch(cards.map((c) => c.topicId));
+  return cards.map((c) => ({
+    ...c,
+    topic: c.topicId ? topics.get(c.topicId) ?? null : null,
+  }));
 }
 
 export async function getDueFlashcards() {
-  const now = Date.now();
-  const all = await db.flashcards.toArray();
-  const due = all
-    .filter((c) => c.nextReview.getTime() <= now)
-    .sort((a, b) => a.nextReview.getTime() - b.nextReview.getTime())
-    .slice(0, 20);
-  return Promise.all(due.map(async (c) => ({ ...c, topic: await topicInclude(c.topicId) })));
+  const due = filterDueCards(await db.flashcards.toArray()).slice(0, 20);
+  const topics = await topicIncludeBatch(due.map((c) => c.topicId));
+  return due.map((c) => ({
+    ...c,
+    topic: c.topicId ? topics.get(c.topicId) ?? null : null,
+  }));
 }
 
 // All due cards across every bundle (for "Study All Due").
 export async function getAllDueFlashcards() {
-  const now = Date.now();
-  const all = await db.flashcards.toArray();
-  const due = all
-    .filter((c) => c.nextReview.getTime() <= now)
-    .sort((a, b) => a.nextReview.getTime() - b.nextReview.getTime())
-    .slice(0, 2000);
-  return Promise.all(
-    due.map(async (c) => ({
-      ...c,
-      topic: await topicInclude(c.topicId),
-      bundle: await bundleInclude(c.bundleId),
-    }))
-  );
+  const due = filterDueCards(await db.flashcards.toArray()).slice(0, 2000);
+  const [topics, bundles] = await Promise.all([
+    topicIncludeBatch(due.map((c) => c.topicId)),
+    bundleIncludeBatch(due.map((c) => c.bundleId)),
+  ]);
+  return due.map((c) => ({
+    ...c,
+    topic: c.topicId ? topics.get(c.topicId) ?? null : null,
+    bundle: c.bundleId ? bundles.get(c.bundleId) ?? null : null,
+  }));
 }
 
 export async function createFlashcard(data: {
@@ -554,9 +617,10 @@ export async function deletePomoPreset(id: string) {
 
 // ─── Due Count (sidebar badge) ────────────────────────────────────
 export async function getDueCount(): Promise<number> {
-  const now = Date.now();
-  const flashcards = await db.flashcards.toArray();
-  return flashcards.filter((c) => c.nextReview.getTime() <= now).length;
+  // `nextReview` carries an index (schema v1+), so this is a real range count
+  // instead of a full-table scan followed by a JS filter. Same boundary as
+  // isDueCard: due at or before now.
+  return db.flashcards.where("nextReview").belowOrEqual(new Date()).count();
 }
 
 // ─── Dashboard Stats ──────────────────────────────────────────────
@@ -569,7 +633,7 @@ export async function getDashboardStats() {
     db.subjects.toArray(),
   ]);
   const now = Date.now();
-  const dueCards = flashcards.filter((c) => c.nextReview.getTime() <= now).length;
+  const dueCards = flashcards.filter((c) => isDueCard(c, now)).length;
   const totalMinutes = sessions.reduce((sum, s) => sum + s.durationMin, 0);
   const recent = sessions.slice(0, 5);
   const recentSessions = await Promise.all(
@@ -591,7 +655,7 @@ export async function getDashboardStats() {
         name: subj.name,
         color: subj.color,
         cardCount: cards.length,
-        dueCount: cards.filter((c) => c.nextReview.getTime() <= nowMs).length,
+        dueCount: cards.filter((c) => isDueCard(c, nowMs)).length,
       };
     })
   );
@@ -651,7 +715,7 @@ export async function getWeeklyAnalytics(): Promise<WeeklyAnalyticsResult> {
   const bySubject = new Map<string, { due: number; oldest: number }>();
   for (const c of flashcards) {
     if (!c.subjectId) continue;
-    if (c.nextReview.getTime() <= nowMs) {
+    if (isDueCard(c, nowMs)) {
       const entry = bySubject.get(c.subjectId) ?? { due: 0, oldest: 0 };
       entry.due += 1;
       entry.oldest = Math.max(entry.oldest, nowMs - c.nextReview.getTime());
@@ -903,7 +967,7 @@ export async function reviewFlashcardWithLog(id: string, quality: number) {
 
   let newInterval: number;
   let newReviewCount: number;
-  if (q < 3) {
+  if (!isCorrect(q)) {
     // Lapse: reset the repetition ladder (1-day step), like standard SM-2.
     newInterval = 1;
     newReviewCount = 0;
@@ -922,7 +986,7 @@ export async function reviewFlashcardWithLog(id: string, quality: number) {
   nextReview.setDate(nextReview.getDate() + newInterval);
 
   // Leech detection: 5 consecutive Again → flag
-  const newConsecutive = q < 3 ? card.consecutiveAgain + 1 : 0;
+  const newConsecutive = !isCorrect(q) ? card.consecutiveAgain + 1 : 0;
   const isLeech = newConsecutive >= 5;
 
   await db.flashcards.update(id, {

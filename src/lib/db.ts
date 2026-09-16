@@ -305,16 +305,7 @@ export async function getCachedBundleCards(bundleId: string) {
   return db.flashcards.where("bundleId").equals(bundleId).toArray();
 }
 
-export async function getCachedBundles() {
-  return db.bundles.toArray();
-}
-
-// Generic key/value settings read/write (used for misc prefs).
-export async function getSetting<T = unknown>(key: string): Promise<T | undefined> {
-  const row = await db.settings.get(key);
-  return row?.value as T | undefined;
-}
-
-export async function setSetting(key: string, value: unknown): Promise<void> {
-  await db.settings.put({ key, value, updatedAt: Date.now() });
-}
+// NOTE: getCachedBundles / getSetting / setSetting were removed — nothing
+// called them. App prefs live in localStorage (see lib/store.ts prefs), so
+// the `settings` table stays in the Dexie schema but has no accessor. It is
+// left in place deliberately: dropping a table needs a version bump.

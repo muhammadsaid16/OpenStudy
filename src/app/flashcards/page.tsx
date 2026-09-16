@@ -58,7 +58,7 @@ import { ImageUploadButton } from "@/components/image-upload-button";
 import { AiImportButton } from "@/components/ai-import-button";
 import { AiGenerateButton } from "@/components/ai-generate-button";
 import { CardKindFields } from "@/components/card-kind-fields";
-import { RATING_BUTTONS } from "@/lib/card-status";
+import { RATING_BUTTONS, isCorrect } from "@/lib/card-status";
 import { useLiveData } from "@/lib/use-live-data";
 
 type Flashcard = Awaited<ReturnType<typeof getDueFlashcards>>[number];
@@ -298,16 +298,13 @@ function FlashcardsContent() {
         cards = (await getAllDueFlashcards()) as Flashcard[];
       } else if (topicParam) {
         // Topic context (subjects → STUDY ALL): only DUE cards for that topic
-        const now = Date.now();
-        const topicCards = await getFlashcards(topicParam);
-        cards = (topicCards as Flashcard[]).filter((c) => new Date(c.nextReview).getTime() <= now);
+        cards = filterDueCards((await getFlashcards(topicParam)) as Flashcard[]);
       } else {
         try {
-          const now = Date.now();
           // Bundle review: serve ONLY cards whose nextReview has arrived —
           // serving every card broke SM-2 (a +30d card was shown today).
           const all: Flashcard[] = (await getBundleCards(selectedBundle)) as Flashcard[];
-          const due = all.filter((c) => new Date(c.nextReview).getTime() <= now);
+          const due = filterDueCards(all);
           if (due.length === 0 && all.length > 0) {
             cards = shuffled(all);
             practiceFlag = true;
@@ -317,8 +314,7 @@ function FlashcardsContent() {
         } catch {
           // offline fallback
           const cached = await getCachedBundleCards(selectedBundle);
-          const now = Date.now();
-          const due = (cached as unknown as Flashcard[]).filter((c) => new Date(c.nextReview).getTime() <= now);
+          const due = filterDueCards(cached as unknown as Flashcard[]);
           if (due.length === 0 && (cached as unknown as Flashcard[]).length > 0) {
             cards = shuffled(cached as unknown as Flashcard[]);
             practiceFlag = true;
@@ -437,7 +433,7 @@ function FlashcardsContent() {
         // Track run stats for auto session logging
         if (sessionRef.current.reviewed === 0) sessionRef.current.startedAt = Date.now();
         sessionRef.current.reviewed += 1;
-        if (quality >= 3) sessionRef.current.correct += 1;
+        if (isCorrect(quality)) sessionRef.current.correct += 1;
         setTotalReviewed((t) => t + 1);
         totalReviewedRef.current += 1;
         if (
@@ -449,7 +445,7 @@ function FlashcardsContent() {
         }
         setCompletedCount((c) => c + 1);
 
-        if (quality < 3 && !servingFromQueue) {
+        if (!isCorrect(quality) && !servingFromQueue) {
           // AGAIN / HARD on the MAIN queue: requeue for later in THIS session.
           // (When serving FROM the relearn queue the rotate branch below already
           // handles it — appending here too duplicated the card every lapse.)
@@ -463,7 +459,7 @@ function FlashcardsContent() {
           } else {
             setDueCards([]);
           }
-        } else if (quality >= 3) {
+        } else if (isCorrect(quality)) {
           // Relearn queue: remembered → clear the card
           setLearningQueue((prev) => prev.slice(1));
         } else {

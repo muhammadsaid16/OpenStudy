@@ -13,6 +13,9 @@ import { HardestCardsTable } from "@/components/hardest-cards-table";
 import { ForecastCard, BundleMasteryTable } from "@/components/stats-forecast-mastery";
 import { getAllReviewLogs, getBundles, getFlashcards, getStudySessions, getSubjects } from "@/app/actions";
 import { computeStreak } from "@/lib/stats";
+import { isDueCard } from "@/lib/review-queue";
+import { isCorrect } from "@/lib/card-status";
+import { isMastered } from "@/lib/stats";
 import { formatDuration } from "@/lib/utils";
 import type { BundleRec, FlashcardRec, ReviewLogRec, StudySessionRec } from "@/lib/db";
 import { Flame, Layers, Clock, Trophy, AlertTriangle, Activity, Timer } from "lucide-react";
@@ -29,7 +32,7 @@ const PERIODS: { key: Period; labelKey: string; weeks: number }[] = [
 // ── helpers ───────────────────────────────────────────────────────
 function kpiAccuracy(reviews: ReviewLogRec[]) {
   if (!reviews.length) return 0;
-  const correct = reviews.filter((r) => (r.quality ?? 0) >= 3).length;
+  const correct = reviews.filter((r) => isCorrect(r.quality)).length;
   return Math.round((correct / reviews.length) * 100);
 }
 function buildDailyBars(reviews: ReviewLogRec[], days: number) {
@@ -123,7 +126,7 @@ export default function StatsPage() {
 
   const dueNow = useMemo(() => {
     if (!cards) return 0;
-    return cards.filter(c => new Date(c.nextReview).getTime() <= nowMs).length;
+    return cards.filter(c => isDueCard(c, nowMs)).length;
   }, [cards, nowMs]);
   const avgPerDay = useMemo(() => {
     if (!reviews || reviews.length === 0) return 0;
@@ -158,7 +161,7 @@ export default function StatsPage() {
   const totalReviews = reviews.length;
   const totalHours = Math.round(sessions.reduce((a, s) => a + (s.durationMin ?? 0), 0) / 60 * 10) / 10;
   const streak = computeStreak(reviews);
-  const mastered = cards.filter(c => (c.intervalDays ?? 0) >= 21).length;
+  const mastered = cards.filter(isMastered).length;
   const leeches = cards.filter(c => c.isLeech).length;
 
   // Spec §7 actionable insights — derived from the FULL session list.
@@ -254,7 +257,7 @@ export default function StatsPage() {
       <div className="mb-6 auto-grid--dense">
         {[
           { icon: Layers, labelKey: "stats.totalReviews", value: totalReviews.toLocaleString(), sub: `${avgPerDay}/day`, color: "var(--color-accent)" },
-          { icon: Trophy, labelKey: "stats.accuracy", value: `${acc}%`, sub: `${reviews.filter(r => (r.quality ?? 0) >= 3).length} correct`, color: "var(--color-grow)" },
+          { icon: Trophy, labelKey: "stats.accuracy", value: `${acc}%`, sub: `${reviews.filter(r => isCorrect(r.quality)).length} correct`, color: "var(--color-grow)" },
           { icon: Timer, labelKey: "dash.studyTime", value: `${totalHours}h`, sub: `${sessions.length} sessions`, color: "var(--color-flow)" },
           { icon: Flame, labelKey: "stats.streakLabel", value: `${streak} days`, sub: streak === 0 ? "start today" : "keep it up", color: "var(--color-accent)" },
           { icon: Activity, labelKey: "stats.masteredLabel", value: `${mastered}`, sub: `${cards.length} cards`, color: "var(--color-grow)" },

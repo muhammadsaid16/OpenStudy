@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 // ─── POST /api/ai/explain — SSE streaming variant ───────────────
 // Same guards + provider chain as route.ts, but streams tokens to the
@@ -144,6 +145,16 @@ async function streamGroq(apiKey: string, source: string, out: ReturnType<typeof
 }
 
 export async function POST(req: Request) {
+  // Streaming generations run long and bill the whole time, so this endpoint
+  // gets a tighter cap than its sibling AI routes (10/60s).
+  const rl = rateLimit(`ai:explain-stream:` + clientIp(req), 4, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { ok: false, error: "RATE_LIMIT", message: "Too many explanations in a row — wait a moment and try again." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } }
+    );
+  }
+
   const t0 = Date.now();
   const groqKey = (process.env.GROQ_API_KEY ?? "").trim().split(/\s+/)[0].replace(/^["']|["']$/g, "");
   const geminiKey = (process.env.GEMINI_API_KEY ?? "").trim().split(/\s+/)[0].replace(/^["']|["']$/g, "");

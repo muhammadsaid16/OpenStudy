@@ -30,7 +30,7 @@ import {
   exportBundle,
 } from "@/app/actions";
 import { SubjectTopicMenu } from "@/components/subject-topic-menu";
-import { RATING_BUTTONS } from "@/lib/card-status";
+import { RATING_BUTTONS, isCorrect } from "@/lib/card-status";
 import { parseSharedBundle, encodeShare, SHARE_URL_LIMIT } from "@/lib/share";
 import { showToast } from "@/components/toast";
 import { showUndo } from "@/components/undo-toast";
@@ -327,7 +327,7 @@ export default function SubjectsPage() {
         await reviewFlashcardWithLog(activeCard.id, quality);
       }
       completedThisRun.current += 1;
-      if (quality < 3 && !servingFromLearningQueue) {
+      if (!isCorrect(quality) && !servingFromLearningQueue) {
         setLearningQueue((prev) => [...prev, activeCard]);
       }
       if (!servingFromLearningQueue) {
@@ -335,7 +335,7 @@ export default function SubjectsPage() {
           setReviewIndex((i) => i + 1);
         } else {
           // End of main queue — hand off to learning queue or finish
-          const hasLearning = quality < 3 ? true : learningQueue.length > 0;
+          const hasLearning = !isCorrect(quality) ? true : learningQueue.length > 0;
           setReviewQueue([]);
           setReviewIndex(0);
           if (!hasLearning) {
@@ -348,7 +348,7 @@ export default function SubjectsPage() {
             setAllBundles(bundles as Bundle[]);
           }
         }
-      } else if (quality >= 3) {
+      } else if (isCorrect(quality)) {
         setLearningQueue((prev) => {
           const next = prev.slice(1);
           if (next.length === 0) {

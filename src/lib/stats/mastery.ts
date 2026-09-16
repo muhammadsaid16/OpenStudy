@@ -3,6 +3,15 @@ import type {
   FlashcardRec,
   ReviewLogRec,
 } from "@/lib/db";
+import { isDueCard } from "@/lib/review-queue";
+import { isCorrect } from "@/lib/card-status";
+
+/** A card counts as mastered once its interval reaches three weeks. */
+export const MASTERED_INTERVAL_DAYS = 21;
+
+export function isMastered(card: { intervalDays?: number | null }): boolean {
+  return (card.intervalDays ?? 0) >= MASTERED_INTERVAL_DAYS;
+}
 
 export interface BundleMastery {
   bundleId: string;
@@ -40,7 +49,7 @@ export function buildBundleMastery(
   for (const r of reviews) {
     const s = cardStats.get(r.flashcardId) ?? { correct: 0, total: 0 };
     s.total++;
-    if ((r.quality ?? 0) >= 3) s.correct++;
+    if (isCorrect(r.quality)) s.correct++;
     cardStats.set(r.flashcardId, s);
   }
 
@@ -53,7 +62,7 @@ export function buildBundleMastery(
     for (const c of list) {
       const s = cardStats.get(c.id);
       if (s) { correct += s.correct; total += s.total; }
-      if (new Date(c.nextReview).getTime() <= now) dueCount++;
+      if (isDueCard(c, now)) dueCount++;
       if (c.isLeech) leechCount++;
     }
     return {
@@ -101,7 +110,7 @@ export function findHardestCards(
   for (const r of reviews) {
     const s = stats.get(r.flashcardId) ?? { correct: 0, total: 0 };
     s.total++;
-    if ((r.quality ?? 0) >= 3) s.correct++;
+    if (isCorrect(r.quality)) s.correct++;
     stats.set(r.flashcardId, s);
   }
 

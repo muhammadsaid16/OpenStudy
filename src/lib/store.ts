@@ -1,31 +1,14 @@
 "use client";
 
 import { create } from "zustand";
+import { DEFAULT_THEME, normalizeTheme, type ThemeName } from "@/lib/themes";
+import { UI_OPACITY_DEFAULT, clampUiOpacity } from "@/lib/ui-opacity";
 
-// ─── App State ────────────────────────────────────────────────────
-export type ThemeName =
-  | "aurora" | "midnight" | "nebula" | "matrix" | "ember" | "rosewood"
-  | "cyberpunk" | "arctic" | "sandstone" | "mono" | "light" | "paper";
-
-const THEME_FALLBACK: ThemeName = "aurora";
-
-/** Map a stored (possibly legacy v1) theme name to a valid v2 theme. */
-export function normalizeTheme(t: string | undefined | null): ThemeName {
-  const legacy: Record<string, ThemeName> = {
-    onyx: "mono",
-    void: "midnight",
-    emerald: "matrix",
-    magma: "ember",
-    grape: "nebula",
-  };
-  const all: ThemeName[] = [
-    "aurora", "midnight", "nebula", "matrix", "ember", "rosewood",
-    "cyberpunk", "arctic", "sandstone", "mono", "light", "paper",
-  ];
-  if (!t) return THEME_FALLBACK;
-  if (legacy[t]) return legacy[t];
-  return (all as string[]).includes(t) ? (t as ThemeName) : THEME_FALLBACK;
-}
+// The theme catalogue and its legacy-name mapping live in @/lib/themes so the
+// pre-hydration script in layout.tsx can share them. Re-exported here so
+// existing `from "@/lib/store"` imports keep working.
+export type { ThemeName };
+export { normalizeTheme };
 
 export type WallpaperType = "none" | "static" | "live" | "custom";
 
@@ -52,6 +35,11 @@ interface AppState {
   setWallpaper: (type: WallpaperType, id?: string) => void;
   setWallpaperOpacity: (opacity: number) => void;
   setWallpaperBlur: (blur: number) => void;
+
+  // Interface opacity — how far the app's own surfaces step back to let the
+  // wallpaper through. 1 = fully opaque (the original look).
+  uiOpacity: number;
+  setUiOpacity: (opacity: number) => void;
 
   // UI prefs
   reducedMotion: boolean;
@@ -89,6 +77,7 @@ interface PersistedPrefs {
   wallpaperId?: string;
   wallpaperOpacity?: number;
   wallpaperBlur?: number;
+  uiOpacity?: number;
 }
 
 function loadPrefs(): PersistedPrefs {
@@ -111,6 +100,7 @@ function persistAll(s: AppState) {
     wallpaperId: s.wallpaperId,
     wallpaperOpacity: s.wallpaperOpacity,
     wallpaperBlur: s.wallpaperBlur,
+    uiOpacity: s.uiOpacity,
   });
 }
 
@@ -129,7 +119,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   searchQuery: "",
   setSearchQuery: (q) => set({ searchQuery: q }),
 
-  theme: "aurora",
+  theme: DEFAULT_THEME,
   setTheme: (t) => {
     if (typeof document !== "undefined") {
       document.documentElement.setAttribute("data-theme", t);
@@ -157,6 +147,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     persistAll({ ...get(), wallpaperBlur: v });
   },
 
+  uiOpacity: UI_OPACITY_DEFAULT,
+  setUiOpacity: (opacity) => {
+    const v = clampUiOpacity(opacity);
+    set({ uiOpacity: v });
+    persistAll({ ...get(), uiOpacity: v });
+  },
+
   reducedMotion: false,
   setReducedMotion: (v) => {
     set({ reducedMotion: v });
@@ -182,6 +179,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (prefs.wallpaperId) patch.wallpaperId = prefs.wallpaperId;
     if (typeof prefs.wallpaperOpacity === "number") patch.wallpaperOpacity = prefs.wallpaperOpacity;
     if (typeof prefs.wallpaperBlur === "number") patch.wallpaperBlur = prefs.wallpaperBlur;
+    if (typeof prefs.uiOpacity === "number") patch.uiOpacity = clampUiOpacity(prefs.uiOpacity);
     if (prefs.theme) {
       patch.theme = normalizeTheme(prefs.theme);
       if (typeof document !== "undefined") {

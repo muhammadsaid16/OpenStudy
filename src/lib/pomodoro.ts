@@ -533,20 +533,3 @@ export function usePomodoro(): PomodoroHandle {
   };
 }
 
-// Lightweight presence signal (no per-second work): true while a session is
-// persisted. Used by the app-wide chip to decide when to render the live timer.
-export function usePomoPresence(): boolean {
-  const [present, setPresent] = useState<boolean>(() => (typeof window === "undefined" ? false : getActivePomo() !== null));
-  useEffect(() => {
-    const check = () => setPresent(getActivePomo() !== null);
-    check();
-    const onMeta = () => check();
-    window.addEventListener("pomodoro-phase", onMeta);
-    const iv = setInterval(check, 5000); // safety net across tabs
-    return () => {
-      window.removeEventListener("pomodoro-phase", onMeta);
-      clearInterval(iv);
-    };
-  }, []);
-  return present;
-}

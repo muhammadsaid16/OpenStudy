@@ -30,13 +30,6 @@ export interface StatsResult {
 // Palette for subjects — distinguishable across all 12 themes, token-aware fallback uses accent/flow/grow
 const PALETTE = ["#FF7A72","#00E5FF","#10B981","#C084FC","#FCD34D","#FDA4AF","#7DD3FC","#F97316","#34D399","#A78BFA","#FB7185","#38BDF8"];
 
-export function colorFor(subjectId: string | null, subjects: SubjectLite[], idx: number): string {
-  if (!subjectId) return "var(--color-muted-fg)";
-  const found = subjects.find(s=>s.id===subjectId);
-  if (found?.color) return found.color;
-  return PALETTE[idx % PALETTE.length];
-}
-
 export function formatHMS(totalSeconds: number): string {
   if (totalSeconds <= 0) return "00:00:00";
   const h = Math.floor(totalSeconds/3600);
@@ -52,23 +45,6 @@ export function formatHuman(totalSeconds: number, lang: "en"|"ar" = "en"): strin
   if (h===0) return lang==="ar" ? `${m} دقيقة` : `${m}m`;
   if (m===0) return lang==="ar" ? `${h} ساعة` : `${h}h`;
   return lang==="ar" ? `${h} ساعة ${m} دقيقة` : `${h}h ${m}m`;
-}
-
-export function formatHumanLong(totalSeconds: number, lang: "en"|"ar" = "en"): string {
-  if (totalSeconds <=0) return lang==="ar" ? "لا يوجد وقت" : "No time";
-  const h = Math.floor(totalSeconds/3600);
-  const m = Math.floor((totalSeconds%3600)/60);
-  const s = totalSeconds%60;
-  if (lang==="ar") {
-    if (h>0 && m>0) return `${h} ساعة ${m} دقيقة`;
-    if (h>0) return `${h} ساعة`;
-    if (m>0) return `${m} دقيقة ${s} ثانية`;
-    return `${s} ثانية`;
-  }
-  if (h>0 && m>0) return `${h}h ${m}m`;
-  if (h>0) return `${h}h`;
-  if (m>0) return s? `${m}m ${s}s` : `${m}m`;
-  return `${s}s`;
 }
 
 // Local-time boundaries

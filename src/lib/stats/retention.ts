@@ -1,4 +1,5 @@
 import type { ReviewLogRec } from "@/lib/db";
+import { isCorrect } from "@/lib/card-status";
 
 export interface RetentionPoint {
   /** Days since the card's first review. */
@@ -64,7 +65,7 @@ export function buildRetentionCurve(reviews: ReviewLogRec[]): RetentionPoint[] {
     if (bucketIdx === -1) continue;
 
     buckets[bucketIdx].total++;
-    if ((r.quality ?? 0) >= 3) buckets[bucketIdx].correct++;
+    if (isCorrect(r.quality)) buckets[bucketIdx].correct++;
   }
 
   // Also annotate "first review" bucket with cards that have only been seen once

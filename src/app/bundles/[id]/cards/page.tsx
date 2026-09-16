@@ -41,7 +41,7 @@ import { cn } from "@/lib/utils";
 import type { BundleRec, CardKind } from "@/lib/db";
 import { cardKind, cleanChoices, shuffled } from "@/lib/card-kinds";
 import { CardKindFields } from "@/components/card-kind-fields";
-import { RATING_BUTTONS } from "@/lib/card-status";
+import { RATING_BUTTONS, isCorrect } from "@/lib/card-status";
 import { useLiveData } from "@/lib/use-live-data";
 
 type CardTag = { tag: { id: string; name: string } };
@@ -317,14 +317,14 @@ export default function BundleCardsPage() {
     setReviewing(true);
     try {
       await reviewFlashcardWithLog(activeCard.id, quality);
-      if (quality < 3 && !servingFromLearningQueue) {
+      if (!isCorrect(quality) && !servingFromLearningQueue) {
         setLearningQueue((prev) => [...prev, activeCard as Card]);
       }
       if (!servingFromLearningQueue) {
         if (reviewIndex < reviewQueue.length - 1) {
           setReviewIndex((i) => i + 1);
         } else {
-          const hasLearning = quality < 3 ? true : learningQueue.length > 0;
+          const hasLearning = !isCorrect(quality) ? true : learningQueue.length > 0;
           setReviewQueue([]);
           setReviewIndex(0);
           if (!hasLearning) {
@@ -335,7 +335,7 @@ export default function BundleCardsPage() {
             await load();
           }
         }
-      } else if (quality >= 3) {
+      } else if (isCorrect(quality)) {
         setLearningQueue((prev) => {
           const next = prev.slice(1);
           if (next.length === 0) {

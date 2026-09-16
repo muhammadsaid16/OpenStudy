@@ -11,6 +11,7 @@ import { getAllNotes, getSubjects, createNote, deleteNote, updateNote, getBundle
 import { SubjectTopicSelect } from "@/components/subject-topic-select";
 import { TagInput } from "@/components/tag-input";
 import { Markdown } from "@/components/markdown";
+import { escapeCsvField } from "@/lib/import-export/csv";
 import { formatRelative } from "@/lib/utils";
 import { NoteAiImportButton } from "@/components/note-ai-import-button";
 import { showUndo } from "@/components/undo-toast";
@@ -169,7 +170,6 @@ function NotesContent() {
   };
 
   // ─── Export / Import ──────────────────────────────────────────
-  const csvEsc = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 
   function splitCsvLine(line: string, delimiter: string): string[] {
     const cells: string[] = [];
@@ -216,7 +216,7 @@ function NotesContent() {
       const all = await getAllNotes();
       const header = ["title","content","topicId","tags"];
       const rows = (all as any[]).map((n) =>
-        [csvEsc(n.title), csvEsc(n.content ?? ""), csvEsc(n.topicId ?? ""), csvEsc((n.tags ?? []).map((t: any) => t.tag?.name ?? t.name ?? "").join(";"))].join(",")
+        [escapeCsvField(n.title), escapeCsvField(n.content ?? ""), escapeCsvField(n.topicId ?? ""), escapeCsvField((n.tags ?? []).map((t: any) => t.tag?.name ?? t.name ?? "").join(";"))].join(",")
       );
       const csv = [header.join(","), ...rows].join("\n");
       const blob = new Blob([csv], { type: "text/csv" });

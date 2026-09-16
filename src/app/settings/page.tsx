@@ -3,28 +3,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useT } from "@/lib/i18n";
 import { InstallAppButton } from "@/components/install-app-button";
-import { useAppStore, type ThemeName } from "@/lib/store";
+import { useAppStore } from "@/lib/store";
+import { THEMES } from "@/lib/themes";
+import { UI_OPACITY_MAX, UI_OPACITY_MIN } from "@/lib/ui-opacity";
 import { LIVE_WALLPAPERS, STATIC_WALLPAPERS } from "@/components/wallpaper-host";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { exportAllData, importAllData } from "@/app/actions";
 import { showToast } from "@/components/toast";
 import { Download, Upload, Check, AlertTriangle, Sparkles, Search, Loader2 } from "lucide-react";
-
-const THEMES: { id: ThemeName; name: string; nameKey?: string; bg: string; accent: string; fg: string }[] = [
-  { id: "aurora", name: "Aurora", bg: "#0B0F17", accent: "#FF7A72", fg: "#E7EDF7" },
-  { id: "midnight", name: "Midnight", bg: "#030712", accent: "#60A5FA", fg: "#E4EDFF" },
-  { id: "nebula", name: "Nebula", bg: "#0D0716", accent: "#C084FC", fg: "#F2E9FF" },
-  { id: "matrix", name: "Matrix", bg: "#02100B", accent: "#34D399", fg: "#E4FFF1" },
-  { id: "ember", name: "Ember", bg: "#140808", accent: "#FB923C", fg: "#FFF0E7" },
-  { id: "rosewood", name: "Rosewood", bg: "#12070C", accent: "#FB7185", fg: "#FFEAF1" },
-  { id: "cyberpunk", name: "Cyberpunk", bg: "#0A0A12", accent: "#FCEE0A", fg: "#F2F2FF" },
-  { id: "arctic", name: "Arctic", bg: "#07111E", accent: "#38BDF8", fg: "#E8F6FF" },
-  { id: "sandstone", name: "Sandstone", bg: "#151210", accent: "#E8B45C", fg: "#F7EFE3" },
-  { id: "mono", name: "Mono", bg: "#09090B", accent: "#FFFFFF", fg: "#FAFAFA" },
-  { id: "light", name: "Light", nameKey: "nav.light", bg: "#F1F5F9", accent: "#B91C1C", fg: "#0F172A" },
-  { id: "paper", name: "Paper", bg: "#FAF7F2", accent: "#9A3412", fg: "#292018" },
-];
 
 function Toggle({
   label,
@@ -80,6 +67,8 @@ export default function SettingsPage() {
   const setWallpaperBlur = useAppStore((s) => s.setWallpaperBlur);
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const setReducedMotion = useAppStore((s) => s.setReducedMotion);
+  const uiOpacity = useAppStore((s) => s.uiOpacity);
+  const setUiOpacity = useAppStore((s) => s.setUiOpacity);
   const [exportStatus, setExportStatus] = useState<"idle" | "exporting">("idle");
   const [importStatus, setImportStatus] = useState<"idle" | "importing" | "confirm" | "success" | "error">("idle");
   const [importMessage, setImportMessage] = useState("");
@@ -615,6 +604,27 @@ export default function SettingsPage() {
       {/* Interface — preferences under Appearance per spec IA */}
       <section className="max-w-2xl space-y-3">
         <h2 className="mb-4 text-lg font-bold tracking-tight text-fg">{t("settings.interface")}</h2>
+        {/* Interface opacity — how far the app's surfaces step back for the
+            wallpaper. Not gated on wallpaperType: it is a general appearance
+            preference, and hiding it until a wallpaper exists would make it
+            undiscoverable. */}
+        <div className="rounded-2xl border border-border bg-bg p-5">
+          <div className="flex justify-between text-xs font-semibold text-fg">
+            <span>{t("settings.uiOpacity")}</span>
+            <span>{Math.round(uiOpacity * 100)}%</span>
+          </div>
+          <p className="mt-1 text-xs text-muted-fg">{t("settings.uiOpacityHint")}</p>
+          <input
+            type="range"
+            min={UI_OPACITY_MIN}
+            max={UI_OPACITY_MAX}
+            step={0.05}
+            value={uiOpacity}
+            onChange={(e) => setUiOpacity(parseFloat(e.target.value))}
+            aria-label={t("settings.uiOpacity")}
+            className="mt-3 h-1.5 w-full accent-[var(--color-accent)]"
+          />
+        </div>
         <Toggle
           label={t("settings.reducedMotion")}
           description={t("settings.reducedMotionHint")}

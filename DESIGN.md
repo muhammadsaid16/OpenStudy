@@ -121,6 +121,22 @@ Three elevations, all built on `--glass-*` utilities:
 .glass-inset  { neumorphic pressed well: inner shadows both directions }
 ```
 
+### Interface opacity (user-controlled)
+
+`glass` and the app background are painted through `--ui-alpha`:
+
+```css
+.glass { background: color-mix(in srgb, var(--color-surface) calc(var(--ui-alpha) * 100%), transparent); }
+```
+
+`--ui-alpha` defaults to `1`, and `color-mix(X 100%, transparent)` resolves to
+`X` exactly — so every theme renders identically to before unless the user
+moves Settings → Interface → **Interface opacity**. The floor is `0.55`:
+below that, primary text over a bright wallpaper stops clearing AA.
+`glass-inset` is deliberately excluded, so inputs and wells stay opaque for
+legibility. There is no `backdrop-filter` — at low alpha the wallpaper reads
+through sharply, which is far cheaper than blurring hundreds of cards.
+
 Radius scale: `--radius-sm 8px · --radius-md 12px · --radius-lg 16px · --radius-xl 24px`.
 Cards never exceed `xl`. Pills are fully rounded.
 
@@ -190,6 +206,8 @@ grid gaps 16–20px. Max content width 1440px centered with 32–48px gutters.
 
 - No purple-to-blue default gradients; gradients only coral→cyan inside data-viz strokes.
 - No glassmorphism without function — blur is reserved for overlays + sidebar.
+  The one exception is user-controlled interface opacity (§4): opt-in, defaults
+  to fully opaque, and never applies to inputs or wells.
 - No gratuitous scroll animation; motion is entry/hover/state only.
 - No emoji icons — lucide-react only.
 - No raw hex in components — everything reads a token.

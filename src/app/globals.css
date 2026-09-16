@@ -48,7 +48,6 @@
   /* solid (non-glass) surfaces — used directly as bg-* utilities */
   --color-glass: #141519;
   --color-glass-border: rgba(255, 255, 255, 0.07);
-  --color-glass-hover: #23262D;
 
   /* subject badge pastels (kept for chips) */
   --color-badge-lavender: #C084FC;
@@ -129,9 +128,11 @@
    SURFACE SYSTEM — flat, bordered, subtly elevated (no glass)
    ════════════════════════════════════════════════════════════════ */
 
-/* Standard surface card */
+/* Standard surface card.
+   This is the single knob for card surfaces: every <Card> is `className="glass"`
+   and the 33 `bg-glass` sites resolve through the same utility. */
 @utility glass {
-  background: var(--color-surface);
+  background: color-mix(in srgb, var(--color-surface) calc(var(--ui-alpha) * 100%), transparent);
   border: 1px solid var(--color-border);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
 }
@@ -357,7 +358,6 @@
   --color-info: #1D4ED8;
   --color-glass: #FFFFFF;
   --color-glass-border: rgba(15, 23, 42, 0.10);
-  --color-glass-hover: #EEF1F5;
   color-scheme: light;
 }
 
@@ -383,7 +383,6 @@
   --color-info: #1D4ED8;
   --color-glass: #FFFFFF;
   --color-glass-border: rgba(41, 32, 24, 0.12);
-  --color-glass-hover: #F1EADD;
   color-scheme: light;
 }
 
@@ -431,13 +430,22 @@
   color: var(--color-accent-fg);
 }
 
+/* ─── Interface opacity ──────────────────────────────────────────
+   How far the app's own surfaces step back to let the wallpaper through.
+   1 = fully opaque. At 1, color-mix(X 100%, transparent) resolves to X
+   exactly, so every theme renders identically to before this existed.
+   Set on <html> by the store (and by the no-flash script in layout.tsx). */
+:root {
+  --ui-alpha: 1;
+}
+
 html {
-  background-color: var(--color-bg);
+  background-color: color-mix(in srgb, var(--color-bg) calc(var(--ui-alpha) * 100%), transparent);
   color: var(--color-fg);
 }
 
 body {
-  background-color: var(--color-bg);
+  background-color: color-mix(in srgb, var(--color-bg) calc(var(--ui-alpha) * 100%), transparent);
   color: var(--color-fg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

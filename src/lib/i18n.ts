@@ -231,6 +231,8 @@ const DICT: Dict = {
   "settings.wpCustom": { en: "Custom URL", ar: "رابط مخصص" },
   "settings.wpOpacity": { en: "Wallpaper Opacity", ar: "شفافية الخلفية" },
   "settings.wpBlur": { en: "Wallpaper Blur", ar: "ضبابية الخلفية" },
+  "settings.uiOpacity": { en: "Interface Opacity", ar: "شفافية الواجهة" },
+  "settings.uiOpacityHint": { en: "Let the wallpaper show through the app background and cards", ar: "دع الخلفية تظهر من خلف واجهة التطبيق والبطاقات" },
 
   // ─── share ─────────────────────────────────────────────
   "share.backToLibrary": { en: "Back to library", ar: "العودة إلى المكتبة" },

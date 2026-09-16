@@ -39,6 +39,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the template. It holds no values and is the only place the
+# required vars are listed, so ignoring it left clones with no env contract.
+!.env.example
 
 # vercel
 .vercel
@@ -48,9 +51,6 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
-
-.vercel
-.env*
 
 # local audit artifacts
 _e2e/screenshots-v2/
