@@ -156,10 +156,11 @@ type SearchResult = {
   id: string;
   name: string;
   artist: string;
-  type: "track" | "playlist";
+  type: "track" | "playlist" | "album" | "episode" | "show" | "artist";
   image: string | null;
   embedUrl: string;
   webUrl: string;
+  previewUrl?: string | null;
 };
 
 type PlaylistTrack = {
@@ -170,6 +171,23 @@ type PlaylistTrack = {
   embedUrl: string;
   webUrl: string;
 };
+
+function typeMeta(type: SearchResult["type"]) {
+  switch (type) {
+    case "playlist":
+      return { label: "PLAYLIST", icon: ListMusic, color: "bg-emerald-500/15 text-emerald-500 border-emerald-500/20" };
+    case "album":
+      return { label: "ALBUM", icon: Music2, color: "bg-orange-500/15 text-orange-500 border-orange-500/20" };
+    case "episode":
+      return { label: "EPISODE", icon: Music2, color: "bg-purple-500/15 text-purple-500 border-purple-500/20" };
+    case "show":
+      return { label: "SHOW", icon: Music2, color: "bg-pink-500/15 text-pink-500 border-pink-500/20" };
+    case "artist":
+      return { label: "ARTIST", icon: Music2, color: "bg-zinc-500/15 text-zinc-400 border-zinc-500/20" };
+    default:
+      return { label: "TRACK", icon: Music2, color: "bg-sky-500/15 text-sky-500 border-sky-500/20" };
+  }
+}
 
 export function SpotifyEmbedPicker({ className }: { className?: string }) {
   const [tab, setTab] = useState<"search" | "paste">("search");
@@ -254,12 +272,39 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
     }
   }, [input]);
 
+  const previewRef = useRef<HTMLAudioElement | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+
   const playResult = (r: SearchResult) => {
-    if (!r.embedUrl) {
-      window.open(r.webUrl, "_blank", "noreferrer");
+    // Spotify native embed -> mini-player + background iframe
+    if (r.embedUrl) {
+      setTrack(r.embedUrl, r.webUrl, `${r.name} — ${r.artist}`);
+      // Stop any preview audio
+      if (previewRef.current) {
+        previewRef.current.pause();
+        setPreviewId(null);
+      }
       return;
     }
-    setTrack(r.embedUrl, r.webUrl, `${r.name} — ${r.artist}`);
+    // iTunes 30s preview fallback (when no Spotify token) — play inline audio
+    if (r.previewUrl) {
+      if (previewRef.current) {
+        if (previewId === r.id) {
+          previewRef.current.pause();
+          setPreviewId(null);
+          return;
+        }
+        previewRef.current.src = r.previewUrl;
+        previewRef.current.play().catch(() => window.open(r.webUrl, "_blank"));
+        setPreviewId(r.id);
+        // Show in mini-player area as "Preview"
+        setTrack(r.webUrl, r.webUrl, `${r.name} — ${r.artist} (Preview)`);
+      } else {
+        window.open(r.webUrl, "_blank");
+      }
+      return;
+    }
+    window.open(r.webUrl, "_blank");
   };
 
   const openPlaylist = async (r: SearchResult) => {
@@ -279,6 +324,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
 
   return (
     <div className={cn("rounded-2xl border border-glass-border bg-surface p-4", className)}>
+      <audio ref={previewRef} onEnded={() => setPreviewId(null)} preload="none" className="hidden" />
       <div className="mb-4 flex gap-1.5 rounded-full bg-muted p-1">
         <button
           onClick={() => {
@@ -359,45 +405,48 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
             {searched && results.length === 0 && !loading && <p className="rounded-xl border border-border bg-bg px-4 py-6 text-center text-sm text-muted-fg">No results — try another search.</p>}
             {results.length > 0 && (
               <ul className="max-h-[50vh] space-y-1.5 overflow-y-auto pr-1">
-                {results.map((r) => (
+                {results.map((r) => {
+                  const meta = typeMeta(r.type);
+                  const MetaIcon = meta.icon;
+                  const isPlayable = !!(r.embedUrl || r.previewUrl);
+                  const isPreviewPlaying = previewId === r.id;
+                  const canInspect = r.type === "playlist" || r.type === "album" || r.type === "show";
+                  return (
                   <li key={`${r.type}:${r.id}`} className="flex items-center gap-3 rounded-xl border border-transparent bg-bg px-2 py-2 transition hover:border-border hover:bg-surface">
                     {r.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={r.image} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
                     ) : (
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-fg">
-                        <Music2 size={16} />
+                        <MetaIcon size={16} />
                       </span>
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-fg">{r.name}</p>
-                      <p className="truncate text-xs text-muted-fg">
-                        <span className="mr-1 inline-flex rounded bg-muted px-1 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-fg">{r.type}</span>
-                        {r.artist}
+                      <p className="truncate text-xs text-muted-fg flex items-center gap-1">
+                        <span className={cn("inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide", meta.color)}><MetaIcon size={10} />{meta.label}</span>
+                        <span className="truncate">{r.artist}</span>
                       </p>
                     </div>
-                    {r.type === "playlist" ? (
-                      <div className="flex shrink-0 gap-1">
+                    <div className="flex shrink-0 gap-1">
+                      {canInspect && (
                         <button onClick={() => openPlaylist(r)} className="rounded-full border border-border bg-surface px-2.5 py-1.5 text-xs font-bold text-fg hover:bg-muted" aria-label={`View tracks in ${r.name}`}>
                           <ListMusic size={14} />
                         </button>
-                        <button onClick={() => playResult(r)} className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${r.name}`}>
-                          <Play size={14} className="ml-0.5" />
-                        </button>
-                      </div>
-                    ) : (
+                      )}
                       <button
                         onClick={() => playResult(r)}
-                        disabled={!r.embedUrl}
+                        disabled={!isPlayable}
                         className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95 disabled:opacity-40")}
-                        aria-label={r.embedUrl ? `Play ${r.name}` : `Open ${r.name} in Spotify`}
-                        title={r.embedUrl ? undefined : "No preview — opens in Spotify"}
+                        aria-label={isPreviewPlaying ? `Pause ${r.name}` : `Play ${r.name}`}
+                        title={!r.embedUrl && r.previewUrl ? "30s preview" : undefined}
                       >
-                        {r.embedUrl ? <Play size={14} className="ml-0.5" /> : <ExternalLink size={14} />}
+                        {isPreviewPlaying ? <Pause size={14} /> : isPlayable ? <Play size={14} className="ml-0.5" /> : <ExternalLink size={14} />}
                       </button>
-                    )}
+                    </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )}
           </div>

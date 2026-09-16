@@ -56,10 +56,11 @@ type Result = {
   id: string;
   name: string;
   artist: string;
-  type: "track" | "playlist";
+  type: "track" | "playlist" | "album" | "episode" | "show" | "artist";
   image: string | null;
   embedUrl: string;
   webUrl: string;
+  previewUrl?: string | null;
 };
 
 export async function GET(req: NextRequest) {
@@ -69,12 +70,15 @@ export async function GET(req: NextRequest) {
   const token = await getSpotifyToken();
   if (token) {
     try {
-      const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track,playlist&limit=12&market=US`;
+      const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track,playlist,album,episode,show&limit=12&market=US`;
       const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
       if (r.ok) {
         const j = (await r.json()) as {
-          tracks?: { items: Array<{ id: string; name: string; artists: { name: string }[]; album: { images: { url: string }[] } }> };
+          tracks?: { items: Array<{ id: string; name: string; artists: { name: string }[]; album: { images: { url: string }[] }; preview_url: string | null }> };
           playlists?: { items: Array<{ id: string | null; name: string; owner: { display_name: string }; images: { url: string }[] | null }> };
+          albums?: { items: Array<{ id: string; name: string; artists: { name: string }[]; images: { url: string }[] }> };
+          episodes?: { items: Array<{ id: string; name: string; images: { url: string }[]; show: { name: string } }> };
+          shows?: { items: Array<{ id: string; name: string; publisher: string; images: { url: string }[] }> };
         };
         const results: Result[] = [];
         for (const t of j.tracks?.items ?? []) {
@@ -86,6 +90,7 @@ export async function GET(req: NextRequest) {
             image: t.album.images[0]?.url ?? null,
             embedUrl: `https://open.spotify.com/embed/track/${t.id}?theme=0`,
             webUrl: `https://open.spotify.com/track/${t.id}`,
+            previewUrl: t.preview_url,
           });
         }
         for (const p of j.playlists?.items ?? []) {
@@ -99,6 +104,15 @@ export async function GET(req: NextRequest) {
             embedUrl: `https://open.spotify.com/embed/playlist/${p.id}?theme=0`,
             webUrl: `https://open.spotify.com/playlist/${p.id}`,
           });
+        }
+        for (const a of j.albums?.items ?? []) {
+          results.push({ id: a.id, name: a.name, artist: a.artists.map((x) => x.name).join(", "), type: "album", image: a.images[0]?.url ?? null, embedUrl: `https://open.spotify.com/embed/album/${a.id}?theme=0`, webUrl: `https://open.spotify.com/album/${a.id}` });
+        }
+        for (const e of j.episodes?.items ?? []) {
+          results.push({ id: e.id, name: e.name, artist: e.show.name, type: "episode", image: e.images[0]?.url ?? null, embedUrl: `https://open.spotify.com/embed/episode/${e.id}?theme=0`, webUrl: `https://open.spotify.com/episode/${e.id}` });
+        }
+        for (const s of j.shows?.items ?? []) {
+          results.push({ id: s.id, name: s.name, artist: s.publisher, type: "show", image: s.images[0]?.url ?? null, embedUrl: `https://open.spotify.com/embed/show/${s.id}?theme=0`, webUrl: `https://open.spotify.com/show/${s.id}` });
         }
         if (results.length) return NextResponse.json({ results, source: "spotify" });
       }
@@ -140,21 +154,22 @@ export async function GET(req: NextRequest) {
     }
   } catch {}
 
-  // Final fallback: iTunes (keeps search working when token absent — no playlists)
+  // Final fallback: iTunes (keeps search working when token absent — now with 30s preview playable)
   try {
-    const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=12`, { cache: "no-store" });
+    const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=musicTrack&limit=12`, { cache: "no-store" });
     if (!r.ok) return NextResponse.json({ results: [] as Result[] });
-    const j = (await r.json()) as { results: Array<{ trackId: number; trackName: string; artistName: string; artworkUrl100: string }> };
+    const j = (await r.json()) as { results: Array<{ trackId: number; trackName: string; artistName: string; artworkUrl100: string; previewUrl?: string; collectionName?: string; kind?: string }> };
     const results: Result[] = (j.results ?? []).map((t) => ({
       id: String(t.trackId),
       name: t.trackName,
       artist: t.artistName,
-      type: "track" as const,
+      type: (t.kind === "podcast" ? "episode" : "track") as Result["type"],
       image: t.artworkUrl100 ?? null,
       embedUrl: "",
       webUrl: `https://open.spotify.com/search/${encodeURIComponent(`${t.trackName} ${t.artistName}`)}`,
+      previewUrl: t.previewUrl ?? null,
     }));
-    return NextResponse.json({ results, source: "itunes", note: "Add SPOTIFY_CLIENT_SECRET in Vercel env for full Spotify playlists" });
+    return NextResponse.json({ results, source: "itunes", note: "Preview playable — add SPOTIFY_CLIENT_SECRET for native Spotify embeds & playlists" });
   } catch {
     return NextResponse.json({ results: [] as Result[] });
   }
