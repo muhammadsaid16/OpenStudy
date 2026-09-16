@@ -89,20 +89,29 @@ export default function SettingsPage() {
   const [wpQuery, setWpQuery] = useState("space");
   const [wpResults, setWpResults] = useState<Array<{ id: string; thumbUrl: string; fullUrl: string; title: string }>>([]);
   const [wpLoading, setWpLoading] = useState(false);
+  const [wpPage, setWpPage] = useState(1);
+  const [wpHasMore, setWpHasMore] = useState(true);
+  const [wpLoadingMore, setWpLoadingMore] = useState(false);
 
   useEffect(() => {
     if (wallpaperType !== "static") return;
     let cancelled = false;
     setWpLoading(true);
+    setWpPage(1);
+    setWpHasMore(true);
     const t = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "dark space")}`);
+        const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "dark space")}&page=1`);
         const data = await res.json();
         if (!cancelled && data.wallpapers) {
           setWpResults(data.wallpapers);
+          setWpHasMore(data.hasMore && data.wallpapers.length > 0);
         }
       } catch {
-        if (!cancelled) setWpResults([]);
+        if (!cancelled) {
+          setWpResults([]);
+          setWpHasMore(false);
+        }
       } finally {
         if (!cancelled) setWpLoading(false);
       }
@@ -112,6 +121,31 @@ export default function SettingsPage() {
       clearTimeout(t);
     };
   }, [wpQuery, wallpaperType]);
+
+  const loadMoreWallpapers = async () => {
+    if (wpLoadingMore || !wpHasMore) return;
+    setWpLoadingMore(true);
+    const nextPage = wpPage + 1;
+    try {
+      const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "dark space")}&page=${nextPage}`);
+      const data = await res.json();
+      if (data.wallpapers && data.wallpapers.length > 0) {
+        setWpResults((prev) => {
+          const existingIds = new Set(prev.map((w) => w.id));
+          const newItems = data.wallpapers.filter((w: { id: string }) => !existingIds.has(w.id));
+          return [...prev, ...newItems];
+        });
+        setWpPage(nextPage);
+        setWpHasMore(data.hasMore);
+      } else {
+        setWpHasMore(false);
+      }
+    } catch {
+      setWpHasMore(false);
+    } finally {
+      setWpLoadingMore(false);
+    }
+  };
 
   const handleExport = async () => {
     setExportStatus("exporting");
@@ -338,8 +372,11 @@ export default function SettingsPage() {
                   ))}
                 </div>
               ) : wpResults.length > 0 ? (
-                <div className="max-h-[50vh] overflow-y-auto pr-1 space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{wpResults.length} Wallpapers — scroll to explore all</p>
+                <div className="max-h-[60vh] overflow-y-auto pr-1 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{wpResults.length} Wallpapers Loaded</p>
+                    <span className="text-[10px] text-muted-fg">Page {wpPage}</span>
+                  </div>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {wpResults.map((item) => {
                       const active = wallpaperId === item.fullUrl;
@@ -365,6 +402,26 @@ export default function SettingsPage() {
                       );
                     })}
                   </div>
+                  {wpHasMore && (
+                    <div className="pt-2 text-center">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={loadMoreWallpapers}
+                        disabled={wpLoadingMore}
+                        className="w-full sm:w-auto"
+                      >
+                        {wpLoadingMore ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Loading More...
+                          </>
+                        ) : (
+                          "Load More Wallpapers"
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="rounded-xl border border-border bg-bg p-4 text-center text-xs text-muted-fg">No wallpapers found for &quot;{wpQuery}&quot;.</p>
