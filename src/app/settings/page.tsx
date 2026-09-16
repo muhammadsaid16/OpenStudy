@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useT } from "@/lib/i18n";
 import { InstallAppButton } from "@/components/install-app-button";
 import { useAppStore } from "@/lib/store";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { exportAllData, importAllData } from "@/app/actions";
 import { showToast } from "@/components/toast";
-import { Download, Upload, Check, AlertTriangle, Sparkles, Search, Loader2 } from "lucide-react";
+import { Download, Upload, Check, AlertTriangle, Sparkles } from "lucide-react";
 
 function Toggle({
   label,
@@ -74,146 +74,6 @@ export default function SettingsPage() {
   const [importMessage, setImportMessage] = useState("");
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [wpQuery, setWpQuery] = useState("space");
-  const [wpResults, setWpResults] = useState<Array<{ id: string; thumbUrl: string; fullUrl: string; title: string }>>([]);
-  const [wpLoading, setWpLoading] = useState(false);
-  const [wpPage, setWpPage] = useState(1);
-  const [wpHasMore, setWpHasMore] = useState(true);
-  const [wpLoadingMore, setWpLoadingMore] = useState(false);
-  // Random start pages so every open shows a fresh slice of wallpapers
-  const wpStartPage = useRef(Math.floor(Math.random() * 40) + 1);
-
-  // Live video wallpaper state
-  const [vidQuery, setVidQuery] = useState("space");
-  const [vidResults, setVidResults] = useState<Array<{ id: string; thumbUrl: string; videoUrl: string; title: string }>>([]);
-  const [vidLoading, setVidLoading] = useState(false);
-  const [vidPage, setVidPage] = useState(1);
-  const [vidHasMore, setVidHasMore] = useState(true);
-  const [vidLoadingMore, setVidLoadingMore] = useState(false);
-  const vidStartPage = useRef(Math.floor(Math.random() * 30) + 1);
-
-  useEffect(() => {
-    if (wallpaperType !== "static") return;
-    let cancelled = false;
-    setWpLoading(true);
-    const startPage = wpStartPage.current;
-    setWpPage(startPage);
-    setWpHasMore(true);
-    const t = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "space")}&page=${startPage}`);
-        const data = await res.json();
-        if (!cancelled && data.wallpapers) {
-          setWpResults(data.wallpapers);
-          setWpHasMore(data.hasMore && data.wallpapers.length > 0);
-        }
-      } catch {
-        if (!cancelled) {
-          setWpResults([]);
-          setWpHasMore(false);
-        }
-      } finally {
-        if (!cancelled) setWpLoading(false);
-      }
-    }, 300);
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
-    };
-  }, [wpQuery, wallpaperType]);
-
-  // Randomize start page each time the query changes
-  const handleWpQueryChange = (q: string) => {
-    wpStartPage.current = Math.floor(Math.random() * 40) + 1;
-    setWpQuery(q);
-  };
-
-  useEffect(() => {
-    if (wallpaperType !== "live") return;
-    let cancelled = false;
-    setVidLoading(true);
-    const startPage = vidStartPage.current;
-    setVidPage(startPage);
-    setVidHasMore(true);
-    const t = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/wallpapers/videos?q=${encodeURIComponent(vidQuery || "space")}&page=${startPage}`);
-        const data = await res.json();
-        if (!cancelled && data.videos) {
-          setVidResults(data.videos);
-          setVidHasMore(data.hasMore && data.videos.length > 0);
-        }
-      } catch {
-        if (!cancelled) {
-          setVidResults([]);
-          setVidHasMore(false);
-        }
-      } finally {
-        if (!cancelled) setVidLoading(false);
-      }
-    }, 300);
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
-    };
-  }, [vidQuery, wallpaperType]);
-
-  // Randomize start page each time the query changes
-  const handleVidQueryChange = (q: string) => {
-    vidStartPage.current = Math.floor(Math.random() * 30) + 1;
-    setVidQuery(q);
-  };
-
-  const loadMoreWallpapers = async () => {
-    if (wpLoadingMore || !wpHasMore) return;
-    setWpLoadingMore(true);
-    const nextPage = wpPage + 1;
-    try {
-      const res = await fetch(`/api/wallpapers/search?q=${encodeURIComponent(wpQuery || "space")}&page=${nextPage}`);
-      const data = await res.json();
-      if (data.wallpapers && data.wallpapers.length > 0) {
-        setWpResults((prev) => {
-          const existingIds = new Set(prev.map((w) => w.id));
-          const newItems = data.wallpapers.filter((w: { id: string }) => !existingIds.has(w.id));
-          return [...prev, ...newItems];
-        });
-        setWpPage(nextPage);
-        setWpHasMore(data.hasMore);
-      } else {
-        setWpHasMore(false);
-      }
-    } catch {
-      setWpHasMore(false);
-    } finally {
-      setWpLoadingMore(false);
-    }
-  };
-
-  const loadMoreVideos = async () => {
-    if (vidLoadingMore || !vidHasMore) return;
-    setVidLoadingMore(true);
-    const nextPage = vidPage + 1;
-    try {
-      const res = await fetch(`/api/wallpapers/videos?q=${encodeURIComponent(vidQuery || "space")}&page=${nextPage}`);
-      const data = await res.json();
-      if (data.videos && data.videos.length > 0) {
-        setVidResults((prev) => {
-          const existingIds = new Set(prev.map((v) => v.id));
-          const newItems = data.videos.filter((v: { id: string }) => !existingIds.has(v.id));
-          return [...prev, ...newItems];
-        });
-        setVidPage(nextPage);
-        setVidHasMore(data.hasMore);
-      } else {
-        setVidHasMore(false);
-      }
-    } catch {
-      setVidHasMore(false);
-    } finally {
-      setVidLoadingMore(false);
-    }
-  };
 
   const handleExport = async () => {
     setExportStatus("exporting");
@@ -370,7 +230,7 @@ export default function SettingsPage() {
             })}
           </div>
 
-          {/* Live Wallpapers — Canvas Presets + API Video Wallpapers */}
+          {/* Live Wallpapers — locally drawn canvas presets, no network */}
           {wallpaperType === "live" && (
             <div className="space-y-5">
               {/* Canvas Presets */}
@@ -401,148 +261,42 @@ export default function SettingsPage() {
                   })}
                 </div>
               </div>
-
-              {/* API Video Wallpapers */}
-              <div className="space-y-3 border-t border-border pt-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">Live Video Wallpapers</p>
-                <div className="relative">
-                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
-                  <input
-                    type="text"
-                    value={vidQuery}
-                    onChange={(e) => setVidQuery(e.target.value)}
-                    placeholder="Search videos (e.g. rain, forest, city, ocean)..."
-                    className="h-9 w-full rounded-xl border border-border bg-bg pl-8 pr-8 text-xs text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none"
-                  />
-                  {vidLoading && <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-fg" />}
-                </div>
-
-                {vidLoading ? (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />
-                    ))}
-                  </div>
-                ) : vidResults.length > 0 ? (
-                  <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                      {vidResults.map((item) => {
-                        const active = wallpaperId === item.videoUrl;
-                        return (
-                          <button
-                            key={item.id}
-                            onClick={() => setWallpaper("live", item.videoUrl)}
-                            className={cn(
-                              "group relative h-28 overflow-hidden rounded-xl border text-start transition-all",
-                              active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
-                            )}
-                          >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={item.thumbUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-                            <span className="absolute bottom-1.5 left-2 max-w-[85%] truncate text-[10px] font-bold text-white drop-shadow">{item.title}</span>
-                            {active && (
-                              <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
-                                <Check size={12} strokeWidth={3} />
-                              </span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {vidHasMore && (
-                      <div className="pt-2 text-center">
-                        <Button size="sm" variant="secondary" onClick={loadMoreVideos} disabled={vidLoadingMore} className="w-full sm:w-auto">
-                          {vidLoadingMore ? <><Loader2 size={14} className="animate-spin" /> Loading More...</> : "Load More Videos"}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="rounded-xl border border-border bg-bg p-4 text-center text-xs text-muted-fg">No videos found for &quot;{vidQuery}&quot;.</p>
-                )}
-              </div>
             </div>
           )}
 
-          {/* API Photo Wallpapers Grid */}
+          {/* Bundled backgrounds — local files in /public/bgs, no network call */}
           {wallpaperType === "static" && (
             <div className="space-y-4">
-              {/* Search Input */}
-              <div className="relative">
-                <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
-                <input
-                  type="text"
-                  value={wpQuery}
-                  onChange={(e) => setWpQuery(e.target.value)}
-                  placeholder="Search 4K wallpapers (e.g. rain, mountains, lofi, galaxy)..."
-                  className="h-9 w-full rounded-xl border border-border bg-bg pl-8 pr-8 text-xs text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none"
-                />
-                {wpLoading && <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-fg" />}
-              </div>
-
-              {/* Photo Results Grid */}
-              {wpLoading ? (
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+                {STATIC_WALLPAPERS.length} Backgrounds
+              </p>
+              <div className="max-h-[60vh] overflow-y-auto pr-1">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />
-                  ))}
-                </div>
-              ) : wpResults.length > 0 ? (
-                <div className="max-h-[60vh] overflow-y-auto pr-1 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{wpResults.length} Wallpapers Loaded</p>
-                    <span className="text-[10px] text-muted-fg">Page {wpPage}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {wpResults.map((item) => {
-                      const active = wallpaperId === item.fullUrl;
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => setWallpaper("static", item.fullUrl)}
-                          className={cn(
-                            "group relative h-28 overflow-hidden rounded-xl border text-start transition-all",
-                            active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
-                          )}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={item.thumbUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-                          <span className="absolute bottom-1.5 left-2 max-w-[85%] truncate text-[10px] font-bold text-white drop-shadow">{item.title}</span>
-                          {active && (
-                            <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
-                              <Check size={12} strokeWidth={3} />
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {wpHasMore && (
-                    <div className="pt-2 text-center">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={loadMoreWallpapers}
-                        disabled={wpLoadingMore}
-                        className="w-full sm:w-auto"
-                      >
-                        {wpLoadingMore ? (
-                          <>
-                            <Loader2 size={14} className="animate-spin" />
-                            Loading More...
-                          </>
-                        ) : (
-                          "Load More Wallpapers"
+                  {STATIC_WALLPAPERS.map((item) => {
+                    const active = wallpaperId === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setWallpaper("static", item.id)}
+                        className={cn(
+                          "group relative h-28 overflow-hidden rounded-xl border text-start transition-all",
+                          active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
                         )}
-                      </Button>
-                    </div>
-                  )}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.src} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+                        <span className="absolute bottom-1.5 left-2 max-w-[85%] truncate text-[10px] font-bold text-white drop-shadow">{item.name}</span>
+                        {active && (
+                          <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
+                            <Check size={12} strokeWidth={3} />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-              ) : (
-                <p className="rounded-xl border border-border bg-bg p-4 text-center text-xs text-muted-fg">No wallpapers found for &quot;{wpQuery}&quot;.</p>
-              )}
+              </div>
             </div>
           )}
 

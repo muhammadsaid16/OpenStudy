@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useAppStore, type WallpaperType } from "@/lib/store";
+import { useAppStore } from "@/lib/store";
 
 export const LIVE_WALLPAPERS = [
   { id: "aurora", name: "Aurora Waves", desc: "Flowing ambient gradient waves" },
@@ -10,13 +10,30 @@ export const LIVE_WALLPAPERS = [
   { id: "bokeh", name: "Glowing Bokeh", desc: "Floating ambient light orbs" },
 ];
 
+/**
+ * Bundled backgrounds, served from /public/bgs by Next.js. Entirely local: no
+ * network call, no API key, works offline, and nothing to rate-limit.
+ *
+ * The store persists the `id` (not the path), so a file can be renamed or
+ * replaced without invalidating anyone's saved choice.
+ */
 export const STATIC_WALLPAPERS = [
-  { id: "deep-space", name: "Deep Space", bg: "radial-gradient(ellipse at top left, #1e1b4b, #0f172a, #020617)" },
-  { id: "cosmic-dust", name: "Cosmic Dust", bg: "radial-gradient(ellipse at bottom right, #451a03, #1c1917, #09090b)" },
-  { id: "northern-lights", name: "Northern Lights", bg: "radial-gradient(ellipse at top, #022c22, #0f172a, #020617)" },
-  { id: "sunset-glow", name: "Sunset Twilight", bg: "radial-gradient(ellipse at top right, #31103f, #180e29, #090611)" },
-  { id: "cyber-grid", name: "Cyber Neon", bg: "radial-gradient(circle at center, #17072b, #080313, #020108)" },
-  { id: "sand-dunes", name: "Sandstone Night", bg: "radial-gradient(ellipse at bottom left, #291e17, #140f0c, #070504)" },
+  { id: "bg-01", name: "Background 01", src: "/bgs/bg-01.jpg" },
+  { id: "bg-02", name: "Background 02", src: "/bgs/bg-02.jpg" },
+  { id: "bg-03", name: "Background 03", src: "/bgs/bg-03.jpg" },
+  { id: "bg-04", name: "Background 04", src: "/bgs/bg-04.jpg" },
+  { id: "bg-05", name: "Background 05", src: "/bgs/bg-05.jpg" },
+  { id: "bg-06", name: "Background 06", src: "/bgs/bg-06.jpg" },
+  { id: "bg-07", name: "Background 07", src: "/bgs/bg-07.jpg" },
+  { id: "bg-08", name: "Background 08", src: "/bgs/bg-08.jpg" },
+  { id: "bg-09", name: "Background 09", src: "/bgs/bg-09.jpg" },
+  { id: "bg-10", name: "Background 10", src: "/bgs/bg-10.jpg" },
+  { id: "bg-11", name: "Background 11", src: "/bgs/bg-11.jpg" },
+  { id: "hello-kitty", name: "Hello Kitty", src: "/bgs/hello-kitty.jpg" },
+  { id: "linviena", name: "Linviena", src: "/bgs/linviena.jpg" },
+  { id: "saule", name: "Saule", src: "/bgs/saule.jpg" },
+  { id: "fondo-de-pantalla", name: "Fondo de Pantalla", src: "/bgs/fondo-de-pantalla.jpg" },
+  { id: "hd-4k", name: "HD 4K", src: "/bgs/hd-4k.jpg" },
 ];
 
 export function WallpaperHost() {
@@ -28,10 +45,6 @@ export function WallpaperHost() {
 
   if (wallpaperType === "none") return null;
 
-  const isLiveVideoUrl =
-    wallpaperType === "live" &&
-    (wallpaperId.startsWith("http://") || wallpaperId.startsWith("https://"));
-
   return (
     <div
       aria-hidden="true"
@@ -41,10 +54,7 @@ export function WallpaperHost() {
         filter: wallpaperBlur > 0 ? `blur(${wallpaperBlur}px)` : undefined,
       }}
     >
-      {wallpaperType === "live" && isLiveVideoUrl && (
-        <VideoWallpaper url={wallpaperId} />
-      )}
-      {wallpaperType === "live" && !isLiveVideoUrl && (
+      {wallpaperType === "live" && (
         <LiveCanvas preset={wallpaperId} reducedMotion={reducedMotion} />
       )}
       {wallpaperType === "static" && (
@@ -59,35 +69,16 @@ export function WallpaperHost() {
 
 
 function StaticWallpaper({ preset }: { preset: string }) {
-  const isUrl = preset.startsWith("http://") || preset.startsWith("https://") || preset.startsWith("/");
-  if (isUrl) {
-    return (
-      <div
-        className="h-full w-full bg-cover bg-center transition-all duration-700"
-        style={{ backgroundImage: `url(${preset})` }}
-      />
-    );
-  }
-  const item = STATIC_WALLPAPERS.find((w) => w.id === preset) ?? STATIC_WALLPAPERS[0];
+  // A path/URL is still honoured so a choice saved from the removed API search
+  // keeps working; anything else is looked up as a bundled background id.
+  const isPath = preset.startsWith("http://") || preset.startsWith("https://") || preset.startsWith("/");
+  const src = isPath
+    ? preset
+    : (STATIC_WALLPAPERS.find((w) => w.id === preset) ?? STATIC_WALLPAPERS[0]).src;
   return (
     <div
       className="h-full w-full bg-cover bg-center transition-all duration-700"
-      style={{ background: item.bg }}
-    />
-  );
-}
-
-function VideoWallpaper({ url }: { url: string }) {
-  if (!url) return null;
-  return (
-    <video
-      key={url}
-      src={url}
-      autoPlay
-      loop
-      muted
-      playsInline
-      className="h-full w-full object-cover"
+      style={{ backgroundImage: `url(${src})` }}
     />
   );
 }
