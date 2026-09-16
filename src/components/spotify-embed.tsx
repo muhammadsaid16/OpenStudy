@@ -2,53 +2,36 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Music2, Link2, Check, Play, Pause, ExternalLink } from "lucide-react";
+import { Music2, Link2, Play, Pause, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  STUDY_PRESETS,
-  toSpotifyEmbedUrl,
-  toSpotifyWebUrl,
-  type StudyPreset,
-} from "@/lib/spotify-embed";
+import { toSpotifyEmbedUrl, toSpotifyWebUrl } from "@/lib/spotify-embed";
 
 interface SpotifyEmbedPlayerProps {
   className?: string;
 }
 
-const DEFAULT_URI = STUDY_PRESETS[0].uri;
-
 export function SpotifyEmbedPlayer({ className }: SpotifyEmbedPlayerProps) {
-  const [selected, setSelected] = useState<StudyPreset | null>(STUDY_PRESETS[0]);
-  const [custom, setCustom] = useState("");
   const [input, setInput] = useState("");
+  const [custom, setCustom] = useState("");
   const [playing, setPlaying] = useState(false);
   const [valid, setValid] = useState(true);
 
-  const embedUrl = toSpotifyEmbedUrl(selected?.uri ?? custom) ?? "";
-  const activeUri = custom || selected?.uri || DEFAULT_URI;
+  const embedUrl = custom ? toSpotifyEmbedUrl(custom) : "";
+  const webUrl = embedUrl ? toSpotifyWebUrl(embedUrl) : "";
 
-  const onSelectPreset = useCallback((p: StudyPreset) => {
-    setSelected(p);
-    setCustom("");
-    setValid(true);
-  }, []);
-
-  const onUseCustom = useCallback(() => {
+  const onUse = useCallback(() => {
     const url = toSpotifyEmbedUrl(input);
     if (!url) {
       setValid(false);
       return;
     }
     setCustom(input.trim());
-    setSelected(null);
     setValid(true);
   }, [input]);
 
-  const webUrl = embedUrl ? toSpotifyWebUrl(embedUrl) : "";
-
   return (
     <div className={cn("glass-inset rounded-3xl p-5", className)}>
-      {/* Vinyl + now playing */}
+      {/* Vinyl + status */}
       <div className="flex items-center gap-4">
         <Vinyl spinning={playing} />
         <div className="min-w-0 flex-1">
@@ -56,7 +39,7 @@ export function SpotifyEmbedPlayer({ className }: SpotifyEmbedPlayerProps) {
             {playing ? "Now Spinning" : "Focus Mix"}
           </p>
           <p className="truncate text-sm font-semibold text-fg">
-            {selected?.label ?? (custom ? "Custom playlist" : "Pick a preset")}
+            {custom ? "Custom playlist" : "Paste a Spotify link"}
           </p>
         </div>
         <button
@@ -68,29 +51,8 @@ export function SpotifyEmbedPlayer({ className }: SpotifyEmbedPlayerProps) {
         </button>
       </div>
 
-      {/* Preset switcher */}
-      <div className="mt-5 flex flex-wrap gap-2">
-        {STUDY_PRESETS.map((p) => {
-          const active = selected?.id === p.id;
-          return (
-            <button
-              key={p.id}
-              onClick={() => onSelectPreset(p)}
-              className={cn(
-                "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-                active
-                  ? "border-accent bg-accent-soft text-accent"
-                  : "border-glass-border text-muted-fg hover:text-fg",
-              )}
-            >
-              {p.label}
-            </button>
-          );
-        })}
-      </div>
-
       {/* Custom URL input */}
-      <div className="mt-4">
+      <div className="mt-5">
         <div className="relative">
           <Link2 size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" aria-hidden />
           <input
@@ -99,12 +61,12 @@ export function SpotifyEmbedPlayer({ className }: SpotifyEmbedPlayerProps) {
               setInput(e.target.value);
               if (!valid) setValid(true);
             }}
-            onKeyDown={(e) => e.key === "Enter" && onUseCustom()}
+            onKeyDown={(e) => e.key === "Enter" && onUse()}
             placeholder="Paste a Spotify playlist or track link…"
             className="w-full rounded-2xl border border-glass-border bg-glass py-2.5 pl-10 pr-3 text-sm text-fg placeholder:text-muted-fg outline-none focus:border-accent/60"
           />
           <button
-            onClick={onUseCustom}
+            onClick={onUse}
             className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-xl bg-accent px-3 py-1 text-xs font-bold text-accent-fg transition-transform hover:scale-105 active:scale-95"
           >
             Load
@@ -153,7 +115,6 @@ export function SpotifyEmbedPlayer({ className }: SpotifyEmbedPlayerProps) {
 function Vinyl({ spinning }: { spinning: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  // Persist rotation angle across play/pause so the disc never snaps back.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -162,7 +123,7 @@ function Vinyl({ spinning }: { spinning: boolean }) {
     let angle = parseFloat(el.dataset.angle || "0");
     if (spinning) {
       const tick = (now: number) => {
-        angle += ((now - last) / 1000) * 220; // deg/sec
+        angle += ((now - last) / 1000) * 220;
         last = now;
         el.style.transform = `rotate(${angle}deg)`;
         el.dataset.angle = String(angle % 360);

@@ -40,15 +40,3 @@ export function toSpotifyEmbedUrl(input: string): string | null {
 export function toSpotifyWebUrl(embedUrl: string): string {
   return embedUrl.replace("/embed/", "/");
 }
-
-export interface StudyPreset {
-  id: string;
-  label: string;
-  uri: string;
-}
-
-export const STUDY_PRESETS: StudyPreset[] = [
-  { id: "lofi", label: "Lofi Study Beats", uri: "spotify:playlist:37i9dQZF1DX8NTLI29BXW3" },
-  { id: "focus", label: "Deep Focus", uri: "spotify:playlist:37i9dQZF1DWZeKCadgRdKQ" },
-  { id: "ambient", label: "Ambient Rain / Nature", uri: "spotify:playlist:37i9dQZF1DX4sWSpwq3LiO" },
-];
