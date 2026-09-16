@@ -105,7 +105,42 @@ export async function GET(req: NextRequest) {
     } catch {}
   }
 
-  // Fallback: iTunes (keeps search working when token absent — no playlists)
+  // Fallback: scrape public Spotify search page (works without token — blocked get_access_token)
+  // Extract track/playlist IDs directly from the HTML, then enrich via oembed.
+  try {
+    const html = await fetch(`https://open.spotify.com/search/${encodeURIComponent(q)}`, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      cache: "no-store",
+    }).then((r) => (r.ok ? r.text() : ""));
+    if (html) {
+      const trackIds = [...new Set([...html.matchAll(/spotify:track:([A-Za-z0-9]{22})/g)].map((m) => m[1]))].slice(0, 8);
+      const playlistIds = [...new Set([...html.matchAll(/spotify:playlist:([A-Za-z0-9]{22})/g)].map((m) => m[1]))].slice(0, 4);
+      if (trackIds.length || playlistIds.length) {
+        const results: Result[] = [];
+        // Enrich via oembed in parallel (fast, public, no auth)
+        const enrich = async (id: string, type: "track" | "playlist"): Promise<Result> => {
+          try {
+            const o = (await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/${type}/${id}`, { cache: "no-store" }).then((r) => r.json())) as { title?: string; thumbnail_url?: string };
+            const rawTitle = o.title ?? id;
+            // oembed title for track is "Song — Artist", for playlist is playlist name
+            if (type === "track" && rawTitle.includes(" — ")) {
+              const [name, ...rest] = rawTitle.split(" — ");
+              return { id, name: name.trim(), artist: rest.join(" — ").trim() || "Spotify", type, image: o.thumbnail_url ?? null, embedUrl: `https://open.spotify.com/embed/${type}/${id}?theme=0`, webUrl: `https://open.spotify.com/${type}/${id}` };
+            }
+            return { id, name: rawTitle, artist: type === "playlist" ? "Playlist" : "Spotify", type, image: o.thumbnail_url ?? null, embedUrl: `https://open.spotify.com/embed/${type}/${id}?theme=0`, webUrl: `https://open.spotify.com/${type}/${id}` };
+          } catch {
+            return { id, name: id, artist: type === "playlist" ? "Playlist" : "Spotify", type, image: null, embedUrl: `https://open.spotify.com/embed/${type}/${id}?theme=0`, webUrl: `https://open.spotify.com/${type}/${id}` };
+          }
+        };
+        const trackResults = await Promise.all(trackIds.map((id) => enrich(id, "track")));
+        const playlistResults = await Promise.all(playlistIds.map((id) => enrich(id, "playlist")));
+        results.push(...trackResults, ...playlistResults);
+        if (results.length) return NextResponse.json({ results, source: "scrape" });
+      }
+    }
+  } catch {}
+
+  // Final fallback: iTunes (keeps search working when token absent — no playlists)
   try {
     const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=12`, { cache: "no-store" });
     if (!r.ok) return NextResponse.json({ results: [] as Result[] });
