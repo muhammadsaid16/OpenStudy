@@ -11,6 +11,7 @@ import { CommandPalette } from "@/components/command-palette";
 import { GlobalFocusChip } from "@/components/global-focus-chip";
 import { StorageGuard } from "@/components/storage-guard";
 import { VitalsGuard } from "@/components/vitals-guard";
+import { SpotifyAudioSource, SpotifyMiniPlayer } from "@/components/spotify-embed";
 
 export const metadata: Metadata = {
   title: "OpenStudy — Learn Smarter",
@@ -61,6 +62,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </main>
         </div>
         <BottomNav />
+        <SpotifyMiniPlayer />
+        <SpotifyAudioSource />
         <UndoToastHost />
         <ToastHost />
         <CommandPalette />

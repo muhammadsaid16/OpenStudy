@@ -2,11 +2,12 @@
 
 // ─── Spotify tab ─────────────────────────────────────────────────────
 // Zero-auth Spotify playback via the official iframe embed. No API key,
-// no Premium, no OAuth — pick a study preset or paste any Spotify link
-// and it plays in the embedded player. A spinning vinyl sets the mood.
+// no Premium, no OAuth — paste a public Spotify link and it plays in the
+// background (global audio source) while you browse other tabs. A spinning
+// vinyl rides along in the persistent mini-player.
 import { Music2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { SpotifyEmbedPlayer } from "@/components/spotify-embed";
+import { SpotifyEmbedPicker } from "@/components/spotify-embed";
 
 export default function SpotifyPage() {
   const t = useT();
@@ -22,7 +23,7 @@ export default function SpotifyPage() {
         </div>
       </header>
 
-      <SpotifyEmbedPlayer />
+      <SpotifyEmbedPicker />
 
       <p className="mt-4 text-center text-xs text-muted-fg">{t("spotify.embedFree")}</p>
     </main>
