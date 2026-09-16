@@ -48,7 +48,7 @@ const navGroups: { headingKey: string; items: { href: string; labelKey: string; 
   },
   {
     headingKey: "nav.music",
-    items: [{ href: "/sounds", labelKey: "nav.spotify", icon: Headphones }],
+    items: [{ href: "/spotify", labelKey: "nav.spotify", icon: Headphones }],
   },
   {
     headingKey: "nav.system",

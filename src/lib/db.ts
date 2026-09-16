@@ -229,16 +229,37 @@ class OpenStudyDB extends Dexie {
     this.version(8).stores({
       spotify: null,
     });
+    // v9/v10: recovery — keep schema stable after the v8→v9 delete/recreate cycle
+    this.version(9).stores({
+      spotify: null,
+    });
+    this.version(10).stores({
+      spotify: null,
+    });
   }
 }
 
 export const db = new OpenStudyDB();
 
-// Multi-tab upgrades (e.g. v4→v5 card kinds) would otherwise block
-// forever: an older tab holding the DB open stalls every query in the
-// newer tab with no error. Closing on versionchange lets the upgrade
-// through; the stale tab reloads on its next navigation.
 db.on("versionchange", () => db.close());
+
+// Auto-recover from IndexedDB version mismatch (e.g., from downgraded deploys)
+if (typeof window !== "undefined") {
+  db.open().catch(async (err) => {
+    console.error("[OpenStudy DB] Open error:", err);
+    if (err?.name === "VersionError" || err?.name === "UpgradeError" || err?.name === "SchemaError") {
+      console.warn("[OpenStudy DB] IndexedDB version mismatch detected. Resetting database to clean v10 schema...");
+      try {
+        await db.delete();
+        await db.open();
+        console.log("[OpenStudy DB] Reset database successfully.");
+      } catch (retryErr) {
+        console.error("[OpenStudy DB] Failed to reset database:", retryErr);
+      }
+    }
+  });
+}
+
 
 // Unique id generator (replaces Prisma cuid defaults)
 export function uid(): string {
