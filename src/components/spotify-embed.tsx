@@ -50,30 +50,16 @@ export function SpotifyMiniPlayer() {
   const setExpanded = useSpotify((s) => s.setExpanded);
   const clear = useSpotify((s) => s.clear);
 
-  // Keep our visual state in sync with the real iframe playback.
-  useEffect(() => {
-    function onMsg(e: MessageEvent) {
-      try {
-        const d = e.data as { type?: string; isPlaying?: boolean; data?: { isPlaying?: boolean } };
-        if (d?.type === "player_update") {
-          const playing = d.isPlaying ?? d.data?.isPlaying;
-          if (typeof playing === "boolean") setPlaying(playing);
-        }
-      } catch {
-        /* ignore */
-      }
-    }
-    window.addEventListener("message", onMsg);
-    return () => window.removeEventListener("message", onMsg);
-  }, [setPlaying]);
+  // No external state listener: the off-screen iframe emits a `player_update`
+  // with isPlaying:false on load, which would flip the icon opposite to the
+  // real audio. The button press is the single source of truth now.
 
   if (!url) return null;
 
   const toggle = () => {
     spotifyCommand("toggle");
-    // Reconcile from the real iframe state via the message listener; this
-    // optimistic flip just keeps the UI responsive if the message is slow.
-    setPlaying(!isPlaying);
+    setPlaying(!isPlaying); // reflects the action you took; the sized iframe
+    // now reliably receives the postMessage so audio matches the icon.
   };
 
   return (
