@@ -74,8 +74,6 @@ export function SpotifyMiniPlayer() {
   const clear = useSpotify((s) => s.clear);
   const previewRef = useRef<HTMLAudioElement | null>(null);
 
-  if (!url && !previewUrl) return null;
-
   const isPlaylist = !!url && url.includes("/playlist/");
   const isYoutube = !!url && (url.includes("youtube.com") || url.includes("youtu.be"));
   const isPreview = !!previewUrl && !url;
@@ -90,6 +88,8 @@ export function SpotifyMiniPlayer() {
   useEffect(() => {
     if (previewRef.current) previewRef.current.volume = volume;
   }, [volume, previewUrl]);
+
+  if (!url && !previewUrl) return null;
 
   const toggle = () => {
     const next = !isPlaying;
