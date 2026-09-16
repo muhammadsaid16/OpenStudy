@@ -10,10 +10,23 @@ type WallpaperItem = {
   source: "wallhaven" | "unsplash";
 };
 
-// Real Unsplash NAPI pagination — different photos per page, keyed by real photo ID
+// Blocked terms — queries containing these are rejected / replaced with safe fallback
+const BLOCKED_TERMS = [
+  "nude", "naked", "porn", "sex", "nsfw", "hentai", "erotic", "adult",
+  "xxx", "lewd", "ecchi", "boob", "ass", "butt", "lingerie", "bikini model",
+  "topless", "uncensored", "rule34",
+];
+
+function sanitizeQuery(q: string): string {
+  const lower = q.toLowerCase();
+  if (BLOCKED_TERMS.some((t) => lower.includes(t))) return "nature";
+  return q;
+}
+
+// Real Unsplash NAPI pagination — content_filter=high enforces SFW-only
 async function searchUnsplash(q: string, page: number): Promise<WallpaperItem[]> {
   try {
-    const url = `https://unsplash.com/napi/search/photos?query=${encodeURIComponent(q)}&page=${page}&per_page=20`;
+    const url = `https://unsplash.com/napi/search/photos?query=${encodeURIComponent(q)}&page=${page}&per_page=20&content_filter=high`;
     const r = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
@@ -44,10 +57,11 @@ async function searchUnsplash(q: string, page: number): Promise<WallpaperItem[]>
   }
 }
 
-// Wallhaven public API — sorted by date_added so different pages = different photos
+// Wallhaven public API — purity=100 (SFW only), categories=100 (general, no anime/NSFW)
 async function searchWallhaven(q: string, page: number): Promise<WallpaperItem[]> {
   try {
-    const url = `https://wallhaven.cc/api/v1/search?q=${encodeURIComponent(q)}&page=${page}&purity=100&sorting=date_added&categories=111`;
+    // purity=100 = SFW only; categories=100 = General only (excludes anime & people)
+    const url = `https://wallhaven.cc/api/v1/search?q=${encodeURIComponent(q)}&page=${page}&purity=100&categories=100&sorting=date_added`;
     const r = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0" },
       cache: "no-store",
@@ -76,7 +90,8 @@ async function searchWallhaven(q: string, page: number): Promise<WallpaperItem[]
 }
 
 export async function GET(req: NextRequest) {
-  const q = req.nextUrl.searchParams.get("q")?.trim() || "space";
+  const rawQ = req.nextUrl.searchParams.get("q")?.trim() || "space";
+  const q = sanitizeQuery(rawQ);
   const page = Math.max(1, parseInt(req.nextUrl.searchParams.get("page") || "1", 10));
 
   // Try Unsplash first (real pagination, always unique results per page)
