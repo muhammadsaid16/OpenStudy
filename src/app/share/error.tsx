@@ -39,6 +39,16 @@ export default function RouteError({
             code: {error.digest.slice(0, 8)}
           </p>
         )}
+        {error?.message && (
+          <div className="mt-4 max-w-lg overflow-auto rounded-xl border border-danger/30 bg-danger/10 p-3 text-left font-mono text-xs text-danger">
+            <p className="font-bold">{error.name || "Error"}: {error.message}</p>
+            {error.stack && (
+              <pre className="mt-2 max-h-40 overflow-auto text-[10px] text-danger/80 whitespace-pre-wrap">
+                {error.stack}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex gap-3">
         <button
