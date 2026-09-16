@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useAppStore } from "@/lib/store";
 
 export const LIVE_WALLPAPERS = [
@@ -36,11 +36,40 @@ export const STATIC_WALLPAPERS = [
   { id: "hd-4k", name: "HD 4K", src: "/bgs/hd-4k.jpg" },
 ];
 
+/**
+ * Fills the viewport with `children` turned clockwise by `deg`.
+ *
+ * A quarter-turned rectangle would normally leave its corners uncovered, so the
+ * layer's dimensions are swapped before rotating (100vw x 100vh becomes
+ * 100vh x 100vw). The rotated footprint is then exactly the viewport again, and
+ * `background-size: cover` inside the pre-rotation box keeps the image
+ * undistorted — it crops, as cover always does.
+ */
+function RotatedLayer({ deg, animate, children }: { deg: number; animate: boolean; children: ReactNode }) {
+  const quarter = ((Math.round(deg / 90) * 90) % 360 + 360) % 360;
+  if (quarter === 0) return <div className="h-full w-full">{children}</div>;
+  const swapped = quarter === 90 || quarter === 270;
+  return (
+    <div
+      className="absolute left-1/2 top-1/2"
+      style={{
+        width: swapped ? "100vh" : "100vw",
+        height: swapped ? "100vw" : "100vh",
+        transform: `translate(-50%, -50%) rotate(${quarter}deg)`,
+        transition: animate ? "transform 700ms ease" : undefined,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function WallpaperHost() {
   const wallpaperType = useAppStore((s) => s.wallpaperType);
   const wallpaperId = useAppStore((s) => s.wallpaperId);
   const wallpaperOpacity = useAppStore((s) => s.wallpaperOpacity);
   const wallpaperBlur = useAppStore((s) => s.wallpaperBlur);
+  const wallpaperRotation = useAppStore((s) => s.wallpaperRotation);
   const reducedMotion = useAppStore((s) => s.reducedMotion);
 
   if (wallpaperType === "none") return null;
@@ -58,17 +87,17 @@ export function WallpaperHost() {
         <LiveCanvas preset={wallpaperId} reducedMotion={reducedMotion} />
       )}
       {wallpaperType === "static" && (
-        <StaticWallpaper preset={wallpaperId} />
+        <StaticWallpaper preset={wallpaperId} rotation={wallpaperRotation} animate={!reducedMotion} />
       )}
       {wallpaperType === "custom" && (
-        <CustomWallpaper url={wallpaperId} />
+        <CustomWallpaper url={wallpaperId} rotation={wallpaperRotation} animate={!reducedMotion} />
       )}
     </div>
   );
 }
 
 
-function StaticWallpaper({ preset }: { preset: string }) {
+function StaticWallpaper({ preset, rotation, animate }: { preset: string; rotation: number; animate: boolean }) {
   // A path/URL is still honoured so a choice saved from the removed API search
   // keeps working; anything else is looked up as a bundled background id.
   const isPath = preset.startsWith("http://") || preset.startsWith("https://") || preset.startsWith("/");
@@ -76,35 +105,41 @@ function StaticWallpaper({ preset }: { preset: string }) {
     ? preset
     : (STATIC_WALLPAPERS.find((w) => w.id === preset) ?? STATIC_WALLPAPERS[0]).src;
   return (
-    <div
-      className="h-full w-full bg-cover bg-center transition-all duration-700"
-      style={{ backgroundImage: `url(${src})` }}
-    />
+    <RotatedLayer deg={rotation} animate={animate}>
+      <div
+        className="h-full w-full bg-cover bg-center transition-all duration-700"
+        style={{ backgroundImage: `url(${src})` }}
+      />
+    </RotatedLayer>
   );
 }
 
-function CustomWallpaper({ url }: { url: string }) {
+function CustomWallpaper({ url, rotation, animate }: { url: string; rotation: number; animate: boolean }) {
   if (!url) return <div className="h-full w-full bg-bg" />;
 
   const isVideo = url.endsWith(".mp4") || url.endsWith(".webm");
   if (isVideo) {
     return (
-      <video
-        src={url}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="h-full w-full object-cover"
-      />
+      <RotatedLayer deg={rotation} animate={animate}>
+        <video
+          src={url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="h-full w-full object-cover"
+        />
+      </RotatedLayer>
     );
   }
 
   return (
-    <div
-      className="h-full w-full bg-cover bg-center transition-all duration-700"
-      style={{ backgroundImage: `url(${url})` }}
-    />
+    <RotatedLayer deg={rotation} animate={animate}>
+      <div
+        className="h-full w-full bg-cover bg-center transition-all duration-700"
+        style={{ backgroundImage: `url(${url})` }}
+      />
+    </RotatedLayer>
   );
 }
 

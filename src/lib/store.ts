@@ -32,9 +32,12 @@ interface AppState {
   wallpaperId: string;
   wallpaperOpacity: number;
   wallpaperBlur: number;
+  /** Clockwise, in degrees. Only 0 / 90 / 180 / 270 are meaningful. */
+  wallpaperRotation: number;
   setWallpaper: (type: WallpaperType, id?: string) => void;
   setWallpaperOpacity: (opacity: number) => void;
   setWallpaperBlur: (blur: number) => void;
+  setWallpaperRotation: (deg: number) => void;
 
   // Interface opacity — how far the app's own surfaces step back to let the
   // wallpaper through. 1 = fully opaque (the original look).
@@ -77,6 +80,7 @@ interface PersistedPrefs {
   wallpaperId?: string;
   wallpaperOpacity?: number;
   wallpaperBlur?: number;
+  wallpaperRotation?: number;
   uiOpacity?: number;
 }
 
@@ -100,6 +104,7 @@ function persistAll(s: AppState) {
     wallpaperId: s.wallpaperId,
     wallpaperOpacity: s.wallpaperOpacity,
     wallpaperBlur: s.wallpaperBlur,
+    wallpaperRotation: s.wallpaperRotation,
     uiOpacity: s.uiOpacity,
   });
 }
@@ -132,6 +137,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   wallpaperId: "aurora",
   wallpaperOpacity: 0.7,
   wallpaperBlur: 0,
+  wallpaperRotation: 0,
   setWallpaper: (type, id = "aurora") => {
     set({ wallpaperType: type, wallpaperId: id });
     persistAll({ ...get(), wallpaperType: type, wallpaperId: id });
@@ -145,6 +151,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     const v = Math.min(30, Math.max(0, blur));
     set({ wallpaperBlur: v });
     persistAll({ ...get(), wallpaperBlur: v });
+  },
+  setWallpaperRotation: (deg) => {
+    // Normalise into 0..359, then snap to the nearest quarter turn. A dragged
+    // or typed value like 450 or -90 still lands on a meaningful angle.
+    const v = ((Math.round(deg / 90) * 90) % 360 + 360) % 360;
+    set({ wallpaperRotation: v });
+    persistAll({ ...get(), wallpaperRotation: v });
   },
 
   uiOpacity: UI_OPACITY_DEFAULT,
@@ -179,6 +192,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (prefs.wallpaperId) patch.wallpaperId = prefs.wallpaperId;
     if (typeof prefs.wallpaperOpacity === "number") patch.wallpaperOpacity = prefs.wallpaperOpacity;
     if (typeof prefs.wallpaperBlur === "number") patch.wallpaperBlur = prefs.wallpaperBlur;
+    if (typeof prefs.wallpaperRotation === "number") patch.wallpaperRotation = ((Math.round(prefs.wallpaperRotation / 90) * 90) % 360 + 360) % 360;
     if (typeof prefs.uiOpacity === "number") patch.uiOpacity = clampUiOpacity(prefs.uiOpacity);
     if (prefs.theme) {
       patch.theme = normalizeTheme(prefs.theme);

@@ -62,8 +62,10 @@ export default function SettingsPage() {
   const wallpaperId = useAppStore((s) => s.wallpaperId);
   const wallpaperOpacity = useAppStore((s) => s.wallpaperOpacity);
   const wallpaperBlur = useAppStore((s) => s.wallpaperBlur);
+  const wallpaperRotation = useAppStore((s) => s.wallpaperRotation);
   const setWallpaper = useAppStore((s) => s.setWallpaper);
   const setWallpaperOpacity = useAppStore((s) => s.setWallpaperOpacity);
+  const setWallpaperRotation = useAppStore((s) => s.setWallpaperRotation);
   const setWallpaperBlur = useAppStore((s) => s.setWallpaperBlur);
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const setReducedMotion = useAppStore((s) => s.setReducedMotion);
@@ -350,6 +352,39 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
+
+              {/* Rotation — quarter turns only; the layer swaps w/h so the
+                  turned image still covers the screen. Hidden for "live": the
+                  canvases fill their frame themselves and turning them would
+                  just clip corners for no visual gain. */}
+              {wallpaperType !== "live" && (
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold text-fg">
+                    <span>{t("settings.wpRotation")}</span>
+                    <span>{wallpaperRotation}°</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[0, 90, 180, 270].map((deg) => {
+                      const active = wallpaperRotation === deg;
+                      return (
+                        <button
+                          key={deg}
+                          onClick={() => setWallpaperRotation(deg)}
+                          aria-pressed={active}
+                          className={cn(
+                            "h-8 rounded-lg border text-xs font-bold transition-colors",
+                            active
+                              ? "border-accent bg-accent text-accent-fg"
+                              : "border-border bg-bg text-muted-fg hover:border-accent hover:text-fg"
+                          )}
+                        >
+                          {deg}°
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
