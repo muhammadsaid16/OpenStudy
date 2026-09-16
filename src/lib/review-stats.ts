@@ -94,6 +94,14 @@ function clipSessionToRange(s: StudySessionLike, rangeStart: Date|null, rangeEnd
   return Math.round(durSec * (overlap/totalSpan));
 }
 
+/** Local-time YYYY-MM-DD key — the same bucketing the day counts use. */
+export function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 export function getStudyTimeStats(
   sessions: StudySessionLike[],
   range: RangeKey,
@@ -164,7 +172,10 @@ export function getStudyTimeStats(
       }
       // Only count if intersects main range
       const inMain = db.start.getTime() <= re!.getTime() && db.end.getTime() >= rs!.getTime();
-      daily.push({ date: new Date(d).toISOString().slice(0,10), seconds: inMain? daySec:0 });
+      // Local key, not toISOString(): the UTC date is a day behind the local
+      // day in positive offsets (e.g. UTC+3), which shifted every label and
+      // made adjacent local days share one.
+      daily.push({ date: localDateKey(new Date(d)), seconds: inMain? daySec:0 });
     }
   } else if (range==="month" && bounds) {
     const daysInMonth = new Date(bounds.start.getFullYear(), bounds.start.getMonth()+1,0).getDate();
@@ -173,10 +184,11 @@ export function getStudyTimeStats(
       const db=dayBounds(d);
       let daySec=0; const ds=new Set<string>();
       for(const s of sessions){ if(!s.id||ds.has(s.id)) continue; ds.add(s.id); daySec+=clipSessionToRange(s, db.start, db.end); }
-      daily.push({ date: d.toISOString().slice(0,10), seconds: daySec });
+      daily.push({ date: localDateKey(d), seconds: daySec });
     }
   } else if (range==="day" && bounds) {
-    daily.push({ date: bounds.start.toISOString().slice(0,10), seconds: totalSeconds });
+    // Local key, same reason as the week/month branches above.
+    daily.push({ date: localDateKey(bounds.start), seconds: totalSeconds });
   }
 
   return { totalSeconds, breakdown, daily };

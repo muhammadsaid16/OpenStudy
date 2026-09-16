@@ -574,7 +574,11 @@ export async function createStudySession(data: {
     subjectId: data.subjectId ?? null,
     topicId: data.topicId ?? null,
     title: data.title,
-    durationMin: data.durationMin,
+    // A 0/negative duration is always a bug (stale tab, timer that never
+    // ticked) — it inflates session counts while dragging every average and
+    // total down. Clamping (not rejecting) keeps a stale tab's save from
+    // becoming a lost session entirely.
+    durationMin: Math.max(1, Math.round(data.durationMin)),
     notes: data.notes ?? null,
     completed: data.completed ?? true,
     startedAt: data.startedAt ?? now,
@@ -700,10 +704,17 @@ export async function getWeeklyAnalytics(): Promise<WeeklyAnalyticsResult> {
   monday.setDate(monday.getDate() - todayIdx);
 
   const minutes = Array(7).fill(0) as number[];
+  // Day offset in LOCAL calendar days, not raw ms / 24h: a DST transition makes
+  // some days 23h or 25h, so the ms division mis-buckets the boundary hours
+  // (Egypt observes DST — this fires twice a year).
+  const dayOffset = (d: Date) => {
+    const a = new Date(d); a.setHours(0, 0, 0, 0);
+    return Math.round((a.getTime() - monday.getTime()) / 86_400_000);
+  };
   for (const s of sessions) {
     const d = new Date(s.startedAt);
     if (d >= monday) {
-      const idx = Math.floor((d.getTime() - monday.getTime()) / 86_400_000);
+      const idx = dayOffset(d);
       if (idx >= 0 && idx < 7) minutes[idx] += s.durationMin;
     }
   }
@@ -1426,7 +1437,19 @@ function nextRepeatDate(base: Date, repeat: GoalRepeat): Date {
   const d = new Date(base);
   if (repeat === "daily") d.setDate(d.getDate() + 1);
   else if (repeat === "weekly") d.setDate(d.getDate() + 7);
-  else d.setMonth(d.getMonth() + 1);
+  else {
+    // setMonth overflows: Jan 31 + 1 month lands on Mar 3 (31 Feb → Mar 3),
+    // silently skipping February — and clamping the day AFTER the move is not
+    // enough, because by then d is already in the wrong month. Normalize to
+    // the 1st (a day every month has) BEFORE moving the month, then clamp the
+    // day to the target month's last day.
+    const dayOfMonth = d.getDate();
+    const targetMonth = d.getMonth() + 1;
+    const lastOfTarget = new Date(d.getFullYear(), targetMonth + 1, 0).getDate();
+    d.setDate(1);
+    d.setMonth(targetMonth);
+    d.setDate(Math.min(dayOfMonth, lastOfTarget));
+  }
   return d;
 }
 
@@ -1897,7 +1920,7 @@ export async function importAllData(json: string): Promise<{ imported: string }>
         }
       }
     }
-    const now = new Date();
+    const startedAt = new Date(s.startedAt);
     await db.studySessions.add({
       id: uid(),
       subjectId,
@@ -1906,8 +1929,11 @@ export async function importAllData(json: string): Promise<{ imported: string }>
       durationMin: s.durationMin,
       notes: s.notes ?? null,
       completed: s.completed,
-      startedAt: new Date(s.startedAt),
-      endedAt: s.endedAt ? new Date(s.endedAt) : now,
+      startedAt,
+      // Derive a missing endedAt from start + duration — stamping `now` would
+      // teleport every historical session's end to import time and distort
+      // any duration/end-based chart.
+      endedAt: s.endedAt ? new Date(s.endedAt) : new Date(startedAt.getTime() + s.durationMin * 60_000),
     });
   }
   imported += `${data.sessions.length} sessions`;
