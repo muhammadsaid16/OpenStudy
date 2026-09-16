@@ -84,6 +84,7 @@ export function SpotifyMiniPlayer() {
   const previewUrl = useSpotify((s) => s.previewUrl);
   const webUrl = useSpotify((s) => s.webUrl);
   const title = useSpotify((s) => s.title);
+  const image = useSpotify((s) => s.image);
   const isPlaying = useSpotify((s) => s.isPlaying);
   const expanded = useSpotify((s) => s.expanded);
   const volume = useSpotify((s) => s.volume);
@@ -163,11 +164,22 @@ export function SpotifyMiniPlayer() {
           <div className="space-y-2 border-t border-glass-border p-3">
             {isPreview && previewUrl ? (
               <div className="rounded-xl bg-bg p-3">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-500">30s Preview</span>
-                  <span className="text-xs text-muted-fg">iTunes preview — open in Spotify for full song</span>
+                <div className="flex gap-3">
+                  {image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={image} alt="" className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+                  ) : (
+                    <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-fg"><Music2 size={24} /></span>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-500">30s Preview</span>
+                    </div>
+                    <p className="truncate text-sm font-semibold text-fg">{title}</p>
+                    <p className="text-xs text-muted-fg">Tap ▶ in header to play — open in Spotify for full song</p>
+                  </div>
                 </div>
-                <audio ref={previewRef} src={previewUrl} controls autoPlay={isPlaying} onEnded={() => setPlaying(false)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} className="w-full" />
+                <audio ref={previewRef} src={previewUrl} autoPlay={isPlaying} onEnded={() => setPlaying(false)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} controls className="mt-3 w-full" />
               </div>
             ) : (
               <iframe
@@ -330,7 +342,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
   const playResult = (r: SearchResult) => {
     // Spotify native embed -> mini-player + background iframe
     if (r.embedUrl) {
-      setTrack(r.embedUrl, r.webUrl, `${r.name} — ${r.artist}`);
+      setTrack(r.embedUrl, r.webUrl, `${r.name} — ${r.artist}`, r.image);
       setPreviewId(null);
       return;
     }
@@ -341,7 +353,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
         useSpotify.getState().setPlaying(!useSpotify.getState().isPlaying);
         return;
       }
-      setPreview(r.previewUrl, `${r.name} — ${r.artist} (Preview)`, r.webUrl);
+      setPreview(r.previewUrl, `${r.name} — ${r.artist} (Preview)`, r.webUrl, r.image);
       setPreviewId(r.id);
       return;
     }
@@ -419,7 +431,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                       <p className="truncate text-sm font-semibold text-fg">{t.name}</p>
                       <p className="truncate text-xs text-muted-fg">{t.artist}</p>
                     </div>
-                    <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
+                    <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`, t.image)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
                       <Play size={14} className="ml-0.5" />
                     </button>
                   </li>
@@ -536,7 +548,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                     <p className="truncate text-sm font-semibold text-fg">{t.name}</p>
                     <p className="truncate text-xs text-muted-fg">{t.artist}</p>
                   </div>
-                  <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
+                  <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`, t.image)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
                     <Play size={14} className="ml-0.5" />
                   </button>
                 </li>
