@@ -97,6 +97,7 @@ export function SpotifyMiniPlayer() {
   if (!url && !previewUrl) return null;
 
   const isPlaylist = !!url && url.includes("/playlist/");
+  const isYoutube = !!url && url.includes("youtube.com/embed");
   const isPreview = !!previewUrl && !url;
 
   useEffect(() => {
@@ -188,7 +189,7 @@ export function SpotifyMiniPlayer() {
                 src={visibleSrc}
                 onLoad={() => setTimeout(() => spotifyCommand("volume", volume), 600)}
                 className="w-full rounded-xl border-0"
-                style={{ height: isPlaylist ? 352 : 80 }}
+                style={{ height: isYoutube ? 200 : isPlaylist ? 352 : 80 }}
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                 loading="lazy"
               />
@@ -277,9 +278,24 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
     setLoading(true);
     debounceRef.current = window.setTimeout(async () => {
       try {
-        const r = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
-        const j = (await r.json()) as { results: SearchResult[] };
-        setResults(j.results ?? []);
+        // Fetch YouTube Music (full songs) + Spotify (playlists) in parallel
+        const [ytRes, spRes] = await Promise.allSettled([
+          fetch(`/api/ytmusic/search?q=${encodeURIComponent(q)}`).then((r) => r.json() as Promise<{ results: SearchResult[] }>),
+          fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`).then((r) => r.json() as Promise<{ results: SearchResult[] }>),
+        ]);
+        const ytResults = ytRes.status === "fulfilled" ? (ytRes.value.results ?? []) : [];
+        const spResults = spRes.status === "fulfilled" ? (spRes.value.results ?? []) : [];
+        // Prefer YouTube Music for tracks (full song), Spotify for playlists/albums/shows
+        const ytTracks = ytResults.filter((r: any) => r.type === "track").slice(0, 8);
+        const spPlaylists = spResults.filter((r: any) => r.type !== "track").slice(0, 4);
+        // If YouTube failed, fall back to Spotify/iTunes tracks
+        const tracks = ytTracks.length ? ytTracks : spResults.filter((r: any) => r.type === "track").slice(0, 8);
+        const merged = [...tracks, ...spPlaylists];
+        // Mark YouTube tracks for UI
+        for (const r of merged) {
+          if (ytTracks.find((t: any) => t.id === r.id)) (r as any)._source = "ytmusic";
+        }
+        setResults(merged as SearchResult[]);
         setSearched(true);
       } catch {
         setResults([]);
@@ -458,7 +474,8 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
             {results.length > 0 && (
               <ul className="max-h-[50vh] space-y-1.5 overflow-y-auto pr-1">
                 {results.map((r) => {
-                  const meta = typeMeta(r.type);
+                  const isYtMusic = !!(r as any)._source || r.embedUrl.includes("youtube.com");
+                  const meta = isYtMusic ? { label: "YOUTUBE MUSIC", icon: Music2, color: "bg-red-500/15 text-red-500 border-red-500/20" } : typeMeta(r.type);
                   const MetaIcon = meta.icon;
                   const isPlayable = !!(r.embedUrl || r.previewUrl);
                   const isPreviewPlaying = previewId === r.id && isPreviewPlayingGlobal;
