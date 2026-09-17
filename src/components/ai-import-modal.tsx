@@ -119,7 +119,7 @@ export function AiImportModal({
       </p>
       <p className="text-sm text-muted-fg leading-relaxed">
         Paste this prompt into NotebookLM (or any chat LLM) along with your lesson.
-        It returns a JSON array of <code className="font-mono text-accent">{"{front, back, description?}"}</code> cards.
+        It returns a JSON array of <code className="font-mono text-primary">{"{front, back, description?}"}</code> cards.
       </p>
       <div className="flex flex-wrap gap-2 pt-1">
         <Button size="sm" variant="secondary" onClick={copyPrompt}>
@@ -152,7 +152,7 @@ export function AiImportModal({
           ))}
         </select>
       ) : (
-        <p className="text-sm text-warning">
+        <p className="text-sm text-tertiary">
           No decks yet — create one in Library first.
         </p>
       )}
@@ -164,7 +164,7 @@ export function AiImportModal({
       </p>
       <p className="text-sm text-fg">
         Cards will be added to{" "}
-        <span className="font-bold text-accent">{sourceName}</span>.
+        <span className="font-bold text-primary">{sourceName}</span>.
       </p>
     </div>
   );
@@ -189,7 +189,7 @@ export function AiImportModal({
             detectedCount > 0 ? (
               <>Detected · <span className="font-bold text-fg">{detectedCount}</span> card{detectedCount !== 1 ? "s" : ""}</>
             ) : (
-              <span className="text-warning">Unreadable JSON — check format</span>
+              <span className="text-tertiary">Unreadable JSON — check format</span>
             )
           ) : (
             t("ui.paste_the_json_here")
@@ -199,7 +199,7 @@ export function AiImportModal({
           <button
             type="button"
             onClick={() => setPasted("")}
-            className="text-muted-fg hover:text-accent"
+            className="text-muted-fg hover:text-primary"
           >{t("ui.clear")}</button>
         )}
       </div>

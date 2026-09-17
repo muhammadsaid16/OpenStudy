@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 
 const INTENSITY_BG: Record<0 | 1 | 2 | 3, string> = {
   0: "bg-muted",
-  1: "bg-accent/25",
-  2: "bg-accent/60",
-  3: "bg-accent",
+  1: "bg-primary-container/25",
+  2: "bg-primary-container/60",
+  3: "bg-primary-container",
 };
 
 const DAY_LABELS = ["", "MON", "", "WED", "", "FRI", ""]; // Sun, Mon, ..., Sat

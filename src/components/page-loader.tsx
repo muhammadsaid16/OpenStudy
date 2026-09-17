@@ -37,13 +37,13 @@ function LoaderBar({ label }: { label: string }) {
         Loading {label}…
       </span>
       <div className="mb-3 flex items-center justify-between">
-        <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
+        <p className="font-mono text-xs font-bold uppercase tracking-widest text-primary">
           {label.toUpperCase()}
         </p>
         <p className="font-mono text-xs uppercase tracking-widest text-muted-fg">{t("ui.openstudy")}</p>
       </div>
       <div className="relative h-0.5 w-full overflow-hidden bg-border">
-        <div className="animate-loader absolute inset-y-0 w-1/4 bg-accent" />
+        <div className="animate-loader absolute inset-y-0 w-1/4 bg-primary-container" />
       </div>
     </div>
   );

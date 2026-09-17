@@ -14,7 +14,7 @@ export default function SpotifyPage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-8">
       <header className="mb-6 flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-container/15 text-primary">
           <Headphones size={20} aria-hidden />
         </span>
         <div>

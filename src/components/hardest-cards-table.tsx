@@ -80,7 +80,7 @@ export function HardestCardsTable({
                 </td>
                 <td className="py-2.5 pe-4 text-muted-fg truncate max-w-[18ch]">{r.bundleName}</td>
                 <td className="py-2.5 pe-4 text-end font-mono tabular-nums">
-                  <span className={r.accuracy < 0.5 ? "text-danger" : r.accuracy < 0.75 ? "text-warning" : "text-fg"}>
+                  <span className={r.accuracy < 0.5 ? "text-danger" : r.accuracy < 0.75 ? "text-tertiary" : "text-fg"}>
                     {Math.round(r.accuracy * 100)}%
                   </span>
                 </td>
@@ -114,7 +114,7 @@ export function HardestCardsTable({
             <p className="font-medium leading-snug line-clamp-2" style={{ fontSize: "var(--text-sm)" }}>{r.front}</p>
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="rounded-full bg-muted px-2.5 py-1 font-mono text-muted-fg max-w-[20ch] truncate">{r.bundleName}</span>
-              <span className={`rounded-full px-2.5 py-1 font-mono font-bold ${r.accuracy < 0.5 ? "bg-danger/15 text-danger" : r.accuracy < 0.75 ? "bg-warning/15 text-warning" : "bg-success/15 text-success"}`}>{Math.round(r.accuracy * 100)}% · {r.reviewCount} {t("hardest.reviews").toLowerCase()}</span>
+              <span className={`rounded-full px-2.5 py-1 font-mono font-bold ${r.accuracy < 0.5 ? "bg-danger/15 text-danger" : r.accuracy < 0.75 ? "bg-tertiary/15 text-tertiary" : "bg-success/15 text-success"}`}>{Math.round(r.accuracy * 100)}% · {r.reviewCount} {t("hardest.reviews").toLowerCase()}</span>
             </div>
             <div className="flex justify-end">
               {doneId === r.cardId ? (
@@ -129,7 +129,7 @@ export function HardestCardsTable({
 
       <Modal open={confirmId !== null} onClose={() => setConfirmId(null)} title={t("hardest.reset")}>
         <div className="space-y-4">
-          <div className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs text-warning">
+          <div className="flex items-start gap-2 rounded-xl border border-warning/40 bg-tertiary/10 p-3 text-xs text-tertiary">
             <AlertTriangle size={14} className="shrink-0 mt-0.5" />
             <p>
               This resets the card to &quot;new&quot;: ease factor 2.5, 1-day

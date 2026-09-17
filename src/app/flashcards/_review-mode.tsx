@@ -101,20 +101,20 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                 onClick={() => p.onSelectBundle(bundle.id)}
                 {...spotlightProps()}
                 className="spotlight-card group relative flex h-48 w-full flex-col justify-between rounded-2xl glass p-5 transition-all duration-200 hover:-translate-y-0.5 text-start"
-                style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
+                style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#8083ff")}14, transparent 55%)` }}
               >
                 <div
                   className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-black transition-transform duration-200 group-hover:scale-110"
                   style={{
-                    backgroundColor: `${bundle.color || "#DFE104"}1f`,
-                    color: bundle.color || "#DFE104",
-                    boxShadow: `inset 0 0 0 1px ${(bundle.color || "#DFE104")}3d`,
+                    backgroundColor: `${bundle.color || "#8083ff"}1f`,
+                    color: bundle.color || "#8083ff",
+                    boxShadow: `inset 0 0 0 1px ${(bundle.color || "#8083ff")}3d`,
                   }}
                 >
                   {bundle.name.charAt(0)}
                 </div>
                 <div className="mt-3 min-w-0">
-                  <h3 className="truncate text-lg font-bold text-fg transition-colors group-hover:text-accent">
+                  <h3 className="truncate text-lg font-bold text-fg transition-colors group-hover:text-primary">
                     {bundle.name}
                   </h3>
                   {bundle.description && (
@@ -124,11 +124,11 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                 <div className="flex items-center justify-between">
                   <span
                     className="rounded-full px-2.5 py-1 font-mono text-xs"
-                    style={{ backgroundColor: `${bundle.color || "#DFE104"}14`, color: bundle.color || "#DFE104" }}
+                    style={{ backgroundColor: `${bundle.color || "#8083ff"}14`, color: bundle.color || "#8083ff" }}
                   >
                     {bundle._count.flashcards} card{bundle._count.flashcards !== 1 ? "s" : ""}
                   </span>
-                  <span className="text-xs font-bold text-accent group-hover:underline">Open →</span>
+                  <span className="text-xs font-bold text-primary group-hover:underline">Open →</span>
                 </div>
               </button>
             ))}
@@ -195,7 +195,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
       {/* Progress bar */}
       <div className="h-1 rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-accent transition-all duration-500"
+          className="h-full rounded-full bg-primary-container transition-all duration-500"
           style={{ width: `${(p.completedCount / Math.max(p.totalDue + p.completedCount, 1)) * 100}%` }}
         />
       </div>
@@ -206,7 +206,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
           onClick={p.onToggleSprint}
           className={cn(
             "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors",
-            p.sprintMode ? "border-accent bg-accent text-accent-fg" : "border-border text-muted-fg hover:border-accent"
+            p.sprintMode ? "border-primary bg-primary-container text-on-primary-container" : "border-border text-muted-fg hover:border-primary"
           )}
         >
           <Timer size={14} />{t("ui.speed_sprint")}</button>
@@ -239,7 +239,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                 <div className="flex items-center gap-2">
                   <Badge>{t("cards.questionLabel")}</Badge>
                   {p.activeCard && p.cardKindOf(p.activeCard) !== "basic" && p.activeCard && (
-                    <Badge className="border-accent/50 bg-accent/10 text-accent">
+                    <Badge className="border-primary/50 bg-primary-container/10 text-primary">
                       {p.cardKindOf(p.activeCard)}
                     </Badge>
                   )}
@@ -262,7 +262,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                               : card.front
                           );
                       }}
-                      className="flex h-7 w-7 items-center justify-center rounded-full border border-border/70 text-muted-fg transition-colors hover:border-accent/50 hover:text-accent hover:bg-accent-soft"
+                      className="flex h-7 w-7 items-center justify-center rounded-full border border-border/70 text-muted-fg transition-colors hover:border-primary/50 hover:text-primary hover:bg-primary-container/15"
                     >
                       {p.speaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
                     </button>
@@ -302,7 +302,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                           e.stopPropagation();
                           p.onPickChoice(opt);
                         }}
-                        className="rounded-xl border border-border bg-bg/60 px-4 py-2.5 text-sm font-bold tracking-tight text-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+                        className="rounded-xl border border-border bg-bg/60 px-4 py-2.5 text-sm font-bold tracking-tight text-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
                       >
                         {opt}
                       </button>
@@ -318,10 +318,10 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
             </div>
 
             {/* BACK — ANSWER */}
-            <div className="flip-face flip-back absolute inset-0 flex flex-col overflow-hidden rounded-2xl border border-accent bg-accent">
+            <div className="flip-face flip-back absolute inset-0 flex flex-col overflow-hidden rounded-2xl border border-primary bg-primary-container">
               <span className="absolute inset-x-6 top-0 h-0.5 bg-gradient-to-r from-transparent via-accent-fg/60 to-transparent" />
               <div className="flex items-center justify-between px-7 pt-5">
-                <Badge className="bg-accent-fg/15 text-accent-fg">{t("cards.answerLabel")}</Badge>
+                <Badge className="bg-on-primary-container/15 text-on-primary-container">{t("cards.answerLabel")}</Badge>
                 {p.ttsSupported && (
                   <button
                     type="button"
@@ -337,7 +337,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                             : p.activeCard!.back
                         );
                     }}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-accent-fg/25 text-accent-fg/70 transition-colors hover:border-accent-fg/60 hover:text-accent-fg"
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-primary-fg/25 text-on-primary-container/70 transition-colors hover:border-primary-fg/60 hover:text-on-primary-container"
                   >
                     {p.speaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
                   </button>
@@ -363,16 +363,16 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                       : `✗ You picked: ${p.pickedChoice.slice(0, 60)}`}
                   </p>
                 )}
-                <div className="[&_p]:text-accent-fg [&_li]:text-accent-fg text-3xl font-bold leading-relaxed tracking-tight text-accent-fg sm:text-4xl [&_.md-p]:text-accent-fg">
+                <div className="[&_p]:text-on-primary-container [&_li]:text-on-primary-container text-3xl font-bold leading-relaxed tracking-tight text-on-primary-container sm:text-4xl [&_.md-p]:text-on-primary-container">
                   <Markdown content={p.activeCard.back} align="center" />
                 </div>
                 {((p.activeCard as any).backDescription ?? p.activeCard.description) && (
-                  <p className="mt-4 max-w-[28rem] text-sm font-normal normal-case tracking-normal leading-relaxed text-accent-fg/70">
+                  <p className="mt-4 max-w-[28rem] text-sm font-normal normal-case tracking-normal leading-relaxed text-on-primary-container/70">
                     {(p.activeCard as any).backDescription ?? p.activeCard.description}
                   </p>
                 )}
               </div>
-              <div className="flex items-center justify-between border-t border-accent-fg/15 px-7 py-3.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg/70">
+              <div className="flex items-center justify-between border-t border-primary-fg/15 px-7 py-3.5 text-[10px] font-bold uppercase tracking-widest text-on-primary-container/70">
                 <span className="font-mono">#{p.activeCard.id.slice(-4)}</span>
                 <span>{t("ui.rate_it_below")}</span>
               </div>

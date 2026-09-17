@@ -213,14 +213,14 @@ export default function StatsPage() {
       {loadFailed && (
         <div
           role="alert"
-          className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-warning/40 bg-warning/10 px-5 py-3"
+          className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-warning/40 bg-tertiary/10 px-5 py-3"
         >
           <p className="text-sm font-semibold text-fg">
             Couldn&apos;t load your stats — showing empty charts. Your data is still saved locally.
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="rounded-full bg-warning/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-fg transition-colors hover:bg-warning/30"
+            className="rounded-full bg-tertiary/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-fg transition-colors hover:bg-tertiary/30"
           >{t("stats.retry")}</button>
         </div>
       )}
@@ -242,7 +242,7 @@ export default function StatsPage() {
                   onClick={() => setPeriod(p.key)}
                   aria-pressed={active}
                   disabled={isEmpty}
-                  className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${active ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"} ${isEmpty ? "opacity-40 cursor-not-allowed hover:text-muted-fg" : ""}`}
+                  className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${active ? "bg-primary-container text-on-primary-container" : "text-muted-fg hover:text-primary"} ${isEmpty ? "opacity-40 cursor-not-allowed hover:text-muted-fg" : ""}`}
                 >
                   {t(p.labelKey)}
                 </button>
@@ -346,12 +346,12 @@ export default function StatsPage() {
           <p className="mb-4 text-[11px] uppercase tracking-widest text-muted-fg">When you review · 24h distribution</p>
           <HourlyBars buckets={hourly} />
           <div className="mt-4 rounded-xl border border-border bg-muted/30 p-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs"><Clock size={14} className="text-accent" />{t("stats.mostActive")}<span className="font-mono font-bold">{hourly.indexOf(Math.max(...hourly))}:00</span></div>
+            <div className="flex items-center gap-2 text-xs"><Clock size={14} className="text-primary" />{t("stats.mostActive")}<span className="font-mono font-bold">{hourly.indexOf(Math.max(...hourly))}:00</span></div>
             <span className="text-[10px] uppercase tracking-widest text-muted-fg">{Math.max(...hourly)} reviews</span>
           </div>
           <div className="mt-4 space-y-2">
             <p className="text-[11px] font-bold uppercase tracking-widest text-muted-fg">{t("stats.quickStats")}</p>
-            <div className="flex justify-between text-sm"><span className="text-muted-fg">{t("stats.dueNow")}</span><span className={`font-mono font-bold ${dueNow > 0 ? "text-accent" : "text-muted-fg"}`}>{dueNow}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-fg">{t("stats.dueNow")}</span><span className={`font-mono font-bold ${dueNow > 0 ? "text-primary" : "text-muted-fg"}`}>{dueNow}</span></div>
             <div className="flex justify-between text-sm"><span className="text-muted-fg">{t("dash.tabs.cards")}</span><span className="font-mono font-bold">{cards.length}</span></div>
             <div className="flex justify-between text-sm"><span className="text-muted-fg">{t("common.bundles")}</span><span className="font-mono font-bold">{bundles.length}</span></div>
           </div>
@@ -380,7 +380,7 @@ export default function StatsPage() {
           <p className="mb-3 text-[11px] uppercase tracking-widest text-muted-fg">Cards coming due (cumulative) · {cards.length} cards</p>
           <ForecastCard cards={cards} />
           <div className="mt-4 flex gap-2 text-[10px] font-mono uppercase tracking-widest">
-            <span className="rounded-full bg-accent/10 px-2 py-1 text-accent">{dueNow} due now</span>
+            <span className="rounded-full bg-primary-container/10 px-2 py-1 text-primary">{dueNow} due now</span>
             {leeches > 0 && <span className="rounded-full bg-danger/10 px-2 py-1 text-danger">{leeches} leeches</span>}
             {mastered > 0 && <span className="rounded-full bg-success/10 px-2 py-1 text-success">{mastered} mastered (≥21d)</span>}
           </div>

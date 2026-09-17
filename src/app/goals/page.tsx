@@ -67,7 +67,7 @@ const CARD_VARIANTS = {
 const COLUMNS: { id: GoalStatus; labelKey: string; hintKey: string; dot: string }[] = [
   { id: "backlog", labelKey: "goals.col.backlog", hintKey: "ui.someday_not_started", dot: "bg-muted-fg" },
   { id: "in_progress", labelKey: "goals.col.inProgress", hintKey: "ui.actively_working_on", dot: "bg-flow" },
-  { id: "done", labelKey: "goals.col.done", hintKey: "ui.achieved", dot: "bg-grow" },
+  { id: "done", labelKey: "goals.col.done", hintKey: "ui.achieved", dot: "bg-secondary" },
 ];
 
 const PREV_STATUS: Partial<Record<GoalStatus, GoalStatus>> = {
@@ -349,7 +349,7 @@ export default function GoalsPage() {
             <div className="relative">
               <button
                 onClick={() => setExportMenuOpen((o) => !o)}
-                className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+                className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
               >
                 <Download size={14} />
                 {t("common.export")}
@@ -358,9 +358,9 @@ export default function GoalsPage() {
                 <>
                   <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label={t("common.closeExport")} />
                   <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
-                    <button onClick={exportGoalsAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
+                    <button onClick={exportGoalsAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-primary-container/15 hover:text-primary text-start">
                       <Download size={14} />{t("ui.json")}</button>
-                    <button onClick={exportGoalsAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
+                    <button onClick={exportGoalsAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-primary-container/15 hover:text-primary text-start">
                       <Download size={14} /> CSV
                     </button>
                   </div>
@@ -370,7 +370,7 @@ export default function GoalsPage() {
             <button
               onClick={() => importInputRef.current?.click()}
               disabled={importing}
-              className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft disabled:opacity-50"
+              className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15 disabled:opacity-50"
             >
               <Upload size={14} />
               {importing ? "Importing..." : "Import"}
@@ -402,7 +402,7 @@ export default function GoalsPage() {
           [
             { label: t("goals.col.total"), value: stats.total, tone: "" },
             { label: t("goals.col.active"), value: stats.active, tone: "text-flow" },
-            { label: t("goals.col.done"), value: stats.done, tone: "text-grow" },
+            { label: t("goals.col.done"), value: stats.done, tone: "text-secondary" },
             { label: t("goals.overdue"), value: stats.overdue, tone: stats.overdue > 0 ? "text-danger" : "" },
           ] as const
         ).map((s) => (
@@ -432,13 +432,13 @@ export default function GoalsPage() {
               onClick={() => setFilter(id)}
               className={cn(
                 "relative flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition-colors",
-                filter === id ? "text-accent-fg" : "text-muted-fg hover:text-accent"
+                filter === id ? "text-on-primary-container" : "text-muted-fg hover:text-primary"
               )}
             >
               {filter === id && (
                 <motion.span
                   layoutId="goal-filter-pill"
-                  className="absolute inset-0 rounded-full bg-accent"
+                  className="absolute inset-0 rounded-full bg-primary-container"
                   transition={CARD_TRANSITION}
                 />
               )}
@@ -563,7 +563,7 @@ export default function GoalsPage() {
                                 setEditingGoal(g);
                                 setModalOpen(true);
                               }}
-                              className="flex h-7 w-7 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-accent"
+                              className="flex h-7 w-7 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-primary"
                             >
                               <Pencil size={12} />
                             </button>
@@ -644,7 +644,7 @@ export default function GoalsPage() {
                           <div className="mt-3 flex items-center justify-between gap-2">
                             <button
                               onClick={() => setExpandedId(expanded ? null : g.id)}
-                              className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-accent"
+                              className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-primary"
                             >
                               <ChevronRight
                                 size={12}
@@ -656,7 +656,7 @@ export default function GoalsPage() {
                                   type="button"
                                   aria-label={t("goals.movePrev")}
                                   onClick={() => moveByButton(g, "prev")}
-                                  className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                                  className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 >
                                   <ChevronLeft size={12} />
                                 </button>
@@ -666,7 +666,7 @@ export default function GoalsPage() {
                                   type="button"
                                   aria-label={t("goals.moveNext")}
                                   onClick={() => moveByButton(g, "next")}
-                                  className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                                  className="flex h-6 w-6 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 >
                                   <ChevronRight size={12} />
                                 </button>
@@ -691,7 +691,7 @@ export default function GoalsPage() {
                                     }}
                                     className={cn(
                                       "shrink-0 transition-colors",
-                                      m.done ? "text-flow" : "text-muted-fg hover:text-accent"
+                                      m.done ? "text-flow" : "text-muted-fg hover:text-primary"
                                     )}
                                   >
                                     {m.done ? <CheckSquare size={14} /> : <Square size={14} />}

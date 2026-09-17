@@ -33,7 +33,7 @@ const SOUNDSCAPES: SoundscapeName[] = [
 const PHASE_META = {
   work: {
     labelKey: "ui.focus",
-    chip: "bg-accent-soft text-accent",
+    chip: "bg-primary-container/15 text-primary",
     from: "var(--color-accent)",
     to: "var(--color-flow)",
   },
@@ -45,7 +45,7 @@ const PHASE_META = {
   },
   long: {
     labelKey: "ui.long_break",
-    chip: "bg-grow/10 text-grow",
+    chip: "bg-secondary/10 text-secondary",
     from: "var(--color-grow)",
     to: "var(--color-accent)",
   },
@@ -186,7 +186,7 @@ export function FocusZone() {
           }}
           title={`Soundscape: ${soundscapeName} — click to change`}
           aria-label={`Soundscape: ${soundscapeName}. Click to change`}
-          className="flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-accent"
+          className="flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:text-primary"
         >
           <Music size={12} aria-hidden />
           {soundscapeName}
@@ -246,7 +246,7 @@ export function FocusZone() {
           <button
             onClick={start}
             aria-label={t("ui.start_focus_session")}
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg transition-transform hover:scale-105 active:scale-95"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-container text-on-primary-container transition-transform hover:scale-105 active:scale-95"
           >
             <Play size={22} className="ml-0.5" />
           </button>
@@ -262,7 +262,7 @@ export function FocusZone() {
             <button
               onClick={pomo.skip}
               aria-label={t("ui.skip_phase")}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg backdrop-blur-md transition-transform hover:scale-105 hover:text-accent active:scale-95"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-glass-border bg-glass text-muted-fg backdrop-blur-md transition-transform hover:scale-105 hover:text-primary active:scale-95"
             >
               <SkipForward size={18} />
             </button>
@@ -297,8 +297,8 @@ export function FocusZone() {
               className={cn(
                 "rounded-full border px-4 py-1.5 text-xs font-bold tracking-wide transition-colors disabled:opacity-40",
                 isActive
-                  ? "border-accent/50 bg-accent-soft text-accent"
-                  : "border-glass-border bg-glass text-muted-fg hover:text-accent"
+                  ? "border-primary/50 bg-primary-container/15 text-primary"
+                  : "border-glass-border bg-glass text-muted-fg hover:text-primary"
               )}
             >
               {p.label}
@@ -319,8 +319,8 @@ export function FocusZone() {
             className={cn(
               "rounded-full border px-4 py-1.5 text-xs font-bold tracking-wide transition-colors disabled:opacity-40",
               activePresetId === p.id
-                ? "border-accent/50 bg-accent-soft text-accent"
-                : "border-glass-border bg-glass text-muted-fg hover:text-accent"
+                ? "border-primary/50 bg-primary-container/15 text-primary"
+                : "border-glass-border bg-glass text-muted-fg hover:text-primary"
             )}
           >
             {p.name}

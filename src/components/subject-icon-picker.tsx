@@ -62,8 +62,8 @@ export function SubjectIconPicker({
               className={cn(
                 "flex aspect-square items-center justify-center rounded-xl border transition-all",
                 active
-                  ? "border-accent bg-accent-soft text-accent"
-                  : "border-border bg-bg text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
+                  ? "border-primary bg-primary-container/15 text-primary"
+                  : "border-border bg-bg text-muted-fg hover:border-primary hover:text-primary hover:bg-primary-container/15"
               )}
             >
               <Icon size={18} />

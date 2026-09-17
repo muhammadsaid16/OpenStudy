@@ -9,7 +9,7 @@ export function ForecastCard({ cards }: { cards: FlashcardRec[] }) {
   const t = useT();
   const f = useMemo(() => forecastDue(cards), [cards]);
   const stats = [
-    { label: "Today", value: f.dueToday, color: f.dueToday > 0 ? "text-accent" : "text-muted-fg" },
+    { label: "Today", value: f.dueToday, color: f.dueToday > 0 ? "text-primary" : "text-muted-fg" },
     { label: "Tomorrow", value: f.dueTomorrow - f.dueToday, color: "text-fg" },
     { label: t("ui.this_week"), value: f.dueThisWeek - f.dueTomorrow, color: "text-fg" },
     { label: t("ui.this_month"), value: f.dueThisMonth - f.dueThisWeek, color: "text-fg" },
@@ -80,7 +80,7 @@ export function BundleMasteryTable({
                 </div>
               </td>
               <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-fg">{r.total}</td>
-              <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-accent">{r.dueCount}</td>
+              <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-primary">{r.dueCount}</td>
               <td className="py-2.5 pr-4 text-right font-mono tabular-nums">
                 {r.leechCount > 0 ? <span className="text-danger">{r.leechCount}</span> : <span className="text-muted-fg">0</span>}
               </td>
@@ -88,7 +88,7 @@ export function BundleMasteryTable({
                 {isNaN(r.accuracy) ? (
                   <span className="text-muted-fg">—</span>
                 ) : (
-                  <span className={r.accuracy < 0.5 ? "text-danger" : r.accuracy < 0.75 ? "text-warning" : "text-fg"}>
+                  <span className={r.accuracy < 0.5 ? "text-danger" : r.accuracy < 0.75 ? "text-tertiary" : "text-fg"}>
                     {Math.round(r.accuracy * 100)}%
                   </span>
                 )}

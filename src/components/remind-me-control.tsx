@@ -72,7 +72,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
           <button
             type="button"
             onClick={() => setRemindAt(null)}
-            className="text-success hover:text-accent"
+            className="text-success hover:text-primary"
             aria-label={t("ui.dismiss")}
           >
             <X size={11} />
@@ -81,15 +81,15 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
       );
     }
     return (
-      <div className="flex items-center justify-center gap-2 rounded-full border border-accent/30 bg-accent-soft px-3 py-1.5">
-        <Bell size={11} className="text-accent" />
-        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent-fg">
+      <div className="flex items-center justify-center gap-2 rounded-full border border-primary/30 bg-primary-container/15 px-3 py-1.5">
+        <Bell size={11} className="text-primary" />
+        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-on-primary-container">
           REMINDING IN {fmtCountdown(remaining)}
         </span>
         <button
           type="button"
           onClick={cancel_}
-          className="text-accent-fg hover:text-accent"
+          className="text-on-primary-container hover:text-primary"
           aria-label={t("ui.cancel_reminder")}
         >
           <X size={11} />
@@ -104,7 +104,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-glass-border bg-glass px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-fg backdrop-blur-md transition-colors hover:border-accent hover:text-accent"
+          className="inline-flex items-center gap-1.5 rounded-full border border-glass-border bg-glass px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-fg backdrop-blur-md transition-colors hover:border-primary hover:text-primary"
         >
           <Bell size={11} />{t("ui.remind_me")}</button>
       ) : (
@@ -122,7 +122,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-full p-1.5 text-muted-fg hover:bg-accent-soft hover:text-accent"
+            className="rounded-full p-1.5 text-muted-fg hover:bg-primary-container/15 hover:text-primary"
             aria-label={t("common.cancel")}
           >
             <X size={11} />

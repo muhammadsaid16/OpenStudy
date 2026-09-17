@@ -118,7 +118,7 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t("exam.default_title")}
-              className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold tracking-tight text-fg backdrop-blur-md focus:border-accent focus:outline-none"
+              className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold tracking-tight text-fg backdrop-blur-md focus:border-primary focus:outline-none"
             />
           </div>
 
@@ -138,7 +138,7 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
                     }}
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-xs font-bold tracking-tight transition-colors",
-                      on ? "border-accent bg-accent text-accent-fg" : "border-border text-muted-fg hover:border-accent/60 hover:text-accent"
+                      on ? "border-primary bg-primary-container text-on-primary-container" : "border-border text-muted-fg hover:border-primary/60 hover:text-primary"
                     )}
                   >
                     {s.name}
@@ -164,7 +164,7 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
                       onClick={() => setSelTopics((prev) => (on ? prev.filter((x) => x !== tp.id) : [...prev, tp.id]))}
                       className={cn(
                         "rounded-full border px-2.5 py-1 text-[11px] font-bold tracking-tight transition-colors",
-                        on ? "border-accent bg-accent/15 text-accent" : "border-border text-muted-fg hover:border-accent/60"
+                        on ? "border-primary bg-primary-container/15 text-primary" : "border-border text-muted-fg hover:border-primary/60"
                       )}
                     >
                       {tp.name}
@@ -185,7 +185,7 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
                 max={200}
                 value={count}
                 onChange={(e) => setCount(Math.min(200, Math.max(1, parseInt(e.target.value) || 1)))}
-                className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold text-fg backdrop-blur-md focus:border-accent focus:outline-none"
+                className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold text-fg backdrop-blur-md focus:border-primary focus:outline-none"
               />
             </div>
             <div className="space-y-1.5">
@@ -199,7 +199,7 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
                     onClick={() => setTimeMin(m)}
                     className={cn(
                       "rounded-lg border px-2.5 py-2 text-[11px] font-bold transition-colors",
-                      timeMin === m ? "border-accent bg-accent text-accent-fg" : "border-border text-muted-fg hover:border-accent/60"
+                      timeMin === m ? "border-primary bg-primary-container text-on-primary-container" : "border-border text-muted-fg hover:border-primary/60"
                     )}
                   >
                     {m === null ? t("exam.time_none") : `${m}m`}
@@ -350,7 +350,7 @@ function ExamRunner({ examId, onExit, onFinish }: { examId: string; onExit: () =
   return (
     <div className="mx-auto max-w-2xl space-y-5">
       <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
-        <button onClick={() => setConfirmExit(true)} className="flex items-center gap-1.5 hover:text-accent"><ArrowLeft size={13} />{t("exam.exit")}</button>
+        <button onClick={() => setConfirmExit(true)} className="flex items-center gap-1.5 hover:text-primary"><ArrowLeft size={13} />{t("exam.exit")}</button>
         <span>{idx + 1} / {questions.length}</span>
         {remaining !== null ? (
           <span className={cn("flex items-center gap-1.5", remaining < 60 && "text-danger")}><Timer size={13} />{Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, "0")}</span>
@@ -359,7 +359,7 @@ function ExamRunner({ examId, onExit, onFinish }: { examId: string; onExit: () =
         )}
       </div>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full bg-accent transition-all" style={{ width: `${((idx + 1) / questions.length) * 100}%` }} />
+        <div className="h-full bg-primary-container transition-all" style={{ width: `${((idx + 1) / questions.length) * 100}%` }} />
       </div>
 
       <div className="glass min-h-[300px] rounded-2xl p-8">
@@ -375,7 +375,7 @@ function ExamRunner({ examId, onExit, onFinish }: { examId: string; onExit: () =
                 key={opt}
                 type="button"
                 onClick={() => answer({ mode: "choice", answer: opt })}
-                className="rounded-xl border border-border bg-bg/60 px-4 py-3 text-sm font-bold tracking-tight transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+                className="rounded-xl border border-border bg-bg/60 px-4 py-3 text-sm font-bold tracking-tight transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
               >
                 {opt}
               </button>
@@ -438,7 +438,7 @@ function ExamResults({ examId, onRetake }: { examId: string; onRetake: () => voi
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="glass rounded-2xl p-8 text-center">
-        <Award size={30} className={cn("mx-auto mb-3", passing ? "text-success" : "text-warning")} />
+        <Award size={30} className={cn("mx-auto mb-3", passing ? "text-success" : "text-tertiary")} />
         <p className="text-5xl font-black tracking-tight">{totals.scorePct}%</p>
         <p className="mt-2 text-sm text-muted-fg">
           {exam.title} · {t("exam.correct_of").replace("{c}", String(totals.correct)).replace("{n}", String(totals.answered))}
@@ -456,10 +456,10 @@ function ExamResults({ examId, onRetake }: { examId: string; onRetake: () => voi
             <div key={tp.topicId ?? "general"} className="space-y-1">
               <div className="flex justify-between text-xs font-bold tracking-tight">
                 <span>{tp.label}</span>
-                <span className={tp.pct < 50 ? "text-danger" : tp.pct < 80 ? "text-warning" : "text-success"}>{tp.correct}/{tp.total} · {tp.pct}%</span>
+                <span className={tp.pct < 50 ? "text-danger" : tp.pct < 80 ? "text-tertiary" : "text-success"}>{tp.correct}/{tp.total} · {tp.pct}%</span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                <div className={cn("h-full rounded-full", tp.pct < 50 ? "bg-danger" : tp.pct < 80 ? "bg-warning" : "bg-success")} style={{ width: `${tp.pct}%` }} />
+                <div className={cn("h-full rounded-full", tp.pct < 50 ? "bg-danger" : tp.pct < 80 ? "bg-tertiary" : "bg-success")} style={{ width: `${tp.pct}%` }} />
               </div>
             </div>
           ))}

@@ -13,65 +13,135 @@
 @import "@fontsource/plus-jakarta-sans/700.css";
 
 /* ════════════════════════════════════════════════════════════════
-   OPENSTUDY — "QUIETLY PREMIUM" DESIGN SYSTEM (v3)
-   Linear-like precision · Notion-like organization · Apple-like restraint
-   - Neutral charcoal surfaces, no glassmorphism
-   - One accent per theme, used sparingly
-   - Subtle 1px borders, 8/12/16 radius, 150–220ms motion
-   - Visible focus, full RTL, all 12 themes share one base
+   OPENSTUDY — "QUIET INTELLIGENCE v2" DESIGN SYSTEM
+   Austere precision · Instrument-panel calm · Border-based depth
+   - 4-level elevation: Canvas → Panes → Active Cards → Modals
+   - Semantic color roles: primary (focus), secondary (success), tertiary (alert)
+   - Role-based typography with JetBrains Mono for data
+   - 1px hairline borders, tight radii, restrained motion
+   - No glow effects, no neon halos, no blurred transparencies
    ════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ─── Core neutral surface ramp (shared by every dark theme) ──── */
-  --color-bg: #0B0C0F;             /* near-black neutral charcoal */
-  --color-surface: #141519;        /* card / panel surface */
-  --color-surface-raised: #1B1D23; /* elevated: modals, dropdowns */
-  --color-surface-hover: #23262D;  /* interactive hover surface */
-  --color-muted: #23262D;          /* chips, wells, dividers bg */
-  --color-fg: #ECEDEF;             /* primary text */
-  --color-muted-fg: #9BA1AC;       /* secondary text */
-  --color-border: rgba(255, 255, 255, 0.07);
-  --color-border-strong: rgba(255, 255, 255, 0.13);
+  /* ─── QI v2 Core neutral surface ramp ──────────────────────────── */
+  --color-bg: #111316;               /* canvas — Level 0 */
+  --color-surface: #1e2023;          /* surface container — cards, panels */
+  --color-surface-raised: #282a2d;   /* surface container high — modals, elevated */
+  --color-surface-hover: #333538;    /* surface container highest — hover/active */
+  --color-muted: #1a1c1f;            /* surface container low — inset wells, dividers */
+  --color-fg: #e2e2e6;               /* on-surface — primary text */
+  --color-muted-fg: #c7c4d7;         /* on-surface variant — secondary text */
+  --color-outline: #908fa0;          /* outline — labels, metadata, borders */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
 
-  --color-accent: #FF7A72;         /* OpenStudy signal coral (Aurora) */
-  --color-accent-soft: rgba(255, 122, 114, 0.12);
-  --color-accent-fg: #1A0505;
+  /* ─── QI v2 Semantic color roles ────────────────────────────────── */
+  /* Primary = active focus, CTAs, navigational emphasis */
+  --color-primary: #c0c1ff;
+  --color-primary-container: #8083ff;
+  --color-on-primary-container: #0d0096;
+  --color-accent: #c0c1ff;           /* alias for backward compat */
+  --color-accent-soft: rgba(128, 131, 255, 0.15);
+  --color-accent-fg: #0d0096;
 
-  --color-flow: #38BDF8;           /* progress / active session */
-  --color-grow: #34D399;           /* growth / streaks */
-  --color-danger: #FB4A55;
-  --color-success: #34D399;
-  --color-warning: #F5B544;
+  /* Secondary = success, retention, mastery */
+  --color-secondary: #4edea3;
+  --color-secondary-container: #00a572;
+  --color-grow: #4edea3;             /* backward compat alias */
+  --color-success: #4edea3;          /* backward compat alias */
+
+  /* Tertiary = warnings, urgency, alerts */
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;          /* backward compat alias */
+
+  /* Error = failure, lapses, destructive */
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-danger: #ffb4ab;           /* backward compat alias */
+
+  /* Utility signals */
+  --color-flow: #c0c1ff;            /* progress / active session (maps to primary) */
   --color-info: #60A5FA;
-  --color-on-color: #0B0C0F;
+  --color-on-color: #111316;
 
-  /* solid (non-glass) surfaces — used directly as bg-* utilities */
-  --color-glass: #141519;
-  --color-glass-border: rgba(255, 255, 255, 0.07);
+  /* Solid surfaces */
+  --color-glass: #1e2023;
+  --color-glass-border: rgba(255, 255, 255, 0.08);
 
-  /* subject badge pastels (kept for chips) */
+  /* Subject badge pastels */
   --color-badge-lavender: #C084FC;
   --color-badge-yellow: #F5B544;
   --color-badge-rose: #FDA4AF;
   --color-badge-mint: #6EE7B7;
   --color-badge-sky: #7DD3FC;
 
+  /* ─── QI v2 Typography — role-based ─────────────────────────────── */
   --font-display: "Inter", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --font-round: "Plus Jakarta Sans", "Inter", "Noto Sans Arabic", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  /* ─── QI v2 Border radius — tight, austere ──────────────────────── */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 
-  /* motion tokens — restrained, 150–220ms where used */
+  /* ─── Motion tokens — restrained, 150–220ms where used ──────────── */
   --animate-shimmer: shimmer 1.6s linear infinite;
   --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-loader: loader-slide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   --animate-pulse-dot: pulse-dot 1.6s ease-in-out infinite;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   QI v2 TYPOGRAPHY — role-based type scale
+   ════════════════════════════════════════════════════════════════ */
+@theme {
+  --text-display: 2.25rem;
+  --text-headline-lg: 1.75rem;
+  --text-headline-md: 1.375rem;
+  --text-headline-sm: 1.125rem;
+  --text-body-lg: 1rem;
+  --text-body-md: 0.875rem;
+  --text-body-sm: 0.8125rem;
+  --text-label-code: 0.8125rem;
+  --text-label-metric: 0.75rem;
+  --text-label-keybinding: 0.6875rem;
+
+  /* Legacy fluid scale (kept for compat, overridden by role tokens) */
+  --text-xs: clamp(0.70rem, 0.64rem + 0.30vw, 0.875rem);
+  --text-sm: clamp(0.80rem, 0.74rem + 0.30vw, 1rem);
+  --text-base: clamp(0.95rem, 0.86rem + 0.42vw, 1.125rem);
+  --text-lg: clamp(1.05rem, 0.93rem + 0.55vw, 1.25rem);
+  --text-xl: clamp(1.20rem, 1.00rem + 0.95vw, 1.50rem);
+  --text-2xl: clamp(1.40rem, 1.15rem + 1.20vw, 2rem);
+  --text-3xl: clamp(1.70rem, 1.30rem + 1.90vw, 2.50rem);
+  --text-4xl: clamp(2.00rem, 1.40rem + 2.90vw, 3.50rem);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   QI v2 SPACING — tighter, more precise
+   ════════════════════════════════════════════════════════════════ */
+@theme {
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1.25rem;
+  --space-xl: 2rem;
+  --gutter: 1rem;
+  --margin: 1.5rem;
+
+  /* Legacy fluid spacing (kept for compat) */
+  --space-3xs: clamp(0.20rem, 0.16rem + 0.20vw, 0.375rem);
+  --space-2xs: clamp(0.30rem, 0.26rem + 0.20vw, 0.50rem);
+  --content-max: min(100% - 1.25rem, 80rem);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   KEYFRAMES — preserved from v3
+   ════════════════════════════════════════════════════════════════ */
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
@@ -100,7 +170,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Heading reveal: subtle one-shot rise (no blur/scale drama) ── */
+/* ─── Heading reveal: subtle one-shot rise ── */
 .heading-reveal {
   animation: heading-reveal-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -111,8 +181,8 @@
 
 /* Due-banner attention pulse (token-driven) */
 @keyframes pulse-border {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 40%, transparent); }
-  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent) 0%, transparent); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 40%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 0%, transparent); }
 }
 
 /* ─── Route transition ─────────────────────────────────────────── */
@@ -125,34 +195,37 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   SURFACE SYSTEM — flat, bordered, subtly elevated (no glass)
+   SURFACE SYSTEM — QI v2 4-level elevation model
+   Level 0 (Canvas): root workspace bg
+   Level 1 (Panes): sidebars, navigation panels
+   Level 2 (Active Cards): content cards, editors
+   Level 3 (Modals): dialogs, command palettes
    ════════════════════════════════════════════════════════════════ */
 
-/* Standard surface card.
-   This is the single knob for card surfaces: every <Card> is `className="glass"`
-   and the 33 `bg-glass` sites resolve through the same utility. */
+/* Level 2 — Standard surface card (the universal container) */
 @utility glass {
   background: color-mix(in srgb, var(--color-surface) calc(var(--ui-alpha) * 100%), transparent);
   border: 1px solid var(--color-border);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  box-shadow: none;
 }
 
-/* Raised surface — modals, popovers */
+/* Level 3 — Raised surface: modals, popovers, command palette */
 @utility glass-raised {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border-strong);
-  box-shadow: 0 12px 40px -16px rgb(0 0 0 / 0.55);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-/* Inset well (inputs, fields) */
+/* Level 0/1 — Inset well: inputs, fields, recessed areas */
 @utility glass-inset {
-  background: var(--color-surface);
+  background: var(--color-muted);
   border: 1px solid var(--color-border);
+  box-shadow: none;
 }
 
-/* Soft accent ring for selected / focus-within (NOT a glow) */
+/* Primary ring for selected / focus-within — 1px border, no glow */
 @utility glow-accent {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent);
+  box-shadow: 0 0 0 1px var(--color-primary);
 }
 
 /* Legacy class kept for any remaining reference — static, no breathing */
@@ -161,10 +234,10 @@
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  border: 1px solid color-mix(in srgb, var(--color-accent) 24%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 24%, transparent);
 }
 
-/* ─── Spotlight card — refined radial on hover only ────────────── */
+/* ─── Spotlight card — subtle radial on hover only ──────────────── */
 .spotlight-card { position: relative; }
 .spotlight-card::after {
   content: "";
@@ -176,7 +249,7 @@
   transition: opacity 300ms ease;
   background: radial-gradient(
     340px circle at var(--sx, 50%) var(--sy, 50%),
-    color-mix(in srgb, var(--color-accent) 7%, transparent),
+    color-mix(in srgb, var(--color-primary) 5%, transparent),
     transparent 65%
   );
 }
@@ -202,137 +275,218 @@
 .flip-back { position: absolute; inset: 0; transform: rotateY(180deg); }
 
 /* ════════════════════════════════════════════════════════════════
-   THEME PRESETS (12) — same neutral base, accent variation only.
-   Light themes override the neutral ramp for AA contrast.
+   THEME PRESETS (12) — QI v2 semantic role mapping
+   Each theme sets: primary, secondary, tertiary, and their containers.
+   Dark themes share the neutral ramp; light themes override it.
    ════════════════════════════════════════════════════════════════ */
 
-/* AURORA — coral signal on charcoal (DEFAULT) */
+/* AURORA — coral/indigo (DEFAULT) */
 [data-theme="aurora"] {
-  --color-accent: #FF7A72;
-  --color-accent-soft: rgba(255, 122, 114, 0.12);
-  --color-accent-fg: #1A0505;
-  --color-flow: #38BDF8;
-  --color-grow: #34D399;
-  --color-danger: #FB4A55;
-  --color-success: #34D399;
-  --color-warning: #F5B544;
+  --color-primary: #c0c1ff;
+  --color-primary-container: #8083ff;
+  --color-on-primary-container: #0d0096;
+  --color-accent: #c0c1ff;
+  --color-accent-soft: rgba(128, 131, 255, 0.15);
+  --color-accent-fg: #0d0096;
+  --color-secondary: #4edea3;
+  --color-secondary-container: #00a572;
+  --color-grow: #4edea3;
+  --color-success: #4edea3;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;
+  --color-flow: #c0c1ff;
+  --color-danger: #ffb4ab;
+  --color-error: #ffb4ab;
   --color-info: #60A5FA;
 }
 
-/* MIDNIGHT — blue night */
+/* MIDNIGHT — blue focus */
 [data-theme="midnight"] {
-  --color-accent: #60A5FA;
-  --color-accent-soft: rgba(96, 165, 250, 0.12);
-  --color-accent-fg: #030A1A;
-  --color-flow: #22D3EE;
-  --color-grow: #34D399;
-  --color-danger: #FB4A55;
-  --color-success: #34D399;
-  --color-warning: #F5B544;
+  --color-primary: #adc6ff;
+  --color-primary-container: #4f46e5;
+  --color-on-primary-container: #dad7ff;
+  --color-accent: #adc6ff;
+  --color-accent-soft: rgba(79, 70, 229, 0.15);
+  --color-accent-fg: #dad7ff;
+  --color-secondary: #4edea3;
+  --color-secondary-container: #00a572;
+  --color-grow: #4edea3;
+  --color-success: #4edea3;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;
+  --color-flow: #adc6ff;
+  --color-danger: #ffb4ab;
+  --color-error: #ffb4ab;
   --color-info: #818CF8;
 }
 
 /* NEBULA — violet cosmos */
 [data-theme="nebula"] {
-  --color-accent: #C084FC;
-  --color-accent-soft: rgba(192, 132, 252, 0.12);
-  --color-accent-fg: #150A26;
-  --color-flow: #F0ABFC;
+  --color-primary: #d4bfff;
+  --color-primary-container: #7c3aed;
+  --color-on-primary-container: #ede9fe;
+  --color-accent: #d4bfff;
+  --color-accent-soft: rgba(124, 58, 237, 0.15);
+  --color-accent-fg: #ede9fe;
+  --color-secondary: #6EE7B7;
+  --color-secondary-container: #059669;
   --color-grow: #6EE7B7;
-  --color-danger: #FB4A55;
-  --color-success: #34D399;
-  --color-warning: #F5B544;
+  --color-success: #6EE7B7;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;
+  --color-flow: #d4bfff;
+  --color-danger: #ffb4ab;
+  --color-error: #ffb4ab;
   --color-info: #A78BFA;
 }
 
-/* MATRIX — terminal mint */
+/* MATRIX — terminal emerald */
 [data-theme="matrix"] {
-  --color-accent: #34D399;
-  --color-accent-soft: rgba(52, 211, 153, 0.12);
-  --color-accent-fg: #02120A;
-  --color-flow: #A7F3D0;
-  --color-grow: #F5B544;
-  --color-danger: #FB4A55;
+  --color-primary: #6EE7B7;
+  --color-primary-container: #059669;
+  --color-on-primary-container: #ecfdf5;
+  --color-accent: #6EE7B7;
+  --color-accent-soft: rgba(5, 150, 105, 0.15);
+  --color-accent-fg: #ecfdf5;
+  --color-secondary: #34D399;
+  --color-secondary-container: #047857;
+  --color-grow: #34D399;
   --color-success: #34D399;
-  --color-warning: #F5B544;
-  --color-info: #6EE7B7;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;
+  --color-flow: #6EE7B7;
+  --color-danger: #ffb4ab;
+  --color-error: #ffb4ab;
+  --color-info: #A7F3D0;
 }
 
 /* EMBER — warm hearth */
 [data-theme="ember"] {
-  --color-accent: #FB923C;
-  --color-accent-soft: rgba(251, 146, 60, 0.12);
-  --color-accent-fg: #1A0A02;
-  --color-flow: #F5B544;
-  --color-grow: #34D399;
-  --color-danger: #FB4A55;
-  --color-success: #34D399;
-  --color-warning: #F5B544;
+  --color-primary: #fdba74;
+  --color-primary-container: #ea580c;
+  --color-on-primary-container: #fff7ed;
+  --color-accent: #fdba74;
+  --color-accent-soft: rgba(234, 88, 12, 0.15);
+  --color-accent-fg: #fff7ed;
+  --color-secondary: #4edea3;
+  --color-secondary-container: #00a572;
+  --color-grow: #4edea3;
+  --color-success: #4edea3;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;
+  --color-flow: #fdba74;
+  --color-danger: #ffb4ab;
+  --color-error: #ffb4ab;
   --color-info: #FB923C;
 }
 
-/* ROSEWOOD — soft red-pink */
+/* ROSEWOOD — soft rose */
 [data-theme="rosewood"] {
-  --color-accent: #FB7185;
-  --color-accent-soft: rgba(251, 113, 133, 0.12);
-  --color-accent-fg: #1A060B;
-  --color-flow: #FDA4AF;
+  --color-primary: #fda4af;
+  --color-primary-container: #e11d48;
+  --color-on-primary-container: #fff1f2;
+  --color-accent: #fda4af;
+  --color-accent-soft: rgba(225, 29, 72, 0.15);
+  --color-accent-fg: #fff1f2;
+  --color-secondary: #6EE7B7;
+  --color-secondary-container: #059669;
   --color-grow: #6EE7B7;
-  --color-danger: #FB4A55;
-  --color-success: #34D399;
-  --color-warning: #F5B544;
+  --color-success: #6EE7B7;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;
+  --color-flow: #fda4af;
+  --color-danger: #ffb4ab;
+  --color-error: #ffb4ab;
   --color-info: #F472B6;
 }
 
-/* CYBERPUNK — acid yellow neon */
+/* CYBERPUNK — acid neon */
 [data-theme="cyberpunk"] {
+  --color-primary: #FCEE0A;
+  --color-primary-container: #CA8A04;
+  --color-on-primary-container: #12120A;
   --color-accent: #FCEE0A;
-  --color-accent-soft: rgba(252, 238, 10, 0.10);
+  --color-accent-soft: rgba(202, 138, 4, 0.15);
   --color-accent-fg: #12120A;
-  --color-flow: #00E5FF;
-  --color-grow: #34D399;
-  --color-danger: #FB4A55;
-  --color-success: #34D399;
-  --color-warning: #F5B544;
+  --color-secondary: #4edea3;
+  --color-secondary-container: #00a572;
+  --color-grow: #4edea3;
+  --color-success: #4edea3;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;
+  --color-flow: #FCEE0A;
+  --color-danger: #ffb4ab;
+  --color-error: #ffb4ab;
   --color-info: #00E5FF;
 }
 
-/* ARCTIC — ice blue-teal */
+/* ARCTIC — ice blue */
 [data-theme="arctic"] {
-  --color-accent: #38BDF8;
-  --color-accent-soft: rgba(56, 189, 248, 0.12);
-  --color-accent-fg: #04121E;
-  --color-flow: #99F6E4;
+  --color-primary: #7dd3fc;
+  --color-primary-container: #0284c7;
+  --color-on-primary-container: #e0f2fe;
+  --color-accent: #7dd3fc;
+  --color-accent-soft: rgba(2, 132, 199, 0.15);
+  --color-accent-fg: #e0f2fe;
+  --color-secondary: #6EE7B7;
+  --color-secondary-container: #059669;
   --color-grow: #6EE7B7;
-  --color-danger: #FB4A55;
-  --color-success: #34D399;
-  --color-warning: #F5B544;
+  --color-success: #6EE7B7;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;
+  --color-flow: #7dd3fc;
+  --color-danger: #ffb4ab;
+  --color-error: #ffb4ab;
   --color-info: #38BDF8;
 }
 
-/* SANDSTONE — warm library paper */
+/* SANDSTONE — warm library */
 [data-theme="sandstone"] {
+  --color-primary: #E8B45C;
+  --color-primary-container: #B45309;
+  --color-on-primary-container: #fffbeb;
   --color-accent: #E8B45C;
-  --color-accent-soft: rgba(232, 180, 92, 0.12);
-  --color-accent-fg: #1A1206;
-  --color-flow: #A5B48C;
+  --color-accent-soft: rgba(180, 83, 9, 0.15);
+  --color-accent-fg: #fffbeb;
+  --color-secondary: #86B87E;
+  --color-secondary-container: #4d7c0f;
   --color-grow: #86B87E;
-  --color-danger: #FB4A55;
-  --color-success: #34D399;
-  --color-warning: #F5B544;
+  --color-success: #86B87E;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #ff5451;
+  --color-warning: #ffb3ad;
+  --color-flow: #E8B45C;
+  --color-danger: #ffb4ab;
+  --color-error: #ffb4ab;
   --color-info: #C8A26A;
 }
 
-/* MONO — pure grayscale focus */
+/* MONO — pure grayscale */
 [data-theme="mono"] {
+  --color-primary: #FFFFFF;
+  --color-primary-container: #52525b;
+  --color-on-primary-container: #fafafa;
   --color-accent: #FFFFFF;
-  --color-accent-soft: rgba(255, 255, 255, 0.10);
-  --color-accent-fg: #09090B;
-  --color-flow: #D4D4D8;
-  --color-grow: #A1A1AA;
+  --color-accent-soft: rgba(82, 82, 91, 0.20);
+  --color-accent-fg: #fafafa;
+  --color-secondary: #a1a1aa;
+  --color-secondary-container: #52525b;
+  --color-grow: #a1a1aa;
+  --color-success: #a1a1aa;
+  --color-tertiary: #d4d4d8;
+  --color-tertiary-container: #71717a;
+  --color-warning: #d4d4d8;
+  --color-flow: #FFFFFF;
   --color-danger: #FB4A55;
-  --color-success: #A1A1AA;
-  --color-warning: #F5B544;
+  --color-error: #FB4A55;
   --color-info: #D4D4D8;
 }
 
@@ -342,19 +496,28 @@
   --color-surface: #FFFFFF;
   --color-surface-raised: #FFFFFF;
   --color-surface-hover: #EEF1F5;
-  --color-muted: #EAEef2;
+  --color-muted: #EAEFF2;
   --color-fg: #0F172A;
   --color-muted-fg: #5A6675;
+  --color-outline: #94a3b8;
   --color-border: rgba(15, 23, 42, 0.10);
   --color-border-strong: rgba(15, 23, 42, 0.16);
-  --color-accent: #B91C1C;
-  --color-accent-soft: rgba(185, 28, 28, 0.10);
-  --color-accent-fg: #FFFFFF;
-  --color-flow: #0E7490;
-  --color-grow: #047857;
+  --color-primary: #4f46e5;
+  --color-primary-container: #6366f1;
+  --color-on-primary-container: #eef2ff;
+  --color-accent: #4f46e5;
+  --color-accent-soft: rgba(79, 70, 229, 0.10);
+  --color-accent-fg: #eef2ff;
+  --color-secondary: #059669;
+  --color-secondary-container: #10b981;
+  --color-grow: #059669;
+  --color-success: #059669;
+  --color-tertiary: #dc2626;
+  --color-tertiary-container: #ef4444;
+  --color-warning: #dc2626;
+  --color-flow: #4f46e5;
   --color-danger: #BE123C;
-  --color-success: #047857;
-  --color-warning: #B45309;
+  --color-error: #BE123C;
   --color-info: #1D4ED8;
   --color-glass: #FFFFFF;
   --color-glass-border: rgba(15, 23, 42, 0.10);
@@ -370,16 +533,25 @@
   --color-muted: #EFE9DF;
   --color-fg: #292018;
   --color-muted-fg: #6E604E;
+  --color-outline: #9a8c7a;
   --color-border: rgba(41, 32, 24, 0.12);
   --color-border-strong: rgba(41, 32, 24, 0.18);
+  --color-primary: #9A3412;
+  --color-primary-container: #c2410c;
+  --color-on-primary-container: #fff7ed;
   --color-accent: #9A3412;
   --color-accent-soft: rgba(154, 52, 18, 0.10);
-  --color-accent-fg: #FFFFFF;
-  --color-flow: #0F766E;
+  --color-accent-fg: #fff7ed;
+  --color-secondary: #15803D;
+  --color-secondary-container: #22c55e;
   --color-grow: #15803D;
-  --color-danger: #BE123C;
   --color-success: #15803D;
-  --color-warning: #A16207;
+  --color-tertiary: #991b1b;
+  --color-tertiary-container: #dc2626;
+  --color-warning: #991b1b;
+  --color-flow: #9A3412;
+  --color-danger: #BE123C;
+  --color-error: #BE123C;
   --color-info: #1D4ED8;
   --color-glass: #FFFFFF;
   --color-glass-border: rgba(41, 32, 24, 0.12);
@@ -419,6 +591,10 @@
   --color-slate-300: var(--color-fg);
 }
 
+/* ════════════════════════════════════════════════════════════════
+   BASE STYLES
+   ════════════════════════════════════════════════════════════════ */
+
 * {
   font-family: var(--font-sans);
   scrollbar-width: thin;
@@ -426,15 +602,11 @@
 }
 
 ::selection {
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
+  background: var(--color-primary);
+  color: var(--color-on-primary-container);
 }
 
-/* ─── Interface opacity ──────────────────────────────────────────
-   How far the app's own surfaces step back to let the wallpaper through.
-   1 = fully opaque. At 1, color-mix(X 100%, transparent) resolves to X
-   exactly, so every theme renders identically to before this existed.
-   Set on <html> by the store (and by the no-flash script in layout.tsx). */
+/* ─── Interface opacity ────────────────────────────────────────── */
 :root {
   --ui-alpha: 1;
 }
@@ -456,9 +628,9 @@ body {
 @utility skeleton {
   background: linear-gradient(
     90deg,
-    var(--color-surface-hover) 25%,
-    color-mix(in srgb, var(--color-surface-hover) 65%, var(--color-fg)) 37%,
-    var(--color-surface-hover) 63%
+    var(--color-muted) 25%,
+    color-mix(in srgb, var(--color-muted) 65%, var(--color-fg)) 37%,
+    var(--color-muted) 63%
   );
   background-size: 200% 100%;
   animation: var(--animate-shimmer);
@@ -470,7 +642,7 @@ body {
 
 /* ─── Global select/option theming ─────────────────────────────── */
 select {
-  background-color: var(--color-surface);
+  background-color: var(--color-muted);
   color: var(--color-fg);
 }
 select option {
@@ -494,13 +666,13 @@ select:disabled {
 .md-ul { list-style: disc; }
 .md-ol { list-style: decimal; }
 .md-ul li, .md-ol li { line-height: 1.5; }
-.md-quote { border-left: 3px solid var(--color-accent); padding: 0.25rem 0 0.25rem 0.75rem; margin: 0.5rem 0; color: var(--color-muted-fg); }
-[dir="rtl"] .md-quote { border-left: none; border-right: 3px solid var(--color-accent); padding: 0.25rem 0.75rem 0.25rem 0; }
-.md-pre { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.75rem; overflow-x: auto; margin: 0.5rem 0; }
+.md-quote { border-left: 3px solid var(--color-primary); padding: 0.25rem 0 0.25rem 0.75rem; margin: 0.5rem 0; color: var(--color-muted-fg); }
+[dir="rtl"] .md-quote { border-left: none; border-right: 3px solid var(--color-primary); padding: 0.25rem 0.75rem 0.25rem 0; }
+.md-pre { background: var(--color-muted); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 0.75rem; overflow-x: auto; margin: 0.5rem 0; }
 .md-pre code, .md-code { font-family: var(--font-mono); font-size: 0.85em; }
-.md-code { background: var(--color-surface); padding: 0.1rem 0.35rem; border-radius: 4px; }
+.md-code { background: var(--color-muted); padding: 0.1rem 0.35rem; border-radius: 4px; }
 .md-pre code { background: transparent; padding: 0; }
-.md-link { color: var(--color-accent); text-decoration: underline; }
+.md-link { color: var(--color-primary); text-decoration: underline; }
 .md-link:hover { opacity: 0.8; }
 
 /* ─── JetBrains Mono for all digits & counts ───────────────────── */
@@ -515,7 +687,7 @@ p.font-mono,
    Visible only for keyboard / AT users. Accent-tinted, 2px, offset. */
 @layer base {
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
@@ -579,27 +751,8 @@ p.font-mono,
 [dir="rtl"] .loader-bar-fill { left: auto; right: 0; }
 
 /* ════════════════════════════════════════════════════════════════
-   RESPONSIVE — fluid type/space + container queries
+   RESPONSIVE — container queries + auto-grid
    ════════════════════════════════════════════════════════════════ */
-:root {
-  --text-xs: clamp(0.70rem, 0.64rem + 0.30vw, 0.875rem);
-  --text-sm: clamp(0.80rem, 0.74rem + 0.30vw, 1rem);
-  --text-base: clamp(0.95rem, 0.86rem + 0.42vw, 1.125rem);
-  --text-lg: clamp(1.05rem, 0.93rem + 0.55vw, 1.25rem);
-  --text-xl: clamp(1.20rem, 1.00rem + 0.95vw, 1.50rem);
-  --text-2xl: clamp(1.40rem, 1.15rem + 1.20vw, 2rem);
-  --text-3xl: clamp(1.70rem, 1.30rem + 1.90vw, 2.50rem);
-  --text-4xl: clamp(2.00rem, 1.40rem + 2.90vw, 3.50rem);
-  --space-3xs: clamp(0.20rem, 0.16rem + 0.20vw, 0.375rem);
-  --space-2xs: clamp(0.30rem, 0.26rem + 0.20vw, 0.50rem);
-  --space-xs: clamp(0.40rem, 0.34rem + 0.30vw, 0.75rem);
-  --space-sm: clamp(0.60rem, 0.48rem + 0.55vw, 1rem);
-  --space-md: clamp(0.90rem, 0.72rem + 0.85vw, 1.50rem);
-  --space-lg: clamp(1.20rem, 0.95rem + 1.20vw, 2.50rem);
-  --space-xl: clamp(1.80rem, 1.35rem + 2.10vw, 3.50rem);
-  --content-max: min(100% - 1.25rem, 80rem);
-}
-
 .cq, .card-cq, .grid-cq { container-type: inline-size; }
 .cq-card { container: card / inline-size; }
 

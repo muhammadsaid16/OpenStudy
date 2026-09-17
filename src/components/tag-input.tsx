@@ -47,14 +47,14 @@ export function TagInput({ tags, onChange, placeholder, label }: TagInputProps) 
         {tags.map((t) => (
           <span
             key={t}
-            className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-1 text-xs font-bold text-accent"
+            className="inline-flex items-center gap-1 rounded-full bg-primary-container/15 px-2 py-1 text-xs font-bold text-primary"
           >
             {t}
             <button
               type="button"
               onClick={() => removeTag(t)}
               aria-label={`Remove ${t}`}
-              className="rounded-full p-0.5 text-muted-fg transition-colors hover:text-accent"
+              className="rounded-full p-0.5 text-muted-fg transition-colors hover:text-primary"
             >
               <X size={12} />
             </button>

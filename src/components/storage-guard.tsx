@@ -180,7 +180,7 @@ export function StorageGuard() {
   return (
     <div className="sticky top-0 z-40">
       {preview && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/30 bg-warning/15 px-4 py-3 text-sm backdrop-blur">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/30 bg-tertiary/15 px-4 py-3 text-sm backdrop-blur">
           <p className="font-medium text-fg">
             {t("guard.previewLink").replace("{host}", PROD_HOST)}
           </p>
@@ -191,7 +191,7 @@ export function StorageGuard() {
       )}
 
       {resetAt !== null && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/40 bg-warning/20 px-4 py-3 text-sm backdrop-blur">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/40 bg-tertiary/20 px-4 py-3 text-sm backdrop-blur">
           <div className="space-y-0.5">
             <p className="font-bold text-fg">{t("guard.resetTitle")}</p>
             <p className="text-muted-fg">
@@ -201,10 +201,10 @@ export function StorageGuard() {
           <div className="flex items-center gap-2">
             {copyCount > 0 && (
               <>
-                <button onClick={download} className="rounded-full border border-border bg-bg px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-fg hover:border-accent">
+                <button onClick={download} className="rounded-full border border-border bg-bg px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-fg hover:border-primary">
                   {t("guard.downloadCopy")}
                 </button>
-                <button onClick={restore} disabled={restoring} className="rounded-full bg-accent px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-fg disabled:opacity-50">
+                <button onClick={restore} disabled={restoring} className="rounded-full bg-primary-container px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-on-primary-container disabled:opacity-50">
                   {restoring ? t("guard.restoring") : t("guard.restoreOld")}
                 </button>
               </>
@@ -217,13 +217,13 @@ export function StorageGuard() {
       )}
 
       {resetAt === null && emptyWithBackup && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-accent/25 bg-accent-soft/50 px-4 py-3 text-sm backdrop-blur">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-primary/25 bg-primary-container/15/50 px-4 py-3 text-sm backdrop-blur">
           <p className="font-medium text-fg">{t("guard.foundBackup")}</p>
           <div className="flex items-center gap-2">
-            <button onClick={download} className="rounded-full border border-border bg-bg px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-fg hover:border-accent">
+            <button onClick={download} className="rounded-full border border-border bg-bg px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-fg hover:border-primary">
               {t("guard.downloadCopy")}
             </button>
-            <button onClick={restore} disabled={restoring} className="rounded-full bg-accent px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-fg disabled:opacity-50">
+            <button onClick={restore} disabled={restoring} className="rounded-full bg-primary-container px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-on-primary-container disabled:opacity-50">
               {restoring ? t("guard.restoring") : t("guard.restoreBackup")}
             </button>
           </div>

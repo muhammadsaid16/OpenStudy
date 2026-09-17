@@ -157,11 +157,11 @@ function GoalForm({
                 onClick={() => setHorizon(id)}
                 className={cn(
                   "relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors",
-                  horizon === id ? "text-accent-fg" : "text-muted-fg hover:text-accent"
+                  horizon === id ? "text-on-primary-container" : "text-muted-fg hover:text-primary"
                 )}
               >
                 {horizon === id && (
-                  <span className="absolute inset-0 rounded-full bg-accent" />
+                  <span className="absolute inset-0 rounded-full bg-primary-container" />
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">
                   <Icon size={13} />
@@ -191,11 +191,11 @@ function GoalForm({
                 onClick={() => setRepeat(id)}
                 className={cn(
                   "relative flex flex-1 items-center justify-center rounded-full px-2 py-2 text-xs font-bold transition-colors",
-                  repeat === id ? "text-accent-fg" : "text-muted-fg hover:text-accent"
+                  repeat === id ? "text-on-primary-container" : "text-muted-fg hover:text-primary"
                 )}
               >
                 {repeat === id && (
-                  <span className="absolute inset-0 rounded-full bg-accent" />
+                  <span className="absolute inset-0 rounded-full bg-primary-container" />
                 )}
                 <span className="relative z-10">{label}</span>
               </button>
@@ -215,7 +215,7 @@ function GoalForm({
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="glass-inset flex h-12 w-full rounded-xl px-4 py-2 text-base font-medium tracking-tight text-fg transition-colors duration-200 focus:outline-none focus:!border-accent/20"
+            className="glass-inset flex h-12 w-full rounded-xl px-4 py-2 text-base font-medium tracking-tight text-fg transition-colors duration-200 focus:outline-none focus:!border-primary/20"
           />
         </div>
 
@@ -245,7 +245,7 @@ function GoalForm({
                 className={cn(
                   "h-7 w-7 rounded-full border border-glass-border transition-transform hover:scale-110",
                   color === s.value &&
-                    "ring-2 ring-accent ring-offset-2 ring-offset-bg-raised"
+                    "ring-2 ring-primary ring-offset-2 ring-offset-bg-raised"
                 )}
                 style={{
                   background:

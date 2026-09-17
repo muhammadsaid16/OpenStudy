@@ -36,7 +36,7 @@ export function BundleColorPicker({
               title={c}
               className={cn(
                 "h-7 w-7 rounded-full border border-glass-border transition-transform hover:scale-110",
-                active && "ring-2 ring-accent ring-offset-2 ring-offset-bg-raised"
+                active && "ring-2 ring-primary ring-offset-2 ring-offset-bg-raised"
               )}
               style={{ background: c }}
             />
@@ -49,7 +49,7 @@ export function BundleColorPicker({
           aria-label={t("common.customColor")}
           className={cn(
             "relative h-7 w-7 cursor-pointer rounded-full border border-glass-border transition-transform hover:scale-110",
-            isCustom && "ring-2 ring-accent ring-offset-2 ring-offset-bg-raised"
+            isCustom && "ring-2 ring-primary ring-offset-2 ring-offset-bg-raised"
           )}
           style={{
             background: isCustom
@@ -59,7 +59,7 @@ export function BundleColorPicker({
         >
           <input
             type="color"
-            value={isCustom ? value : "#DFE104"}
+            value={isCustom ? value : "#8083ff"}
             onChange={(e) => onChange(e.target.value.toUpperCase())}
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           />

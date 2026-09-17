@@ -43,7 +43,7 @@ export function ContinueStudying({ target }: { target: ContinueTarget | null }) 
           <Link
             href="/sessions"
             aria-label={`Resume ${target.title}`}
-            className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-bold text-accent-fg transition-transform hover:scale-105"
+            className="inline-flex items-center gap-2 rounded-full bg-primary-container px-4 py-2 text-xs font-bold text-on-primary-container transition-transform hover:scale-105"
           >
             <RotateCw size={13} aria-hidden />{t("dash.resume")}</Link>
         </div>
@@ -52,7 +52,7 @@ export function ContinueStudying({ target }: { target: ContinueTarget | null }) 
           <p className="text-sm text-muted-fg">{t("dash.noActive")}</p>
           <Link
             href="/sessions"
-            className="text-xs font-bold tracking-tight text-accent transition-opacity hover:opacity-80"
+            className="text-xs font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
           >{t("dash.startFirst")}</Link>
         </div>
       )}

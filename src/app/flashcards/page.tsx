@@ -257,7 +257,7 @@ function FlashcardsContent() {
   const [editBundleOpen, setEditBundleOpen] = useState(false);
   const [editBundleName, setEditBundleName] = useState("");
   const [editBundleDesc, setEditBundleDesc] = useState("");
-  const [editBundleColor, setEditBundleColor] = useState("#DFE104");
+  const [editBundleColor, setEditBundleColor] = useState("#8083ff");
   const [savingBundle, setSavingBundle] = useState(false);
 
   // ─── Offline sync ───────────────────────────────────────────
@@ -270,7 +270,7 @@ function FlashcardsContent() {
 
   // ─── Confetti ───────────────────────────────────────────────
   const triggerConfetti = useCallback(() => {
-    const colors = ["#DFE104", "#22C55E", "#3B82F6", "#EF4444", "#EC4899"];
+    const colors = ["#8083ff", "#22C55E", "#3B82F6", "#EF4444", "#EC4899"];
     const container = document.createElement("div");
     container.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden";
     document.body.appendChild(container);
@@ -842,7 +842,7 @@ function FlashcardsContent() {
           />
           <button
             onClick={() => router.push("/subjects")}
-            className="ms-auto py-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
+            className="ms-auto py-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-primary"
           >
             {t("fc.manageBundles")}
           </button>
@@ -858,10 +858,10 @@ function FlashcardsContent() {
                   if (!b) return;
                   setEditBundleName(b.name);
                   setEditBundleDesc(b.description ?? "");
-                  setEditBundleColor(b.color || "#DFE104");
+                  setEditBundleColor(b.color || "#8083ff");
                   setEditBundleOpen(true);
                 }}
-                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
+                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-primary"
                 title={t("fc.editBundle")}
               >
                 <Pencil size={14} className="inline" /> {t("common.edit")}
@@ -886,14 +886,14 @@ function FlashcardsContent() {
                     showToast(t("fc.exportFailed"), "danger");
                   }
                 }}
-                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
+                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-primary"
                 title={t("fc.exportBundleJson")}
               >
                 <Download size={14} className="inline" /> {t("notes.export")}
               </button>
               <button
                 onClick={() => document.getElementById("import-file")?.click()}
-                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
+                className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-primary"
                 title={t("fc.importCardsFile")}
               >
                 <Upload size={14} className="inline" /> {t("fc.import")}
@@ -944,14 +944,14 @@ function FlashcardsContent() {
                 onClick={() => { setMode(m); setIsFlipped(false); }}
                 className={cn(
                   "relative shrink-0 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors",
-                  mode === m ? "text-accent-fg" : "text-muted-fg hover:text-accent"
+                  mode === m ? "text-on-primary-container" : "text-muted-fg hover:text-primary"
                 )}
               >
                 {mode === m && (
                   <motion.span
                     layoutId="fc-tab-pill"
                     transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                    className="absolute inset-0 rounded-lg bg-accent"
+                    className="absolute inset-0 rounded-lg bg-primary-container"
                   />
                 )}
                 <span className="relative z-10">
@@ -1103,10 +1103,10 @@ function FlashcardsContent() {
             </div>
           )}
           {selectedBundle && (
-            <div className="inline-flex items-center gap-2 rounded-full border border-accent/50 bg-accent/5 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/50 bg-primary-container/5 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
               <Layers size={12} />
               <span>{t("fc.bundle")}</span>
-              <span className="h-3 w-px bg-accent/40" />
+              <span className="h-3 w-px bg-primary-container/40" />
               <span>{bundles.find((b) => b.id === selectedBundle)?.name}</span>
             </div>
           )}

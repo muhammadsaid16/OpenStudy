@@ -88,7 +88,7 @@ export function CardImagePicker({
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent/60 hover:text-accent"
+        className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-primary/60 hover:text-primary"
       >
         <ImagePlus size={12} />
         {label}

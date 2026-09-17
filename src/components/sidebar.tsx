@@ -90,11 +90,11 @@ export function Sidebar() {
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         {sidebarOpen && (
           <Link href="/" aria-label={t("ui.openstudy_home")} className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-fg">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
               <Sparkles size={15} aria-hidden />
             </span>
             <span className="text-base font-bold tracking-tight text-fg">
-              Open<span className="text-accent">Study</span>
+              Open<span className="text-primary">Study</span>
             </span>
           </Link>
         )}
@@ -127,7 +127,7 @@ export function Sidebar() {
                     className={cn(
                       "group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium tracking-tight transition-colors duration-150",
                       isActive
-                        ? "bg-accent-soft text-accent"
+                        ? "bg-primary/15 text-primary"
                         : "text-muted-fg hover:bg-surface-hover hover:text-fg",
                       !sidebarOpen && "justify-center px-0"
                     )}
@@ -136,7 +136,7 @@ export function Sidebar() {
                       <motion.span
                         layoutId="sidebar-pill"
                         transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                        className="absolute inset-y-1.5 start-0 w-0.5 rounded-full bg-accent"
+                        className="absolute inset-y-1.5 start-0 w-0.5 rounded-full bg-primary"
                       />
                     )}
                     <Icon size={18} aria-hidden className="shrink-0" />
@@ -160,7 +160,7 @@ export function Sidebar() {
               <Link
                 href="/settings"
                 aria-label={t("ui.all_themes_in_settings")}
-                className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-fg transition-colors hover:text-accent"
+                className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-fg transition-colors hover:text-primary"
               >
                 {t("nav.all")}
               </Link>
@@ -172,7 +172,7 @@ export function Sidebar() {
                 className={cn(
                   "flex h-9 items-center justify-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors",
                   isLight
-                    ? "border-accent bg-accent-soft text-accent"
+                    ? "border-primary bg-primary/15 text-primary"
                     : "border-border text-muted-fg hover:bg-surface-hover hover:text-fg"
                 )}
               >
@@ -184,7 +184,7 @@ export function Sidebar() {
                 className={cn(
                   "flex h-9 items-center justify-center gap-1.5 rounded-lg border text-xs font-semibold transition-colors",
                   isDark
-                    ? "border-accent bg-accent-soft text-accent"
+                    ? "border-primary bg-primary/15 text-primary"
                     : "border-border text-muted-fg hover:bg-surface-hover hover:text-fg"
                 )}
               >

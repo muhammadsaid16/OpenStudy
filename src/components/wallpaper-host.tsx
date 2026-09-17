@@ -300,7 +300,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
       ctx.clearRect(0, 0, width, height);
 
       if (preset === "starfield") {
-        ctx.fillStyle = "#030712";
+        ctx.fillStyle = "#0c0e11";
         ctx.fillRect(0, 0, width, height);
 
         for (const star of stars) {
@@ -320,7 +320,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
         ctx.fillStyle = "rgba(2, 6, 23, 0.15)";
         ctx.fillRect(0, 0, width, height);
 
-        ctx.fillStyle = "#10b981";
+        ctx.fillStyle = "#4edea3";
         ctx.font = `${fontSize}px monospace`;
 
         for (let i = 0; i < drops.length; i++) {
@@ -336,7 +336,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
           if (!reducedMotion) drops[i]++;
         }
       } else if (preset === "bokeh") {
-        ctx.fillStyle = "#070a12";
+        ctx.fillStyle = "#0c0e11";
         ctx.fillRect(0, 0, width, height);
 
         for (const orb of orbs) {
@@ -360,7 +360,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
         }
       } else {
         // Default: Aurora Waves
-        ctx.fillStyle = "#070b14";
+        ctx.fillStyle = "#111316";
         ctx.fillRect(0, 0, width, height);
 
         for (const wave of waves) {

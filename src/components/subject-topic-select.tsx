@@ -111,7 +111,7 @@ export function SubjectTopicSelect({
     return (
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-grow/40 bg-grow/10 px-2.5 py-1 text-xs font-bold text-grow">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-grow/40 bg-secondary/10 px-2.5 py-1 text-xs font-bold text-secondary">
             <Check size={12} />{t("ui.topic_linked")}</span>
           <button
             type="button"
@@ -120,7 +120,7 @@ export function SubjectTopicSelect({
               if (topics === null && selectedSubject) void loadTopics(selectedSubject);
               setTopics((t) => (t === null ? [] : null));
             }}
-            className="text-xs font-bold text-accent hover:underline"
+            className="text-xs font-bold text-primary hover:underline"
           >
             {topics === null ? "Change" : t("common.close")}
           </button>
@@ -154,7 +154,7 @@ export function SubjectTopicSelect({
                     key={t.id}
                     type="button"
                     onClick={() => resolve(selectedSubject, "", t.id)}
-                    className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-sm text-fg transition-colors hover:bg-accent/10"
+                    className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-sm text-fg transition-colors hover:bg-primary-container/10"
                   >
                     <span className="truncate">{t.name}</span>
                     {typeof t._count?.flashcards === "number" && (
@@ -188,7 +188,7 @@ export function SubjectTopicSelect({
                   type="button"
                   disabled={creating || !topicName.trim()}
                   onClick={() => resolve(selectedSubject, topicName)}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-bg px-4 text-xs font-bold text-fg transition-all hover:bg-accent hover:text-accent-fg disabled:opacity-50"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-bg px-4 text-xs font-bold text-fg transition-all hover:bg-primary-container hover:text-on-primary-container disabled:opacity-50"
                 >
                   <Plus size={14} />
                   {creating ? "…" : "Use"}
@@ -221,7 +221,7 @@ export function SubjectTopicSelect({
           type="button"
           disabled={creating || !newSubjectName.trim()}
           onClick={createSubjectInline}
-          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-bg px-4 py-2 text-xs font-bold text-fg transition-all hover:bg-accent hover:text-accent-fg disabled:opacity-50"
+          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-bg px-4 py-2 text-xs font-bold text-fg transition-all hover:bg-primary-container hover:text-on-primary-container disabled:opacity-50"
         >
           <Plus size={14} />
           {creating ? t("fc.creating") : t("ui.create_subject")}
@@ -280,7 +280,7 @@ export function SubjectTopicSelect({
             type="button"
             disabled={creating}
             onClick={() => resolve(selectedSubject, topicName)}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-bg px-4 text-xs font-bold uppercase tracking-tighter text-fg transition-all hover:bg-accent hover:text-accent-fg disabled:opacity-50"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-bg px-4 text-xs font-bold uppercase tracking-tighter text-fg transition-all hover:bg-primary-container hover:text-on-primary-container disabled:opacity-50"
           >
             <Plus size={14} />
             {creating ? "…" : "Use"}

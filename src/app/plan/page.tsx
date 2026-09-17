@@ -94,7 +94,7 @@ export default function PlanPage() {
           ))}
         </div>
         {plan.overloadDay && (
-          <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-2 text-xs font-bold text-warning">
+          <p className="rounded-xl border border-warning/40 bg-tertiary/10 px-4 py-2 text-xs font-bold text-tertiary">
             {t("plan.overloaded").replace("{date}", plan.overloadDay)}
           </p>
         )}
@@ -142,11 +142,11 @@ export default function PlanPage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t("plan.task_title")}
-            className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold text-fg focus:border-accent focus:outline-none"
+            className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold text-fg focus:border-primary focus:outline-none"
           />
           <div className="grid grid-cols-2 gap-3">
-            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm text-fg focus:border-accent focus:outline-none" />
-            <input type="number" min={5} value={estimate} onChange={(e) => setEstimate(e.target.value)} className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm text-fg focus:border-accent focus:outline-none" />
+            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm text-fg focus:border-primary focus:outline-none" />
+            <input type="number" min={5} value={estimate} onChange={(e) => setEstimate(e.target.value)} className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm text-fg focus:border-primary focus:outline-none" />
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="ghost" onClick={() => setModalOpen(false)}>{t("common.cancel")}</Button>
@@ -177,9 +177,9 @@ function PlanDayCard({ day, exams }: { day: PlannerDay; exams: string[] }) {
   const [y, m, d] = day.date.split("-").map(Number);
   const date = new Date(y, m - 1, d);
   const total = day.totalMinutes;
-  const intensity = total === 0 ? "bg-muted" : total < 20 ? "bg-success/40" : total < 45 ? "bg-success" : total < 75 ? "bg-warning" : "bg-danger";
+  const intensity = total === 0 ? "bg-muted" : total < 20 ? "bg-success/40" : total < 45 ? "bg-success" : total < 75 ? "bg-tertiary" : "bg-danger";
   return (
-    <div className={cn("glass space-y-1.5 rounded-xl p-3", exams.length > 0 && "border-accent")}>
+    <div className={cn("glass space-y-1.5 rounded-xl p-3", exams.length > 0 && "border-primary")}>
       <div className="flex items-center justify-between">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">
           {DAY_LABELS[date.getDay()]} {d}
@@ -187,12 +187,12 @@ function PlanDayCard({ day, exams }: { day: PlannerDay; exams: string[] }) {
         <span className={cn("h-2 w-2 rounded-full", intensity)} />
       </div>
       {day.dueCount > 0 && <p className="text-[11px] font-bold text-fg">{day.dueCount} {t("plan.due_cards")}</p>}
-      {day.practiceMinutes > 0 && <p className="text-[11px] text-accent">+{day.practiceMinutes}m {t("plan.practice_short")}</p>}
+      {day.practiceMinutes > 0 && <p className="text-[11px] text-primary">+{day.practiceMinutes}m {t("plan.practice_short")}</p>}
       {day.taskTitles.slice(0, 2).map((title) => (
         <p key={title} className="truncate text-[11px] text-muted-fg">· {title}</p>
       ))}
       {exams.map((x) => (
-        <p key={x} className="truncate text-[11px] font-bold text-accent">★ {x}</p>
+        <p key={x} className="truncate text-[11px] font-bold text-primary">★ {x}</p>
       ))}
     </div>
   );
@@ -210,7 +210,7 @@ function WeakRow({ w }: { w: WeaknessSignal }) {
         {w.trend === "improving" ? <TrendingUp size={14} className="text-success" /> : w.trend === "worsening" ? <TrendingDown size={14} className="text-danger" /> : null}
         <span className={cn(
           "rounded-full px-2 py-0.5 text-[10px] font-black",
-          w.score >= 60 ? "bg-danger/15 text-danger" : w.score >= 35 ? "bg-warning/15 text-warning" : "bg-success/15 text-success"
+          w.score >= 60 ? "bg-danger/15 text-danger" : w.score >= 35 ? "bg-tertiary/15 text-tertiary" : "bg-success/15 text-success"
         )}>
           {w.score}
         </span>

@@ -31,12 +31,12 @@ export function StatsStreakBadge({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent-soft px-3 py-1.5",
+        "inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-container/15 px-3 py-1.5",
         className
       )}
     >
-      <Flame size={14} className="text-accent" />
-      <span className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
+      <Flame size={14} className="text-primary" />
+      <span className="font-mono text-xs font-bold uppercase tracking-widest text-primary">
         {streak} day streak
       </span>
     </div>

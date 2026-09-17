@@ -138,7 +138,7 @@ export function SpotifyMiniPlayer() {
           <button
             onClick={toggle}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg transition-transform hover:scale-105 active:scale-95"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container transition-transform hover:scale-105 active:scale-95"
           >
             {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
           </button>
@@ -196,7 +196,7 @@ export function SpotifyMiniPlayer() {
                   </button>
                   <input type="range" min={0} max={1} step={0.05} value={volume} onChange={(e) => onVolume(parseFloat(e.target.value))} className="h-1 flex-1 accent-[var(--color-accent)]" aria-label="Volume" />
                   {webUrl && (
-                    <a href={webUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
+                    <a href={webUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
                       <ExternalLink size={13} aria-hidden /> Open
                     </a>
                   )}
@@ -226,7 +226,7 @@ export function SpotifyMiniPlayer() {
                   </button>
                   <input type="range" min={0} max={1} step={0.05} value={volume} onChange={(e) => onVolume(parseFloat(e.target.value))} className="h-1 flex-1 accent-[var(--color-accent)]" aria-label="Volume" />
                   {webUrl && (
-                    <a href={webUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
+                    <a href={webUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
                       <ExternalLink size={13} aria-hidden /> Open
                     </a>
                   )}
@@ -428,11 +428,11 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
             setTab("search");
             setActivePlaylist(null);
           }}
-          className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition", tab === "search" ? "bg-accent text-accent-fg shadow" : "text-muted-fg hover:text-fg")}
+          className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition", tab === "search" ? "bg-primary-container text-on-primary-container shadow" : "text-muted-fg hover:text-fg")}
         >
           <Search size={14} /> Search
         </button>
-        <button onClick={() => setTab("paste")} className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition", tab === "paste" ? "bg-accent text-accent-fg shadow" : "text-muted-fg hover:text-fg")}>
+        <button onClick={() => setTab("paste")} className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition", tab === "paste" ? "bg-primary-container text-on-primary-container shadow" : "text-muted-fg hover:text-fg")}>
           <Link2 size={14} /> Paste Link
         </button>
       </div>
@@ -440,7 +440,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
       {tab === "search" ? (
         activePlaylist ? (
           <div className="space-y-3">
-            <button onClick={() => setActivePlaylist(null)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline">
+            <button onClick={() => setActivePlaylist(null)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
               <ArrowLeft size={14} /> Back to results
             </button>
             <div className="flex items-center gap-3 rounded-xl border border-border bg-bg p-3">
@@ -456,7 +456,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                 <p className="truncate text-sm font-bold text-fg">{activePlaylist.name}</p>
                 <p className="truncate text-xs text-muted-fg">{activePlaylist.artist}</p>
               </div>
-              <button onClick={() => playResult(activePlaylist)} className="shrink-0 rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-fg hover:opacity-90">
+              <button onClick={() => playResult(activePlaylist)} className="shrink-0 rounded-full bg-primary-container px-3 py-1.5 text-xs font-bold text-on-primary-container hover:opacity-90">
                 Play all
               </button>
             </div>
@@ -476,7 +476,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                       <p className="truncate text-sm font-semibold text-fg">{t.name}</p>
                       <p className="truncate text-xs text-muted-fg">{t.artist}</p>
                     </div>
-                    <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`, t.image)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
+                    <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`, t.image)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
                       <Play size={14} className="ml-0.5" />
                     </button>
                   </li>
@@ -488,7 +488,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
           <div className="space-y-3">
             <div className="relative">
               <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-fg" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search…" className="h-10 w-full rounded-xl border border-border bg-bg pl-9 pr-9 text-sm text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none" aria-label="Search" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search…" className="h-10 w-full rounded-xl border border-border bg-bg pl-9 pr-9 text-sm text-fg placeholder:text-muted-fg focus:border-primary focus:outline-none" aria-label="Search" />
               {loading && <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-fg" />}
             </div>
 
@@ -535,7 +535,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                       <button
                         onClick={() => playResult(r)}
                         disabled={!isPlayable}
-                        className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95 disabled:opacity-40")}
+                        className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container hover:scale-105 active:scale-95 disabled:opacity-40")}
                         aria-label={isPreviewPlaying ? `Pause ${r.name}` : `Play ${r.name}`}
                         title={!r.embedUrl && r.previewUrl ? "30s preview" : undefined}
                       >
@@ -564,11 +564,11 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                 }}
                 onKeyDown={(e) => e.key === "Enter" && onUse()}
                 placeholder="Paste any link…"
-                className={cn("h-10 w-full rounded-xl border bg-bg pl-9 pr-3 text-sm text-fg placeholder:text-muted-fg focus:outline-none", valid ? "border-border focus:border-accent" : "border-danger focus:border-danger")}
+                className={cn("h-10 w-full rounded-xl border bg-bg pl-9 pr-3 text-sm text-fg placeholder:text-muted-fg focus:outline-none", valid ? "border-border focus:border-primary" : "border-danger focus:border-danger")}
                 aria-label="Paste Spotify link"
               />
             </div>
-            <button onClick={onUse} className="shrink-0 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg hover:opacity-90 active:scale-[0.98]">
+            <button onClick={onUse} className="shrink-0 rounded-xl bg-primary-container px-4 text-sm font-bold text-on-primary-container hover:opacity-90 active:scale-[0.98]">
               Load
             </button>
             {input.includes("playlist") && (
@@ -594,7 +594,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
                     <p className="truncate text-sm font-semibold text-fg">{t.name}</p>
                     <p className="truncate text-xs text-muted-fg">{t.artist}</p>
                   </div>
-                  <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`, t.image)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
+                  <button onClick={() => setTrack(t.embedUrl, t.webUrl, `${t.name} — ${t.artist}`, t.image)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container hover:scale-105 active:scale-95" aria-label={`Play ${t.name}`}>
                     <Play size={14} className="ml-0.5" />
                   </button>
                 </li>
@@ -626,14 +626,14 @@ function Vinyl({ spinning }: { spinning: boolean }) {
         ref={ref}
         className="h-12 w-12 rounded-full"
         style={{
-          background: "repeating-radial-gradient(circle at center, #0b0f17 0 3px, #10151f 3px 6px)",
+          background: "repeating-radial-gradient(circle at center, #111316 0 3px, #1e2023 3px 6px)",
           boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.06), 0 4px 14px rgba(0,0,0,0.5)",
         }}
       >
-        <div className="absolute inset-0 m-auto h-7 w-7 rounded-full border border-white/10 bg-[#0b0f17]" />
+        <div className="absolute inset-0 m-auto h-7 w-7 rounded-full border border-white/10 bg-[#111316]" />
         <div className="absolute inset-0 m-auto h-2.5 w-2.5 rounded-full bg-white/70" />
       </div>
-      {spinning && <motion.span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1, repeat: Infinity }} />}
+      {spinning && <motion.span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-primary" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1, repeat: Infinity }} />}
     </div>
   );
 }

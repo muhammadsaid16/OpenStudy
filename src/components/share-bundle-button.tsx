@@ -97,12 +97,12 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
             <Button variant="secondary" disabled={busy} onClick={download}>{busy ? "…" : t("ui.save_file")}</Button>
           </div>
           {link && (
-            <button type="button" onClick={copy} className="w-full break-all rounded-xl border border-accent bg-accent/10 p-3 text-start text-xs">
+            <button type="button" onClick={copy} className="w-full break-all rounded-xl border border-primary bg-primary-container/10 p-3 text-start text-xs">
               {link}
               <span className="mt-1 block font-bold uppercase tracking-widest">{copied ? "Copied ✓" : t("ui.tap_to_copy")}</span>
             </button>
           )}
-          {tooBig && <p className="text-xs uppercase tracking-widest text-warning">Too big for a link — use save file instead.</p>}
+          {tooBig && <p className="text-xs uppercase tracking-widest text-tertiary">Too big for a link — use save file instead.</p>}
           {error !== "" && <p className="text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
         </div>
       </Modal>

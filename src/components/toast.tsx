@@ -3,6 +3,7 @@
 import { useT } from "@/lib/i18n";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { X } from "lucide-react";
 
 /**
  * Unified app toast — single design system for all notifications.
@@ -22,9 +23,9 @@ type Toast = {
 
 const TONE_CLASS: Record<ToastTone, string> = {
   info: "text-fg",
-  success: "text-grow",
+  success: "text-secondary",
   danger: "text-danger",
-  warning: "text-warning",
+  warning: "text-tertiary",
 };
 
 let listeners: ((t: Toast) => void)[] = [];
@@ -91,9 +92,9 @@ export function ToastHost() {
             <button
               onClick={() => dismiss(toast.id)}
               aria-label={t("ui.dismiss")}
-              className="text-muted-fg transition-colors hover:text-accent"
+              className="text-muted-fg transition-colors hover:text-primary"
             >
-              ✕
+              <X className="h-3.5 w-3.5" aria-hidden />
             </button>
           </div>
         );

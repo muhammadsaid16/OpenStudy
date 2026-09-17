@@ -44,7 +44,7 @@ export function Upcoming({ items }: { items: UpcomingItem[] }) {
           <p className="text-sm text-muted-fg">{t("dash.noDeadlines")}</p>
           <Link
             href="/goals"
-            className="inline-flex items-center gap-1.5 text-xs font-bold tracking-tight text-accent transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-1.5 text-xs font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
           >
             <Plus size={12} aria-hidden />{t("dash.addGoalDeadline")}</Link>
         </div>

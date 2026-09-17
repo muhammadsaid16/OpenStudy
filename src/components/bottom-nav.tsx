@@ -56,14 +56,14 @@ export function BottomNav() {
             aria-current={active ? "page" : undefined}
             className={cn(
               "relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 transition-colors duration-150",
-              active ? "text-accent" : "text-muted-fg"
+              active ? "text-primary" : "text-muted-fg"
             )}
           >
             {active && (
               <motion.span
                 layoutId="bottom-nav-pill"
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                className="absolute inset-x-4 top-1 h-0.5 rounded-full bg-accent"
+                className="absolute inset-x-4 top-1 h-0.5 rounded-full bg-primary"
               />
             )}
             <Icon size={20} aria-hidden />
@@ -76,7 +76,7 @@ export function BottomNav() {
         aria-label="OpenStudy"
         className="flex w-12 items-center justify-center text-muted-fg"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-fg">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
           <Sparkles size={14} aria-hidden />
         </span>
       </Link>

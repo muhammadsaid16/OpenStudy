@@ -31,9 +31,9 @@ const FALL_TRANSITION = { type: "spring" as const, stiffness: 420, damping: 18 }
 const PHASE_META = {
   work: {
     labelKey: "sessions.phaseFocus",
-    cls: "border-accent/40 bg-accent-soft text-accent",
+    cls: "border-primary/40 bg-primary-container/15 text-primary",
     ring: "var(--color-accent)",
-    text: "text-accent",
+    text: "text-primary",
   },
   break: {
     labelKey: "sessions.phaseBreak",
@@ -43,9 +43,9 @@ const PHASE_META = {
   },
   long: {
     labelKey: "sessions.phaseLongBreak",
-    cls: "border-grow/40 bg-grow/10 text-grow",
+    cls: "border-grow/40 bg-secondary/10 text-secondary",
     ring: "var(--color-grow)",
-    text: "text-grow",
+    text: "text-secondary",
   },
 } as const;
 
@@ -337,7 +337,7 @@ export default function SessionsPage() {
             disabled={anyRunning && mode !== m.id}
             className={cn(
               "relative flex items-center rounded-full px-5 py-2 text-xs font-black uppercase tracking-widest transition-colors",
-              mode === m.id ? "text-accent-fg" : "text-muted-fg hover:text-accent",
+              mode === m.id ? "text-on-primary-container" : "text-muted-fg hover:text-primary",
               anyRunning && mode !== m.id && "opacity-40 cursor-not-allowed"
             )}
           >
@@ -345,7 +345,7 @@ export default function SessionsPage() {
               <motion.span
                 layoutId="timer-mode-pill"
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                className="absolute inset-0 rounded-full bg-accent"
+                className="absolute inset-0 rounded-full bg-primary-container"
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
@@ -371,7 +371,7 @@ export default function SessionsPage() {
               placeholder={mode === "pomodoro" ? t("sessions.autoNamed") : t("sessions.exampleReviewing")}
               disabled={anyRunning}
               autoFocus={!anyRunning}
-              className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-accent/20"
+              className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-primary/20"
             />
           </div>
           <SubjectTopicMenu
@@ -404,8 +404,8 @@ export default function SessionsPage() {
                         className={cn(
                           "px-4 py-2 rounded-full border text-xs font-black uppercase tracking-widest transition-colors",
                           isActive
-                            ? "border-accent bg-accent-soft text-accent"
-                            : "border-border bg-bg text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft",
+                            ? "border-primary bg-primary-container/15 text-primary"
+                            : "border-border bg-bg text-muted-fg hover:border-primary hover:text-primary hover:bg-primary-container/15",
                           pomo.running && "opacity-50 cursor-not-allowed"
                         )}
                       >
@@ -420,8 +420,8 @@ export default function SessionsPage() {
                       className={cn(
                         "group inline-flex items-center overflow-hidden rounded-full border text-xs font-black uppercase tracking-widest transition-colors",
                         activePresetId === p.id
-                          ? "border-accent bg-accent-soft text-accent"
-                          : "border-border bg-bg text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft",
+                          ? "border-primary bg-primary-container/15 text-primary"
+                          : "border-border bg-bg text-muted-fg hover:border-primary hover:text-primary hover:bg-primary-container/15",
                         pomo.running && "opacity-50"
                       )}
                     >
@@ -463,7 +463,7 @@ export default function SessionsPage() {
                     value={workMin}
                     onChange={(e) => applyConfig({ workMin: parseInt(e.target.value, 10) || 1 })}
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-accent/20"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-primary/20"
                   />
                 </div>
                 <div>
@@ -476,7 +476,7 @@ export default function SessionsPage() {
                     value={breakMin}
                     onChange={(e) => applyConfig({ breakMin: parseInt(e.target.value, 10) || 1 })}
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-accent/20"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-primary/20"
                   />
                 </div>
                 <div>
@@ -489,7 +489,7 @@ export default function SessionsPage() {
                     value={longBreakMin}
                     onChange={(e) => applyConfig({ longBreakMin: parseInt(e.target.value, 10) || 0 })}
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-accent/20"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-primary/20"
                   />
                 </div>
                 <div>
@@ -504,7 +504,7 @@ export default function SessionsPage() {
                       applyConfig({ cyclesBeforeLongBreak: parseInt(e.target.value, 10) || 0 })
                     }
                     disabled={pomo.running}
-                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-accent/20"
+                    className="glass-inset w-full rounded-xl px-4 py-3 text-sm font-mono tabular-nums text-fg transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-primary/20"
                   />
                 </div>
               </div>
@@ -535,13 +535,13 @@ export default function SessionsPage() {
                   placeholder={t("sessions.saveSetupAs")}
                   disabled={pomo.running}
                   maxLength={50}
-                  className="glass-inset w-full rounded-xl px-4 py-2.5 text-xs text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-accent/20"
+                  className="glass-inset w-full rounded-xl px-4 py-2.5 text-xs text-fg placeholder:text-muted-fg/60 transition-colors outline-none disabled:opacity-50 focus:outline-none focus:!border-primary/20"
                 />
                 <button
                   onClick={saveCurrentAsPreset}
                   disabled={pomo.running || !presetName.trim()}
                   className={cn(
-                    "flex shrink-0 items-center gap-2 rounded-full border border-accent/40 bg-accent-soft px-4 py-2.5 text-xs font-black uppercase tracking-widest text-accent transition-colors hover:bg-accent hover:text-accent-fg",
+                    "flex shrink-0 items-center gap-2 rounded-full border border-primary/40 bg-primary-container/15 px-4 py-2.5 text-xs font-black uppercase tracking-widest text-primary transition-colors hover:bg-primary-container hover:text-on-primary-container",
                     (pomo.running || !presetName.trim()) && "opacity-40 cursor-not-allowed"
                   )}
                 >
@@ -559,7 +559,7 @@ export default function SessionsPage() {
                 className={cn(
                   "relative flex w-full flex-col items-center justify-center gap-3 rounded-2xl border px-4 sm:px-6 py-8 transition-colors",
                   timerRunning && !timerPaused
-                    ? "border-accent/40 bg-accent-soft"
+                    ? "border-primary/40 bg-primary-container/15"
                     : "border-border bg-bg-raised/60"
                 )}
               >
@@ -581,7 +581,7 @@ export default function SessionsPage() {
                 <p
                   className={cn(
                     "font-mono text-4xl font-extrabold tracking-tight tabular-nums transition-colors sm:text-5xl lg:text-6xl whitespace-nowrap",
-                    timerRunning && !timerPaused ? "text-accent" : "text-fg"
+                    timerRunning && !timerPaused ? "text-primary" : "text-fg"
                   )}
                 >
                   {formatTimer(timerSeconds)}
@@ -595,7 +595,7 @@ export default function SessionsPage() {
                 {...magneticHandlers(0.18)}
                 disabled={!timerRunning && !sessionTitle.trim() ? true : false}
                 className={cn(
-                  "mt-6 w-full bg-accent hover:opacity-90 text-accent-fg font-black text-lg rounded-full transition-all py-3 flex items-center justify-center gap-2",
+                  "mt-6 w-full bg-primary-container hover:opacity-90 text-on-primary-container font-black text-lg rounded-full transition-all py-3 flex items-center justify-center gap-2",
                   (!timerRunning && !sessionTitle.trim()) && "opacity-50 cursor-not-allowed"
                 )}
               >
@@ -702,7 +702,7 @@ export default function SessionsPage() {
               <button
                 onClick={!pomo.running ? startPomodoro : pomo.togglePause}
                 {...magneticHandlers(0.18)}
-                className="mt-6 w-full bg-accent hover:opacity-90 text-accent-fg font-black text-lg rounded-full transition-all py-3 flex items-center justify-center gap-2"
+                className="mt-6 w-full bg-primary-container hover:opacity-90 text-on-primary-container font-black text-lg rounded-full transition-all py-3 flex items-center justify-center gap-2"
               >
                 {!pomo.running ? (
                   <>
@@ -722,7 +722,7 @@ export default function SessionsPage() {
                 <div className="mt-2 grid w-full grid-cols-2 gap-2">
                   <button
                     onClick={pomo.skip}
-                    className="w-full bg-glass hover:bg-accent-soft text-muted-fg hover:text-accent font-black text-sm rounded-full transition-all py-2.5 flex items-center justify-center gap-2 border border-glass-border"
+                    className="w-full bg-glass hover:bg-primary-container/15 text-muted-fg hover:text-primary font-black text-sm rounded-full transition-all py-2.5 flex items-center justify-center gap-2 border border-glass-border"
                   >
                     <SkipForward size={14} />{t("ui.skip")}</button>
                   <button
@@ -756,7 +756,7 @@ export default function SessionsPage() {
                   onClick={() => setHistoryRange(key)}
                   aria-pressed={historyRange === key}
                   className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${
-                    historyRange === key ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"
+                    historyRange === key ? "bg-primary-container text-on-primary-container" : "text-muted-fg hover:text-primary"
                   }`}
                 >
                   {label}

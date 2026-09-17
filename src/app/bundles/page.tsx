@@ -44,7 +44,7 @@ export default function BundlesPage() {
   const [editBundle, setEditBundle] = useState<Bundle | null>(null);
   const [editName, setEditName] = useState("");
   const [editDesc, setEditDesc] = useState("");
-  const [editColor, setEditColor] = useState("#DFE104");
+  const [editColor, setEditColor] = useState("#8083ff");
 
   // Delete
   const [deleteTarget, setDeleteTarget] = useState<Bundle | null>(null);
@@ -237,7 +237,7 @@ export default function BundlesPage() {
               {...spotlightProps()}
               {...tiltHandlers(5)}
               className="spotlight-card cq-card group relative flex h-72 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-1 will-change-transform"
-              style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
+              style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#8083ff")}14, transparent 55%)` }}
             >
 
               {/* Header: icon + quick actions */}
@@ -245,9 +245,9 @@ export default function BundlesPage() {
                 <div
                   className="flex h-11 w-11 items-center justify-center rounded-xl text-lg font-black transition-transform duration-200 group-hover:scale-110"
                   style={{
-                    backgroundColor: `${bundle.color || "#DFE104"}1f`,
-                    color: bundle.color || "#DFE104",
-                    boxShadow: `inset 0 0 0 1px ${(bundle.color || "#DFE104")}3d`,
+                    backgroundColor: `${bundle.color || "#8083ff"}1f`,
+                    color: bundle.color || "#8083ff",
+                    boxShadow: `inset 0 0 0 1px ${(bundle.color || "#8083ff")}3d`,
                   }}
                 >
                   {bundle.name.charAt(0)}
@@ -297,7 +297,7 @@ export default function BundlesPage() {
                     }}
                     aria-label={t("common.copyLink")}
                     title={t("share.copyLinkDesc")}
-                    className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-accent disabled:opacity-50"
+                    className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-primary disabled:opacity-50"
                     disabled={shareBusy === bundle.id}
                   >
                     <Link2 size={13} />
@@ -311,7 +311,7 @@ export default function BundlesPage() {
                     }}
                     aria-label={t("bundles.manageCards")}
                     title={t("bundles.manageCards")}
-                    className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-accent"
+                    className="flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg hover:text-primary"
                   >
                     <Layers size={13} />{t("ui.manage")}</button>
                   <button
@@ -324,7 +324,7 @@ export default function BundlesPage() {
                       setEditColor(bundle.color);
                     }}
                     aria-label={t("bundles.editBundle")}
-                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
+                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-primary-container/15 hover:text-primary"
                   >
                     <Pencil size={14} />
                   </button>
@@ -344,7 +344,7 @@ export default function BundlesPage() {
 
               {/* Content */}
               <div className="mt-3 min-w-0">
-                <h3 className="truncate text-xl font-bold text-fg transition-colors group-hover:text-accent">
+                <h3 className="truncate text-xl font-bold text-fg transition-colors group-hover:text-primary">
                   {bundle.name}
                 </h3>
                 {/* Topic badge */}
@@ -367,7 +367,7 @@ export default function BundlesPage() {
               <div className="flex items-center justify-between gap-2" onClick={(e) => e.preventDefault()}>
                 <span
                   className="rounded-full px-2.5 py-1 font-mono text-xs"
-                  style={{ backgroundColor: `${bundle.color || "#DFE104"}14`, color: bundle.color || "#DFE104" }}
+                  style={{ backgroundColor: `${bundle.color || "#8083ff"}14`, color: bundle.color || "#8083ff" }}
                 >
                   {bundle._count.flashcards} card{bundle._count.flashcards !== 1 ? "s" : ""}
                 </span>
@@ -378,7 +378,7 @@ export default function BundlesPage() {
                       e.preventDefault();
                       router.push(`/bundles/${bundle.id}/cards`);
                     }}
-                    className="py-2 text-xs font-bold uppercase tracking-widest text-accent hover:underline"
+                    className="py-2 text-xs font-bold uppercase tracking-widest text-primary hover:underline"
                   >{t("ui.manage_cards")}</button>
                   {bundle._count.flashcards > 0 && (
                     <span className="text-xs font-bold uppercase tracking-widest text-muted-fg group-hover:underline">

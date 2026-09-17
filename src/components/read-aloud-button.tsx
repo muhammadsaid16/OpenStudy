@@ -25,7 +25,7 @@ export function ReadAloudButton({
       onClick={() => (playing || loading ? stop() : speak(text, lang))}
       aria-label={label ?? (playing ? "Stop" : "Read aloud")}
       title={playing ? "Stop" : "Read aloud"}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:bg-accent-soft hover:text-foreground transition-colors tap-target ${className}`}
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:bg-primary-container/15 hover:text-foreground transition-colors tap-target ${className}`}
       style={{ minWidth: 36, minHeight: 36 }}
     >
       {loading ? <Loader2 size={size} className="animate-spin" /> : playing ? <Square size={size - 2} /> : <Volume2 size={size} />}

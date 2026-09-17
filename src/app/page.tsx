@@ -110,9 +110,9 @@ export default function DashboardPage() {
         {action && (
           <motion.div variants={item} className="mb-6">
             <Link href={action.href} className="group block">
-              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/40 bg-accent-soft px-6 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/40 bg-primary-container/15 px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/15 text-accent">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-container/15 text-primary">
                     {action.kind === "due_reviews" ? <Zap size={17} /> : action.kind === "exam_prep" ? <FileQuestion size={17} /> : action.kind === "weak_practice" ? <GraduationCap size={17} /> : action.kind === "task" ? <Target size={17} /> : <CalendarRange size={17} />}
                   </span>
                   <div>
@@ -120,7 +120,7 @@ export default function DashboardPage() {
                     <p className="text-xs text-muted-fg">{action.detail}{action.minutes > 0 ? ` · ~${action.minutes}m` : ""}</p>
                   </div>
                 </div>
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-accent transition-transform group-hover:translate-x-0.5">
+                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary transition-transform group-hover:translate-x-0.5">
                   {t("dash.next_action")} <ArrowRight size={14} />
                 </span>
               </div>
@@ -129,9 +129,9 @@ export default function DashboardPage() {
         )}
         {stats.dueCards > 0 && (
           <motion.div variants={item} className="mb-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/40 bg-accent-soft px-6 py-4 animate-[pulse-border_2s_ease-in-out_infinite]">
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/40 bg-primary-container/15 px-6 py-4 animate-[pulse-border_2s_ease-in-out_infinite]">
               <div className="flex items-center gap-3">
-                <Zap size={20} className="text-accent" aria-hidden />
+                <Zap size={20} className="text-primary" aria-hidden />
                 <p className="text-sm font-bold tracking-tight text-fg">
                   {stats.dueCards} {t("dash.dueReady")}
                 </p>
@@ -198,7 +198,7 @@ export default function DashboardPage() {
                         <p className="mt-2 ps-2 font-mono text-xs tabular-nums text-muted-fg">
                           {s.cardCount} cards ·{" "}
                           {s.dueCount > 0 ? (
-                            <span className="font-bold text-accent">{s.dueCount} due</span>
+                            <span className="font-bold text-primary">{s.dueCount} due</span>
                           ) : (
                             "clear"
                           )}
@@ -215,7 +215,7 @@ export default function DashboardPage() {
               </p>
               {stats.recentSessions.length === 0 ? (
                 <Card className="py-12 text-center">
-                  <Sparkles size={28} aria-hidden className="mx-auto mb-3 text-accent" />
+                  <Sparkles size={28} aria-hidden className="mx-auto mb-3 text-primary" />
                   <p className="text-sm text-muted-fg">
                     {t("dash.noSessions")}
                   </p>
@@ -225,12 +225,12 @@ export default function DashboardPage() {
                   {stats.recentSessions.map((session) => (
                     <div
                       key={session.id}
-                      className="group flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-accent-soft"
+                      className="group flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-primary-container/15"
                     >
                       <div className="flex min-w-0 items-center gap-3">
                         <span
                           className="h-2.5 w-2.5 shrink-0 rounded-full"
-                          style={{ backgroundColor: session.subject?.color ?? "#64748B" }}
+                          style={{ backgroundColor: session.subject?.color ?? "#908fa0" }}
                           aria-hidden
                         />
                         <div className="min-w-0">
@@ -246,7 +246,7 @@ export default function DashboardPage() {
                         <span
                           className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
                             session.completed
-                              ? "bg-grow/10 text-grow"
+                              ? "bg-secondary/10 text-secondary"
                               : "bg-flow/10 text-flow"
                           }`}
                         >
@@ -315,20 +315,20 @@ export default function DashboardPage() {
                 return isEmpty ? (
                   <Link key={s.label} href={s.emptyHref}>
                     <Card hover className="flex h-full flex-col gap-3 p-5">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-container/15 text-primary">
                         <s.icon size={17} aria-hidden />
                       </span>
                       <span className="font-mono text-xl font-bold tabular-nums leading-none lg:text-2xl">
                         0
                       </span>
-                      <span className="text-xs font-bold tracking-tight text-accent">
+                      <span className="text-xs font-bold tracking-tight text-primary">
                         {s.emptyCta}
                       </span>
                     </Card>
                   </Link>
                 ) : (
                   <Card key={s.label} hover className="flex h-full flex-col gap-3 p-5 !p-5">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-container/15 text-primary">
                       <s.icon size={17} aria-hidden />
                     </span>
                     <span className="font-mono text-xl font-bold tabular-nums leading-none lg:text-2xl">
@@ -362,7 +362,7 @@ export default function DashboardPage() {
               <Link href="/goals" aria-label={t("dash.openGoals")}>
                 <Card hover className="flex flex-wrap items-center justify-between gap-4 !p-5">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-container/15 text-primary">
                       <Target size={17} aria-hidden />
                     </span>
                     <div>

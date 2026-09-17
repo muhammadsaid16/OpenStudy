@@ -69,7 +69,7 @@ export default function BundleCardsPage() {
   const router = useRouter();
 
   const [bundleName, setBundleName] = useState<string>("");
-  const [bundleColor, setBundleColor] = useState<string>("#DFE104");
+  const [bundleColor, setBundleColor] = useState<string>("#8083ff");
   const [bundleTopicLabel, setBundleTopicLabel] = useState<string | null>(null);
   const [allBundles, setAllBundles] = useState<BundleRec[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -133,7 +133,7 @@ export default function BundleCardsPage() {
     const b = bundles.find((x) => x.id === bundleId);
     if (b) {
       setBundleName(b.name);
-      setBundleColor(b.color || "#DFE104");
+      setBundleColor(b.color || "#8083ff");
       const t = (b as unknown as { topic?: { name: string; subject?: { name: string } | null } | null }).topic;
       if (t) setBundleTopicLabel(`${t.subject?.name ? `${t.subject.name} › ` : ""}${t.name}`);
       else setBundleTopicLabel(null);
@@ -158,7 +158,7 @@ export default function BundleCardsPage() {
     const b = bundles.find((x) => x.id === bundleId);
     if (b) {
       setBundleName(b.name);
-      setBundleColor(b.color || "#DFE104");
+      setBundleColor(b.color || "#8083ff");
       const t = (b as unknown as { topic?: { name: string; subject?: { name: string } | null } | null }).topic;
       if (t) setBundleTopicLabel(`${t.subject?.name ? `${t.subject.name} › ` : ""}${t.name}`);
       else setBundleTopicLabel(null);
@@ -409,7 +409,7 @@ export default function BundleCardsPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/bundles")}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-muted-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
               aria-label={t("cards.backToBundles")}
             >
               <ArrowLeft size={18} />
@@ -439,7 +439,7 @@ export default function BundleCardsPage() {
             <div className="relative">
               <button
                 onClick={() => setExportMenuOpen((o) => !o)}
-                className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+                className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
               >
                 <Download size={14} />
                 {t("common.export")}
@@ -448,9 +448,9 @@ export default function BundleCardsPage() {
                 <>
                   <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label={t("common.closeExport")} />
                   <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg shadow-2xl z-20">
-                  <button onClick={exportAsJson} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
+                  <button onClick={exportAsJson} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-primary-container/15 hover:text-primary text-start">
                     <Download size={14} />{t("ui.json")}</button>
-                  <button onClick={exportAsCsv} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start border-t border-border">
+                  <button onClick={exportAsCsv} className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-primary-container/15 hover:text-primary text-start border-t border-border">
                     <Download size={14} /> CSV
                   </button>
                 </div>
@@ -460,7 +460,7 @@ export default function BundleCardsPage() {
             <button
               onClick={() => document.getElementById("csv-import")?.click()}
               disabled={importing}
-              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft disabled:opacity-50"
+              className="flex h-10 items-center gap-2 rounded-full border border-border px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15 disabled:opacity-50"
             >
               <Upload size={14} />
               {importing ? t("common.importing") : t("common.import")}
@@ -478,9 +478,9 @@ export default function BundleCardsPage() {
             />
             <button
               onClick={startReview}
-              className="flex h-10 items-center gap-1.5 rounded-full border border-accent bg-accent px-4 text-xs font-bold uppercase tracking-widest text-accent-fg transition-colors hover:opacity-90"
+              className="flex h-10 items-center gap-1.5 rounded-full border border-primary bg-primary-container px-4 text-xs font-bold uppercase tracking-widest text-on-primary-container transition-colors hover:opacity-90"
             >
-              <span className="h-2 w-2 rounded-full bg-accent-fg animate-pulse" aria-hidden />
+              <span className="h-2 w-2 rounded-full bg-on-primary-container animate-pulse" aria-hidden />
               {t("deckCard.review")}
             </button>
             <button
@@ -502,7 +502,7 @@ export default function BundleCardsPage() {
                   setTimeout(() => setCopied(false), 2000);
                 }
               }}
-              className="flex h-10 items-center gap-2 rounded-full border border-accent/60 bg-accent-soft px-3 text-xs font-bold uppercase tracking-widest text-accent transition-colors hover:border-accent"
+              className="flex h-10 items-center gap-2 rounded-full border border-primary/60 bg-primary-container/15 px-3 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:border-primary"
             >
               {copied ? <Check size={14} /> : <Link2 size={14} />}
               {copied ? t("cards.copied") : t("cards.shareBundleBtn")}
@@ -528,10 +528,10 @@ export default function BundleCardsPage() {
           <div className="mb-8 mx-auto max-w-2xl space-y-4">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
               <span>{completed + 1} / {initialTotal} {learningQueue.length > 0 ? `• Relearning × ${learningQueue.length}` : ""}</span>
-              <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">{t("cards.exit")}</button>
+              <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-primary hover:text-primary hover:bg-primary-container/15">{t("cards.exit")}</button>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div className="h-full bg-accent transition-all" style={{ width: `${(completed / Math.max(initialTotal, 1)) * 100}%` }} />
+              <div className="h-full bg-primary-container transition-all" style={{ width: `${(completed / Math.max(initialTotal, 1)) * 100}%` }} />
             </div>
             {(() => {
               const card = activeCard;
@@ -648,10 +648,10 @@ export default function BundleCardsPage() {
                   className={cn(
                     "group relative flex min-h-[200px] flex-col rounded-2xl border p-5 transition-all duration-200",
                     isSelected
-                      ? "border-accent bg-accent/5 ring-1 ring-accent/30"
+                      ? "border-primary bg-primary-container/5 ring-1 ring-primary/30"
                       : flipped
-                      ? "border-accent bg-accent text-accent-fg"
-                      : "border-border bg-bg hover:border-accent hover:bg-accent-soft"
+                      ? "border-primary bg-primary-container text-on-primary-container"
+                      : "border-border bg-bg hover:border-primary hover:bg-primary-container/15"
                   )}
                 >
                   <div className="mb-3 flex items-start justify-between gap-2">
@@ -685,7 +685,7 @@ export default function BundleCardsPage() {
                           setEditTags(card.tags.map((t) => t.tag.name));
                         }}
                         aria-label={t("common.edit")}
-                        className={cn("rounded-full p-2.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent")}
+                        className={cn("rounded-full p-2.5 transition-colors", flipped ? "text-on-primary-container/70 hover:bg-on-primary-container/15 hover:text-on-primary-container" : "text-muted-fg hover:bg-primary-container/15 hover:text-primary")}
                       >
                         <Pencil size={13} />
                       </button>
@@ -693,13 +693,13 @@ export default function BundleCardsPage() {
                         <ReadAloudButton
                           text={`${flipped ? card.back : card.front}${(() => { const d = flipped ? ((card as any).backDescription ?? (card as any).description) : (card as any).frontDescription; return d ? ". " + d : ""; })()}`}
                           size={13}
-                          className={cn(flipped ? "border-accent-fg/20 text-accent-fg/80 hover:bg-accent-fg/15" : "")}
+                          className={cn(flipped ? "border-primary-fg/20 text-on-primary-container/80 hover:bg-on-primary-container/15" : "")}
                         />
                       </span>
                       <button
                         onClick={() => setDeleteTarget(card)}
                         aria-label={t("common.delete")}
-                        className={cn("rounded-full p-2.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-danger/10 hover:text-danger")}
+                        className={cn("rounded-full p-2.5 transition-colors", flipped ? "text-on-primary-container/70 hover:bg-on-primary-container/15 hover:text-on-primary-container" : "text-muted-fg hover:bg-danger/10 hover:text-danger")}
                       >
                         <Trash2 size={13} />
                       </button>
@@ -713,7 +713,7 @@ export default function BundleCardsPage() {
                       <span
                         className={cn(
                           "mb-2 inline-block text-[10px] font-bold uppercase tracking-widest",
-                          flipped ? "text-accent-fg/70" : "text-muted-fg"
+                          flipped ? "text-on-primary-container/70" : "text-muted-fg"
                         )}
                       >
                         {flipped ? t("cards.answerLabel") : t("cards.questionLabel")}
@@ -728,7 +728,7 @@ export default function BundleCardsPage() {
                           <p
                             className={cn(
                               "mt-2 text-xs leading-relaxed tracking-tight",
-                              flipped ? "text-accent-fg/70" : "text-muted-fg"
+                              flipped ? "text-on-primary-container/70" : "text-muted-fg"
                             )}
                           >
                             {d}
@@ -742,14 +742,14 @@ export default function BundleCardsPage() {
                       {card.tags.map((t) => (
                         <span
                           key={t.tag.id}
-                          className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest", flipped ? "bg-accent-fg/15 text-accent-fg" : "bg-muted text-muted-fg")}
+                          className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest", flipped ? "bg-on-primary-container/15 text-on-primary-container" : "bg-muted text-muted-fg")}
                         >
                           {t.tag.name}
                         </span>
                       ))}
                     </div>
                   )}
-                  <p className={cn("mt-2 text-center text-[10px] uppercase tracking-widest", flipped ? "text-accent-fg/60" : "text-muted-fg")}>
+                  <p className={cn("mt-2 text-center text-[10px] uppercase tracking-widest", flipped ? "text-on-primary-container/60" : "text-muted-fg")}>
                     Click to flip • {card.reviewCount} reviews
                   </p>
                 </div>

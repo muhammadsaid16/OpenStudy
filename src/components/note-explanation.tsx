@@ -301,15 +301,15 @@ export function NoteExplanation({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="flex items-center gap-2.5 text-lg font-bold tracking-tight">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent-soft text-accent">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-container/15 text-primary">
               <Lightbulb size={16} />
             </span>
             Explanation
             {hasExplanation && (
-              <span className="rounded-full bg-accent-soft px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent">AI</span>
+              <span className="rounded-full bg-primary-container/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">AI</span>
             )}
             {isTyping && (
-              <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent-fg animate-pulse">{t("noteExp.typing")}</span>
+              <span className="rounded-full bg-primary-container px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-on-primary-container animate-pulse">{t("noteExp.typing")}</span>
             )}
             {isStale && !isTyping && (
               <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">{t("noteExp.outdated")}</span>
@@ -361,7 +361,7 @@ export function NoteExplanation({
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
             rows={14}
-            className="glass-inset mt-2 flex min-h-56 w-full rounded-xl px-4 py-3 text-sm leading-relaxed text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20"
+            className="glass-inset mt-2 flex min-h-56 w-full rounded-xl px-4 py-3 text-sm leading-relaxed text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-primary/20"
             placeholder={t("ui.edit_the_explanation")}
           />
           <div className="mt-3 flex justify-end gap-2">
@@ -401,7 +401,7 @@ export function NoteExplanation({
         ) : hasExplanation && !editing ? (
           <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:font-bold prose-headings:tracking-tight prose-li:leading-relaxed">
             <Markdown content={shown} />
-            {isTyping && <span className="inline-block h-4 w-2 animate-pulse bg-accent align-baseline ml-0.5" aria-hidden />}
+            {isTyping && <span className="inline-block h-4 w-2 animate-pulse bg-primary-container align-baseline ml-0.5" aria-hidden />}
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-glass-border bg-bg-raised/40 p-6">
@@ -414,7 +414,7 @@ export function NoteExplanation({
             <div className="mt-4 flex flex-wrap gap-2">
               <Button size="sm" onClick={doGenerate} disabled={generating || !hasLesson || isTyping}>
                 <Sparkles size={14} />{t("ui.generate_with_ai")}</Button>
-              <a href="#notebooklm-option2" className="inline-flex h-9 items-center gap-2 rounded-full border border-glass-border px-4 text-xs font-semibold text-fg hover:border-accent hover:text-accent">
+              <a href="#notebooklm-option2" className="inline-flex h-9 items-center gap-2 rounded-full border border-glass-border px-4 text-xs font-semibold text-fg hover:border-primary hover:text-primary">
                 Go to Option 2 — NotebookLM <ExternalLink size={14} />
               </a>
             </div>
@@ -440,28 +440,28 @@ export function NoteExplanation({
         {/* ── OPTION 2 ── */}
         <div
           id="notebooklm-option2"
-          className="mt-6 rounded-2xl border border-accent/25 bg-accent-soft/40 p-5 ring-1 ring-accent/10"
+          className="mt-6 rounded-2xl border border-primary/25 bg-primary-container/15/40 p-5 ring-1 ring-primary/10"
         >
           <div className="flex items-start justify-between gap-3">
             <h3 className="flex items-center gap-2 text-sm font-bold tracking-tight">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-accent-fg">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
                 <BookOpen size={14} />
               </span>
               Option 2 — Import via NotebookLM
-              <span className="hidden rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg sm:inline">{t("ui.backup_solution")}</span>
+              <span className="hidden rounded-full bg-primary-container px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-on-primary-container sm:inline">{t("ui.backup_solution")}</span>
             </h3>
-            <span className="shrink-0 rounded-full border border-accent/30 bg-bg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-accent">When AI fails or lesson is too long</span>
+            <span className="shrink-0 rounded-full border border-primary/30 bg-bg px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">When AI fails or lesson is too long</span>
           </div>
           <p className="mt-2 text-xs leading-relaxed text-muted-fg">
             Used when the built-in AI is rate-limited, credits are exhausted, or your lesson exceeds the size limit. You generate the explanation in{" "}
-            <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-accent underline underline-offset-2">{t("ui.notebooklm")}</a>{" "}
+            <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-primary underline underline-offset-2">{t("ui.notebooklm")}</a>{" "}
             with a pre-built prompt (already includes your lesson), then paste the result back here.
           </p>
           <ol className="mt-3 list-decimal space-y-1 pl-5 text-xs leading-relaxed text-muted-fg">
             <li>{t("ui.click")}<span className="font-semibold text-fg">{t("ui.copy_prompt")}</span> below.</li>
             <li>
               Open{" "}
-              <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-accent underline underline-offset-2">{t("ui.notebooklm")}</a>{" "}
+              <a href={NOTEBOOKLM_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-primary underline underline-offset-2">{t("ui.notebooklm")}</a>{" "}
               → <span className="font-semibold text-fg">{t("ui.new_notebook")}</span> → paste the prompt → generate.
             </li>
             <li>Copy NotebookLM’s answer, come back here, paste it in the box below and hit Save.</li>
@@ -482,7 +482,7 @@ export function NoteExplanation({
                 href={NOTEBOOKLM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-9 items-center gap-2 rounded-full bg-accent px-4 text-xs font-bold text-accent-fg transition hover:brightness-110"
+                className="inline-flex h-9 items-center gap-2 rounded-full bg-primary-container px-4 text-xs font-bold text-on-primary-container transition hover:brightness-110"
               >{t("ui.open_notebooklm")}<ExternalLink size={14} />
               </a>
               <Button size="sm" variant="secondary" onClick={copyPrompt}>
@@ -491,14 +491,14 @@ export function NoteExplanation({
             </div>
           </div>
 
-          <div className="mt-5 border-t border-accent/15 pt-5">
+          <div className="mt-5 border-t border-primary/15 pt-5">
             <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("ui.paste_notebooklm_answer_here")}</label>
             <textarea
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
               rows={10}
               placeholder="Paste the NotebookLM answer here (Markdown supported — headings, bullets, bold)…"
-              className="glass-inset mt-2 flex min-h-40 w-full rounded-xl px-4 py-3 text-sm leading-relaxed text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20"
+              className="glass-inset mt-2 flex min-h-40 w-full rounded-xl px-4 py-3 text-sm leading-relaxed text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-primary/20"
             />
             <div className="mt-3 flex flex-wrap justify-end gap-2">
               <Button size="sm" onClick={doSavePaste} disabled={saving || !pasteText.trim()}>

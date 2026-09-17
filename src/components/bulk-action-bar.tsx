@@ -97,8 +97,8 @@ export function BulkActionBar({
   return (
     <>
       <div className="fixed inset-x-0 bottom-6 z-40 flex justify-center px-4 pointer-events-none">
-        <div className="pointer-events-auto flex flex-wrap items-center gap-2 rounded-full border border-accent/60 bg-bg-raised px-4 py-2 shadow-2xl backdrop-blur-md">
-          <span className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
+        <div className="pointer-events-auto flex flex-wrap items-center gap-2 rounded-full border border-primary/60 bg-bg-raised px-4 py-2 shadow-2xl backdrop-blur-md">
+          <span className="font-mono text-xs font-bold uppercase tracking-widest text-primary">
            {ids.length} selected
           </span>
           <span className="h-4 w-px bg-border" />
@@ -115,7 +115,7 @@ export function BulkActionBar({
           <button
             type="button"
             onClick={onCleared}
-            className="rounded-full p-1.5 text-muted-fg hover:bg-accent-soft hover:text-accent"
+            className="rounded-full p-1.5 text-muted-fg hover:bg-primary-container/15 hover:text-primary"
             aria-label={t("bulk.clear")}
           >
             <X size={14} />

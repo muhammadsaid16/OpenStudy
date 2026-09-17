@@ -78,14 +78,14 @@ export default function SubjectsPage() {
   const [editSubject, setEditSubject] = useState<Subject | null>(null);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
-  const [editColor, setEditColor] = useState("#FACC15");
+  const [editColor, setEditColor] = useState("#8083ff");
   const [editIcon, setEditIcon] = useState("book-open");
 
   // Topic management modal state
   const [manageTopicsFor, setManageTopicsFor] = useState<string | null>(null);
   const [hubData, setHubData] = useState<Record<string, TopicHubRow>>({});
   const [manageSubjectsName, setManageSubjectsName] = useState("");
-  const [manageSubjectColor, setManageSubjectColor] = useState("#DFE104");
+  const [manageSubjectColor, setManageSubjectColor] = useState("#8083ff");
   const [managedTopics, setManagedTopics] = useState<{ id: string; name: string; description: string | null }[]>([]);
   const [topicLoaded, setTopicLoaded] = useState(false);
   const [newTopicName, setNewTopicName] = useState("");
@@ -111,7 +111,7 @@ export default function SubjectsPage() {
   const [deckEditBundle, setDeckEditBundle] = useState<Bundle | null>(null);
   const [deckEditName, setDeckEditName] = useState("");
   const [deckEditDesc, setDeckEditDesc] = useState("");
-  const [deckEditColor, setDeckEditColor] = useState("#DFE104");
+  const [deckEditColor, setDeckEditColor] = useState("#8083ff");
   const [deckDeleteTarget, setDeckDeleteTarget] = useState<Bundle | null>(null);
   const [deckShareBusy, setDeckShareBusy] = useState<string | null>(null);
   const theme = useAppStore((s: { theme: string }) => s.theme);
@@ -159,7 +159,7 @@ export default function SubjectsPage() {
     const subj = subjects.find((s) => s.id === subjectId);
     setManageTopicsFor(subjectId);
     setManageSubjectsName(subjectName);
-    setManageSubjectColor(subj?.color || "#DFE104");
+    setManageSubjectColor(subj?.color || "#8083ff");
     setTopicLoaded(false);
     setNewTopicName("");
     setEditTopicId(null);
@@ -488,7 +488,7 @@ export default function SubjectsPage() {
     setEditSubject(subject);
     setEditName(subject.name);
     setEditDescription(subject.description ?? "");
-    setEditColor(subject.color || "#FACC15");
+    setEditColor(subject.color || "#8083ff");
     setEditIcon(subject.icon || "book-open");
   };
 
@@ -653,13 +653,13 @@ export default function SubjectsPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`relative -mb-px border-b-2 px-4 py-2.5 text-sm font-bold tracking-tight transition-colors ${
                 activeTab === tab.id
-                  ? "border-accent text-accent"
-                  : "border-transparent text-muted-fg hover:text-accent hover:border-muted-fg/30"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-fg hover:text-primary hover:border-muted-fg/30"
               }`}
             >
               {tab.label}
               {tab.count !== undefined && (
-                <span className={`ms-2 rounded-full px-2 py-0.5 text-[10px] font-mono ${activeTab === tab.id ? "bg-accent-soft text-accent" : "bg-muted text-muted-fg"}`}>
+                <span className={`ms-2 rounded-full px-2 py-0.5 text-[10px] font-mono ${activeTab === tab.id ? "bg-primary-container/15 text-primary" : "bg-muted text-muted-fg"}`}>
                   {tab.count}
                 </span>
               )}
@@ -722,7 +722,7 @@ export default function SubjectsPage() {
                       setManageTopicsFor(null);
                       router.push(`/bundles/${b.id}/cards`);
                     }}
-                    className="inline-flex min-w-0 max-w-full items-center gap-1 truncate rounded-full border border-border px-3 py-1.5 text-xs font-bold hover:border-accent hover:text-accent hover:bg-accent-soft"
+                    className="inline-flex min-w-0 max-w-full items-center gap-1 truncate rounded-full border border-border px-3 py-1.5 text-xs font-bold hover:border-primary hover:text-primary hover:bg-primary-container/15"
                     style={{ borderColor: b.color || undefined, color: b.color || undefined }}
                     title={t("subj.openBundleCards")}
                   >
@@ -747,8 +747,8 @@ export default function SubjectsPage() {
                     <div
                       className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-2xl font-bold transition-transform duration-200 group-hover:scale-105 bg-[var(--chip)] text-[var(--chip-text)]"
                       style={{
-                        ["--chip" as string]: subject.color || "#DFE104",
-                        ["--chip-text" as string]: readableOn(subject.color || "#DFE104"),
+                        ["--chip" as string]: subject.color || "#8083ff",
+                        ["--chip-text" as string]: readableOn(subject.color || "#8083ff"),
                       }}
                     >
                       {(() => {
@@ -774,7 +774,7 @@ export default function SubjectsPage() {
                         openEditSubject(subject);
                       }}
                       aria-label={t("subj.editSubject")}
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-muted-fg transition-colors hover:bg-primary-container/15 hover:text-primary"
                     >
                       <Pencil size={16} />
                     </button>
@@ -832,7 +832,7 @@ export default function SubjectsPage() {
                   e.stopPropagation();
                   openManageTopics(subject.id, subject.name);
                 }}
-                className="mt-4 inline-flex items-center py-2 text-xs font-bold uppercase tracking-widest text-accent transition-colors hover:underline"
+                className="mt-4 inline-flex items-center py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:underline"
               >
                 {t("subjnew.manageTopics")}
               </button>
@@ -877,7 +877,7 @@ export default function SubjectsPage() {
                     onChange={(e) => setDeckSearch(e.target.value)}
                     placeholder={t("subjnew.searchDecks")}
                     aria-label={t("subjnew.searchDecks")}
-                    className="glass-inset w-full rounded-xl border border-glass-border py-2 ps-9 pe-3 text-sm text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20"
+                    className="glass-inset w-full rounded-xl border border-glass-border py-2 ps-9 pe-3 text-sm text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-primary/20"
                   />
                 </div>
                 {deckSearch && (
@@ -908,13 +908,13 @@ export default function SubjectsPage() {
                   key={bundle.id}
                   {...tiltHandlers(5)}
                   className="group relative flex h-64 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 transition-all duration-200 hover:-translate-y-1 will-change-transform"
-                  style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
+                  style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#8083ff")}14, transparent 55%)` }}
                 >
                   <button onClick={() => router.push(`/bundles/${bundle.id}/cards`)} className="flex flex-1 flex-col justify-between text-start w-full">
                     <div className="flex items-start justify-between w-full">
                       <div
                         className="flex h-11 w-11 items-center justify-center rounded-xl text-lg font-black transition-transform duration-200 group-hover:scale-110"
-                        style={{ backgroundColor: bundle.color || "#DFE104", color: readableOn(bundle.color || "#DFE104") }}
+                        style={{ backgroundColor: bundle.color || "#8083ff", color: readableOn(bundle.color || "#8083ff") }}
                       >
                         {bundle.name.charAt(0).toUpperCase()}
                       </div>
@@ -928,7 +928,7 @@ export default function SubjectsPage() {
                             aria-label={t("common.copyLink")}
                             title={t("share.copyLinkDesc")}
                             disabled={deckShareBusy === bundle.id}
-                            className="rounded-full p-1.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent disabled:opacity-50"
+                            className="rounded-full p-1.5 text-muted-fg transition-colors hover:bg-primary-container/15 hover:text-primary disabled:opacity-50"
                           >
                             <Link2 size={13} />
                           </button>
@@ -938,11 +938,11 @@ export default function SubjectsPage() {
                               setDeckEditBundle(bundle);
                               setDeckEditName(bundle.name);
                               setDeckEditDesc(bundle.description || "");
-                              setDeckEditColor(bundle.color || "#DFE104");
+                              setDeckEditColor(bundle.color || "#8083ff");
                             }}
                             aria-label={t("subj.editDeck")}
                             title={t("subj.editDeck")}
-                            className="rounded-full p-1.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
+                            className="rounded-full p-1.5 text-muted-fg transition-colors hover:bg-primary-container/15 hover:text-primary"
                           >
                             <Pencil size={13} />
                           </button>
@@ -970,7 +970,7 @@ export default function SubjectsPage() {
                   <div className="mt-4 flex gap-2">
                     <Button size="sm" variant="secondary" onClick={() => router.push(`/bundles/${bundle.id}/cards`)} className="flex-1">{t("deckCard.open")}</Button>
                     <Button size="sm" onClick={() => startReviewForBundle(bundle.id)} className="flex-1 gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-accent-fg animate-pulse" aria-hidden />
+                      <span className="h-2 w-2 rounded-full bg-on-primary-container animate-pulse" aria-hidden />
                       {t("deckCard.review")}
                     </Button>
                   </div>
@@ -988,10 +988,10 @@ export default function SubjectsPage() {
             <div className="mx-auto max-w-2xl space-y-6">
               <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
                 <span>{completed + 1} / {initialTotal} {learningQueue.length > 0 ? `• Relearning × ${learningQueue.length}` : ""}</span>
-                <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-accent hover:text-accent hover:bg-accent-soft">{t("cards.exit")}</button>
+                <button onClick={() => { setIsReviewing(false); setIsFlipped(false); }} className="rounded-full border border-border px-3 py-1.5 hover:border-primary hover:text-primary hover:bg-primary-container/15">{t("cards.exit")}</button>
               </div>
               <div className="w-full h-1.5 overflow-hidden rounded-full bg-muted">
-                <div className="h-full bg-accent transition-all" style={{ width: `${(completed / Math.max(initialTotal, 1)) * 100}%`}} />
+                <div className="h-full bg-primary-container transition-all" style={{ width: `${(completed / Math.max(initialTotal, 1)) * 100}%`}} />
               </div>
                   <div className="glass rounded-2xl p-8 min-h-[280px] flex flex-col">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted-fg mb-3">
@@ -1049,7 +1049,7 @@ export default function SubjectsPage() {
                       <span className="ms-2 shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-mono">{b._count.flashcards}</span>
                     </button>
                     <Button size="sm" onClick={() => startReviewForBundle(b.id)} className="ms-3 shrink-0 gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-accent-fg animate-pulse" aria-hidden />
+                      <span className="h-2 w-2 rounded-full bg-on-primary-container animate-pulse" aria-hidden />
                       {t("deckCard.review")}
                     </Button>
                   </div>
@@ -1180,10 +1180,10 @@ export default function SubjectsPage() {
                               <span className="inline-flex items-center gap-1"><Clock size={10} /> {hubData[topic.id].sessions} {t("hub.sessions")}</span>
                             )}
                             {hubData[topic.id]?.due > 0 && (
-                              <span className="inline-flex items-center gap-1 text-accent"><Zap size={10} /> {hubData[topic.id].due} {t("topbar.due")}</span>
+                              <span className="inline-flex items-center gap-1 text-primary"><Zap size={10} /> {hubData[topic.id].due} {t("topbar.due")}</span>
                             )}
                             {hubData[topic.id]?.weakness && (
-                              <span className={hubData[topic.id].weakness!.trend === "worsening" ? "inline-flex items-center gap-1 text-danger" : "inline-flex items-center gap-1 text-warning"}>
+                              <span className={hubData[topic.id].weakness!.trend === "worsening" ? "inline-flex items-center gap-1 text-danger" : "inline-flex items-center gap-1 text-tertiary"}>
                                 <TrendingDown size={10} /> {t("hub.weak_score").replace("{n}", String(hubData[topic.id].weakness!.score))}
                               </span>
                             )}
@@ -1198,7 +1198,7 @@ export default function SubjectsPage() {
                                   setManageTopicsFor(null);
                                   router.push(`/bundles/${b.id}/cards`);
                                 }}
-                                className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest hover:border-accent hover:text-accent hover:bg-accent-soft"
+                                className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest hover:border-primary hover:text-primary hover:bg-primary-container/15"
                                 style={{ borderColor: b.color || manageSubjectColor, color: b.color || manageSubjectColor }}
                                 title={t("subj.manageBundleCards")}
                               >
@@ -1219,7 +1219,7 @@ export default function SubjectsPage() {
                             setEditTopicName(topic.name);
                           }}
                           aria-label={t("subj.editTopic")}
-                          className="p-2 text-muted-fg transition-colors hover:bg-accent hover:text-accent-fg"
+                          className="p-2 text-muted-fg transition-colors hover:bg-primary-container hover:text-on-primary-container"
                         >
                           <Pencil size={14} />
                         </button>
@@ -1242,7 +1242,7 @@ export default function SubjectsPage() {
                           setManageTopicsFor(null);
                           router.push(`/notes?topic=${topic.id}`);
                         }}
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
+                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-primary hover:text-primary hover:bg-primary-container/15"
                       >
                         <FileText size={12} />{t("ui.notes")}</button>
                       {bundles.length > 0 ? (
@@ -1251,7 +1251,7 @@ export default function SubjectsPage() {
                             setManageTopicsFor(null);
                             router.push(`/bundles/${bundles[0].id}/cards`);
                           }}
-                          className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg hover:opacity-90"
+                          className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary-container px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-on-primary-container hover:opacity-90"
                         >
                           <Layers size={12} /> Cards ({bundles[0]._count.flashcards}) <ExternalLink size={10} />
                         </button>
@@ -1259,21 +1259,21 @@ export default function SubjectsPage() {
                         <button
                           onClick={() => handleCreateBundleFromTopic(topic.id)}
                           disabled={isPending}
-                          className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg hover:opacity-90 disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary-container px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-on-primary-container hover:opacity-90 disabled:opacity-50"
                         >
                           <Plus size={12} />{t("fc.newBundle")}</button>
                       )}
                       {hubData[topic.id]?.tasks > 0 && (
                         <button
                           onClick={() => router.push("/plan")}
-                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
+                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-primary hover:text-primary hover:bg-primary-container/15"
                         >
                           <CircleDot size={12} /> {hubData[topic.id].tasks} {t("hub.tasks")}
                         </button>
                       )}
                       <button
                         onClick={() => setLinkTopicId(linkTopicId === topic.id ? null : topic.id)}
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
+                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-primary hover:text-primary hover:bg-primary-container/15"
                       >
                         <Link2 size={12} />{t("ui.link")}</button>
                       {bundles.length > 1 && (
@@ -1282,7 +1282,7 @@ export default function SubjectsPage() {
                             setManageTopicsFor(null);
                             router.push(`/bundles/${bundles[0].id}/cards`);
                           }}
-                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
+                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-primary hover:text-primary hover:bg-primary-container/15"
                           title={t("subjnew.studyAll")}
                         >
                           {t("subjnew.studyAll")}

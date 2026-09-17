@@ -172,7 +172,7 @@ export default function NotePage() {
         {/* Back */}
         <button
           onClick={() => router.push("/notes")}
-          className="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent transition-colors"
+          className="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-primary transition-colors"
         >
           <ArrowLeft size={14} />{t("notesDetail.backToNotes")}</button>
 
@@ -193,7 +193,7 @@ export default function NotePage() {
                   </span>
                   <span aria-hidden>›</span>
                   <span>{note.topic.name}</span>
-                  {note.isPinned && <span className="ms-1 inline-flex items-center gap-1 text-accent"><Pin size={10} />{t("notesDetail.pinned")}</span>}
+                  {note.isPinned && <span className="ms-1 inline-flex items-center gap-1 text-primary"><Pin size={10} />{t("notesDetail.pinned")}</span>}
                 </p>
               )}
               <h1 className="text-3xl font-bold tracking-tight text-fg lg:text-4xl">
@@ -207,7 +207,7 @@ export default function NotePage() {
               <ReadAloudButton text={`${note.title}. ${note.content ?? ""}`} />
               <button
                 onClick={handleTogglePin}
-                className={`rounded-full p-2.5 transition-colors ${note.isPinned ? "bg-accent text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent"}`}
+                className={`rounded-full p-2.5 transition-colors ${note.isPinned ? "bg-primary-container text-on-primary-container" : "text-muted-fg hover:bg-primary-container/15 hover:text-primary"}`}
                 title={note.isPinned ? "Unpin" : "Pin"}
                 aria-label={note.isPinned ? t("ui.unpin_note") : t("ui.pin_note")}
               >
@@ -215,7 +215,7 @@ export default function NotePage() {
               </button>
               <button
                 onClick={openEdit}
-                className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-accent-soft hover:text-accent"
+                className="rounded-full p-2.5 text-muted-fg transition-colors hover:bg-primary-container/15 hover:text-primary"
                 title={t("common.edit")}
                 aria-label={t("notesDetail.editNote")}
               >
@@ -251,7 +251,7 @@ export default function NotePage() {
             </div>
           ) : (
             <div className="flex flex-col items-center py-16 text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-container/15 text-primary">
                 <StickyNote size={28} />
               </div>
               <p className="text-sm font-bold uppercase tracking-widest">{t("notes.noContentYet")}</p>
@@ -292,7 +292,7 @@ export default function NotePage() {
 
         {/* Related */}
         <div className="mt-8 flex justify-center">
-          <Link href="/notes" className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-accent transition-colors">
+          <Link href="/notes" className="text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-primary transition-colors">
             ← Back to all notes
           </Link>
         </div>
@@ -319,7 +319,7 @@ export default function NotePage() {
             <input
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className="glass-inset flex h-12 w-full rounded-xl px-4 py-2 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20"
+              className="glass-inset flex h-12 w-full rounded-xl px-4 py-2 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-primary/20"
             />
           </div>
           <div className="space-y-1.5">
@@ -328,7 +328,7 @@ export default function NotePage() {
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               rows={10}
-              className="glass-inset flex w-full rounded-xl px-4 py-3 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-accent/20 resize-none"
+              className="glass-inset flex w-full rounded-xl px-4 py-3 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-primary/20 resize-none"
             />
           </div>
           <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />

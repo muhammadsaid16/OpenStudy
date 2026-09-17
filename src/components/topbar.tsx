@@ -64,7 +64,7 @@ export function TopBar({ dueCards }: { dueCards: number }) {
         <h1 className="truncate text-2xl font-bold tracking-tight text-fg lg:text-3xl">
           {now ? `${greetingFor(now.getHours(), t)}, ${t("topbar.learner")}` : t("topbar.welcomeBack")}
           {dueCards > 0 && (
-            <span className="ms-3 inline-flex items-center rounded-full bg-accent-soft px-3 py-0.5 align-middle text-xs font-bold uppercase tracking-widest text-accent">
+            <span className="ms-3 inline-flex items-center rounded-full bg-primary-container/15 px-3 py-0.5 align-middle text-xs font-bold uppercase tracking-widest text-primary">
               {dueCards} {t("topbar.due")}
             </span>
           )}

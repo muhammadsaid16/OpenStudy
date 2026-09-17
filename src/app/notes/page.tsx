@@ -321,7 +321,7 @@ function NotesContent() {
             <div className="relative">
               <button
                 onClick={() => setExportMenuOpen((o) => !o)}
-                className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+                className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
               >
                 <Download size={14} />
                 {t("notes.exportBtn")}
@@ -330,9 +330,9 @@ function NotesContent() {
                 <>
                   <button className="fixed inset-0 z-10" onClick={() => setExportMenuOpen(false)} aria-label={t("common.closeExport")} />
                   <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-2xl border border-border bg-bg p-1 shadow-2xl z-20">
-                    <button onClick={exportAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
+                    <button onClick={exportAsJson} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-primary-container/15 hover:text-primary text-start">
                       <Download size={14} />{t("ui.json")}</button>
-                    <button onClick={exportAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-accent-soft hover:text-accent text-start">
+                    <button onClick={exportAsCsv} className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide text-fg hover:bg-primary-container/15 hover:text-primary text-start">
                       <Download size={14} /> CSV
                     </button>
                   </div>
@@ -342,7 +342,7 @@ function NotesContent() {
             <button
               onClick={() => importInputRef.current?.click()}
               disabled={importing}
-              className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft disabled:opacity-50"
+              className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15 disabled:opacity-50"
             >
               <Upload size={14} />
               {importing ? t("notes.importingBtn") : t("notes.importBtn")}
@@ -378,7 +378,7 @@ function NotesContent() {
               />
             </div>
             {topicFilter && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-accent bg-accent px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-fg">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary bg-primary-container px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-on-primary-container">
                 <BookOpen size={12} /> {activeTopicName}
                 <button onClick={() => router.push("/notes")} className="ms-1 hover:opacity-70" title={t("notes.clearFilter")}>
                   <X size={12} />
@@ -450,21 +450,21 @@ function NotesContent() {
                     onClick={() => router.push("/notes/" + note.id)}
                     aria-label="Study note"
                     title={t("common.study")}
-                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-accent"
+                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-primary"
                   >
                     <Eye size={14} />
                   </button>
                   <button
                     onClick={() => openEdit(note)}
                     aria-label={t("common.edit")}
-                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-accent"
+                    className="rounded-full p-2.5 text-muted-fg transition-colors hover:text-primary"
                   >
                     <Pencil size={14} />
                   </button>
                   <button
                     onClick={() => handleTogglePin(note.id, note.isPinned)}
                     aria-label={isPinned ? "Unpin" : "Pin"}
-                    className={`rounded-full p-2.5 transition-colors ${isPinned ? "text-accent" : "text-muted-fg hover:text-accent"}`}
+                    className={`rounded-full p-2.5 transition-colors ${isPinned ? "text-primary" : "text-muted-fg hover:text-primary"}`}
                   >
                     <Pin size={14} />
                   </button>
@@ -480,14 +480,14 @@ function NotesContent() {
 
               {/* Content */}
               <div className="mt-3 min-w-0 flex-1">
-                <h3 className="line-clamp-2 text-lg font-bold text-fg transition-colors group-hover:text-accent">
+                <h3 className="line-clamp-2 text-lg font-bold text-fg transition-colors group-hover:text-primary">
                   {note.title}
                 </h3>
                 {note.topic && (
                   <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
                     {note.topic.subject?.name ? `${note.topic.subject.name} › ` : ""}
                     {note.topic.name}
-                    {isPinned && <span className="ms-2 text-accent">· Pinned</span>}
+                    {isPinned && <span className="ms-2 text-primary">· Pinned</span>}
                   </p>
                 )}
                 <div className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-fg">
@@ -495,8 +495,8 @@ function NotesContent() {
                 </div>
                 {/* Explanation snippet */}
                 {(note as any).explanation && (
-                  <div className={`mt-3 flex gap-2 rounded-xl border px-3 py-2 ${(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 ? "border-amber-500/25 bg-amber-500/10" : "border-accent/15 bg-accent-soft/40"}`}>
-                    <Lightbulb size={12} className={`mt-0.5 shrink-0 ${(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 ? "text-amber-600" : "text-accent"}`} />
+                  <div className={`mt-3 flex gap-2 rounded-xl border px-3 py-2 ${(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 ? "border-amber-500/25 bg-amber-500/10" : "border-primary/15 bg-primary-container/15/40"}`}>
+                    <Lightbulb size={12} className={`mt-0.5 shrink-0 ${(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 ? "text-amber-600" : "text-primary"}`} />
                     <p className="line-clamp-2 text-xs leading-relaxed text-fg/75">
                       {(note as any).explanationUpdatedAt && new Date(note.updatedAt).getTime() > new Date((note as any).explanationUpdatedAt).getTime() + 1500 && (
                         <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 me-1"><ClockAlert size={10}/> Outdated ·</span>
@@ -609,7 +609,7 @@ function NotesContent() {
                   <X size={12} />{t("notes.remove")}</button>
               )}
               {!editTopicId && subjects.length > 0 && (
-                <p className="text-[11px] uppercase tracking-widest text-warning">
+                <p className="text-[11px] uppercase tracking-widest text-tertiary">
                   {t("notes.pickSubject")}
                 </p>
               )}

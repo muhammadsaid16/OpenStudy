@@ -74,10 +74,10 @@ export function AiGenerateModal({
   const [source, setSource] = useState(defaultPrompt ?? "");
 
   useEffect(() => {
-    if (defaultPrompt && source === "" ) setSource(defaultPrompt);
+    if (defaultPrompt && source === "") setSource(defaultPrompt);
     // keep source in sync if prompt arrives late (e.g. note loads after mount)
     if (defaultPrompt && defaultPrompt !== source && phase === "input" && source.length === 0) setSource(defaultPrompt);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultPrompt]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -317,11 +317,10 @@ export function AiGenerateModal({
           type="button"
           onClick={() => { if (phase !== "generating" && phase !== "saving") setMode("text"); }}
           disabled={phase === "generating" || phase === "saving"}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
-            mode === "text"
-              ? "bg-accent text-accent-fg"
-              : "text-muted-fg hover:text-accent disabled:opacity-50"
-          }`}
+          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${mode === "text"
+              ? "bg-primary-container text-on-primary-container"
+              : "text-muted-fg hover:text-primary disabled:opacity-50"
+            }`}
           aria-pressed={mode === "text"}
         >
           <FileText size={14} />{t("ui.text")}</button>
@@ -329,11 +328,10 @@ export function AiGenerateModal({
           type="button"
           onClick={() => { if (phase !== "generating" && phase !== "saving") setMode("image"); }}
           disabled={phase === "generating" || phase === "saving"}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
-            mode === "image"
-              ? "bg-accent text-accent-fg"
-              : "text-muted-fg hover:text-accent disabled:opacity-50"
-          }`}
+          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${mode === "image"
+              ? "bg-primary-container text-on-primary-container"
+              : "text-muted-fg hover:text-primary disabled:opacity-50"
+            }`}
           aria-pressed={mode === "image"}
         >
           <ImageIcon size={14} />{t("ui.image")}</button>
@@ -363,7 +361,7 @@ export function AiGenerateModal({
             ))}
           </select>
         ) : (
-          <p className="text-sm text-warning">
+          <p className="text-sm text-tertiary">
             No decks yet — create one in Library first.
           </p>
         )}
@@ -376,13 +374,12 @@ export function AiGenerateModal({
           <div className="flex items-end justify-between">
             <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("ui.your_source_text")}</p>
             <span
-              className={`font-mono text-[10px] uppercase tracking-widest ${
-                sourceLen > MAX_CHARS
+              className={`font-mono text-[10px] uppercase tracking-widest ${sourceLen > MAX_CHARS
                   ? "text-danger"
                   : sourceLen >= MIN_CHARS
-                  ? "text-success"
-                  : "text-muted-fg"
-              }`}
+                    ? "text-success"
+                    : "text-muted-fg"
+                }`}
             >
               {sourceLen.toLocaleString()} / {MAX_CHARS.toLocaleString()}
             </span>
@@ -406,8 +403,8 @@ export function AiGenerateModal({
             {sourceLen < MIN_CHARS
               ? `Need ${MIN_CHARS - sourceLen} more characters`
               : sourceLen > MAX_CHARS
-              ? "Over limit — split into smaller chunks"
-              : "Ready · press Generate or use ⌘/Ctrl + Enter"}
+                ? "Over limit — split into smaller chunks"
+                : "Ready · press Generate or use ⌘/Ctrl + Enter"}
           </p>
         </div>
       ) : (
@@ -433,7 +430,7 @@ export function AiGenerateModal({
                 <button
                   type="button"
                   onClick={clearImage}
-                  className="absolute end-2 top-2 rounded-full border border-border bg-bg/90 p-1 text-muted-fg hover:text-accent hover:bg-accent-soft"
+                  className="absolute end-2 top-2 rounded-full border border-border bg-bg/90 p-1 text-muted-fg hover:text-primary hover:bg-primary-container/15"
                   aria-label={t("ui.remove_image")}
                 >
                   <X size={14} />
@@ -447,7 +444,7 @@ export function AiGenerateModal({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-bg px-4 py-12 text-muted-fg transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-bg px-4 py-12 text-muted-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
             >
               <Upload size={28} />
               <span className="font-mono text-[10px] font-bold uppercase tracking-widest">{t("ui.click_to_pick_an_image")}</span>
@@ -499,9 +496,9 @@ export function AiGenerateModal({
   // ─── Generating step ─────────────────────────────────────────────
   const generatingStep = (
     <div className="flex flex-col items-center justify-center gap-4 py-12">
-      <Loader2 size={28} className="animate-spin text-accent" />
+      <Loader2 size={28} className="animate-spin text-primary" />
       <div className="space-y-1 text-center">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-primary">
           {t(GEN_STAGES[stageIdx])}
         </p>
         <p className="text-xs text-muted-fg leading-relaxed">
@@ -518,9 +515,8 @@ export function AiGenerateModal({
         {GEN_STAGES.map((_, i) => (
           <div
             key={i}
-            className={`h-1.5 w-1.5 rounded-full transition-colors ${
-              i === stageIdx ? "bg-accent" : i < stageIdx ? "bg-accent/60" : "bg-border"
-            }`}
+            className={`h-1.5 w-1.5 rounded-full transition-colors ${i === stageIdx ? "bg-primary-container" : i < stageIdx ? "bg-primary-container/60" : "bg-border"
+              }`}
           />
         ))}
       </div>
@@ -551,7 +547,7 @@ export function AiGenerateModal({
                 setRejected(new Set());
                 setErr("");
               }}
-              className="flex items-center gap-1 text-accent hover:underline"
+              className="flex items-center gap-1 text-primary hover:underline"
             >
               <RefreshCw size={11} />{t("err.tryAgain")}</button>
           </div>
@@ -584,11 +580,10 @@ export function AiGenerateModal({
           return (
             <li
               key={i}
-              className={`group rounded-xl border p-3 transition-colors ${
-                off
+              className={`group rounded-xl border p-3 transition-colors ${off
                   ? "border-border bg-bg/30 opacity-50"
-                  : "border-border bg-bg hover:border-accent/40"
-              }`}
+                  : "border-border bg-bg hover:border-primary/40"
+                }`}
             >
               <div className="flex items-start gap-3">
                 <button
@@ -596,11 +591,10 @@ export function AiGenerateModal({
                   onClick={() => toggleReject(i)}
                   aria-pressed={!off}
                   aria-label={off ? t("ui.include_this_card") : t("ui.exclude_this_card")}
-                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                    off
+                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors ${off
                       ? "border-border bg-bg text-muted-fg"
-                      : "border-accent bg-accent text-accent-fg"
-                  }`}
+                      : "border-primary bg-primary-container text-on-primary-container"
+                    }`}
                 >
                   {off ? <X size={14} /> : <Check size={14} />}
                 </button>
@@ -616,7 +610,7 @@ export function AiGenerateModal({
                     {c.back}
                   </p>
                   {c.description && (
-                    <p className="text-[10px] uppercase tracking-widest text-accent">
+                    <p className="text-[10px] uppercase tracking-widest text-primary">
                       HINT · {c.description}
                     </p>
                   )}
@@ -655,7 +649,7 @@ export function AiGenerateModal({
   // ─── Saving step ─────────────────────────────────────────────────
   const savingStep = (
     <div className="flex flex-col items-center justify-center gap-3 py-12">
-      <Loader2 size={28} className="animate-spin text-accent" />
+      <Loader2 size={28} className="animate-spin text-primary" />
       <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-fg">
         ADDING CARDS…
       </p>

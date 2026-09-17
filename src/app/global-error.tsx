@@ -46,8 +46,8 @@ export default function GlobalError({
       <body
         style={{
           margin: 0,
-          background: "#0B0F17",
-          color: "#E7EDF7",
+          background: "#111316",
+          color: "#e2e2e6",
           fontFamily: "system-ui, sans-serif",
           display: "flex",
           minHeight: "100vh",
@@ -56,11 +56,11 @@ export default function GlobalError({
         }}
       >
         <div style={{ textAlign: "center", padding: "2rem", maxWidth: 420 }}>
-          <AlertTriangle size={48} color="#FB4A55" style={{ margin: "0 auto 1rem" }} />
+          <AlertTriangle size={48} color="#ffb4ab" style={{ margin: "0 auto 1rem" }} />
           <h1 style={{ fontSize: 24, margin: "0 0 0.5rem" }}>{(s as any).titleKey ? t((s as any).titleKey) : (s as any).title}</h1>
-          <p style={{ color: "#94A3B8", fontSize: 14, lineHeight: 1.6 }}>{(s as any).bodyKey ? t((s as any).bodyKey) : (s as any).body}</p>
+          <p style={{ color: "#908fa0", fontSize: 14, lineHeight: 1.6 }}>{(s as any).bodyKey ? t((s as any).bodyKey) : (s as any).body}</p>
           {error?.digest && (
-            <p style={{ color: "#94A3B8", fontSize: 11, fontFamily: "monospace" }}>
+            <p style={{ color: "#908fa0", fontSize: 11, fontFamily: "monospace" }}>
               code: {error.digest.slice(0, 8)}
             </p>
           )}
@@ -71,8 +71,8 @@ export default function GlobalError({
               padding: "10px 24px",
               borderRadius: 999,
               border: "none",
-              background: "#FF7A72",
-              color: "#1A0505",
+              background: "#8083ff",
+              color: "#0d0096",
               fontWeight: 700,
               fontSize: 14,
               cursor: "pointer",

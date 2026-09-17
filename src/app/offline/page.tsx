@@ -22,7 +22,7 @@ export default function OfflinePage() {
       </p>
       <Link
         href="/"
-        className="mt-8 inline-block bg-accent px-6 py-3 text-sm font-bold uppercase tracking-widest text-accent-fg transition-transform hover:scale-105"
+        className="mt-8 inline-block bg-primary-container px-6 py-3 text-sm font-bold uppercase tracking-widest text-on-primary-container transition-transform hover:scale-105"
       >
         {t("offline.goHome")}
       </Link>

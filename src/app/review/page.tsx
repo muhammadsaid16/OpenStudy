@@ -143,7 +143,7 @@ export default function ReviewPage() {
             onClick={() => setRange(k)}
             className={cn(
               "flex-1 rounded-full px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors",
-              range === k ? "bg-accent text-accent-fg shadow" : "text-muted-fg hover:text-fg"
+              range === k ? "bg-primary-container text-on-primary-container shadow" : "text-muted-fg hover:text-fg"
             )}
           >
             {t(`review.range.${k}`)}
@@ -172,9 +172,9 @@ export default function ReviewPage() {
       </div>
 
       {pomo.active && (
-        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-accent/20 bg-accent-soft px-4 py-3">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-accent" />
-          <span className="text-xs font-bold uppercase tracking-widest text-accent">{t("review.currentlyStudying")}</span>
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary-container/15 px-4 py-3">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-primary-container" />
+          <span className="text-xs font-bold uppercase tracking-widest text-primary">{t("review.currentlyStudying")}</span>
           <span className="text-sm font-medium">{pomo.title || subjects.find((s) => s.id === pomo.subjectId)?.name || t("review.uncategorized")}</span>
           <span className="ms-auto font-mono text-sm">{formatHMS(pomo.workSeconds)}</span>
         </div>
@@ -190,7 +190,7 @@ export default function ReviewPage() {
           <Clock className="mx-auto mb-3 text-muted-fg" />
           <p className="font-semibold">{t("review.empty")}</p>
           <p className="mt-1 text-sm text-muted-fg">{t("review.emptyHint")}</p>
-          <Link href="/sessions" className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-accent-fg">
+          <Link href="/sessions" className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary-container px-5 py-2 text-sm font-semibold text-on-primary-container">
             <Play size={16} />
             {t("review.startSession")}
           </Link>
@@ -218,7 +218,7 @@ export default function ReviewPage() {
                 </>
               );
               return subject ? (
-                <Link key={b.id} href="/subjects" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent-soft">
+                <Link key={b.id} href="/subjects" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary-container/15">
                   {content}
                 </Link>
               ) : (

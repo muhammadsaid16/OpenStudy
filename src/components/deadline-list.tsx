@@ -29,7 +29,7 @@ function urgencyOf(d: Deadline): Urgency {
 
 const URGENCY_STYLE: Record<Urgency, string> = {
   high: "text-danger",
-  medium: "text-warning",
+  medium: "text-tertiary",
   low: "text-muted-fg",
 };
 
@@ -51,7 +51,7 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
               dead-ending the section */}
           <Link
             href="/subjects"
-            className="mt-3 text-xs font-bold tracking-tight text-accent transition-opacity hover:opacity-80"
+            className="mt-3 text-xs font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
           >
             Review cards ahead →
           </Link>
@@ -103,7 +103,7 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
                   className={cn(
                     "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest",
                     u === "high" && "bg-danger/10",
-                    u === "medium" && "bg-warning/10",
+                    u === "medium" && "bg-tertiary/10",
                     u === "low" && "bg-muted"
                   )}
                 >
@@ -111,7 +111,7 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
                 </span>
                 <ArrowUpRight
                   size={14}
-                  className="shrink-0 text-muted-fg opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent group-hover:opacity-100"
+                  className="shrink-0 text-muted-fg opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary group-hover:opacity-100"
                   aria-hidden
                 />
               </Link>

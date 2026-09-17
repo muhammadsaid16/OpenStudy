@@ -24,17 +24,17 @@ export interface ThemeDef {
 }
 
 export const THEMES: ThemeDef[] = [
-  { id: "aurora", name: "Aurora", bg: "#0B0F17", accent: "#FF7A72", fg: "#E7EDF7" },
-  { id: "midnight", name: "Midnight", bg: "#030712", accent: "#60A5FA", fg: "#E4EDFF" },
-  { id: "nebula", name: "Nebula", bg: "#0D0716", accent: "#C084FC", fg: "#F2E9FF" },
-  { id: "matrix", name: "Matrix", bg: "#02100B", accent: "#34D399", fg: "#E4FFF1" },
-  { id: "ember", name: "Ember", bg: "#140808", accent: "#FB923C", fg: "#FFF0E7" },
-  { id: "rosewood", name: "Rosewood", bg: "#12070C", accent: "#FB7185", fg: "#FFEAF1" },
-  { id: "cyberpunk", name: "Cyberpunk", bg: "#0A0A12", accent: "#FCEE0A", fg: "#F2F2FF" },
-  { id: "arctic", name: "Arctic", bg: "#07111E", accent: "#38BDF8", fg: "#E8F6FF" },
-  { id: "sandstone", name: "Sandstone", bg: "#151210", accent: "#E8B45C", fg: "#F7EFE3" },
+  { id: "aurora", name: "Aurora", bg: "#111316", accent: "#c0c1ff", fg: "#e2e2e6" },
+  { id: "midnight", name: "Midnight", bg: "#111316", accent: "#adc6ff", fg: "#e2e2e6" },
+  { id: "nebula", name: "Nebula", bg: "#111316", accent: "#d4bfff", fg: "#e2e2e6" },
+  { id: "matrix", name: "Matrix", bg: "#111316", accent: "#6EE7B7", fg: "#e2e2e6" },
+  { id: "ember", name: "Ember", bg: "#111316", accent: "#fdba74", fg: "#e2e2e6" },
+  { id: "rosewood", name: "Rosewood", bg: "#111316", accent: "#fda4af", fg: "#e2e2e6" },
+  { id: "cyberpunk", name: "Cyberpunk", bg: "#111316", accent: "#FCEE0A", fg: "#e2e2e6" },
+  { id: "arctic", name: "Arctic", bg: "#111316", accent: "#7dd3fc", fg: "#e2e2e6" },
+  { id: "sandstone", name: "Sandstone", bg: "#111316", accent: "#E8B45C", fg: "#e2e2e6" },
   { id: "mono", name: "Mono", bg: "#09090B", accent: "#FFFFFF", fg: "#FAFAFA" },
-  { id: "light", name: "Light", nameKey: "nav.light", bg: "#F1F5F9", accent: "#B91C1C", fg: "#0F172A" },
+  { id: "light", name: "Light", nameKey: "nav.light", bg: "#F6F7F9", accent: "#4f46e5", fg: "#0F172A" },
   { id: "paper", name: "Paper", bg: "#FAF7F2", accent: "#9A3412", fg: "#292018" },
 ];
 

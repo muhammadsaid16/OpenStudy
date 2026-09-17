@@ -53,12 +53,12 @@ export default function RouteError({
       <div className="flex gap-3">
         <button
           onClick={reset}
-          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-accent-fg transition-transform hover:scale-105"
+          className="inline-flex items-center gap-2 rounded-full bg-primary-container px-5 py-2.5 text-sm font-bold text-on-primary-container transition-transform hover:scale-105"
         >
           <RotateCcw size={14} aria-hidden />{t("err.tryAgain")}</button>
         <a
           href="/"
-          className="inline-flex items-center gap-2 rounded-full border border-glass-border bg-glass px-5 py-2.5 text-sm font-bold text-fg transition-colors hover:bg-accent-soft"
+          className="inline-flex items-center gap-2 rounded-full border border-glass-border bg-glass px-5 py-2.5 text-sm font-bold text-fg transition-colors hover:bg-primary-container/15"
         >
           <Home size={14} aria-hidden />
           {t("err.dashboard")}

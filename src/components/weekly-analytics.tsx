@@ -70,7 +70,7 @@ export function WeeklyAnalytics({ data }: { data: WeekDay[] }) {
           </p>
           <a
             href="/sessions"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-bold text-accent-fg transition-transform hover:scale-105"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary-container px-4 py-2 text-xs font-bold text-on-primary-container transition-transform hover:scale-105"
           >{t("dash.startSession")}</a>
         </div>
       </div>
@@ -115,7 +115,7 @@ export function WeeklyAnalytics({ data }: { data: WeekDay[] }) {
               <span
                 className={cn(
                   "text-[10px] font-bold uppercase tracking-wide",
-                  isToday ? "text-accent" : "text-muted-fg"
+                  isToday ? "text-primary" : "text-muted-fg"
                 )}
               >
                 {d.label}

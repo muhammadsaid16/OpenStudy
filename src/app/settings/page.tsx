@@ -30,7 +30,7 @@ function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-border bg-bg p-5 text-start transition-colors hover:border-accent"
+      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-border bg-bg p-5 text-start transition-colors hover:border-primary"
     >
       <div>
         <p className="text-sm font-bold tracking-tight text-fg">{label}</p>
@@ -39,7 +39,7 @@ function Toggle({
       <span
         className={cn(
           "relative h-6 w-11 shrink-0 rounded-full border transition-colors",
-          checked ? "border-accent bg-accent" : "border-border bg-muted"
+          checked ? "border-primary bg-primary-container" : "border-border bg-muted"
         )}
       >
         <span
@@ -74,7 +74,7 @@ function UploadTile({ rec, active, onSelect, onDelete }: {
   return (
     <div className={cn(
       "group relative h-28 overflow-hidden rounded-xl border transition-all",
-      active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
+      active ? "border-primary ring-2 ring-primary" : "border-border hover:border-primary"
     )}>
       {url && (
         // eslint-disable-next-line @next/next/no-img-element
@@ -83,7 +83,7 @@ function UploadTile({ rec, active, onSelect, onDelete }: {
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
       <span className="pointer-events-none absolute bottom-1.5 left-2 max-w-[75%] truncate text-[10px] font-bold text-white drop-shadow">{rec.name}</span>
       {active && (
-        <span className="pointer-events-none absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
+        <span className="pointer-events-none absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-container text-on-primary-container shadow">
           <Check size={12} strokeWidth={3} />
         </span>
       )}
@@ -248,12 +248,12 @@ export default function SettingsPage() {
             <button
               onClick={() => setLang("en")}
               aria-pressed={lang === "en"}
-              className={`relative flex-1 rounded-full px-4 py-2 text-xs font-bold transition-colors ${lang === "en" ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"}`}
+              className={`relative flex-1 rounded-full px-4 py-2 text-xs font-bold transition-colors ${lang === "en" ? "bg-primary-container text-on-primary-container" : "text-muted-fg hover:text-primary"}`}
             >{t("settings.english")}</button>
             <button
               onClick={() => setLang("ar")}
               aria-pressed={lang === "ar"}
-              className={`relative flex-1 rounded-full px-4 py-2 text-xs font-bold transition-colors ${lang === "ar" ? "bg-accent text-accent-fg" : "text-muted-fg hover:text-accent"}`}
+              className={`relative flex-1 rounded-full px-4 py-2 text-xs font-bold transition-colors ${lang === "ar" ? "bg-primary-container text-on-primary-container" : "text-muted-fg hover:text-primary"}`}
             >
               العربية
             </button>
@@ -275,7 +275,7 @@ export default function SettingsPage() {
                 aria-label={`Use ${th.nameKey ? t(th.nameKey) : th.name} theme`}
                 className={cn(
                   "group flex flex-col gap-3 rounded-2xl border p-3 transition-all",
-                  active ? "border-accent ring-2 ring-accent ring-offset-1 ring-offset-bg" : "border-border hover:border-accent"
+                  active ? "border-primary ring-2 ring-primary ring-offset-1 ring-offset-bg" : "border-border hover:border-primary"
                 )}
                 style={{ background: th.bg }}
               >
@@ -329,7 +329,7 @@ export default function SettingsPage() {
                   onClick={() => setWallpaper(tab.type, tab.type === "live" ? "aurora" : tab.type === "static" ? "deep-space" : wallpaperId)}
                   className={cn(
                     "rounded-xl px-4 py-2 text-xs font-bold transition-all",
-                    active ? "bg-accent text-accent-fg shadow-sm" : "border border-border bg-bg text-muted-fg hover:text-fg"
+                    active ? "bg-primary-container text-on-primary-container shadow-sm" : "border border-border bg-bg text-muted-fg hover:text-fg"
                   )}
                 >
                   {tab.label}
@@ -353,12 +353,12 @@ export default function SettingsPage() {
                         onClick={() => setWallpaper("live", wp.id)}
                         className={cn(
                           "flex flex-col gap-2 rounded-xl border p-3 text-start transition-all",
-                          active ? "border-accent bg-accent-soft/30 ring-2 ring-accent" : "border-border bg-bg hover:border-accent"
+                          active ? "border-primary bg-primary-container/15/30 ring-2 ring-primary" : "border-border bg-bg hover:border-primary"
                         )}
                       >
                         <div className="flex items-center justify-between">
-                          <Sparkles size={16} className={active ? "text-accent" : "text-muted-fg"} />
-                          {active && <Check size={14} className="text-accent" />}
+                          <Sparkles size={16} className={active ? "text-primary" : "text-muted-fg"} />
+                          {active && <Check size={14} className="text-primary" />}
                         </div>
                         <div>
                           <p className="text-xs font-bold text-fg">{wp.name}</p>
@@ -388,7 +388,7 @@ export default function SettingsPage() {
                         onClick={() => setWallpaper("static", item.id)}
                         className={cn(
                           "group relative h-28 overflow-hidden rounded-xl border text-start transition-all",
-                          active ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"
+                          active ? "border-primary ring-2 ring-primary" : "border-border hover:border-primary"
                         )}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -396,7 +396,7 @@ export default function SettingsPage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
                         <span className="absolute bottom-1.5 left-2 max-w-[85%] truncate text-[10px] font-bold text-white drop-shadow">{item.name}</span>
                         {active && (
-                          <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg shadow">
+                          <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-container text-on-primary-container shadow">
                             <Check size={12} strokeWidth={3} />
                           </span>
                         )}
@@ -421,7 +421,7 @@ export default function SettingsPage() {
               {uploads.length === 0 ? (
                 <button
                   onClick={() => wallpaperInputRef.current?.click()}
-                  className="flex h-36 w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-muted-fg transition-colors hover:border-accent hover:text-fg"
+                  className="flex h-36 w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-muted-fg transition-colors hover:border-primary hover:text-fg"
                 >
                   <ImageIcon size={22} />
                   <span className="text-xs font-bold">{t("settings.wpUploadEmpty")}</span>
@@ -431,7 +431,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   <button
                     onClick={() => wallpaperInputRef.current?.click()}
-                    className="flex h-28 flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-border text-muted-fg transition-colors hover:border-accent hover:text-fg"
+                    className="flex h-28 flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-border text-muted-fg transition-colors hover:border-primary hover:text-fg"
                   >
                     <Upload size={16} />
                     <span className="text-[10px] font-bold">{t("settings.wpUploadAdd")}</span>
@@ -478,7 +478,7 @@ export default function SettingsPage() {
                 value={wallpaperId}
                 onChange={(e) => setWallpaper("custom", e.target.value)}
                 placeholder="Paste image/GIF/video URL (e.g. https://...)"
-                className="h-10 w-full rounded-xl border border-border bg-bg px-3 text-xs text-fg placeholder:text-muted-fg focus:border-accent focus:outline-none"
+                className="h-10 w-full rounded-xl border border-border bg-bg px-3 text-xs text-fg placeholder:text-muted-fg focus:border-primary focus:outline-none"
               />
             </div>
           )}
@@ -541,8 +541,8 @@ export default function SettingsPage() {
                           className={cn(
                             "h-8 rounded-lg border text-xs font-bold transition-colors",
                             active
-                              ? "border-accent bg-accent text-accent-fg"
-                              : "border-border bg-bg text-muted-fg hover:border-accent hover:text-fg"
+                              ? "border-primary bg-primary-container text-on-primary-container"
+                              : "border-border bg-bg text-muted-fg hover:border-primary hover:text-fg"
                           )}
                         >
                           {deg}°
@@ -631,7 +631,7 @@ export default function SettingsPage() {
               <div
                 role="alertdialog"
                 aria-label="Confirm import"
-                className="mt-3 border border-warning/40 bg-warning/10 p-4"
+                className="mt-3 border border-warning/40 bg-tertiary/10 p-4"
               >
                 <p className="text-sm font-bold tracking-tight text-fg">{t("settings.importConfirm")}</p>
                 <p className="mt-1 text-xs text-muted-fg">

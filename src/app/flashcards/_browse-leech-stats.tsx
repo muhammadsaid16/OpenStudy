@@ -95,14 +95,14 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
         <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-bg p-3">
           <button
             onClick={p.onSelectAllToggle}
-            className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent"
+            className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-primary"
           >
             {p.allBrowseSelected ? <CheckSquare size={14} /> : <Square size={14} />}
             {p.allBrowseSelected ? "Deselect all" : t("cards.selectAll")}
           </button>
           {p.browseSelected.size > 0 && (
             <>
-              <span className="text-xs font-bold uppercase tracking-widest text-accent">
+              <span className="text-xs font-bold uppercase tracking-widest text-primary">
                 {p.browseSelected.size} selected
               </span>
               <button
@@ -112,13 +112,13 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                 <Trash2 size={14} />{t("notes.delete")}</button>
               <button
                 onClick={p.onBatchTag}
-                className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+                className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
               >
                 <Tag size={14} /> Tag
               </button>
               <button
                 onClick={p.onBatchMove}
-                className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-accent hover:text-accent hover:bg-accent-soft"
+                className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
               >
                 <ArrowRight size={14} />{t("ui.move")}</button>
             </>
@@ -140,20 +140,20 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
               onClick={() => p.onOpenBundle(bundle.id)}
               {...spotlightProps()}
               className="spotlight-card group relative flex h-48 w-full flex-col justify-between rounded-2xl glass p-5 text-start transition-all duration-200 hover:-translate-y-0.5"
-              style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#DFE104")}14, transparent 55%)` }}
+              style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#8083ff")}14, transparent 55%)` }}
             >
               <div
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-black transition-transform duration-200 group-hover:scale-110"
                 style={{
-                  backgroundColor: `${bundle.color || "#DFE104"}1f`,
-                  color: bundle.color || "#DFE104",
-                  boxShadow: `inset 0 0 0 1px ${(bundle.color || "#DFE104")}3d`,
+                  backgroundColor: `${bundle.color || "#8083ff"}1f`,
+                  color: bundle.color || "#8083ff",
+                  boxShadow: `inset 0 0 0 1px ${(bundle.color || "#8083ff")}3d`,
                 }}
               >
                 {bundle.name.charAt(0)}
               </div>
               <div className="mt-3 min-w-0">
-                <h3 className="truncate text-lg font-bold text-fg transition-colors group-hover:text-accent">
+                <h3 className="truncate text-lg font-bold text-fg transition-colors group-hover:text-primary">
                   {bundle.name}
                 </h3>
                 {bundle.description && (
@@ -163,11 +163,11 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
               <div className="flex items-center justify-between">
                 <span
                   className="rounded-full px-2.5 py-1 font-mono text-xs"
-                  style={{ backgroundColor: `${bundle.color || "#DFE104"}14`, color: bundle.color || "#DFE104" }}
+                  style={{ backgroundColor: `${bundle.color || "#8083ff"}14`, color: bundle.color || "#8083ff" }}
                 >
                   {bundle._count.flashcards} card{bundle._count.flashcards !== 1 ? "s" : ""}
                 </span>
-                <span className="text-xs font-bold text-accent group-hover:underline">Open →</span>
+                <span className="text-xs font-bold text-primary group-hover:underline">Open →</span>
               </div>
             </button>
           ))}
@@ -183,20 +183,20 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                 className={cn(
                   "group relative flex min-h-[200px] flex-col overflow-hidden rounded-2xl border p-5 transition-all duration-200",
                   selected
-                    ? "border-accent bg-accent/5"
+                    ? "border-primary bg-primary-container/5"
                     : flipped
-                      ? "border-accent bg-accent text-accent-fg shadow-[0_14px_40px_-12px_var(--color-accent-soft)] -translate-y-0.5"
-                      : "border-border bg-bg shadow-sm hover:-translate-y-1 hover:border-accent hover:shadow-lg"
+                      ? "border-primary bg-primary-container text-on-primary-container shadow-[0_14px_40px_-12px_var(--color-accent-soft)] -translate-y-0.5"
+                      : "border-border bg-bg shadow-sm hover:-translate-y-1 hover:border-primary hover:shadow-lg"
                 )}
               >
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={(e) => { e.stopPropagation(); p.onSelectToggle(card.id); }}
-                      className="rounded-full text-muted-fg transition-colors hover:text-accent"
+                      className="rounded-full text-muted-fg transition-colors hover:text-primary"
                       aria-label={selected ? t("ui.deselect_card") : "Select card"}
                     >
-                      {selected ? <CheckSquare size={14} className="text-accent" /> : <Square size={14} />}
+                      {selected ? <CheckSquare size={14} className="text-primary" /> : <Square size={14} />}
                     </button>
 
                   </div>
@@ -205,7 +205,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                       onClick={(e) => { e.stopPropagation(); p.onEditCard(card); }}
                       aria-label={t("browse.editCard")}
                       title={t("common.edit")}
-                      className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-accent-soft hover:text-accent")}
+                      className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-on-primary-container/70 hover:bg-on-primary-container/15 hover:text-on-primary-container" : "text-muted-fg hover:bg-primary-container/15 hover:text-primary")}
                     >
                       <Pencil size={13} />
                     </button>
@@ -213,7 +213,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                       onClick={(e) => { e.stopPropagation(); p.onDeleteCard(card); }}
                       aria-label={t("browse.deleteCard")}
                       title={t("common.delete")}
-                      className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-accent-fg/70 hover:bg-accent-fg/15 hover:text-accent-fg" : "text-muted-fg hover:bg-danger/10 hover:text-danger")}
+                      className={cn("rounded-full p-1.5 transition-colors", flipped ? "text-on-primary-container/70 hover:bg-on-primary-container/15 hover:text-on-primary-container" : "text-muted-fg hover:bg-danger/10 hover:text-danger")}
                     >
                       <Trash2 size={13} />
                     </button>
@@ -224,7 +224,7 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                   onClick={() => p.onFlipToggle(card.id)}
                 >
                   <div>
-                    <span className={cn("mb-2 inline-block text-[10px] font-bold uppercase tracking-widest", flipped ? "text-accent-fg/70" : "text-muted-fg")}>
+                    <span className={cn("mb-2 inline-block text-[10px] font-bold uppercase tracking-widest", flipped ? "text-on-primary-container/70" : "text-muted-fg")}>
                       {flipped ? t("cards.answerLabel") : t("cards.questionLabel")}
                     </span>
                     <div className="text-center text-lg font-bold tracking-tight leading-relaxed">
@@ -233,20 +233,20 @@ export function BrowseMode<C extends BrowseCard>(p: BrowseModeProps<C>) {
                   </div>
                 </div>
                 {((flipped ? ((card as any).backDescription ?? card.description) : (card as any).frontDescription) && (
-                  <p className={cn("mt-2 text-xs leading-relaxed tracking-tight", flipped ? "text-accent-fg/70" : "text-muted-fg")}>
+                  <p className={cn("mt-2 text-xs leading-relaxed tracking-tight", flipped ? "text-on-primary-container/70" : "text-muted-fg")}>
                     {flipped ? ((card as any).backDescription ?? card.description) : (card as any).frontDescription}
                   </p>
                 ))}
                 {card.tags && card.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {card.tags.map(({ tag }) => (
-                      <span key={tag.id} className={cn("px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest", flipped ? "bg-accent-fg/15 text-accent-fg" : "bg-muted text-muted-fg")}>
+                      <span key={tag.id} className={cn("px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest", flipped ? "bg-on-primary-container/15 text-on-primary-container" : "bg-muted text-muted-fg")}>
                         {tag.name}
                       </span>
                     ))}
                   </div>
                 )}
-                <div className={cn("mt-2 flex items-center justify-between text-[10px] uppercase tracking-widest", flipped ? "text-accent-fg/60" : "text-muted-fg")}>
+                <div className={cn("mt-2 flex items-center justify-between text-[10px] uppercase tracking-widest", flipped ? "text-on-primary-container/60" : "text-muted-fg")}>
                   {card.bundle ? (
                     <span className="flex items-center gap-1">
                       <span className="h-2 w-2 rounded-full" style={{ backgroundColor: card.bundle.color ?? undefined }} />
@@ -333,7 +333,7 @@ export function StatsMode(p: StatsModeProps) {
     <div className="space-y-8">
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-2xl border border-border bg-bg p-6 text-center">
-          <p className="text-4xl font-bold tracking-tighter text-accent">{p.streak}</p>
+          <p className="text-4xl font-bold tracking-tighter text-primary">{p.streak}</p>
           <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-fg">{t("dash.dayStreak")}</p>
         </div>
         <div className="rounded-2xl border border-border bg-bg p-6 text-center">
@@ -355,7 +355,7 @@ export function StatsMode(p: StatsModeProps) {
             const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
             const entry = p.heatmap.find((h) => h.date === dateStr);
             const count = entry?.count ?? 0;
-            const intensity = count === 0 ? "bg-muted" : count < 5 ? "bg-accent/30" : count < 15 ? "bg-accent/60" : "bg-accent";
+            const intensity = count === 0 ? "bg-muted" : count < 5 ? "bg-primary-container/30" : count < 15 ? "bg-primary-container/60" : "bg-primary-container";
             return (
               <div key={i} className={`h-3 w-3 ${intensity}`} title={`${dateStr}: ${count} reviews`} />
             );
@@ -364,9 +364,9 @@ export function StatsMode(p: StatsModeProps) {
         <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-fg">
           <span>{t("heatmap.less")}</span>
           <div className="h-3 w-3 bg-muted" />
-          <div className="h-3 w-3 bg-accent/30" />
-          <div className="h-3 w-3 bg-accent/60" />
-          <div className="h-3 w-3 bg-accent" />
+          <div className="h-3 w-3 bg-primary-container/30" />
+          <div className="h-3 w-3 bg-primary-container/60" />
+          <div className="h-3 w-3 bg-primary-container" />
           <span>{t("heatmap.more")}</span>
         </div>
       </div>

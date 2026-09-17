@@ -78,12 +78,12 @@ export function UndoToastHost() {
         </span>
         <button
           onClick={handleUndo}
-          className="rounded-full bg-accent px-3 py-1 text-xs font-bold tracking-wide text-accent-fg transition-colors hover:opacity-90"
+          className="rounded-full bg-primary-container px-3 py-1 text-xs font-bold tracking-wide text-on-primary-container transition-colors hover:opacity-90"
         >{t("ui.undo")}</button>
         <button
           onClick={handleDismiss}
           aria-label={t("ui.dismiss")}
-          className="text-muted-fg transition-colors hover:text-accent"
+          className="text-muted-fg transition-colors hover:text-primary"
         >
           ✕
         </button>
