@@ -22,8 +22,18 @@ import {
   type GoalStatus,
   type GoalRepeat,
   type CardKind,
+  type ExamRec,
+  type ExamQuestionRec,
+  type TaskRec,
 } from "@/lib/db";
 import { cardKind, cleanChoices, isCloze } from "@/lib/card-kinds";
+import {
+  deriveFsrsStateFromLogs,
+  gradeFromQuality,
+  stepFsrs,
+} from "@/lib/fsrs";
+import { buildQuestionSpecs, gradeAnswer, scoreExam } from "@/lib/exam";
+import { computeWeaknessSignals } from "@/lib/weakness";
 import { byDueDateAsc, filterDueCards, isDueCard } from "@/lib/review-queue";
 import { isCorrect } from "@/lib/card-status";
 import { isMastered } from "@/lib/stats/mastery";
@@ -966,54 +976,79 @@ export async function setCardTags(cardId: string, tagNames: string[]) {
   }
 }
 
-// ─── Review with Logging + Leech Detection ────────────────────
+// ─── Review with Logging + Leech Detection (FSRS — the single scheduler) ───
+// Contract 1 (lib/contracts.ts): the signature never changed when SM-2 was
+// replaced — every caller (review pages, exam feeding, offline sync) keeps
+// working. Internals are pure FSRS-4.5 (lib/fsrs.ts).
 export async function reviewFlashcardWithLog(id: string, quality: number) {
   const q = z.number().int().min(0).max(5).parse(quality);
   const card = await db.flashcards.get(id);
   if (!card) throw new Error("Flashcard not found");
+  const now = Date.now();
 
-  // SM-2 algorithm
-  let newEF = card.easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
-  if (newEF < 1.3) newEF = 1.3;
-
-  let newInterval: number;
-  let newReviewCount: number;
-  if (!isCorrect(q)) {
-    // Lapse: reset the repetition ladder (1-day step), like standard SM-2.
-    newInterval = 1;
-    newReviewCount = 0;
-  } else if (card.reviewCount === 0) {
-    newInterval = 1;
-    newReviewCount = card.reviewCount + 1;
-  } else if (card.reviewCount === 1) {
-    newInterval = 6;
-    newReviewCount = card.reviewCount + 1;
+  // Lazy migration: a card not yet touched since the SM-2 era derives its
+  // FSRS state from the legacy fields + real review history, once, here.
+  // Nothing is deleted; the legacy fields stay as the migration's source.
+  const hasFsrs =
+    typeof card.fsrsStability === "number" &&
+    typeof card.fsrsDifficulty === "number" &&
+    typeof card.fsrsLapses === "number";
+  let state;
+  if (hasFsrs) {
+    state = {
+      stability: card.fsrsStability!,
+      difficulty: card.fsrsDifficulty!,
+      lapses: card.fsrsLapses!,
+      lastReview: card.lastReview ? new Date(card.lastReview).getTime() : null,
+      reviewCount: card.reviewCount,
+    };
   } else {
-    newInterval = Math.min(Math.round(card.intervalDays * newEF), 365);
-    newReviewCount = card.reviewCount + 1;
+    const logs = await db.reviewLogs.where("flashcardId").equals(id).toArray();
+    state = deriveFsrsStateFromLogs(
+      {
+        intervalDays: card.intervalDays,
+        easeFactor: card.easeFactor,
+        reviewCount: card.reviewCount,
+        consecutiveAgain: card.consecutiveAgain,
+        lastReview: card.lastReview ?? null,
+      },
+      logs.map((l) => ({ quality: l.quality, reviewedAt: l.reviewedAt }))
+    );
   }
 
-  const nextReview = new Date();
-  nextReview.setDate(nextReview.getDate() + newInterval);
+  const grade = gradeFromQuality(q);
+  const step = stepFsrs(state, grade, now);
 
-  // Leech detection: 5 consecutive Again → flag
-  const newConsecutive = !isCorrect(q) ? card.consecutiveAgain + 1 : 0;
+  // Keep the legacy fields coherent for display/backup (they no longer
+  // drive scheduling): interval mirrors the FSRS interval, EF eases with
+  // the grade so "hardest cards" style views stay meaningful.
+  const efDelta = grade === "again" ? -0.2 : grade === "hard" ? -0.05 : grade === "easy" ? 0.1 : 0;
+  const newEF = Math.min(3.2, Math.max(1.3, card.easeFactor + efDelta));
+  const newInterval = Math.min(step.intervalDays, 365);
+
+  const nextReview = new Date(now + newInterval * 86_400_000);
+
+  // Leech detection unchanged: 5 consecutive Again → flag.
+  const newConsecutive = grade === "again" ? card.consecutiveAgain + 1 : 0;
   const isLeech = newConsecutive >= 5;
 
   await db.flashcards.update(id, {
     easeFactor: newEF,
     intervalDays: newInterval,
+    fsrsStability: step.next.stability,
+    fsrsDifficulty: step.next.difficulty,
+    fsrsLapses: step.next.lapses,
     nextReview,
-    lastReview: new Date(),
-    reviewCount: newReviewCount,
+    lastReview: new Date(now),
+    reviewCount: card.reviewCount + 1,
     difficulty: q,
     consecutiveAgain: newConsecutive,
     isLeech,
-    updatedAt: new Date(),
+    updatedAt: new Date(now),
   });
 
   // Log the review
-  const log: ReviewLogRec = { id: uid(), flashcardId: id, quality: q, reviewedAt: new Date() };
+  const log: ReviewLogRec = { id: uid(), flashcardId: id, quality: q, reviewedAt: new Date(now) };
   await db.reviewLogs.add(log);
 
   return db.flashcards.get(id);
@@ -2080,6 +2115,9 @@ export async function batchResetCardProgress(ids: string[]): Promise<number> {
   await db.flashcards.where("id").anyOf(ids).modify({
     easeFactor: 2.5,
     intervalDays: 1,
+    fsrsStability: null,
+    fsrsDifficulty: null,
+    fsrsLapses: null,
     nextReview: now,
     lastReview: undefined,
     reviewCount: 0,
@@ -2090,4 +2128,325 @@ export async function batchResetCardProgress(ids: string[]): Promise<number> {
   // Clear review history so the card drops from Hardest cards (accuracy is computed from logs).
   await db.reviewLogs.where("flashcardId").anyOf(ids).delete();
   return ids.length;
+}
+
+// ─── Study OS: Exams ─────────────────────────────────────────────
+// Feeding follows Contract 5 (lib/contracts.ts) exactly: wrong → real
+// schedule lapse, correct → log-only, practice → log-only, and each
+// question feeds at most once (guarded structurally — the feed happens
+// inside answerExamQuestion, never in a UI retry path).
+
+export async function getUpcomingExams(): Promise<ExamRec[]> {
+  const now = Date.now();
+  const exams = await db.exams.toArray();
+  return exams
+    .filter((e) => e.status === "completed" ? new Date(e.completedAt ?? e.startedAt).getTime() > now - 30 * 86_400_000 : true)
+    .sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime());
+}
+
+export async function createExam(setup: {
+  title: string;
+  subjectIds: string[];
+  topicIds: string[];
+  questionCount: number;
+  timeLimitSec: number | null;
+  practiceOnly: boolean;
+}): Promise<ExamRec> {
+  const count = Math.min(200, Math.max(1, Math.round(setup.questionCount)));
+  const exam: ExamRec = {
+    id: uid(),
+    title: setup.title.trim().slice(0, 120) || "Exam",
+    status: "in_progress",
+    subjectIds: setup.subjectIds,
+    topicIds: setup.topicIds,
+    questionCount: count,
+    timeLimitSec: setup.timeLimitSec,
+    practiceOnly: setup.practiceOnly,
+    scorePct: null,
+    correctCount: null,
+    durationSec: null,
+    startedAt: new Date(),
+    completedAt: null,
+  };
+  await db.exams.add(exam);
+
+  // Build the question set from the current pool (snapshots taken now).
+  const pool = (await db.flashcards.toArray()).filter((c) => {
+    if (setup.subjectIds.length && (!c.subjectId || !setup.subjectIds.includes(c.subjectId))) return false;
+    if (setup.topicIds.length && (!c.topicId || !setup.topicIds.includes(c.topicId))) return false;
+    return true;
+  });
+  // Deterministic spread + seeded shuffle (mirrors lib/exam.ts pickExamCards).
+  const pick = <T,>(arr: T[], n: number): T[] => {
+    if (n <= 0 || arr.length === 0) return [];
+    const spread: T[] = [];
+    for (let i = 0; i < arr.length; i++) spread.push(arr[Math.floor((i * n) % arr.length)]);
+    const seen = new Set<string>();
+    const unique = spread.filter((x) => (seen.has((x as any).id) ? false : (seen.add((x as any).id), true)));
+    let seed = exam.id.split("-").reduce((acc, part) => acc + parseInt(part, 36) || 0, 0x9e3779b9);
+    for (let i = unique.length - 1; i > 0; i--) {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      const j = seed % (i + 1);
+      [unique[i], unique[j]] = [unique[j], unique[i]];
+    }
+    return unique.slice(0, n);
+  };
+  const picked = pick(pool, count);
+
+  const specs = buildQuestionSpecs(picked);
+  const rows: ExamQuestionRec[] = specs.map((s, i) => ({
+    id: uid(),
+    examId: exam.id,
+    flashcardId: s.flashcardId,
+    order: i,
+    frontText: s.frontText,
+    backText: s.backText,
+    kind: s.kind,
+    choicesSnapshot: s.choicesSnapshot,
+    topicId: s.topicId,
+    subjectId: s.subjectId,
+    answer: null,
+    quality: null,
+    isCorrect: null,
+    answeredAt: null,
+  }));
+  await db.examQuestions.bulkAdd(rows);
+  return exam;
+}
+
+export async function getExam(examId: string) {
+  const exam = await db.exams.get(examId);
+  if (!exam) return null;
+  const questions = await db.examQuestions.where("examId").equals(examId).sortBy("order");
+  return { exam, questions };
+}
+
+export async function listExams(): Promise<ExamRec[]> {
+  const exams = await db.exams.orderBy("startedAt").reverse().toArray();
+  return exams;
+}
+
+export async function deleteExam(examId: string): Promise<void> {
+  await db.examQuestions.where("examId").equals(examId).delete();
+  await db.exams.delete(examId);
+}
+
+/**
+ * Record one answer. Choice questions are auto-graded here against the
+ * SNAPSHOT back text; typed/basic questions pass their self-grade through.
+ * Contract 5 feeding happens exactly here — the idempotency-by-construction
+ * point: once isCorrect is set, the question is graded and never re-fed.
+ */
+export async function answerExamQuestion(
+  questionId: string,
+  input: { mode: "choice"; answer: string } | { mode: "self"; quality: number }
+): Promise<ExamQuestionRec> {
+  const q = await db.examQuestions.get(questionId);
+  if (!q) throw new Error("Question not found");
+  if (q.isCorrect !== null && q.isCorrect !== undefined) return q; // already graded — idempotent
+
+  const exam = await db.exams.get(q.examId);
+  if (!exam) throw new Error("Exam not found");
+
+  let quality: number;
+  if (input.mode === "choice") {
+    quality = gradeAnswer({ backText: q.backText, kind: q.kind }, { kind: "choice", answer: input.answer });
+  } else {
+    quality = gradeAnswer({ backText: q.backText, kind: q.kind }, { kind: "self", quality: input.quality });
+  }
+  const correct = isCorrect(quality);
+
+  await db.examQuestions.update(questionId, {
+    answer: input.mode === "choice" ? input.answer : null,
+    quality,
+    isCorrect: correct,
+    answeredAt: new Date(),
+  });
+
+  // ── Contract 5 feeding ──
+  // Real exam + wrong → a genuine FSRS lapse on the card (schedules it
+  // sooner and feeds the weakness engine). Everything else → log-only.
+  // Practice exams never touch schedules.
+  if (!exam.practiceOnly && !correct) {
+    try {
+      await reviewFlashcardWithLog(q.flashcardId, 0);
+    } catch {
+      // Card may have been deleted after the exam was built — the exam
+      // grade stands; the SRS feed is best-effort in that case.
+    }
+  } else {
+    try {
+      await logReviewOnly(q.flashcardId, quality);
+    } catch {
+      /* same — card gone; grade evidence lives on the question */
+    }
+  }
+
+  const updated = await db.examQuestions.get(questionId);
+  return updated!;
+}
+
+/** Abandon an in-progress exam (no scoring, no feeding beyond answered Qs). */
+export async function abandonExam(examId: string): Promise<void> {
+  await db.exams.update(examId, { status: "abandoned", completedAt: new Date() });
+}
+
+/** Finish the exam: compute totals from the graded questions and store them. */
+export async function completeExam(examId: string): Promise<ExamRec> {
+  const exam = await db.exams.get(examId);
+  if (!exam) throw new Error("Exam not found");
+  const questions = await db.examQuestions.where("examId").equals(examId).sortBy("order");
+  const completedAt = new Date();
+  const totals = scoreExam(questions, {
+    startedAt: new Date(exam.startedAt).getTime(),
+    completedAt: completedAt.getTime(),
+    labelFor: (topicId) => {
+      // Synchronous label resolution is impossible here without topics in
+      // hand — completeExam resolves labels from the DB in one pass below.
+      return topicId ?? "General";
+    },
+  });
+  // Resolve human-readable labels for the breakdown (topic → subject name).
+  const topics = await db.topics.toArray();
+  const subjects = await db.subjects.toArray();
+  const topicById = new Map(topics.map((t) => [t.id, t]));
+  const subjectById = new Map(subjects.map((s) => [s.id, s]));
+  const labelOf = (topicId: string | null) => {
+    if (!topicId) return "General";
+    const t = topicById.get(topicId);
+    if (!t) return "General";
+    return subjectById.get(t.subjectId)?.name ? `${subjectById.get(t.subjectId)!.name} › ${t.name}` : t.name;
+  };
+  totals.byTopic = totals.byTopic.map((t) => ({ ...t, label: labelOf(t.topicId) }));
+  totals.weakTopics = totals.weakTopics.map((t) => ({ ...t, label: labelOf(t.topicId) }));
+
+  await db.exams.update(examId, {
+    status: "completed",
+    completedAt,
+    scorePct: totals.scorePct,
+    correctCount: totals.correct,
+    durationSec: totals.durationSec,
+  });
+  const updated = await db.exams.get(examId);
+  return updated!;
+}
+
+/** Results bundle for the results screen (totals + questions). */
+export async function getExamResults(examId: string) {
+  const exam = await db.exams.get(examId);
+  if (!exam) return null;
+  const questions = await db.examQuestions.where("examId").equals(examId).sortBy("order");
+  const topics = await db.topics.toArray();
+  const subjects = await db.subjects.toArray();
+  const topicById = new Map(topics.map((t) => [t.id, t]));
+  const subjectById = new Map(subjects.map((s) => [s.id, s]));
+  const labelOf = (topicId: string | null) => {
+    if (!topicId) return "General";
+    const t = topicById.get(topicId);
+    if (!t) return "General";
+    return subjectById.get(t.subjectId)?.name ? `${subjectById.get(t.subjectId)!.name} › ${t.name}` : t.name;
+  };
+  const totals = scoreExam(questions, {
+    startedAt: new Date(exam.startedAt).getTime(),
+    completedAt: new Date(exam.completedAt ?? Date.now()).getTime(),
+    labelFor: labelOf,
+  });
+  return { exam, totals };
+}
+
+// ─── Study OS: Tasks ─────────────────────────────────────────────
+export async function getTasks(): Promise<TaskRec[]> {
+  return db.tasks.orderBy("order").toArray();
+}
+
+export async function createTask(data: {
+  title: string;
+  description?: string | null;
+  subjectId?: string | null;
+  topicId?: string | null;
+  goalId?: string | null;
+  examId?: string | null;
+  dueDate?: Date | null;
+  estimateMin?: number | null;
+}): Promise<TaskRec> {
+  const now = new Date();
+  const count = await db.tasks.count();
+  const task: TaskRec = {
+    id: uid(),
+    title: data.title.trim().slice(0, 200),
+    description: data.description ?? null,
+    status: "todo",
+    order: count,
+    subjectId: data.subjectId ?? null,
+    topicId: data.topicId ?? null,
+    goalId: data.goalId ?? null,
+    examId: data.examId ?? null,
+    dueDate: data.dueDate ?? null,
+    estimateMin: data.estimateMin ?? null,
+    createdAt: now,
+    updatedAt: now,
+    completedAt: null,
+  };
+  await db.tasks.add(task);
+  return task;
+}
+
+export async function moveTask(id: string, status: "todo" | "in_progress" | "done", index?: number): Promise<void> {
+  const patch: Partial<TaskRec> = { status, updatedAt: new Date() };
+  if (status === "done") patch.completedAt = new Date();
+  if (status !== "done") patch.completedAt = null;
+  if (index !== undefined) patch.order = index;
+  await db.tasks.update(id, patch);
+}
+
+export async function updateTask(id: string, data: Partial<Pick<TaskRec, "title" | "description" | "dueDate" | "estimateMin" | "order">>): Promise<void> {
+  await db.tasks.update(id, { ...data, updatedAt: new Date() });
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  await db.tasks.delete(id);
+}
+
+// ─── Study OS: Planner data assembly ─────────────────────────────
+/** Gathers everything the planner needs in one round trip. */
+export async function getPlannerData() {
+  const [cards, tasks, logs, topics, subjects, sessions] = await Promise.all([
+    db.flashcards.toArray(),
+    getTasks(),
+    db.reviewLogs.toArray(),
+    db.topics.toArray(),
+    db.subjects.toArray(),
+    getStudySessions(1000),
+  ]);
+  const exams = (await listExams()).filter((e) => e.status !== "abandoned");
+  // Weakness signals from the shared engine (Contract 2 producer).
+  const weakness = computeWeaknessSignals({ logs, cards, topics, subjects });
+  return { cards, tasks, weakness, exams, sessions };
+}
+
+// ─── Study OS: Topic hub data (Connector) ────────────────────────
+/** Per-topic live counts + weakness for the subject/topic hub panels. */
+export async function getTopicHubData(topicIds: string[]) {
+  if (topicIds.length === 0) return [];
+  const [cards, logs, topics, subjects, sessions, tasks] = await Promise.all([
+    db.flashcards.toArray(),
+    db.reviewLogs.toArray(),
+    db.topics.toArray(),
+    db.subjects.toArray(),
+    db.studySessions.toArray(),
+    getTasks(),
+  ]);
+  const weakness = computeWeaknessSignals({ logs, cards, topics, subjects });
+  const dueNow = Date.now();
+  return topicIds.map((topicId) => {
+    const topic = topics.find((t) => t.id === topicId);
+    return {
+      topicId,
+      subjectName: topic ? subjects.find((s) => s.id === topic.subjectId)?.name ?? null : null,
+      sessions: sessions.filter((s) => s.topicId === topicId).length,
+      tasks: tasks.filter((t) => t.topicId === topicId && t.status !== "done").length,
+      due: cards.filter((c) => c.topicId === topicId && isDueCard(c, dueNow)).length,
+      weakness: weakness.find((w) => w.topicId === topicId) ?? null,
+    };
+  });
 }

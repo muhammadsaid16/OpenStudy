@@ -18,6 +18,8 @@ import {
   Moon,
   Sparkles,
   Headphones,
+  FileQuestion,
+  CalendarRange,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -32,8 +34,16 @@ const navGroups: { headingKey: string; items: { href: string; labelKey: string; 
     ],
   },
   {
+    headingKey: "nav.practice",
+    items: [
+      { href: "/review", labelKey: "nav.review", icon: Clock },
+      { href: "/exam", labelKey: "nav.exam", icon: FileQuestion },
+    ],
+  },
+  {
     headingKey: "nav.focus",
     items: [
+      { href: "/plan", labelKey: "nav.plan", icon: CalendarRange },
       { href: "/sessions", labelKey: "nav.sessions", icon: Timer },
       { href: "/goals", labelKey: "nav.goals", icon: Target },
     ],
@@ -42,7 +52,6 @@ const navGroups: { headingKey: string; items: { href: string; labelKey: string; 
     headingKey: "nav.insights",
     items: [
       { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
-      { href: "/review", labelKey: "nav.review", icon: Clock },
       { href: "/stats", labelKey: "nav.stats", icon: BarChart3 },
     ],
   },

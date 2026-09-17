@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition, useRef } from "react";
 import { useT } from "@/lib/i18n";
-import { Plus, Trash2, BookOpen, Pencil, Layers, FileText, ExternalLink, Link2, Search } from "lucide-react";
+import { Plus, Trash2, BookOpen, Pencil, Layers, FileText, ExternalLink, Link2, Search, Clock, Zap, TrendingDown, CircleDot } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Card, Button, Modal, Input, EmptyState, Skeleton } from "@/components/ui";
 import { formatDuration, formatRelative } from "@/lib/utils";
@@ -42,6 +42,20 @@ import { SubjectIconPicker, SUBJECT_ICONS } from "@/components/subject-icon-pick
 import { readableOn } from "@/lib/utils";
 import { tiltHandlers } from "@/lib/interactions";
 import { shuffled } from "@/lib/card-kinds";
+import { getTopicHubData } from "@/app/actions";
+import type { WeaknessSignal } from "@/lib/contracts";
+
+// Per-topic hub row (live counts + weakness from getTopicHubData).
+interface TopicHubRow {
+  topicId: string;
+  subjectName: string | null;
+  sessions: number;
+  tasks: number;
+  due: number;
+  weakness: WeaknessSignal | null;
+}
+import { useCardSideImages } from "@/lib/card-images";
+import { CardImage } from "@/components/card-image";
 import { useLiveData } from "@/lib/use-live-data";
 import { usePendingDeletes } from "@/hooks/usePendingDeletes";
 
@@ -69,6 +83,7 @@ export default function SubjectsPage() {
 
   // Topic management modal state
   const [manageTopicsFor, setManageTopicsFor] = useState<string | null>(null);
+  const [hubData, setHubData] = useState<Record<string, TopicHubRow>>({});
   const [manageSubjectsName, setManageSubjectsName] = useState("");
   const [manageSubjectColor, setManageSubjectColor] = useState("#DFE104");
   const [managedTopics, setManagedTopics] = useState<{ id: string; name: string; description: string | null }[]>([]);
@@ -132,6 +147,12 @@ export default function SubjectsPage() {
       stats[tid] = { notes, cards, bundles: linked as Bundle[] };
     }
     setTopicStats(stats);
+    // Study OS hub data: sessions/tasks/due/weakness per topic.
+    getTopicHubData(topicIds).then((rows) => {
+      const map: Record<string, TopicHubRow> = {};
+      for (const r of rows) map[r.topicId] = r;
+      setHubData(map);
+    });
   };
 
   const openManageTopics = async (subjectId: string, subjectName: string) => {
@@ -374,6 +395,7 @@ export default function SubjectsPage() {
   const remainingMain = reviewQueue.length > 0 ? reviewQueue.length - reviewIndex : 0;
   const totalDue = remainingMain + learningQueue.length;
   const completed = reviewQueue.length > 0 ? reviewIndex : 0;
+  const sideImages = useCardSideImages(activeCard?.id ?? null);
   const initialTotal = totalDue + completed;
 
   // Realtime: subjects + bundles + due badge re-fetch on ANY table change.
@@ -977,6 +999,9 @@ export default function SubjectsPage() {
                     </p>
                     <div className="flex-1 flex flex-col justify-center text-center">
                       <p className="text-xl font-bold tracking-tight leading-relaxed">{isFlipped ? activeCard.back : activeCard.front}</p>
+                      <div className="mt-4">
+                        <CardImage rec={isFlipped ? sideImages.back : sideImages.front} maxWidth={280} />
+                      </div>
                       {isFlipped && (activeCard as any).description && <p className="mt-3 text-sm text-muted-fg">{(activeCard as any).description}</p>}
                     </div>
                     {!isFlipped ? (
@@ -1151,6 +1176,17 @@ export default function SubjectsPage() {
                             <span className="inline-flex items-center gap-1"><FileText size={10} /> {stats.notes} notes</span>
                             <span className="inline-flex items-center gap-1"><Layers size={10} /> {stats.cards === 1 ? t("deckCard.oneCard") : t("deckCard.nCards").replace("{n}", String(stats.cards))}</span>
                             <span className="inline-flex items-center gap-1"><BookOpen size={10} /> {bundles.length} bundles</span>
+                            {hubData[topic.id] && hubData[topic.id].sessions > 0 && (
+                              <span className="inline-flex items-center gap-1"><Clock size={10} /> {hubData[topic.id].sessions} {t("hub.sessions")}</span>
+                            )}
+                            {hubData[topic.id]?.due > 0 && (
+                              <span className="inline-flex items-center gap-1 text-accent"><Zap size={10} /> {hubData[topic.id].due} {t("topbar.due")}</span>
+                            )}
+                            {hubData[topic.id]?.weakness && (
+                              <span className={hubData[topic.id].weakness!.trend === "worsening" ? "inline-flex items-center gap-1 text-danger" : "inline-flex items-center gap-1 text-warning"}>
+                                <TrendingDown size={10} /> {t("hub.weak_score").replace("{n}", String(hubData[topic.id].weakness!.score))}
+                              </span>
+                            )}
                           </span>
                         )}
                         {bundles.length > 0 && (
@@ -1226,6 +1262,14 @@ export default function SubjectsPage() {
                           className="inline-flex items-center gap-1 rounded-full border border-accent bg-accent px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-fg hover:opacity-90 disabled:opacity-50"
                         >
                           <Plus size={12} />{t("fc.newBundle")}</button>
+                      )}
+                      {hubData[topic.id]?.tasks > 0 && (
+                        <button
+                          onClick={() => router.push("/plan")}
+                          className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg hover:border-accent hover:text-accent hover:bg-accent-soft"
+                        >
+                          <CircleDot size={12} /> {hubData[topic.id].tasks} {t("hub.tasks")}
+                        </button>
                       )}
                       <button
                         onClick={() => setLinkTopicId(linkTopicId === topic.id ? null : topic.id)}

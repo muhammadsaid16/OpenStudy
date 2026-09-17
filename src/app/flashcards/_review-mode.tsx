@@ -15,6 +15,8 @@ import { spotlightProps } from "@/lib/interactions";
 import { Markdown } from "@/components/markdown";
 import { Volume2, VolumeX } from "lucide-react";
 import { RATING_BUTTONS } from "@/lib/card-status";
+import { CardImage } from "@/components/card-image";
+import type { CardImageRec } from "@/lib/db";
 
 export interface ReviewCard {
   id: string;
@@ -54,6 +56,9 @@ export interface ReviewModeProps<C extends ReviewCard> {
   cardKindOf: (c: C) => string;
   maskCloze: (s: string) => string;
   choiceOptions: string[];
+  // blob side-images (Study OS); null when the card has none
+  cardImageFront: CardImageRec | null;
+  cardImageBack: CardImageRec | null;
   // callbacks
   onSelectBundle: (id: string) => void;
   onOpenCreate: () => void;
@@ -277,6 +282,11 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                       ? p.maskCloze(p.activeCard.front)
                       : p.activeCard.front)}
                 </div>
+                {p.cardImageFront && (
+                  <div className="mt-5">
+                    <CardImage rec={p.cardImageFront} />
+                  </div>
+ )}
                 {(p.activeCard as any).frontDescription && (
                   <p className="mt-4 max-w-[28rem] text-sm font-normal normal-case tracking-normal leading-relaxed text-muted-fg">
                     {(p.activeCard as any).frontDescription}
@@ -334,6 +344,11 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
                 )}
               </div>
               <div className="flex flex-1 flex-col items-center justify-center px-10 pb-4 text-center">
+                {p.cardImageBack && (
+                  <div className="mb-5">
+                    <CardImage rec={p.cardImageBack} />
+                  </div>
+                )}
                 {p.pickedChoice !== null && p.cardKindOf(p.activeCard) === "choice" && (
                   <p
                     className={cn(

@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react";
 import { useT } from "@/lib/i18n";
-import { Brain, Plus, Pencil, Layers, BarChart3, AlertTriangle, Download, Upload, Wifi, WifiOff, Search } from "lucide-react";
+import { Brain, Plus, Pencil, Layers, BarChart3, AlertTriangle, Download, Upload, Wifi, WifiOff, Search, X } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
+import type { CardImageRec } from "@/lib/db";
 import { Button, EmptyState, Modal, Input, Skeleton } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
@@ -59,6 +60,16 @@ import { AiImportButton } from "@/components/ai-import-button";
 import { AiGenerateButton } from "@/components/ai-generate-button";
 import { CardKindFields } from "@/components/card-kind-fields";
 import { RATING_BUTTONS, isCorrect } from "@/lib/card-status";
+import {
+  getCardImage,
+  setCardImage,
+  removeCardImage,
+  deleteCardImages,
+  snapshotCardImages,
+  restoreCardImages,
+  useCardImageUrl,
+} from "@/lib/card-images";
+import { CardImage, CardImagePicker } from "@/components/card-image";
 import { useLiveData } from "@/lib/use-live-data";
 
 type Flashcard = Awaited<ReturnType<typeof getDueFlashcards>>[number];
@@ -176,6 +187,18 @@ function FlashcardsContent() {
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
   const [frontDesc, setFrontDesc] = useState("");
+  // Attach-image drafts (blob side-images, distinct from the inline
+  // markdown uploads). File = will save; null = untouched.
+  const [createFrontImg, setCreateFrontImg] = useState<File | null>(null);
+  const [createBackImg, setCreateBackImg] = useState<File | null>(null);
+  // Edit-modal image state: `undefined` = no change, null = remove, File = replace.
+  const [editFrontImg, setEditFrontImg] = useState<File | null | undefined>(undefined);
+  const [editBackImg, setEditBackImg] = useState<File | null | undefined>(undefined);
+  const [editFrontImgState, setEditFrontImgState] = useState<CardImageRec | null>(null);
+  const [editBackImgState, setEditBackImgState] = useState<CardImageRec | null>(null);
+  // Review-face images for the active card, keyed by card id so the
+  // async load can't race a card change.
+  const [reviewImgs, setReviewImgs] = useState<{ id: string; front: CardImageRec | null; back: CardImageRec | null }>({ id: "", front: null, back: null });
   const [backDesc, setBackDesc] = useState("");
   const [kind, setKind] = useState<CardKind>("basic");
   const [choicesText, setChoicesText] = useState("");
@@ -404,6 +427,27 @@ function FlashcardsContent() {
   // same-session relearning queue (cards rated AGAIN / HARD).
   const activeCard = dueCards[currentIndex] ?? learningQueue[0] ?? null;
 
+  // ─── Review-face images (blob side-images) ──────────────────
+  // Loaded per active card; keyed by id so a card change during the
+  // async load can't show stale images. Cleared on exit.
+  useEffect(() => {
+    if (!activeCard) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset is the guard clause of the per-card async load below
+      setReviewImgs({ id: "", front: null, back: null });
+      return;
+    }
+    if (reviewImgs.id === activeCard.id) return;
+    let stale = false;
+    (async () => {
+      const [front, back] = await Promise.all([getCardImage(activeCard.id, "front"), getCardImage(activeCard.id, "back")]);
+      if (!stale) setReviewImgs({ id: activeCard.id, front, back });
+    })();
+    return () => {
+      stale = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCard?.id]);
+
   // ─── Multiple-choice answering ──────────────────────────────
   // The tapped option flips the card; correctness is revealed on the
   // answer face. Reset on every rating (card advance happens only there).
@@ -580,10 +624,14 @@ function FlashcardsContent() {
     // choice with <2 options) surface in the modal, not silently.
     const choices = kind === "choice" ? cleanChoices(choicesText.split("\n")) : undefined;
     try {
-      if (selectedBundle) {
-        await createBundleFlashcard({ bundleId: selectedBundle, front: front.trim(), back: back.trim(), frontDescription: frontDesc.trim() || undefined, backDescription: backDesc.trim() || undefined, kind, choices });
-      } else if (selectedTopicId) {
-        await createFlashcard({ topicId: selectedTopicId, front: front.trim(), back: back.trim(), frontDescription: frontDesc.trim() || undefined, backDescription: backDesc.trim() || undefined, kind, choices });
+      const created = selectedBundle
+        ? await createBundleFlashcard({ bundleId: selectedBundle, front: front.trim(), back: back.trim(), frontDescription: frontDesc.trim() || undefined, backDescription: backDesc.trim() || undefined, kind, choices })
+        : selectedTopicId
+          ? await createFlashcard({ topicId: selectedTopicId, front: front.trim(), back: back.trim(), frontDescription: frontDesc.trim() || undefined, backDescription: backDesc.trim() || undefined, kind, choices })
+          : null;
+      if (created) {
+        if (createFrontImg) await setCardImage(created.id, "front", createFrontImg, createFrontImg.name);
+        if (createBackImg) await setCardImage(created.id, "back", createBackImg, createBackImg.name);
       }
       setModalOpen(false);
       setFront("");
@@ -593,6 +641,8 @@ function FlashcardsContent() {
       setKind("basic");
       setChoicesText("");
       setSelectedTopicId("");
+      setCreateFrontImg(null);
+      setCreateBackImg(null);
       await loadDueCards();
     } catch (err) {
       setCreateError(err instanceof Error ? err.message.slice(0, 140) : t("fc.createCardFailed"));
@@ -616,6 +666,15 @@ function FlashcardsContent() {
         kind: editKind,
         choices: editKind === "choice" ? cleanChoices(editChoicesText.split("\n")) : undefined,
       });
+      // Image side-changes: undefined = untouched, null = remove, File = replace.
+      if (editFrontImg !== undefined) {
+        if (editFrontImg === null) await removeCardImage(editCard.id, "front");
+        else await setCardImage(editCard.id, "front", editFrontImg, editFrontImg.name);
+      }
+      if (editBackImg !== undefined) {
+        if (editBackImg === null) await removeCardImage(editCard.id, "back");
+        else await setCardImage(editCard.id, "back", editBackImg, editBackImg.name);
+      }
       setEditCard(null);
       // Refresh browse list so the edited card shows new text immediately
       if (browseLoaded) await loadBrowseAll();
@@ -635,11 +694,13 @@ function FlashcardsContent() {
     setDeleting(true);
     try {
       // Snapshot everything needed for a faithful undo BEFORE deletion
-      const [cardSnapshot, tagLinks] = await Promise.all([
+      const [cardSnapshot, tagLinks, imageSnap] = await Promise.all([
         getFlashcardSnapshot(snapshot.id),
         getCardTagLinks(snapshot.id),
+        snapshotCardImages(snapshot.id),
       ]);
       await deleteFlashcard(snapshot.id);
+      await deleteCardImages(snapshot.id); // cascade: images die with the card
       setDeleteTarget(null);
       await loadDueCards();
       if (browseLoaded) await loadBrowseAll();
@@ -649,6 +710,7 @@ function FlashcardsContent() {
           // Restore the exact card (same id, SM-2 state, tags, links) —
           // recreating it fresh would silently reset its scheduling.
           if (cardSnapshot) await restoreFlashcard(cardSnapshot, tagLinks);
+          if (imageSnap.length) await restoreCardImages(imageSnap);
           await loadDueCards();
         },
       });
@@ -930,6 +992,8 @@ function FlashcardsContent() {
           cardKindOf={cardKind}
           maskCloze={maskCloze}
           choiceOptions={choiceOptions}
+          cardImageFront={reviewImgs.id === activeCard?.id ? reviewImgs.front : null}
+          cardImageBack={reviewImgs.id === activeCard?.id ? reviewImgs.back : null}
           onSelectBundle={(id) => setSelectedBundle(id)}
           onOpenCreate={() => setModalOpen(true)}
           onOpenBundleCreate={() => setBundleCreateOpen(true)}
@@ -992,6 +1056,14 @@ function FlashcardsContent() {
             setEditKind(cardKind(card));
             setEditChoicesText((card.choices ?? []).join("\n"));
             setEditError("");
+            // Image drafts: undefined = untouched until the user acts.
+            setEditFrontImg(undefined);
+            setEditBackImg(undefined);
+            (async () => {
+              const [f, b] = await Promise.all([getCardImage(card.id, "front"), getCardImage(card.id, "back")]);
+              setEditFrontImgState(f);
+              setEditBackImgState(b);
+            })();
           }}
           onDeleteCard={(card) => setDeleteTarget(card)}
           onBatchDelete={handleBatchDelete}
@@ -1041,7 +1113,7 @@ function FlashcardsContent() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.frontQuestion")}</label>
-              <ImageUploadButton onImage={(md) => setFront((prev) => prev ? `${prev} ${md}` : md)} label={t("fc.image")} />
+              <CardImagePicker file={createFrontImg} onFile={setCreateFrontImg} label={t("fc.image")} />
             </div>
             <Input placeholder={t("fc.frontExample")} value={front} onChange={(e) => setFront(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
@@ -1050,7 +1122,7 @@ function FlashcardsContent() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.backAnswer")}</label>
-              <ImageUploadButton onImage={(md) => setBack((prev) => prev ? `${prev} ${md}` : md)} label={t("fc.image")} />
+              <CardImagePicker file={createBackImg} onFile={setCreateBackImg} label={t("fc.image")} />
             </div>
             <Input placeholder={t("fc.backExample")} value={back} onChange={(e) => setBack(e.target.value)}
               onKeyDown={(e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
@@ -1087,16 +1159,18 @@ function FlashcardsContent() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.frontQuestion")}</label>
-                <ImageUploadButton onImage={(md) => setEditFront((prev) => prev ? `${prev} ${md}` : md)} label={t("fc.image")} />
+                <CardImagePicker file={editFrontImg ?? null} onFile={setEditFrontImg} label={t("fc.image")} />
               </div>
+              {editFrontImgState && !editFrontImg && <EditImageStrip rec={editFrontImgState} onRemove={() => setEditFrontImg(null)} />}
               <Input value={editFront} onChange={(e) => setEditFront(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.backAnswer")}</label>
-                <ImageUploadButton onImage={(md) => setEditBack((prev) => prev ? `${prev} ${md}` : md)} label={t("fc.image")} />
+                <CardImagePicker file={editBackImg ?? null} onFile={setEditBackImg} label={t("fc.image")} />
               </div>
               <Input value={editBack} onChange={(e) => setEditBack(e.target.value)} />
+              {editBackImgState && !editBackImg && <EditImageStrip rec={editBackImgState} onRemove={() => setEditBackImg(null)} />}
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.frontDesc")}</label>
@@ -1279,5 +1353,21 @@ export default function FlashcardsPage() {
     <Suspense fallback={<div className="page-gutter cq"><Skeleton className="h-[400px] w-full" /></div>}>
       <FlashcardsContent />
     </Suspense>
+  );
+}
+
+// ─── Edit-modal strip: shows the SAVED side-image with remove (undefined
+// means untouched, so this only renders while the saved image exists). ──
+function EditImageStrip({ rec, onRemove }: { rec: CardImageRec; onRemove: () => void }) {
+  const url = useCardImageUrl(rec);
+  if (!url) return null;
+  return (
+    <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+      <img src={url} alt="" className="h-8 w-8 rounded object-cover" />
+      <span className="max-w-[10rem] truncate normal-case">{rec.name}</span>
+      <button type="button" aria-label="Remove saved image" onClick={onRemove} className="text-muted-fg hover:text-danger">
+        <X size={12} />
+      </button>
+    </span>
   );
 }

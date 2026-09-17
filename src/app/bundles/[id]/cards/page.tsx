@@ -42,6 +42,8 @@ import type { BundleRec, CardKind } from "@/lib/db";
 import { cardKind, cleanChoices, shuffled } from "@/lib/card-kinds";
 import { CardKindFields } from "@/components/card-kind-fields";
 import { RATING_BUTTONS, isCorrect } from "@/lib/card-status";
+import { useCardSideImages } from "@/lib/card-images";
+import { CardImage } from "@/components/card-image";
 import { useLiveData } from "@/lib/use-live-data";
 
 type CardTag = { tag: { id: string; name: string } };
@@ -116,6 +118,10 @@ export default function BundleCardsPage() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [reviewing, setReviewing] = useState(false);
+
+  // Review-face images for the active review card (Study OS side-images).
+  const peekActive = (reviewQueue[reviewIndex] as Card | undefined) ?? (learningQueue[0] as Card | undefined) ?? null;
+  const sideImages = useCardSideImages(peekActive?.id ?? null);
 
   const load = useCallback(async () => {
     const [bundleCards, bundles] = await Promise.all([
@@ -533,6 +539,9 @@ export default function BundleCardsPage() {
                 <div className="glass rounded-2xl p-8 min-h-[280px] flex flex-col">
                   <div className="flex-1 flex flex-col justify-center text-center">
                     <p className="text-xl font-bold tracking-tight leading-relaxed">{isFlipped ? card.back : card.front}</p>
+                    <div className="mt-4">
+                      <CardImage rec={isFlipped ? sideImages.back : sideImages.front} maxWidth={280} />
+                    </div>
                     {isFlipped ? (((card as any).backDescription ?? (card as any).description) && <p className="mt-3 text-sm text-muted-fg">{(card as any).backDescription ?? (card as any).description}</p>) : (((card as any).frontDescription) && <p className="mt-3 text-sm text-muted-fg/80">{(card as any).frontDescription}</p>)}
                   </div>
                   {!isFlipped ? (

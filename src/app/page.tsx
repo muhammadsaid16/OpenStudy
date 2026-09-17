@@ -16,10 +16,13 @@ import { Upcoming } from "@/components/upcoming";
 import { PageLoader } from "@/components/page-loader";
 import { StatsHeatmap } from "@/components/stats-heatmap";
 import { StatsStreakBadge } from "@/components/stats-streak-badge";
-import { getDashboardStats, getTodayProgress, getWeeklyAnalytics, getGoals, getAllReviewLogs } from "./actions";
+import { getDashboardStats, getTodayProgress, getWeeklyAnalytics, getGoals, getAllReviewLogs, getPlannerData } from "./actions";
 import type { ReviewLogRec } from "@/lib/db";
 import { formatDuration } from "@/lib/utils";
 import { useLiveData } from "@/lib/use-live-data";
+import { nextAction } from "@/lib/planner";
+import type { NextAction } from "@/lib/contracts";
+import { ArrowRight, CalendarRange, FileQuestion, GraduationCap } from "lucide-react";
 
 type Stats = Awaited<ReturnType<typeof getDashboardStats>>;
 type Weekly = Awaited<ReturnType<typeof getWeeklyAnalytics>>;
@@ -63,6 +66,36 @@ export default function DashboardPage() {
     setGoalCounts({ active: g.filter((x) => x.status === "in_progress").length, total: g.length });
   }, [live]);
 
+  // Study OS: the single Next Action from the shared priority engine
+  // (due reviews > imminent exam > weakness practice > tasks).
+  const [action, setAction] = useState<NextAction | null>(null);
+  useEffect(() => {
+    let stale = false;
+    getPlannerData().then((d) => {
+      if (stale) return;
+      const dueCards = d.cards.filter((c) => new Date(c.nextReview).getTime() <= Date.now());
+      const oldestDue = dueCards.length
+        ? Math.max(...dueCards.map((c) => (Date.now() - new Date(c.nextReview).getTime()) / 86_400_000))
+        : null;
+      const nextExam = d.exams
+        .filter((e) => e.status === "in_progress")
+        .map((e) => ({ title: e.title, dueDate: e.startedAt as Date | string | null }))
+        .sort((a, b) => new Date(a.dueDate ?? 0).getTime() - new Date(b.dueDate ?? 0).getTime())[0] ?? null;
+      setAction(
+        nextAction({
+          dueCount: dueCards.length,
+          dueOldestDays: oldestDue,
+          weakness: d.weakness,
+          openTasks: d.tasks.filter((x) => x.status !== "done").map((x) => ({ id: x.id, title: x.title, dueDate: x.dueDate ?? null })),
+          nextExam,
+        })
+      );
+    });
+    return () => {
+      stale = true;
+    };
+  }, []);
+
   if (!stats) {
     return <PageLoader variant="dashboard" titleW="w-56" />;
   }
@@ -74,6 +107,26 @@ export default function DashboardPage() {
       <TopBar dueCards={stats.dueCards} />
 
       <motion.div variants={container} initial="hidden" animate="show">
+        {action && (
+          <motion.div variants={item} className="mb-6">
+            <Link href={action.href} className="group block">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/40 bg-accent-soft px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/15 text-accent">
+                    {action.kind === "due_reviews" ? <Zap size={17} /> : action.kind === "exam_prep" ? <FileQuestion size={17} /> : action.kind === "weak_practice" ? <GraduationCap size={17} /> : action.kind === "task" ? <Target size={17} /> : <CalendarRange size={17} />}
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold tracking-tight text-fg">{action.title}</p>
+                    <p className="text-xs text-muted-fg">{action.detail}{action.minutes > 0 ? ` · ~${action.minutes}m` : ""}</p>
+                  </div>
+                </div>
+                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-accent transition-transform group-hover:translate-x-0.5">
+                  {t("dash.next_action")} <ArrowRight size={14} />
+                </span>
+              </div>
+            </Link>
+          </motion.div>
+        )}
         {stats.dueCards > 0 && (
           <motion.div variants={item} className="mb-6">
             <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/40 bg-accent-soft px-6 py-4 animate-[pulse-border_2s_ease-in-out_infinite]">

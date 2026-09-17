@@ -14,6 +14,8 @@ import {
   Clock,
   Settings,
   Sparkles,
+  CalendarRange,
+  FileQuestion,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,8 +28,8 @@ const primary = [
   { href: "/review", label: "nav.review", icon: Clock },
 ];
 const secondary = [
-  { href: "/notes", label: "nav.notes", icon: StickyNote },
-  { href: "/goals", label: "nav.goals", icon: Target },
+  { href: "/plan", label: "nav.plan", icon: CalendarRange },
+  { href: "/exam", label: "nav.exam", icon: FileQuestion },
   { href: "/stats", label: "nav.stats", icon: BarChart3 },
   { href: "/settings", label: "nav.settings", icon: Settings },
 ];
