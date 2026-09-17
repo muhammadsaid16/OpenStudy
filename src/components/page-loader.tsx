@@ -24,7 +24,9 @@ export type LoaderVariant =
   | "settings"
   | "kanban"    // goals
   | "cards"     // bundles/[id]/cards
-  | "stats";    // stats
+  | "stats"     // stats
+  | "plan"      // planner
+  | "exam";     // exam setup
 
 function LoaderBar({ label }: { label: string }) {
   const t = useT();
@@ -409,7 +411,61 @@ const LABELS: Record<LoaderVariant, { key: string }> = {
   kanban: { key: "goals.title" },
   cards: { key: "loader.cards" },
   stats: { key: "stats.title" },
+  plan: { key: "page.plan" },
+  exam: { key: "page.exam" },
 };
+
+function PlannerBody() {
+  /* /plan — 4 stat tiles + 7-day calendar strip + two glass panels. */
+  return (
+    <>
+      <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-[88px] w-full rounded-2xl" />
+        ))}
+      </div>
+      <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 w-full rounded-xl" />
+        ))}
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Skeleton className="h-56 w-full rounded-2xl" />
+        <Skeleton className="h-56 w-full rounded-2xl" />
+      </div>
+    </>
+  );
+}
+
+function ExamBody() {
+  /* /exam — main form panel + 320px sidebar of info cards. */
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="space-y-4">
+        <Skeleton className="h-11 w-full rounded-xl" />
+        <Skeleton className="h-5 w-40" />
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-20 rounded-full" />
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Skeleton className="h-11 w-full rounded-xl" />
+          <div className="flex flex-wrap gap-1.5">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-9 w-14 rounded-lg" />
+            ))}
+          </div>
+        </div>
+        <Skeleton className="h-12 w-full rounded-xl" />
+      </div>
+      <div className="space-y-4">
+        <Skeleton className="h-28 w-full rounded-2xl" />
+        <Skeleton className="h-24 w-full rounded-2xl" />
+      </div>
+    </div>
+  );
+}
 
 export function PageLoader({
   variant,
@@ -434,6 +490,8 @@ export function PageLoader({
       {variant === "sessions" && <SessionsBody />}
       {variant === "settings" && <SettingsBody />}
       {variant === "kanban" && <KanbanBody />}
+      {variant === "plan" && <PlannerBody />}
+      {variant === "exam" && <ExamBody />}
       {variant === "cards" && <CardsBody />}
       {variant === "stats" && <StatsBody />}
     </div>

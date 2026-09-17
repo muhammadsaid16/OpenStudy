@@ -43,51 +43,63 @@ test("realtime: creating a subject on /subjects updates the dashboard without re
   await page.goto("/subjects");
   await expect(page.locator("body")).not.toContainText("Loading OpenStudy", { timeout: 20_000 });
 
-  // Create a subject (empty state or populated header button)
-  const createBtn = page.getByRole("button", { name: /new subject|create subject/i }).first();
-  await createBtn.click();
-  await page.getByPlaceholder("e.g. Linear Algebra").fill("E2E Realtime Subject");
-  await page.getByRole("button", { name: "Create", exact: true }).click();
-  await expect(page.getByText("E2E Realtime Subject")).toBeVisible({ timeout: 10_000 });
+  // Open the New Subject modal (populated header button or empty-state CTA)
+  await page.getByRole("button", { name: /new subject|create subject/i }).first().click();
+  const dialog = page.getByRole("dialog", { name: /new subject/i });
+  await dialog.getByPlaceholder("Example Subject").fill("E2E Realtime Subject");
+  await dialog.getByRole("button", { name: "Create", exact: true }).click();
+  await expect(page.getByText("E2E Realtime Subject").first()).toBeVisible({ timeout: 10_000 });
 
   // SPA-nav to dashboard — subject shortcut should appear without reload
   await page.getByRole("link", { name: "Dashboard" }).first().click();
-  await expect(page.getByText("E2E Realtime Subject")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("E2E Realtime Subject").first()).toBeVisible({ timeout: 10_000 });
   await expect(page.locator("body")).not.toContainText("Loading OpenStudy");
 });
 
 test("deck: create → card count → edit rename → delete with undo", async ({ page }) => {
   await page.goto("/subjects");
+  await expect(page.locator("body")).not.toContainText("Loading OpenStudy", { timeout: 20_000 });
   await page.getByRole("tab", { name: /decks/i }).click();
 
-  await page.getByRole("button", { name: /create deck|new deck/i }).first().click();
-  await page.getByPlaceholder(/Biology/i).fill("E2E Deck Alpha");
-  await page.getByRole("button", { name: "Create", exact: true }).click();
-  await expect(page.getByText("E2E Deck Alpha")).toBeVisible({ timeout: 10_000 });
+  // Scoped to the deck card in the grid — the 5s undo toast also echoes the
+  // name, so page-wide text lookups would race the toast.
+  const deckCard = (name: string) => page.locator("div.group", { hasText: name }).first();
 
-  // Edit via the card's pencil action
-  await page.locator('button[aria-label="Edit deck"]').first().click();
-  const nameInput = page.locator('input[value="E2E Deck Alpha"]');
-  await nameInput.fill("E2E Deck Alpha v2");
-  await page.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(page.getByText("E2E Deck Alpha v2")).toBeVisible({ timeout: 10_000 });
+  await page.getByRole("button", { name: /create deck|new deck/i }).first().click();
+  const createDialog = page.getByRole("dialog", { name: /new deck/i });
+  await createDialog.getByPlaceholder("Example Deck").fill("E2E Deck Alpha");
+  await createDialog.getByRole("button", { name: "Create", exact: true }).click();
+  await expect(deckCard("E2E Deck Alpha")).toBeVisible({ timeout: 10_000 });
+  await expect(deckCard("E2E Deck Alpha").getByText("0 cards", { exact: true })).toBeVisible();
+
+  // Edit via the card's pencil action (attribute selector — the card's
+  // clickable wrapper also resolves as a button and would collide).
+  await deckCard("E2E Deck Alpha").locator('button[aria-label="Edit deck"]').click();
+  const editDialog = page.getByRole("dialog", { name: /edit deck/i });
+  await editDialog.locator("input").first().fill("E2E Deck Alpha v2");
+  await editDialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(deckCard("E2E Deck Alpha v2")).toBeVisible({ timeout: 10_000 });
 
   // Delete via the card's trash action (undo toast appears; card leaves the grid)
-  await page.locator('button[aria-label="Delete deck"]').first().click();
-  await page.getByRole("button", { name: "Delete", exact: true }).click();
-  await expect(page.getByText("E2E Deck Alpha v2")).toBeHidden({ timeout: 10_000 });
+  await deckCard("E2E Deck Alpha v2").locator('button[aria-label="Delete deck"]').click();
+  const deleteDialog = page.getByRole("dialog", { name: /delete deck/i });
+  await deleteDialog.getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(deckCard("E2E Deck Alpha v2")).toBeHidden({ timeout: 10_000 });
 });
 
 test("share: empty deck cannot produce a link; seeded deck link round-trips", async ({ page }) => {
   await page.goto("/subjects");
+  await expect(page.locator("body")).not.toContainText("Loading OpenStudy", { timeout: 20_000 });
   await page.getByRole("tab", { name: /decks/i }).click();
 
   // Empty deck → share warns, no success toast
   await page.getByRole("button", { name: /create deck|new deck/i }).first().click();
-  await page.getByPlaceholder(/Biology/i).fill("E2E Empty Deck");
-  await page.getByRole("button", { name: "Create", exact: true }).click();
-  await expect(page.getByText("E2E Empty Deck")).toBeVisible({ timeout: 10_000 });
-  await page.locator('button[aria-label="Copy share link"]').first().click();
+  const createDialog = page.getByRole("dialog", { name: /new deck/i });
+  await createDialog.getByPlaceholder("Example Deck").fill("E2E Empty Deck");
+  await createDialog.getByRole("button", { name: "Create", exact: true }).click();
+  const deckCard = page.locator("div.group", { hasText: "E2E Empty Deck" }).first();
+  await expect(deckCard).toBeVisible({ timeout: 10_000 });
+  await deckCard.locator('button[aria-label="Copy share link"]').click();
   await expect(page.getByText(/has no cards yet/i)).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText(/Share link copied/i)).toHaveCount(0);
 });

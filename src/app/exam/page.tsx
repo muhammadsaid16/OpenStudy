@@ -23,9 +23,9 @@ import {
 import { filterExamPool } from "@/lib/exam";
 import { shuffled } from "@/lib/card-kinds";
 import { RATING_BUTTONS } from "@/lib/card-status";
-import { Button, EmptyState, Modal, Skeleton } from "@/components/ui";
+import { Button, EmptyState, Modal, Input, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { db, type ExamQuestionRec, type ExamRec, type SubjectRec } from "@/lib/db";
+import { db, type ExamQuestionRec, type ExamRec, type FlashcardRec, type SubjectRec } from "@/lib/db";
 import { ArrowLeft, Award, CheckCircle2, ChevronRight, Clock, FileQuestion, ListChecks, Timer, Trash2, XCircle } from "lucide-react";
 
 type Phase = "setup" | "running" | "results";
@@ -72,6 +72,7 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
   const [timeMin, setTimeMin] = useState<number | null>(15);
   const [practice, setPractice] = useState(false);
   const [poolSize, setPoolSize] = useState<number | null>(null);
+  const [allCards, setAllCards] = useState<FlashcardRec[] | null>(null);
   const [starting, setStarting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<ExamRec | null>(null);
 
@@ -79,10 +80,26 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
     (async () => {
       const [s, cards, allTopics] = await Promise.all([getSubjects(), getAllFlashcards(), db.topics.toArray()]);
       setSubjects(s);
+      setAllCards(cards as FlashcardRec[]);
       setTopics(allTopics.map((x) => ({ id: x.id, name: x.name, subjectId: x.subjectId })));
-      setPoolSize(filterExamPool(cards as any, { title: "", subjectIds: [], topicIds: [], questionCount: 0, timeLimitSec: null, practiceOnly: false }).length);
     })();
   }, []);
+
+  // Pool size reacts to scope changes so the sidebar count matches what
+  // Start will actually build from.
+  useEffect(() => {
+    if (!allCards) return;
+    setPoolSize(
+      filterExamPool(allCards, {
+        title: "",
+        subjectIds: selSubjects,
+        topicIds: selTopics,
+        questionCount: 0,
+        timeLimitSec: null,
+        practiceOnly: false,
+      }).length
+    );
+  }, [allCards, selSubjects, selTopics]);
 
   const visibleTopics = useMemo(() => {
     if (!topics) return [];
@@ -106,19 +123,25 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
     }
   };
 
-  if (!subjects || !topics) return <Skeleton className="h-[420px] w-full" />;
+  if (!subjects || !topics) return <div className="page-gutter"><Skeleton className="h-[420px] w-full" /></div>;
 
   return (
-    <div className="space-y-8">
+    <div className="page-gutter cq space-y-8">
+      {/* Header — standard v2 page header (eyebrow → title → subtitle) */}
+      <div className="mb-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.practice")}</p>
+        <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.exam")}</h1>
+        <p className="mt-2 text-sm text-muted-fg">{t("page.exam.subtitle")}</p>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="glass space-y-6 rounded-2xl p-6">
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("exam.title_label")}</label>
-            <input
+            <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t("exam.default_title")}
-              className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold tracking-tight text-fg backdrop-blur-md focus:border-primary focus:outline-none"
             />
           </div>
 
@@ -137,7 +160,7 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
                       setSelTopics([]);
                     }}
                     className={cn(
-                      "rounded-full border px-3 py-1.5 text-xs font-bold tracking-tight transition-colors",
+                      "tap-target flex items-center rounded-full border px-3 py-1.5 text-xs font-bold tracking-tight transition-colors",
                       on ? "border-primary bg-primary-container text-on-primary-container" : "border-border text-muted-fg hover:border-primary/60 hover:text-primary"
                     )}
                   >
@@ -179,13 +202,12 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("exam.questions_label")}</label>
-              <input
+              <Input
                 type="number"
                 min={1}
                 max={200}
                 value={count}
                 onChange={(e) => setCount(Math.min(200, Math.max(1, parseInt(e.target.value) || 1)))}
-                className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold text-fg backdrop-blur-md focus:border-primary focus:outline-none"
               />
             </div>
             <div className="space-y-1.5">
@@ -196,11 +218,10 @@ function ExamSetup({ onStart, history, onDeleteExam }: {
                     key={String(m)}
                     type="button"
                     aria-pressed={timeMin === m}
-                    onClick={() => setTimeMin(m)}
-                    className={cn(
-                      "rounded-lg border px-2.5 py-2 text-[11px] font-bold transition-colors",
-                      timeMin === m ? "border-primary bg-primary-container text-on-primary-container" : "border-border text-muted-fg hover:border-primary/60"
-                    )}
+                    onClick={() => setTimeMin(m)}                      className={cn(
+                        "tap-target flex items-center rounded-lg border px-2.5 py-2 text-[11px] font-bold transition-colors",
+                        timeMin === m ? "border-primary bg-primary-container text-on-primary-container" : "border-border text-muted-fg hover:border-primary/60"
+                      )}
                   >
                     {m === null ? t("exam.time_none") : `${m}m`}
                   </button>
@@ -276,6 +297,7 @@ function ExamRunner({ examId, onExit, onFinish }: { examId: string; onExit: () =
   const [exam, setExam] = useState<ExamRec | null>(null);
   const [questions, setQuestions] = useState<ExamQuestionRec[]>([]);
   const [idx, setIdx] = useState(0);
+  const [answeredCount, setAnsweredCount] = useState(0);
   const [choiceOptions, setChoiceOptions] = useState<string[]>([]);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [finishing, setFinishing] = useState(false);
@@ -335,7 +357,9 @@ function ExamRunner({ examId, onExit, onFinish }: { examId: string; onExit: () =
   const answer = async (input: { mode: "choice"; answer: string } | { mode: "self"; quality: number }) => {
     if (!q || answeredRef.current || finishing) return;
     answeredRef.current = true;
-    await answerExamQuestion(q.id, input);
+    const graded = await answerExamQuestion(q.id, input);
+    // The stored record is the source of truth — reflect it immediately.
+    if (graded?.isCorrect !== null && graded?.isCorrect !== undefined) setAnsweredCount((c) => c + 1);
     if (idx + 1 < questions.length) {
       setIdx(idx + 1);
     } else {
@@ -343,12 +367,11 @@ function ExamRunner({ examId, onExit, onFinish }: { examId: string; onExit: () =
     }
   };
 
-  if (!loaded || !exam || !q) return <Skeleton className="mx-auto h-[380px] w-full max-w-2xl" />;
-
-  const answeredCount = questions.filter((x) => x.isCorrect !== null && x.isCorrect !== undefined).length;
+  if (!loaded || !exam || !q) return <div className="page-gutter"><Skeleton className="mx-auto h-[380px] w-full max-w-2xl" /></div>;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
+    <div className="page-gutter">
+      <div className="mx-auto max-w-2xl space-y-5">
       <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
         <button onClick={() => setConfirmExit(true)} className="flex items-center gap-1.5 hover:text-primary"><ArrowLeft size={13} />{t("exam.exit")}</button>
         <span>{idx + 1} / {questions.length}</span>
@@ -411,6 +434,7 @@ function ExamRunner({ examId, onExit, onFinish }: { examId: string; onExit: () =
           <Button variant="danger" onClick={onExit}>{t("exam.exit")}</Button>
         </div>
       </Modal>
+      </div>
     </div>
   );
 }
@@ -430,13 +454,14 @@ function ExamResults({ examId, onRetake }: { examId: string; onRetake: () => voi
     })();
   }, [examId]);
 
-  if (!data) return <Skeleton className="mx-auto h-[380px] w-full max-w-3xl" />;
+  if (!data) return <div className="page-gutter"><Skeleton className="mx-auto h-[380px] w-full max-w-3xl" /></div>;
   const { exam, totals } = data;
   const wrong = questions.filter((q) => q.isCorrect === false);
   const passing = totals.scorePct >= 60;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="page-gutter">
+      <div className="mx-auto max-w-3xl space-y-6">
       <div className="glass rounded-2xl p-8 text-center">
         <Award size={30} className={cn("mx-auto mb-3", passing ? "text-success" : "text-tertiary")} />
         <p className="text-5xl font-black tracking-tight">{totals.scorePct}%</p>
@@ -482,6 +507,7 @@ function ExamResults({ examId, onRetake }: { examId: string; onRetake: () => voi
       <div className="flex justify-center gap-3">
         <Button variant="ghost" onClick={onRetake}><ChevronRight size={15} />{t("exam.new_exam")}</Button>
         <Link href="/"><Button>{t("exam.back_home")}</Button></Link>
+      </div>
       </div>
     </div>
   );

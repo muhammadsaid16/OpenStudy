@@ -146,7 +146,9 @@ describe("nextAction (Contract 3)", () => {
       nowMs: NOW,
     });
     expect(a.kind).toBe("due_reviews");
-    expect(a.href).toBe("/review");
+    // Points at the Library Study tab (the review runner), not /review —
+    // that route is the study-time analytics page.
+    expect(a.href).toBe("/subjects?tab=study");
   });
 
   it("an exam within 3 days outranks weakness but not reviews; past exams never nag", () => {

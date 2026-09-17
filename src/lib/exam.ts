@@ -41,24 +41,30 @@ export function examFrontOf(card: FlashcardRec): string {
 }
 
 /**
- * Shuffle-free deterministic pick: spread N cards evenly across the pool,
- * then shuffle with a seeded PRNG (mulberry32) so a given build is stable.
- * Zero cards and fewer cards than requested are both valid (partial exam).
+ * Deterministic pick: take up to `count` cards so the exam covers the pool
+ * evenly (pool order is walked with an even stride), then shuffle with a
+ * seeded PRNG (mulberry32) so a given build is stable. Zero cards and fewer
+ * cards than requested are both valid (partial exam) — but when the pool
+ * has enough cards the exam ALWAYS gets exactly `count` distinct questions.
  */
 export function pickExamCards(pool: FlashcardRec[], count: number, seed: number): FlashcardRec[] {
   if (count <= 0 || pool.length === 0) return [];
-  const spread: FlashcardRec[] = [];
-  const n = pool.length;
-  for (let i = 0; i < n; i++) spread.push(pool[Math.floor((i * count) % n)]);
+  // A card must never appear twice in one exam.
   const seen = new Set<string>();
-  const unique = spread.filter((c) => (seen.has(c.id) ? false : (seen.add(c.id), true)));
-  // Fisher-Yates with seeded PRNG
+  const unique = pool.filter((c) => (seen.has(c.id) ? false : (seen.add(c.id), true)));
+  if (unique.length <= count) return unique;
+  // Spread `count` picks evenly across the deduped pool (stride n/count ≥ 1
+  // never revisits an index), then seed-shuffle so consecutive questions
+  // aren't pool-adjacent.
+  const spread: FlashcardRec[] = [];
+  const n = unique.length;
+  for (let i = 0; i < count; i++) spread.push(unique[Math.floor((i * n) / count)]);
   const rng = mulberry32(seed);
-  for (let i = unique.length - 1; i > 0; i--) {
+  for (let i = spread.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
-    [unique[i], unique[j]] = [unique[j], unique[i]];
+    [spread[i], spread[j]] = [spread[j], spread[i]];
   }
-  return unique.slice(0, count);
+  return spread;
 }
 
 function mulberry32(a: number) {

@@ -133,7 +133,11 @@ export function buildPlan(input: PlanInput): PlanResult {
     });
   const taskMinutesByDay = new Array(days).fill(0);
   const tasksByDay: string[][] = Array.from({ length: days }, () => []);
-  const taskEstimate = (t: TaskRec) => t.estimateMin ?? 20;
+  // Schedule adjustments (carrying a task's remainder to the next day) live
+  // here, keyed by id — never written back onto the caller's TaskRec, which
+  // the page renders and must keep showing the user's own estimate.
+  const remainingEstimates = new Map<string, number>();
+  const taskEstimate = (t: TaskRec) => remainingEstimates.get(t.id) ?? (t.estimateMin ?? 20);
   let ti = 0;
   for (let d = 0; d < days && ti < openTasks.length; d++) {
     let free = capacity - reviewMinutes[d] - practiceByDay[d] - taskMinutesByDay[d];
@@ -144,15 +148,16 @@ export function buildPlan(input: PlanInput): PlanResult {
       taskMinutesByDay[d] += spend;
       tasksByDay[d].push(t.title);
       if (spend < est) {
-        t.estimateMin = est - spend; // carry the remainder (input objects are ours)
+        // Carry the remainder WITHOUT mutating the caller's TaskRec —
+        // the page renders these records and must never see a schedule-
+        // adjusted value in place of the user's own estimate.
+        remainingEstimates.set(t.id, est - spend);
       }
       free -= spend;
       if (spend >= est) ti++;
       else break;
     }
   }
-  // Restore mutated estimates (defensive — input shouldn't be reused anyway).
-  for (const t of openTasks) delete (t as any)._restored;
 
   // Exams land on their dates.
   const examByDay: string[][] = Array.from({ length: days }, () => []);
@@ -214,7 +219,9 @@ export function nextAction(input: NextActionInput): NextAction {
       kind: "due_reviews",
       title: input.dueCount === 1 ? "Review 1 due card" : `Review ${input.dueCount} due cards`,
       detail: oldest != null && oldest >= 1 ? `The oldest has waited ${oldest} day${oldest === 1 ? "" : "s"}` : "Reviews are protected — nothing displaces them",
-      href: "/review",
+      // The old /review is the study-time analytics page — a dead end. The
+      // Library Study tab hosts the review runner (and can review all due).
+      href: "/subjects?tab=study",
       minutes: Math.max(5, Math.round(input.dueCount * MINUTES_PER_CARD)),
     };
   }

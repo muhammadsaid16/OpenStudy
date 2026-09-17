@@ -32,7 +32,7 @@ import {
   gradeFromQuality,
   stepFsrs,
 } from "@/lib/fsrs";
-import { buildQuestionSpecs, gradeAnswer, scoreExam } from "@/lib/exam";
+import { buildQuestionSpecs, gradeAnswer, pickExamCards, scoreExam } from "@/lib/exam";
 import { computeWeaknessSignals } from "@/lib/weakness";
 import { byDueDateAsc, filterDueCards, isDueCard } from "@/lib/review-queue";
 import { isCorrect } from "@/lib/card-status";
@@ -2176,22 +2176,9 @@ export async function createExam(setup: {
     if (setup.topicIds.length && (!c.topicId || !setup.topicIds.includes(c.topicId))) return false;
     return true;
   });
-  // Deterministic spread + seeded shuffle (mirrors lib/exam.ts pickExamCards).
-  const pick = <T,>(arr: T[], n: number): T[] => {
-    if (n <= 0 || arr.length === 0) return [];
-    const spread: T[] = [];
-    for (let i = 0; i < arr.length; i++) spread.push(arr[Math.floor((i * n) % arr.length)]);
-    const seen = new Set<string>();
-    const unique = spread.filter((x) => (seen.has((x as any).id) ? false : (seen.add((x as any).id), true)));
-    let seed = exam.id.split("-").reduce((acc, part) => acc + parseInt(part, 36) || 0, 0x9e3779b9);
-    for (let i = unique.length - 1; i > 0; i--) {
-      seed = (seed * 1664525 + 1013904223) >>> 0;
-      const j = seed % (i + 1);
-      [unique[i], unique[j]] = [unique[j], unique[i]];
-    }
-    return unique.slice(0, n);
-  };
-  const picked = pick(pool, count);
+  // Shared deterministic spread + seeded shuffle (lib/exam.ts pickExamCards).
+  const seed = exam.id.split("").reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, 0x9e3779b9);
+  const picked = pickExamCards(pool, count, seed);
 
   const specs = buildQuestionSpecs(picked);
   const rows: ExamQuestionRec[] = specs.map((s, i) => ({
@@ -2211,7 +2198,10 @@ export async function createExam(setup: {
     answeredAt: null,
   }));
   await db.examQuestions.bulkAdd(rows);
-  return exam;
+  // The exam actually delivered what was built (the pool may be smaller
+  // than requested) — store the built count so "8/8" never renders as "8/15".
+  await db.exams.update(exam.id, { questionCount: rows.length });
+  return { ...exam, questionCount: rows.length };
 }
 
 export async function getExam(examId: string) {

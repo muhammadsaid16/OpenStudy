@@ -104,6 +104,9 @@ export default function SubjectsPage() {
 
   const [topicCounts, setTopicCounts] = useState<Record<string, number>>({});
   const [activeTab, setActiveTab] = useState<"subjects" | "decks" | "study">("subjects");
+  // Deep link: ?tab=study|decks selects the tab on mount (the dashboard's
+  // Next-Action card and other entries rely on this landing straight in a tab).
+  const initialTabRef = useRef(false);
 
   // Decks tab state (merged from /bundles)
   const [deckCreateOpen, setDeckCreateOpen] = useState(false);
@@ -420,6 +423,14 @@ export default function SubjectsPage() {
     setDueCount(Array.isArray(due) ? due.length : 0);
     setLoaded(true);
   }, [live]);
+
+  // ?tab=study|decks — land directly in the requested tab on first mount.
+  useEffect(() => {
+    if (initialTabRef.current) return;
+    initialTabRef.current = true;
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (tab === "study" || tab === "decks") setActiveTab(tab);
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -910,7 +921,7 @@ export default function SubjectsPage() {
                   className="group relative flex h-64 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 transition-all duration-200 hover:-translate-y-1 will-change-transform"
                   style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#8083ff")}14, transparent 55%)` }}
                 >
-                  <button onClick={() => router.push(`/bundles/${bundle.id}/cards`)} className="flex flex-1 flex-col justify-between text-start w-full">
+                  <div onClick={() => router.push(`/bundles/${bundle.id}/cards`)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/bundles/${bundle.id}/cards`); } }} className="flex flex-1 flex-col justify-between text-start w-full cursor-pointer">
                     <div className="flex items-start justify-between w-full">
                       <div
                         className="flex h-11 w-11 items-center justify-center rounded-xl text-lg font-black transition-transform duration-200 group-hover:scale-110"
@@ -966,7 +977,7 @@ export default function SubjectsPage() {
                         </p>
                       )}
                     </div>
-                  </button>
+                  </div>
                   <div className="mt-4 flex gap-2">
                     <Button size="sm" variant="secondary" onClick={() => router.push(`/bundles/${bundle.id}/cards`)} className="flex-1">{t("deckCard.open")}</Button>
                     <Button size="sm" onClick={() => startReviewForBundle(bundle.id)} className="flex-1 gap-1.5">
@@ -1035,6 +1046,10 @@ export default function SubjectsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="secondary" onClick={() => setActiveTab("decks")}>{t("subjnew.browseDecks")}</Button>
+                    {/* Review-all entry point — startReview existed but was orphaned
+                        by the Library-merge redesign, leaving no way to review all
+                        due cards in one click. */}
+                    <Button onClick={startReview} disabled={dueCount === 0}>{t("dash.reviewNow")}</Button>
                   </div>
                 </div>
                 {allBundles.length > 0 ? (

@@ -13,7 +13,7 @@ import { buildPlan } from "@/lib/planner";
 import type { PlannerDay } from "@/lib/contracts";
 import type { ExamRec, TaskRec } from "@/lib/db";
 import type { WeaknessSignal } from "@/lib/contracts";
-import { Button, Modal, Skeleton } from "@/components/ui";
+import { Button, Modal, Input, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { CalendarDays, CircleDot, Clock, Flame, Plus, Trash2, TrendingDown, TrendingUp, Zap } from "lucide-react";
 
@@ -62,7 +62,7 @@ export default function PlanPage() {
     cards: data.cards,
     tasks: data.tasks,
     weakness: data.weakness,
-    exams: data.exams.map((e) => ({ title: e.title, dueDate: e.completedAt ? null : null, status: e.status })),
+    exams: data.exams.map((e) => ({ title: e.title, dueDate: e.startedAt as Date | string | null, status: e.status })),
     sessions: data.sessions.map((s) => ({ startedAt: s.startedAt, durationMin: s.durationMin })),
   });
 
@@ -75,8 +75,13 @@ export default function PlanPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="grid gap-4 sm:grid-cols-4">
+    <div className="page-gutter cq">
+      {/* Header — standard v2 page header (eyebrow → title → subtitle) */}
+      <div className="mb-10">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.focus")}</p>
+        <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.plan")}</h1>
+        <p className="mt-2 text-sm text-muted-fg">{t("page.plan.subtitle")}</p>
+      </div>        <div className="grid gap-4 sm:grid-cols-4">
         <StatCard icon={<Clock size={15} />} label={t("plan.capacity")} value={`${plan.capacityPerDay}m`} hint={t("plan.capacity_hint")} />
         <StatCard icon={<Zap size={15} />} label={t("plan.review")} value={`${plan.totals.reviewMinutes}m`} hint={t("plan.review_hint")} />
         <StatCard icon={<Flame size={15} />} label={t("plan.practice")} value={`${plan.totals.practiceMinutes}m`} hint={t("plan.practice_hint")} />
@@ -138,15 +143,10 @@ export default function PlanPage() {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t("plan.add_task")}>
         <div className="space-y-4">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={t("plan.task_title")}
-            className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm font-bold text-fg focus:border-primary focus:outline-none"
-          />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("plan.task_title")} />
           <div className="grid grid-cols-2 gap-3">
-            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm text-fg focus:border-primary focus:outline-none" />
-            <input type="number" min={5} value={estimate} onChange={(e) => setEstimate(e.target.value)} className="h-11 w-full rounded-xl border border-glass-border bg-glass px-3 text-sm text-fg focus:border-primary focus:outline-none" />
+            <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <Input type="number" min={5} value={estimate} onChange={(e) => setEstimate(e.target.value)} />
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="ghost" onClick={() => setModalOpen(false)}>{t("common.cancel")}</Button>

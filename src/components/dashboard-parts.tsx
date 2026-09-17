@@ -15,7 +15,7 @@ export function StudyAllDueButton() {
   const t = useT();
   return (
     <Link
-      href="/subjects"
+      href="/subjects?tab=study"
       className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary-container px-4 text-xs font-bold uppercase tracking-widest text-on-primary-container transition-colors hover:brightness-110"
     >
       <PlayCircle size={15} aria-hidden />

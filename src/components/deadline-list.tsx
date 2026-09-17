@@ -50,7 +50,7 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
           {/* audit §9: empty card still offers the next action instead of
               dead-ending the section */}
           <Link
-            href="/subjects"
+            href="/subjects?tab=study"
             className="mt-3 text-xs font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
           >
             Review cards ahead →
@@ -74,7 +74,7 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
           return (
             <li key={d.subjectId}>
               <Link
-                href="/subjects"
+                href="/subjects?tab=study"
                 className="group flex items-center gap-3 py-3 transition-colors"
               >
                 <span
