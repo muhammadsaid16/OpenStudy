@@ -1,8 +1,12 @@
 # Ruvren
 
-**A local-first Study OS — FSRS flashcards, notes, subjects/topics, exams, planner, weakness engine, focus timers, goals and analytics in one interconnected, offline PWA.** Bilingual English/Arabic (full RTL). No accounts, no cloud — your study life lives in your browser's IndexedDB.
+[![Repository](https://img.shields.io/badge/GitHub-muhammadsaid16%2FRuvren-blue?logo=github)](https://github.com/muhammadsaid16/Ruvren)
+[![Framework](https://img.shields.io/badge/Next.js-16.3-black?logo=nextdotjs)](https://nextjs.org)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-> **Note on the name:** Ruvren was previously developed as "OpenStudy" / "StudyMax". Only user-facing branding changed. The Dexie database name (`studymax`), `openstudy.*` localStorage keys, the `openstudy-sync` export format tag, and the `.studymax-bundle.json` share extension are **intentionally unchanged** so existing installs keep their data and old backup/share files keep importing.
+**A local-first Study OS — FSRS flashcards, notes, subjects/topics, exams, planner, weakness engine, focus timers, goals, custom theme & wallpaper engine, and analytics in one interconnected, offline PWA.** Bilingual English/Arabic (full RTL). No accounts, no cloud — your study life lives in your browser's IndexedDB.
+
+> **Note on the repository:** Ruvren is published on GitHub at [`muhammadsaid16/Ruvren`](https://github.com/muhammadsaid16/Ruvren) (formerly `OpenStudy`). Dexie database name (`studymax`), `openstudy.*` localStorage keys, export formats, and share extensions are preserved for seamless backward compatibility.
 
 ## ✨ Features
 

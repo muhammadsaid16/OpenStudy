@@ -1,6 +1,15 @@
 {
   "name": "ruvren",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "Local-first study management OS — spaced repetition, notes, custom wallpapers, and progress tracking.",
+  "homepage": "https://github.com/muhammadsaid16/Ruvren#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muhammadsaid16/Ruvren.git"
+  },
+  "bugs": {
+    "url": "https://github.com/muhammadsaid16/Ruvren/issues"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
