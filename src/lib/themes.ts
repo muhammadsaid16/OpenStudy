@@ -40,7 +40,7 @@ export const THEMES: ThemeDef[] = [
 
 export const THEME_IDS: ThemeName[] = THEMES.map((t) => t.id);
 
-export const DEFAULT_THEME: ThemeName = "aurora";
+export const DEFAULT_THEME: ThemeName = "light";
 
 /** v1 theme names → their v2 equivalents, so old localStorage prefs keep working. */
 export const LEGACY_THEME_MAP: Record<string, ThemeName> = {
