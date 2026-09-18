@@ -56,7 +56,7 @@ const navGroups: { headingKey: string; items: { href: string; labelKey: string; 
   },
   {
     headingKey: "nav.music",
-    items: [{ href: "/spotify", labelKey: "nav.spotify", icon: Headphones }],
+    items: [{ href: "/sounds", labelKey: "nav.spotify", icon: Headphones }],
   },
   {
     headingKey: "nav.system",
@@ -65,6 +65,7 @@ const navGroups: { headingKey: string; items: { href: string; labelKey: string; 
 ];
 
 function isLibraryActive(pathname: string, href: string) {
+  if (href === "/sounds") return pathname === "/sounds" || pathname === "/spotify";
   if (href !== "/subjects") return pathname === href || (href !== "/" && pathname.startsWith(href));
   return pathname === "/subjects" || pathname.startsWith("/subjects") || pathname.startsWith("/flashcards") || pathname.startsWith("/bundles");
 }
