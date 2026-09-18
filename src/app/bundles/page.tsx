@@ -234,8 +234,8 @@ export default function BundlesPage() {
             <Link
               key={bundle.id}
               href={`/bundles/${bundle.id}/cards`}
-              {...cardHoverHandlers(5)}
-              className="spotlight-card cq-card group relative flex h-72 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 will-change-transform"
+              {...cardHoverHandlers(12)}
+              className="spotlight-card cq-card group relative flex h-72 w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-colors duration-200 hover:border-primary/30 will-change-transform"
               style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, ${(bundle.color || "#8083ff")}14, transparent 55%)` }}
             >
 

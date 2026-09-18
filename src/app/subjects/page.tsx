@@ -787,7 +787,7 @@ export default function SubjectsPage() {
             <Card
               key={subject.id}
               hover
-              {...tiltHandlers(5)}
+              {...tiltHandlers(12)}
               className="group relative will-change-transform"
             >
                 <div className="flex items-start justify-between">

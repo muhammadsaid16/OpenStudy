@@ -49,7 +49,7 @@ export type SpotlightStyle = CSSProperties;
  * springs flat on leave. Spread onto any block element. Reduced-motion
  * checked at runtime; transform-only so zero layout impact.
  */
-export function tiltHandlers(max = 6) {
+export function tiltHandlers(max = 12) {
   return {
     onMouseMove: (e: React.MouseEvent<HTMLElement>) => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -57,13 +57,13 @@ export function tiltHandlers(max = 6) {
       const r = el.getBoundingClientRect();
       const px = (e.clientX - r.left) / r.width - 0.5; // -0.5..0.5
       const py = (e.clientY - r.top) / r.height - 0.5;
-      el.style.transition = "transform 100ms cubic-bezier(0.22, 1, 0.36, 1)";
-      el.style.transform = `perspective(800px) rotateX(${-py * max}deg) rotateY(${px * max}deg) translateY(-4px) translateZ(8px)`;
+      el.style.transition = "transform 0ms linear, border-color 200ms ease, box-shadow 200ms ease";
+      el.style.transform = `perspective(1000px) rotateX(${-py * max}deg) rotateY(${px * max}deg) translateY(-6px) scale3d(1.015, 1.015, 1.015)`;
     },
     onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
       const el = e.currentTarget as HTMLElement;
-      el.style.transition = "transform 350ms cubic-bezier(0.22, 1, 0.36, 1)";
-      el.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0px) translateZ(0px)";
+      el.style.transition = "transform 400ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms ease, box-shadow 200ms ease";
+      el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)";
     },
   };
 }
@@ -71,7 +71,7 @@ export function tiltHandlers(max = 6) {
 /**
  * Combined 3D tilt + spotlight handler for unified interactive cards.
  */
-export function cardHoverHandlers(maxTilt = 6) {
+export function cardHoverHandlers(maxTilt = 12) {
   return {
     onMouseMove: (e: React.MouseEvent<HTMLElement>) => {
       const el = e.currentTarget as HTMLElement;
@@ -82,14 +82,14 @@ export function cardHoverHandlers(maxTilt = 6) {
       if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         const px = (e.clientX - r.left) / r.width - 0.5;
         const py = (e.clientY - r.top) / r.height - 0.5;
-        el.style.transition = "transform 100ms cubic-bezier(0.22, 1, 0.36, 1)";
-        el.style.transform = `perspective(800px) rotateX(${-py * maxTilt}deg) rotateY(${px * maxTilt}deg) translateY(-4px) translateZ(8px)`;
+        el.style.transition = "transform 0ms linear, border-color 200ms ease, box-shadow 200ms ease";
+        el.style.transform = `perspective(1000px) rotateX(${-py * maxTilt}deg) rotateY(${px * maxTilt}deg) translateY(-6px) scale3d(1.015, 1.015, 1.015)`;
       }
     },
     onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
       const el = e.currentTarget as HTMLElement;
-      el.style.transition = "transform 350ms cubic-bezier(0.22, 1, 0.36, 1)";
-      el.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0px) translateZ(0px)";
+      el.style.transition = "transform 400ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms ease, box-shadow 200ms ease";
+      el.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)";
     },
   };
 }
