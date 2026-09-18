@@ -94,9 +94,9 @@ export default function PlanPage() {
   }
 
   return (
-    <div className="page-gutter cq">
+    <div className="page-gutter cq space-y-6">
       {/* Header — standard v2 page header (eyebrow → title → subtitle) */}
-      <div className="mb-10">
+      <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.focus")}</p>
         <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.plan")}</h1>
         <p className="mt-2 text-sm text-muted-fg">{t("page.plan.subtitle")}</p>
@@ -105,7 +105,7 @@ export default function PlanPage() {
       {/* Plan settings — the knobs the planner actually reads. Auto keeps the
           old behaviour (capacity derived from real sessions); an explicit
           number, a longer horizon, or a shorter week reshape the plan live. */}
-      <section className="glass mb-4 space-y-3 rounded-2xl p-4">
+      <section className="glass space-y-3 rounded-2xl p-4">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("plan.settings")}</p>
         <div className="flex flex-wrap items-end gap-4">
           <div>
@@ -193,7 +193,7 @@ export default function PlanPage() {
         <StatCard icon={<CircleDot size={15} />} label={t("plan.tasks")} value={`${plan.totals.taskMinutes}m`} hint={t("plan.tasks_hint")} />
       </div>
 
-      <section className="space-y-3">
+      <section className="space-y-4">
         <div className="flex items-center justify-between">
           <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("plan.horizon").replace("{n}", String(plan.days.length))}</p>
           <Button size="sm" variant="ghost" onClick={() => setModalOpen(true)}><Plus size={14} />{t("plan.add_task")}</Button>
@@ -204,7 +204,7 @@ export default function PlanPage() {
           ))}
         </div>
         {plan.overloadDay && (
-          <p className="rounded-xl border border-warning/40 bg-tertiary/10 px-4 py-2 text-xs font-bold text-tertiary">
+          <p className="rounded-xl border border-warning/40 bg-tertiary/10 px-4 py-2.5 text-xs font-bold text-tertiary">
             {t("plan.overloaded").replace("{date}", plan.overloadDay)}
           </p>
         )}
