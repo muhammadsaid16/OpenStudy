@@ -57,6 +57,14 @@ import {
   type PomoPresetInput,
 } from "@/lib/validations";
 
+// ─── Date timestamp helper (handles Date | string | number safely) ───
+function toMs(d: Date | string | number | null | undefined): number {
+  if (!d) return 0;
+  if (d instanceof Date) return d.getTime();
+  const ms = new Date(d).getTime();
+  return isNaN(ms) ? 0 : ms;
+}
+
 // ─── Include helpers (mirror Prisma `include` shapes) ────────────
 async function topicInclude(topicId?: string | null) {
   if (!topicId) return null;
@@ -323,7 +331,7 @@ export async function updateTopic(
 export async function getNotes(topicId: string) {
   const notes = await db.notes.where("topicId").equals(topicId).toArray();
   notes.sort((a, b) =>
-    Number(b.isPinned) - Number(a.isPinned) || b.updatedAt.getTime() - a.updatedAt.getTime()
+    Number(b.isPinned) - Number(a.isPinned) || toMs(b.updatedAt) - toMs(a.updatedAt)
   );
   return Promise.all(notes.map(async (n) => ({ ...n, tags: await noteTagsInclude(n.id) })));
 }
@@ -535,7 +543,7 @@ export async function getFlashcardsByIds(ids: string[]): Promise<FlashcardRec[]>
 
 export async function getAllFlashcards() {
   const all = await db.flashcards.toArray();
-  all.sort((a, b) => a.reviewCount - b.reviewCount || b.createdAt.getTime() - a.createdAt.getTime());
+  all.sort((a, b) => a.reviewCount - b.reviewCount || toMs(b.createdAt) - toMs(a.createdAt));
   const cards = all.slice(0, 2000);
   return Promise.all(
     cards.map(async (c) => ({
@@ -782,7 +790,7 @@ export async function getWeeklyAnalytics(): Promise<WeeklyAnalyticsResult> {
     if (isDueCard(c, nowMs)) {
       const entry = bySubject.get(c.subjectId) ?? { due: 0, oldest: 0 };
       entry.due += 1;
-      entry.oldest = Math.max(entry.oldest, nowMs - c.nextReview.getTime());
+      entry.oldest = Math.max(entry.oldest, nowMs - toMs(c.nextReview));
       bySubject.set(c.subjectId, entry);
     }
   }
@@ -856,7 +864,7 @@ export async function getAllTopics() {
 export async function getAllNotes() {
   const all = await db.notes.toArray();
   all.sort((a, b) =>
-    Number(b.isPinned) - Number(a.isPinned) || b.updatedAt.getTime() - a.updatedAt.getTime()
+    Number(b.isPinned) - Number(a.isPinned) || toMs(b.updatedAt) - toMs(a.updatedAt)
   );
   return Promise.all(
     all.map(async (n) => {
@@ -933,7 +941,7 @@ export async function updateBundle(id: string, data: { name?: string; descriptio
 
 export async function getBundlesByTopic(topicId: string) {
   const all = await db.bundles.where("topicId").equals(topicId).toArray();
-  all.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  all.sort((a, b) => toMs(b.createdAt) - toMs(a.createdAt));
   return Promise.all(
     all.map(async (b) => ({
       ...b,
@@ -1000,7 +1008,7 @@ export async function deleteBundle(id: string) {
 
 export async function getBundleCards(bundleId: string) {
   const cards = await db.flashcards.where("bundleId").equals(bundleId).toArray();
-  cards.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  cards.sort((a, b) => toMs(b.createdAt) - toMs(a.createdAt));
   return Promise.all(
     cards.map(async (c) => ({
       ...c,
@@ -1369,7 +1377,7 @@ export async function exportBundleMarkdown(bundleId: string): Promise<string> {
   const bundle = await db.bundles.get(bundleId);
   if (!bundle) throw new Error("Bundle not found");
   const cards = await db.flashcards.where("bundleId").equals(bundleId).toArray();
-  cards.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  cards.sort((a, b) => toMs(a.createdAt) - toMs(b.createdAt));
   const lines: string[] = [];
   lines.push(`# ${bundle.name}`);
   if (bundle.description) lines.push(`\n> ${bundle.description}`);
