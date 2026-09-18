@@ -213,9 +213,9 @@ describe("deletions are recorded, not just performed", () => {
 // the helpers and deletes the whole database in its recovery path).
 describe("no hard deletes outside the tombstone helper", () => {
   const ALLOWED = new Set([
-    join("src", "lib", "sync.ts"),
-    join("src", "lib", "db.ts"),
-    join("src", "lib", "safety-net.ts"),
+    "src/lib/sync.ts",
+    "src/lib/db.ts",
+    "src/lib/safety-net.ts",
   ]);
 
   function sourceFiles(dir: string, acc: string[] = []): string[] {

@@ -22,8 +22,10 @@ import { formatDuration } from "@/lib/utils";
 import { useLiveData } from "@/lib/use-live-data";
 import { useAppStore } from "@/lib/store";
 import { nextAction } from "@/lib/planner";
-import type { NextAction } from "@/lib/contracts";
-import { ArrowRight, CalendarRange, FileQuestion, GraduationCap } from "lucide-react";
+import type { NextAction, WeaknessSignal } from "@/lib/contracts";
+import { ArrowRight, CalendarRange, FileQuestion, GraduationCap, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui";
+import { evaluateStudyOSReminders } from "@/lib/notifications";
 
 type Stats = Awaited<ReturnType<typeof getDashboardStats>>;
 type Weekly = Awaited<ReturnType<typeof getWeeklyAnalytics>>;
@@ -72,6 +74,9 @@ export default function DashboardPage() {
   // Study OS: the single Next Action from the shared priority engine
   // (due reviews > imminent exam > weakness practice > tasks).
   const [action, setAction] = useState<NextAction | null>(null);
+  const [topWeakness, setTopWeakness] = useState<WeaknessSignal[]>([]);
+  const [activeExams, setActiveExams] = useState<Awaited<ReturnType<typeof getPlannerData>>["exams"]>([]);
+
   useEffect(() => {
     let stale = false;
     getPlannerData().then((d) => {
@@ -93,6 +98,17 @@ export default function DashboardPage() {
           nextExam,
         })
       );
+      setTopWeakness(d.weakness.filter((w) => w.score > 0).slice(0, 3));
+      setActiveExams(d.exams.filter((e) => e.status === "in_progress").slice(0, 2));
+
+      // Local notifications for urgent Study OS reminders (with internal cooldown)
+      evaluateStudyOSReminders({
+        dueCardsCount: dueCards.length,
+        upcomingExams: d.exams
+          .filter((e) => e.status === "in_progress")
+          .map((e) => ({ title: e.title, date: e.startedAt as Date | undefined })),
+        overdueTasksCount: d.tasks.filter((t) => t.status !== "done" && t.dueDate && new Date(t.dueDate).getTime() < Date.now()).length,
+      });
     });
     return () => {
       stale = true;
@@ -185,6 +201,77 @@ export default function DashboardPage() {
                 }))}
               />
             </motion.div>
+            {activeExams.length > 0 && (
+              <motion.div variants={item}>
+                <Card className="!p-5 border-border/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container/20 text-primary">
+                        <FileQuestion size={15} />
+                      </span>
+                      <p className="text-xs font-bold uppercase tracking-widest text-fg">Active Exams</p>
+                    </div>
+                    <Link href="/exam" className="text-[11px] font-bold text-primary hover:underline">
+                      View all →
+                    </Link>
+                  </div>
+                  <div className="space-y-2">
+                    {activeExams.map((ex) => (
+                      <div key={ex.id} className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-card/60 p-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold truncate">{ex.title}</p>
+                          <p className="text-[11px] text-muted-fg">
+                            {ex.questionCount} questions · {ex.timeLimitSec ? `${Math.round(ex.timeLimitSec / 60)} min` : "Untimed"}
+                          </p>
+                        </div>
+                        <Link href="/exam">
+                          <Button size="sm" variant="secondary" className="h-7 text-xs px-2.5">
+                            Resume
+                          </Button>
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </motion.div>
+            )}
+            {topWeakness.length > 0 && (
+              <motion.div variants={item}>
+                <Card className="!p-5 border-border/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container/20 text-primary">
+                        <AlertTriangle size={15} />
+                      </span>
+                      <p className="text-xs font-bold uppercase tracking-widest text-fg">Weak Areas to Strengthen</p>
+                    </div>
+                    <Link href="/plan" className="text-[11px] font-bold text-primary hover:underline">
+                      Plan drills →
+                    </Link>
+                  </div>
+                  <div className="space-y-2">
+                    {topWeakness.map((w) => (
+                      <div key={w.topicId ?? w.label} className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-card/60 p-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold truncate">{w.label}</p>
+                          <p className="text-[11px] text-muted-fg truncate">{w.evidence}</p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="rounded-full bg-primary-container/15 px-2 py-0.5 text-[10px] font-bold text-primary">
+                            Risk {w.score}
+                          </span>
+                          <Link href={`/exam?practice=true&topicId=${w.topicId ?? ""}`}>
+                            <Button size="sm" variant="secondary" className="h-7 text-xs px-2.5">
+                              Drill
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </motion.div>
+            )}
             {stats.subjectBreakdown.length > 0 && (
               <motion.div variants={item}>
                 <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-fg">{t("ui.subjects")}</p>
