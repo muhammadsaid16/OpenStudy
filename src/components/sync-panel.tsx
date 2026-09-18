@@ -49,6 +49,8 @@ import {
   removePairedDevice,
   generatePairingCode,
   getPairingCode,
+  getSyncHost,
+  setSyncHost,
   pairWithMainDevice,
   executeLanSync,
   startAutoSyncLoop,
@@ -98,6 +100,10 @@ export function SyncPanel() {
     setPairedDevices(getPairedDevices());
     setDeviceNameState(deviceIdentity().name);
     setCurrentPairingCode(getPairingCode());
+    const savedHost = getSyncHost();
+    if (savedHost) {
+      setPairingHostInput(savedHost);
+    }
     getSyncStatus().then(setStatus).catch(() => {});
   }, []);
 
@@ -497,9 +503,27 @@ export function SyncPanel() {
                 </Button>
               </div>
 
-              <div className="rounded-xl border border-border bg-surface p-3 text-xs text-muted-fg space-y-1">
-                <p className="font-semibold text-fg">Local Network Tip:</p>
-                <p>Ensure both devices are connected to the same local Wi-Fi router. Pairing only needs to be completed once.</p>
+              <div className="rounded-xl border border-border bg-surface p-3 text-xs text-muted-fg space-y-2">
+                <p className="font-semibold text-fg">Main Device Address:</p>
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-bg px-3 py-2 font-mono text-[11px] text-fg">
+                  <span className="truncate">{typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText(window.location.origin);
+                        showToast("Address copied to clipboard", "success");
+                      }
+                    }}
+                    className="hover:text-primary transition-colors shrink-0"
+                    title="Copy Address"
+                  >
+                    <Copy size={13} />
+                  </button>
+                </div>
+                <p className="text-[11px]">
+                  Ensure both devices are connected to the same Wi-Fi. On your secondary device, enter this address and the 6-digit code above.
+                </p>
               </div>
 
               <div className="flex justify-between items-center pt-2">
@@ -525,12 +549,17 @@ export function SyncPanel() {
                 onChange={(e) => setPairingCodeInput(e.target.value.replace(/\D/g, ""))}
               />
 
-              <Input
-                label="Main Device LAN Address (Optional)"
-                value={pairingHostInput}
-                placeholder="e.g. http://192.168.1.50:3000"
-                onChange={(e) => setPairingHostInput(e.target.value)}
-              />
+              <div className="space-y-1">
+                <Input
+                  label="Main Device Address (LAN / Wi-Fi URL)"
+                  value={pairingHostInput}
+                  placeholder="e.g. http://192.168.1.50:3000"
+                  onChange={(e) => setPairingHostInput(e.target.value)}
+                />
+                <p className="text-[11px] text-muted-fg">
+                  Leave blank if running on the same computer or local host. Otherwise, enter the address shown on your Main Device.
+                </p>
+              </div>
 
               <div className="flex justify-end gap-2 pt-3">
                 <Button size="sm" variant="secondary" onClick={() => setPairingOpen(false)}>

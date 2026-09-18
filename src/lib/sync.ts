@@ -421,6 +421,7 @@ export async function applySyncPayload(database: Dexie, payload: SyncPayload): P
         const decision = resolveRow({ local, tombstone });
         if (decision.action === "delete") {
           await table.delete(tombstone.key);
+          await database.table("tombstones").put(tombstone);
           report.deleted++;
           bump(tombstone.table);
         } else if (decision.action === "keep") {

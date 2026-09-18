@@ -66,3 +66,7 @@ midscene_run/
 # Playwright
 playwright-report/
 test-results/
+
+# Local LAN sync cache
+.lan-sync-cache.json
+

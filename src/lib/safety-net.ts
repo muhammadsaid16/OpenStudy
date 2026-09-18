@@ -43,7 +43,7 @@ export interface RawDump {
 
 export type SnapshotPayload = string | RawDump;
 
-interface SnapshotRec {
+export interface SnapshotRec {
   id: SnapshotId;
   /** "v2" = the portable export produced by exportAllData(); "raw" = RawDump. */
   format: "v2" | "raw";
@@ -58,6 +58,7 @@ interface MetaRec {
   /** Set when a schema mismatch forced a reset, so the UI can offer the copy. */
   resetAt?: number;
   resetNoticeDismissedAt?: number;
+  emptyBackupDismissedAt?: number;
 }
 
 class SafetyDB extends Dexie {
@@ -154,6 +155,43 @@ export async function readResetNotice(): Promise<{ resetAt: number; dismissed: b
 
 export async function dismissResetNotice(): Promise<void> {
   await writeMeta({ resetNoticeDismissedAt: Date.now() });
+}
+
+export async function dismissEmptyBackupNotice(): Promise<void> {
+  await writeMeta({ emptyBackupDismissedAt: Date.now() });
+}
+
+export async function readEmptyBackupNotice(): Promise<boolean> {
+  const meta = await withSafetyDb(async () => (await safetyDb.meta.get("state")) ?? null);
+  return Boolean(meta?.emptyBackupDismissedAt);
+}
+
+/** Check if a snapshot actually contains meaningful user data (not just empty shell). */
+export function snapshotHasContent(snapshot: SnapshotRec | null | undefined): boolean {
+  if (!snapshot || !snapshot.payload) return false;
+  try {
+    if (snapshot.format === "raw") {
+      const dump = snapshot.payload as RawDump;
+      return Object.values(dump.stores || {}).some(
+        (rows) => Array.isArray(rows) && rows.length > 0
+      );
+    }
+    if (snapshot.format === "v2") {
+      const p =
+        typeof snapshot.payload === "string"
+          ? JSON.parse(snapshot.payload)
+          : snapshot.payload;
+      if (!p || typeof p !== "object") return false;
+      const subCount = Array.isArray(p.subjects) ? p.subjects.length : 0;
+      const bunCount = Array.isArray(p.bundles) ? p.bundles.length : 0;
+      const cardCount = Array.isArray(p.cards) ? p.cards.length : 0;
+      const sessCount = Array.isArray(p.sessions) ? p.sessions.length : 0;
+      return subCount > 0 || bunCount > 0 || cardCount > 0 || sessCount > 0;
+    }
+  } catch {
+    return false;
+  }
+  return false;
 }
 
 // ─── Raw salvage ──────────────────────────────────────────────────

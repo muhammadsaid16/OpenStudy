@@ -6,13 +6,16 @@ import { exportAllData, importAllData } from "@/app/actions";
 import { useT } from "@/lib/i18n";
 import {
   type RawDump,
+  dismissEmptyBackupNotice,
   dismissResetNotice,
   listSnapshots,
   migrateLegacyLocalBackup,
+  readEmptyBackupNotice,
   readResetNotice,
   restoreRawDump,
   saveSnapshot,
   snapshotFilename,
+  snapshotHasContent,
 } from "@/lib/safety-net";
 
 const PROD_HOST = "openstudy-v1.vercel.app";
@@ -27,6 +30,14 @@ function isPreviewHost(host: string) {
 /** Where the mirror is written now — a separate database, not localStorage. */
 async function writeRollingBackup(last: { json: string }) {
   try {
+    const [sCount, bCount, cCount] = await Promise.all([
+      db.subjects.count(),
+      db.bundles.count(),
+      db.flashcards.count(),
+    ]);
+    // Never overwrite or create auto-snapshots on a blank database (e.g. replica before sync)
+    if (sCount === 0 && bCount === 0 && cCount === 0) return;
+
     const json = await exportAllData();
     if (json === last.json) return;
     // No size cap any more. The old localStorage mirror gave up above ~4.5MB,
@@ -66,6 +77,7 @@ export function StorageGuard() {
 
         const snaps = await listSnapshots();
         const discardedReset = await readResetNotice();
+        const dismissedEmptyBackup = await readEmptyBackupNotice();
         if (cancelled) return;
 
         setCopyCount(snaps.length);
@@ -77,9 +89,12 @@ export function StorageGuard() {
           return;
         }
 
-        const [sCount, bCount] = await Promise.all([db.subjects.count(), db.bundles.count()]);
-        if (!cancelled && sCount === 0 && bCount === 0) {
-          setEmptyWithBackup(snaps.length > 0);
+        if (!dismissedEmptyBackup) {
+          const [sCount, bCount] = await Promise.all([db.subjects.count(), db.bundles.count()]);
+          if (!cancelled && sCount === 0 && bCount === 0) {
+            const hasMeaningful = snaps.some(snapshotHasContent);
+            setEmptyWithBackup(hasMeaningful);
+          }
         }
       } catch {
         /* the banner is a nicety; never break the app to show it */
@@ -175,6 +190,11 @@ export function StorageGuard() {
     setResetAt(null);
   }, []);
 
+  const dismissBackup = useCallback(async () => {
+    await dismissEmptyBackupNotice();
+    setEmptyWithBackup(false);
+  }, []);
+
   if (!preview && resetAt === null && !emptyWithBackup) return null;
 
   return (
@@ -225,6 +245,9 @@ export function StorageGuard() {
             </button>
             <button onClick={restore} disabled={restoring} className="rounded-full bg-primary-container px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-on-primary-container disabled:opacity-50">
               {restoring ? t("guard.restoring") : t("guard.restoreBackup")}
+            </button>
+            <button onClick={dismissBackup} className="rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-muted-fg hover:text-fg">
+              {t("guard.dismiss")}
             </button>
           </div>
         </div>

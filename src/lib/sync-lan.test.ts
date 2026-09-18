@@ -10,6 +10,10 @@ import {
   removePairedDevice,
   getLastSyncTimestamp,
   setLastSyncTimestamp,
+  getSyncHost,
+  setSyncHost,
+  resolveEndpoint,
+  pairWithMainDevice,
 } from "./sync-lan";
 
 describe("sync-lan engine", () => {
@@ -60,5 +64,27 @@ describe("sync-lan engine", () => {
     const now = Date.now();
     setLastSyncTimestamp(now);
     expect(getLastSyncTimestamp()).toBe(now);
+  });
+
+  it("manages custom sync host and resolves endpoints", () => {
+    expect(getSyncHost()).toBe("");
+    expect(resolveEndpoint("/api/sync/exchange")).toBe("/api/sync/exchange");
+
+    setSyncHost("http://192.168.1.50:3000/");
+    expect(getSyncHost()).toBe("http://192.168.1.50:3000");
+    expect(resolveEndpoint("/api/sync/exchange")).toBe("http://192.168.1.50:3000/api/sync/exchange");
+
+    setSyncHost("");
+    expect(getSyncHost()).toBe("");
+    expect(resolveEndpoint("/api/sync/exchange")).toBe("/api/sync/exchange");
+  });
+
+  it("rejects invalid pairing codes without network calls", async () => {
+    const res1 = await pairWithMainDevice("123");
+    expect(res1.ok).toBe(false);
+    expect(res1.error).toContain("6 digits");
+
+    const res2 = await pairWithMainDevice("abcdef");
+    expect(res2.ok).toBe(false);
   });
 });

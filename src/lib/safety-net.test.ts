@@ -3,9 +3,11 @@ import { db } from "@/lib/db";
 import {
   type RawDump,
   SAFETY_DB,
+  dismissEmptyBackupNotice,
   dismissResetNotice,
   listSnapshots,
   migrateLegacyLocalBackup,
+  readEmptyBackupNotice,
   readResetNotice,
   readSnapshot,
   rescueBeforeReset,
@@ -14,6 +16,7 @@ import {
   salvageDatabase,
   saveSnapshot,
   snapshotFilename,
+  snapshotHasContent,
 } from "@/lib/safety-net";
 
 const V2 = JSON.stringify({ version: 2, subjects: [] });
@@ -254,5 +257,37 @@ describe("reset notice", () => {
     const dump = saved?.payload as RawDump;
     expect(dump.version).toBe(99);
     expect(dump.stores.subjects).toEqual([{ id: "s1", name: "Organic Chemistry" }]);
+  });
+});
+
+describe("empty backup notice and content detection", () => {
+  it("recognizes empty snapshots versus snapshots with actual content", () => {
+    expect(snapshotHasContent(null)).toBe(false);
+    expect(snapshotHasContent({ id: "latest", format: "v2", payload: "{}", bytes: 2, createdAt: Date.now(), reason: "test" })).toBe(false);
+    expect(snapshotHasContent({ id: "latest", format: "v2", payload: JSON.stringify({ subjects: [], cards: [] }), bytes: 30, createdAt: Date.now(), reason: "test" })).toBe(false);
+
+    expect(snapshotHasContent({
+      id: "latest",
+      format: "v2",
+      payload: JSON.stringify({ subjects: [{ id: "s1", name: "Physics" }] }),
+      bytes: 50,
+      createdAt: Date.now(),
+      reason: "test",
+    })).toBe(true);
+
+    expect(snapshotHasContent({
+      id: "pre-reset",
+      format: "raw",
+      payload: { kind: "raw", dbName: "db", version: 1, stores: { subjects: [{ id: "1" }] }, unreadable: [], createdAt: Date.now() },
+      bytes: 100,
+      createdAt: Date.now(),
+      reason: "test",
+    })).toBe(true);
+  });
+
+  it("records and persists empty backup notice dismissal", async () => {
+    expect(await readEmptyBackupNotice()).toBe(false);
+    await dismissEmptyBackupNotice();
+    expect(await readEmptyBackupNotice()).toBe(true);
   });
 });
