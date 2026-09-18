@@ -211,23 +211,47 @@
    Level 3 (Modals): dialogs, command palettes
    ════════════════════════════════════════════════════════════════ */
 
+/* When wallpaper is active, body background allows wallpaper to show through */
+html[data-wallpaper-active="true"] body {
+  background-color: transparent !important;
+}
+
+/* Base surface background overrides so all Tailwind bg- classes honor --ui-alpha */
+.bg-bg {
+  background-color: color-mix(in srgb, var(--color-bg) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+}
+.bg-surface {
+  background-color: color-mix(in srgb, var(--color-surface) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+}
+.bg-surface-raised {
+  background-color: color-mix(in srgb, var(--color-surface-raised) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+}
+.bg-surface-hover {
+  background-color: color-mix(in srgb, var(--color-surface-hover) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+}
+.bg-muted {
+  background-color: color-mix(in srgb, var(--color-muted) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+}
+
 /* Level 2 — Standard surface card (the universal container) */
 @utility glass {
-  background: color-mix(in srgb, var(--color-surface) calc(var(--ui-alpha) * 100%), transparent);
+  background: color-mix(in srgb, var(--color-surface) calc(var(--ui-alpha, 1) * 100%), transparent);
   border: 1px solid var(--color-border);
   box-shadow: none;
 }
 
 /* Level 3 — Raised surface: modals, popovers, command palette */
 @utility glass-raised {
-  background: var(--color-surface-raised);
+  background: color-mix(in srgb, var(--color-surface-raised) calc(var(--ui-alpha, 1) * 100%), transparent);
   border: 1px solid var(--color-border-strong);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 /* Level 0/1 — Inset well: inputs, fields, recessed areas */
 @utility glass-inset {
-  background: var(--color-muted);
+  background: color-mix(in srgb, var(--color-muted) calc(var(--ui-alpha, 1) * 100%), transparent);
   border: 1px solid var(--color-border);
   box-shadow: none;
 }

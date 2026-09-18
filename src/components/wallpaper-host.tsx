@@ -101,6 +101,15 @@ export function WallpaperHost() {
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const theme = useAppStore((s) => s.theme);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (wallpaperType !== "none") {
+      document.documentElement.setAttribute("data-wallpaper-active", "true");
+    } else {
+      document.documentElement.removeAttribute("data-wallpaper-active");
+    }
+  }, [wallpaperType]);
+
   if (wallpaperType === "none") return null;
 
   return (
