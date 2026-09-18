@@ -3,8 +3,11 @@ import {
   DEFAULT_PLANNER_CONFIG,
   buildPlan,
   deriveCapacity,
+  examWeightedWorkOrder,
   nextAction,
   reviewLoadPerDay,
+  rollForwardToStudyDays,
+  studyDayMask,
   type PlanInput,
 } from "@/lib/planner";
 import type { FlashcardRec, TaskRec } from "@/lib/db";
@@ -132,6 +135,136 @@ describe("buildPlan", () => {
     const plan = buildPlan(mk({ cards }));
     expect(plan.totals.reviewMinutes).toBe(plan.days.reduce((a, d) => a + d.reviewMinutes, 0));
     expect(plan.overloadDay).not.toBeNull();
+  });
+});
+
+// ─── Study days + exam-weighted distribution (the plan's real knobs) ──
+describe("study days", () => {
+  const richSessions = Array.from({ length: 14 }, () => ({ startedAt: new Date(NOW - DAY), durationMin: 60 }));
+  const mk = (over: Partial<PlanInput> = {}): PlanInput => ({
+    cards: [],
+    tasks: [],
+    weakness: [],
+    exams: [],
+    sessions: richSessions,
+    nowMs: NOW,
+    ...over,
+  });
+  const startDow = new Date(NOW).getDay();
+
+  it("builds the week mask from the configured weekday set", () => {
+    expect(studyDayMask(0, 7, [1, 3])).toEqual([false, true, false, true, false, false, false]);
+    // A weekday set and its wrap-around across weeks
+    expect(studyDayMask(5, 3, [6])).toEqual([false, true, false]);
+    // Empty/undefined = every day (never "no study days at all")
+    expect(studyDayMask(0, 3, [])).toEqual([true, true, true]);
+    expect(studyDayMask(0, 3, undefined)).toEqual([true, true, true]);
+  });
+
+  it("rolls a rest day's work onto the next study day, never dropping it", () => {
+    expect(rollForwardToStudyDays([1, 1, 1, 1], [false, true, false, true])).toEqual([0, 2, 0, 2]);
+    // Nothing left to roll into before the horizon ends: it stays on the last day.
+    expect(rollForwardToStudyDays([0, 0, 0, 1], [true, false, false, false])).toEqual([0, 0, 0, 1]);
+    // With every day allowed the input is returned untouched.
+    expect(rollForwardToStudyDays([2, 0, 5], [true, true, true])).toEqual([2, 0, 5]);
+  });
+
+  it("places reviews only on study days — a card due on a rest day moves to the next one", () => {
+    const studyDow = (startDow + 3) % 7;
+    const plan = buildPlan(mk({ cards: [card(0)], config: { studyDays: [studyDow] } }));
+    expect(plan.days[0].reviewMinutes).toBe(0);
+    expect(plan.days[3].dueCount).toBe(1);
+    expect(plan.studyDays).toEqual([studyDow]);
+    // Nothing is scheduled on a day the user does not study.
+    plan.days.forEach((d, i) => {
+      if (d.totalMinutes > 0) expect((startDow + i) % 7).toBe(studyDow);
+    });
+  });
+
+  it("keeps a card due after the last study day on the horizon's final day", () => {
+    const studyDow = (startDow + 3) % 7; // study days are 3 and 10
+    const plan = buildPlan(mk({ cards: [card(11)], config: { studyDays: [studyDow] } }));
+    expect(plan.days[13].dueCount).toBe(1);
+  });
+});
+
+describe("capacity settings", () => {
+  const mk = (over: Partial<PlanInput> = {}): PlanInput => ({
+    cards: [],
+    tasks: [],
+    weakness: [],
+    exams: [],
+    sessions: [],
+    nowMs: NOW,
+    ...over,
+  });
+
+  it("an explicit capacity wins over the session-derived estimate", () => {
+    const plan = buildPlan(mk({ config: { capacityMinutes: 45 } }));
+    expect(plan.capacityPerDay).toBe(45);
+    expect(plan.capacitySource).toBe("manual");
+  });
+
+  it("clamps absurd capacities and falls back to derivation when unset", () => {
+    expect(buildPlan(mk({ config: { capacityMinutes: 5000 } })).capacityPerDay).toBe(240);
+    expect(buildPlan(mk({ config: { capacityMinutes: 1 } })).capacityPerDay).toBe(10);
+    const derived = buildPlan(mk({ sessions: [{ startedAt: new Date(NOW - DAY), durationMin: 60 }] }));
+    expect(derived.capacitySource).toBe("derived");
+  });
+});
+
+describe("exam-weighted work order", () => {
+  const all = Array.from({ length: 14 }, () => true);
+
+  it("with no exam inside the horizon the order is simply day 0 upward", () => {
+    expect(examWeightedWorkOrder(14, [], all)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+  });
+
+  it("an exam pulls its run-up forward, latest-first", () => {
+    const order = examWeightedWorkOrder(14, [10], all);
+    expect(order.slice(0, 7)).toEqual([9, 8, 7, 6, 5, 4, 3]);
+    expect(order[7]).toBe(0); // then the remaining days, ascending
+    expect(order).toContain(10); // the exam day itself is never a prep slot
+    expect(order.slice(0, 7)).not.toContain(10);
+  });
+
+  it("never places work on a non-study day", () => {
+    const oddOnly = Array.from({ length: 14 }, (_, d) => d % 2 === 1);
+    const order = examWeightedWorkOrder(14, [10], oddOnly);
+    expect(order.every((d) => d % 2 === 1)).toBe(true);
+    expect(order).toHaveLength(7);
+  });
+});
+
+describe("exam-aware planning", () => {
+  const richSessions = Array.from({ length: 14 }, () => ({ startedAt: new Date(NOW - DAY), durationMin: 60 }));
+  const mk = (over: Partial<PlanInput> = {}): PlanInput => ({
+    cards: [],
+    tasks: [],
+    weakness: [],
+    exams: [{ title: "Physics", dueDate: new Date(NOW + 6 * DAY), status: "in_progress" }],
+    sessions: richSessions,
+    nowMs: NOW,
+    ...over,
+  });
+
+  it("practice lands in the run-up to the exam, not on day 0", () => {
+    const plan = buildPlan(mk({ weakness: [weak({ suggestedMinutes: 30 })] }));
+    expect(plan.days[5].practiceMinutes).toBe(30);
+    expect(plan.days[0].practiceMinutes).toBe(0);
+  });
+
+  it("tasks fill the run-up too, before the exam day", () => {
+    const tasks = [task({ id: "a", title: "A", estimateMin: 30 }), task({ id: "b", title: "B", estimateMin: 30 })];
+    const plan = buildPlan(mk({ tasks }));
+    const daysWithTasks = plan.days.flatMap((d, i) => (d.taskTitles.length > 0 ? [i] : []));
+    expect(daysWithTasks.length).toBeGreaterThan(0);
+    for (const d of daysWithTasks) expect(d).toBeLessThan(6);
+  });
+
+  it("without an exam the same work still starts on day 0", () => {
+    const plan = buildPlan(mk({ exams: [], weakness: [weak({ suggestedMinutes: 30 })] }));
+    expect(plan.days[0].practiceMinutes).toBe(30);
   });
 });
 

@@ -20,6 +20,7 @@ import { getDashboardStats, getTodayProgress, getWeeklyAnalytics, getGoals, getA
 import type { ReviewLogRec } from "@/lib/db";
 import { formatDuration } from "@/lib/utils";
 import { useLiveData } from "@/lib/use-live-data";
+import { useAppStore } from "@/lib/store";
 import { nextAction } from "@/lib/planner";
 import type { NextAction } from "@/lib/contracts";
 import { ArrowRight, CalendarRange, FileQuestion, GraduationCap } from "lucide-react";
@@ -42,6 +43,8 @@ const item = {
 
 export default function DashboardPage() {
   const t = useT();
+  const goalCardsPerDay = useAppStore((s) => s.goalCardsPerDay);
+  const goalMinutesPerDay = useAppStore((s) => s.goalMinutesPerDay);
   const [stats, setStats] = useState<Stats | null>(null);
   const [weekly, setWeekly] = useState<Weekly | null>(null);
   const [today, setToday] = useState<Today | null>(null);
@@ -269,9 +272,11 @@ export default function DashboardPage() {
               <DailyProgress
                 data={{
                   cardsReviewed: todayData.cardsReviewedToday,
-                  cardsGoal: 30,
+                  // The student's own targets (Settings-driven), not hardcoded —
+                  // one source of truth for "what does today look like".
+                  cardsGoal: goalCardsPerDay,
                   minutesToday: todayData.minutesToday,
-                  minutesGoal: 60,
+                  minutesGoal: goalMinutesPerDay,
                   streakDays: todayData.streakDays,
                 }}
               />

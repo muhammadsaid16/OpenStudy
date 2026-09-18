@@ -28,6 +28,7 @@ import {
   updateBundle,
   deleteBundle,
   exportBundle,
+  getFlashcardsByIds,
 } from "@/app/actions";
 import { SubjectTopicMenu } from "@/components/subject-topic-menu";
 import { RATING_BUTTONS, isCorrect } from "@/lib/card-status";
@@ -329,6 +330,42 @@ export default function SubjectsPage() {
       showToast(t("fc.practiceMode"), "info");
     } catch { showToast("Failed to load cards", "danger"); }
   };
+
+  /**
+   * Targeted practice over an explicit card set — the exam results screen's
+   * "practise these cards" path (?ids=…). Always served as practice: a real
+   * exam already applied its lapse when the answer was graded (Contract 5),
+   * so re-rating the same card must record evidence without moving the
+   * schedule a second time.
+   */
+  const startReviewForCards = async (ids: string[]) => {
+    completedThisRun.current = 0;
+    try {
+      const cards = await getFlashcardsByIds(ids);
+      if (cards.length === 0) { showToast("No cards to practise", "info"); return; }
+      practiceRef.current = true;
+      setReviewQueue(shuffled(cards));
+      setReviewIndex(0);
+      setLearningQueue([]);
+      setIsFlipped(false);
+      setIsReviewing(true);
+      setActiveTab("study");
+      showToast(t("fc.practiceMode"), "info");
+    } catch { showToast("Failed to load cards", "danger"); }
+  };
+
+  // Deep link: ?ids=a,b,c — practise exactly this set (exam mistakes). Runs
+  // once on mount, like the ?tab handler above.
+  const initialIdsRef = useRef(false);
+  useEffect(() => {
+    if (initialIdsRef.current) return;
+    initialIdsRef.current = true;
+    const raw = new URLSearchParams(window.location.search).get("ids");
+    if (!raw) return;
+    const ids = [...new Set(raw.split(",").map((s) => s.trim()).filter(Boolean))];
+    if (ids.length > 0) void startReviewForCards(ids);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Total cards actually rated this run (main + relearning) — reviewQueue is
   // cleared at the learning handoff, so computing the total from it afterwards
@@ -1018,7 +1055,7 @@ export default function SubjectsPage() {
                     {!isFlipped ? (
                       <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">{t("cards.showAnswer")}</Button>
                     ) : (
-                      <div className="mt-6 grid grid-cols-3 gap-2">
+                      <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
                         {RATING_BUTTONS.map((btn) => (
                           <button
                             key={btn.value}

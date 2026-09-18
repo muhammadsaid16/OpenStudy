@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import type { CardImageRec } from "@/lib/db";
 import { useCardImageUrl, isSupportedImage } from "@/lib/card-images";
+import { useT } from "@/lib/i18n";
 
 /** The review-face renderer. Renders nothing when there is no image. */
 export function CardImage({
@@ -53,21 +54,55 @@ export function useFileUrl(file: File | null | undefined): string | null {
  * Controlled draft picker. The parent owns the File state so the draft
  * survives modal re-renders and applies only when the parent saves.
  * Removal is instant (like wallpaper delete); picking a file is cancel-safe.
+ *
+ * `saved` is the image already stored for this side: it previews alongside the
+ * draft so an edit reads as "here is what's there, here is what you're adding",
+ * and it can be removed on its own.
+ *
+ * Paste: the wrapper is focusable and accepts a pasted image, so a screenshot
+ * from anywhere can land on a card without saving it to disk first.
  */
 export function CardImagePicker({
   file,
   onFile,
   label,
+  saved,
+  onRemoveSaved,
 }: {
   file: File | null;
   onFile: (f: File | null) => void;
   label: string;
+  saved?: CardImageRec | null;
+  onRemoveSaved?: () => void;
 }) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const url = useFileUrl(file);
+  const savedUrl = useCardImageUrl(saved);
+
+  const accept = (f: File | null | undefined) => {
+    if (!f) return;
+    if (!isSupportedImage(f)) {
+      setError("JPG/PNG/WebP/GIF/AVIF · max 8 MB");
+      return;
+    }
+    setError("");
+    onFile(f);
+  };
+
   return (
-    <div className="flex items-center gap-2">
+    <div
+      tabIndex={0}
+      onPaste={(e) => {
+        const item = Array.from(e.clipboardData?.items ?? []).find((i) => i.type.startsWith("image/"));
+        const blob = item?.getAsFile() ?? null;
+        if (!blob) return;
+        e.preventDefault();
+        accept(new File([blob], blob.name || `pasted.${blob.type.split("/")[1] ?? "png"}`, { type: blob.type }));
+      }}
+      className="flex flex-wrap items-center gap-2 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+    >
       <input
         ref={inputRef}
         type="file"
@@ -76,13 +111,7 @@ export function CardImagePicker({
         onChange={(e) => {
           const f = e.target.files?.[0] ?? null;
           e.target.value = ""; // allow re-picking the same file
-          if (!f) return;
-          if (!isSupportedImage(f)) {
-            setError("JPG/PNG/WebP/GIF/AVIF · max 8 MB");
-            return;
-          }
-          setError("");
-          onFile(f);
+          accept(f);
         }}
       />
       <button
@@ -93,11 +122,25 @@ export function CardImagePicker({
         <ImagePlus size={12} />
         {label}
       </button>
-      {file && (
+      <span className="hidden text-[10px] uppercase tracking-widest text-muted-fg/60 sm:inline">
+        {t("img.pasteHint")}
+      </span>
+      {saved && !file && (
         <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg">
+          {savedUrl && <img src={savedUrl} alt="" className="h-7 w-7 rounded object-cover" />}
+          <span className="max-w-[9rem] truncate normal-case">{saved.name}</span>
+          {onRemoveSaved && (
+            <button type="button" aria-label={t("img.remove")} onClick={onRemoveSaved} className="text-muted-fg hover:text-danger">
+              <X size={12} />
+            </button>
+          )}
+        </span>
+      )}
+      {file && (
+        <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
           {url && <img src={url} alt="" className="h-7 w-7 rounded object-cover" />}
           <span className="max-w-[9rem] truncate normal-case">{file.name}</span>
-          <button type="button" aria-label="Remove image" onClick={() => onFile(null)} className="text-muted-fg hover:text-danger">
+          <button type="button" aria-label={t("img.remove")} onClick={() => onFile(null)} className="text-muted-fg hover:text-danger">
             <X size={12} />
           </button>
         </span>

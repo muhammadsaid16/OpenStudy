@@ -9,6 +9,12 @@ import { test, expect, type Page } from "@playwright/test";
 //   4. the setup pool count reacts to subject scope changes
 //   5. /plan marks an in-progress exam on its start day (★)
 //   6. /plan shows the user's task estimate, not the schedule-split remainder
+//
+// Wave 2 adds the cross-system seams:
+//   7. exam evidence → the weakness engine → /plan + the dashboard's Next Action
+//   8. planner settings persist and reshape the plan
+//   9. a card's image survives into an exam question
+//  10. a study session can be attached to a real task
 
 const DAY = 86_400_000;
 
@@ -322,4 +328,178 @@ test("practice-only exam logs answers but never moves schedules", async ({ page 
   // But the practice evidence WAS logged.
   const logs = await readStore(page, "reviewLogs");
   expect(logs.length).toBeGreaterThanOrEqual(4);
+});
+
+// ─── Wave 2: interconnected systems ─────────────────────────────
+
+test("a failed exam becomes a weak topic on /plan and the dashboard's next action", async ({ page }) => {
+  await gotoReady(page, "/plan");
+  const now = new Date();
+  const answeredAt = new Date(Date.now() - 3600_000);
+  await seedDb(page, {
+    subjects: [subjectRow("e2e-weak-subj", "E2E Physics")],
+    topics: [
+      {
+        id: "e2e-weak-topic",
+        subjectId: "e2e-weak-subj",
+        name: "E2E Mechanics",
+        description: null,
+        order: 0,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ],
+    flashcards: [
+      {
+        ...cardRow(0, "e2e-weak-subj"),
+        id: "e2e-weak-card",
+        topicId: "e2e-weak-topic",
+        // Not due — so the dashboard's Next Action is free to be weakness work.
+        nextReview: new Date(Date.now() + 3 * DAY),
+      },
+    ],
+    exams: [
+      {
+        id: "e2e-weak-exam",
+        title: "E2E Midterm",
+        status: "completed",
+        subjectIds: [],
+        topicIds: [],
+        questionCount: 1,
+        timeLimitSec: null,
+        practiceOnly: false, // a REAL exam — this is the evidence that feeds
+        scorePct: 0,
+        correctCount: 0,
+        durationSec: 60,
+        startedAt: new Date(Date.now() - DAY),
+        completedAt: new Date(Date.now() - 3600_000),
+      },
+    ],
+    examQuestions: [
+      {
+        id: "e2e-weak-q",
+        examId: "e2e-weak-exam",
+        flashcardId: "e2e-weak-card",
+        order: 0,
+        frontText: "E2E Q",
+        backText: "E2E A",
+        kind: "basic",
+        choicesSnapshot: null,
+        topicId: "e2e-weak-topic",
+        subjectId: "e2e-weak-subj",
+        answer: null,
+        quality: 0,
+        isCorrect: false,
+        answeredAt,
+      },
+    ],
+  });
+  await page.reload();
+
+  // /plan: the weak panel names the topic and cites the exam as its evidence.
+  await expect(page.getByText("E2E Mechanics").first()).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/exam miss/i).first()).toBeVisible({ timeout: 10_000 });
+
+  // Dashboard: Next Action is now targeted practice on that weak topic.
+  await gotoReady(page, "/");
+  await expect(page.getByText(/Practice E2E Mechanics/)).toBeVisible({ timeout: 15_000 });
+});
+
+test("planner settings persist and reshape the plan", async ({ page }) => {
+  await gotoReady(page, "/plan");
+  // The student's own settings (localStorage prefs, like theme/language).
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "study-prefs",
+      JSON.stringify({ plannerHorizonDays: 7, plannerDailyMinutes: 45, plannerStudyDays: [1, 2, 3, 4, 5] })
+    );
+  });
+  await page.reload();
+  await waitReady(page);
+
+  // Horizon follows the setting…
+  await expect(page.getByText("Next 7 days")).toBeVisible({ timeout: 15_000 });
+  // …and the capacity shows the manual number with an honest label.
+  await expect(page.getByText("45m").first()).toBeVisible();
+  await expect(page.getByText("Set by you")).toBeVisible();
+});
+
+test("a card image survives into the exam runner", async ({ page }) => {
+  await gotoReady(page, "/exam");
+  await seedDb(page, {
+    subjects: [subjectRow("e2e-img-subj", "E2E Physics")],
+    flashcards: [{ ...cardRow(0, "e2e-img-subj"), id: "e2e-img-card" }],
+  });
+  // The blob must be built inside the page — a Blob cannot ride in as an arg.
+  await page.evaluate(async () => {
+    const idb = await new Promise<IDBDatabase>((res, rej) => {
+      const rq = indexedDB.open("studymax");
+      rq.onsuccess = () => res(rq.result);
+      rq.onerror = () => rej(rq.error);
+    });
+    await new Promise<void>((res, rej) => {
+      const tx = idb.transaction("cardImages", "readwrite");
+      tx.objectStore("cardImages").put({
+        id: "e2e-img-front",
+        cardId: "e2e-img-card",
+        side: "front",
+        blob: new Blob(["e2e-bytes"], { type: "image/png" }),
+        type: "image/png",
+        name: "front.png",
+        regions: null,
+        createdAt: new Date(),
+      });
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+    });
+    idb.close();
+  });
+  await page.reload();
+  await expect(page.getByText("E2E Physics")).toBeVisible({ timeout: 15_000 });
+
+  await page.getByRole("spinbutton").fill("1");
+  await page.getByPlaceholder("Practice exam").fill("E2E Image Exam");
+  await page.getByRole("button", { name: /start exam/i }).click();
+  await expect(page.getByText("1 / 1")).toBeVisible({ timeout: 15_000 });
+
+  // The question carries a snapshot of the picture, rendered by the same
+  // <CardImage> boundary the review runner uses.
+  await expect(page.locator('img[alt="front.png"]')).toBeVisible({ timeout: 15_000 });
+
+  // And it is a snapshot on the question row, not a live pointer to the card.
+  const questions = await readStore(page, "examQuestions");
+  expect(questions[0]["frontImage"]).toBeTruthy();
+  expect((questions[0]["frontImage"] as Row)["name"]).toBe("front.png");
+});
+
+test("a study session can be attached to a real task", async ({ page }) => {
+  await gotoReady(page, "/sessions");
+  await seedDb(page, {
+    tasks: [
+      {
+        id: "e2e-sess-task",
+        title: "E2E Read chapter 4",
+        description: null,
+        status: "todo",
+        order: 0,
+        subjectId: null,
+        topicId: null,
+        goalId: null,
+        examId: null,
+        dueDate: null,
+        estimateMin: 30,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        completedAt: null,
+      },
+    ],
+  });
+  await page.reload();
+  await waitReady(page);
+
+  const picker = page.getByRole("combobox", { name: "Task" });
+  await expect(picker).toBeVisible({ timeout: 15_000 });
+  // Open tasks are offered; "No task" keeps a plain session possible.
+  await expect(picker.locator("option")).toHaveCount(2);
+  await expect(picker.locator("option").nth(1)).toHaveText("E2E Read chapter 4");
 });

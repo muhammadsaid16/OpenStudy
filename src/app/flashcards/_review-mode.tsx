@@ -388,7 +388,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
 
       {/* Rating buttons */}
       {p.isFlipped && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {RATING_BUTTONS.map((q, idx) => (
             <button
               key={q.value}
@@ -404,7 +404,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
       )}
 
       <p className="text-center text-xs text-muted-fg uppercase tracking-widest">
-        Space: flip • 1-3: rate
+        Space: flip • 1-4: rate
       </p>
     </div>
   );

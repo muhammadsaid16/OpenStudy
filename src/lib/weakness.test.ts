@@ -2,11 +2,19 @@ import { describe, expect, it } from "vitest";
 import {
   collectOverdueEvidence,
   collectReviewEvidence,
+  examEvidenceFromQuestions,
   scoreWeakness,
   computeWeaknessSignals,
   type WeaknessEvidence,
 } from "@/lib/weakness";
-import type { FlashcardRec, ReviewLogRec, SubjectRec, TopicRec } from "@/lib/db";
+import type {
+  ExamQuestionRec,
+  ExamRec,
+  FlashcardRec,
+  ReviewLogRec,
+  SubjectRec,
+  TopicRec,
+} from "@/lib/db";
 
 const DAY = 86_400_000;
 const NOW = 1_800_000_000_000;
@@ -150,5 +158,104 @@ describe("computeWeaknessSignals (pipeline with labels)", () => {
     const out = computeWeaknessSignals({ logs, cards: [], topics, subjects, nowMs: NOW });
     expect(out).toHaveLength(1);
     expect(out[0].label).toBe("General"); // no subject match either
+  });
+});
+
+// ─── Exam → Weakness adapter (the real-exam feeding rule) ────────
+describe("examEvidenceFromQuestions", () => {
+  const subjects: SubjectRec[] = [
+    { id: "s1", name: "Physics", color: "#fff", icon: "x", createdAt: new Date(), updatedAt: new Date() },
+  ];
+  const topics: TopicRec[] = [
+    { id: "t1", subjectId: "s1", name: "Mechanics", order: 0, createdAt: new Date(), updatedAt: new Date() },
+    { id: "t2", subjectId: "s1", name: "Waves", order: 1, createdAt: new Date(), updatedAt: new Date() },
+  ];
+
+  function exam(over: Partial<ExamRec> = {}): ExamRec {
+    return {
+      id: "e1",
+      title: "Midterm",
+      status: "completed",
+      subjectIds: [],
+      topicIds: [],
+      questionCount: 2,
+      timeLimitSec: null,
+      practiceOnly: false,
+      startedAt: new Date(NOW - 2 * DAY),
+      completedAt: new Date(NOW - DAY),
+      ...over,
+    };
+  }
+
+  function q(over: Partial<ExamQuestionRec> = {}): ExamQuestionRec {
+    return {
+      id: "q1",
+      examId: "e1",
+      flashcardId: "c1",
+      order: 0,
+      frontText: "F",
+      backText: "B",
+      kind: "basic",
+      isCorrect: false,
+      answeredAt: new Date(NOW - DAY),
+      topicId: "t1",
+      subjectId: "s1",
+      ...over,
+    };
+  }
+
+  it("keeps graded questions and drops unanswered ones", () => {
+    const items = examEvidenceFromQuestions(
+      [q({ id: "q1" }), q({ id: "q2", isCorrect: null, answeredAt: null })],
+      [exam()]
+    );
+    expect(items).toHaveLength(1);
+    expect(items[0].isCorrect).toBe(false);
+    expect(items[0].topicId).toBe("t1");
+  });
+
+  it("practice exams contribute nothing here — their evidence is already in the review logs", () => {
+    expect(examEvidenceFromQuestions([q()], [exam({ practiceOnly: true })])).toHaveLength(0);
+  });
+
+  it("abandoned exams are not a verdict on the material", () => {
+    expect(examEvidenceFromQuestions([q()], [exam({ status: "abandoned" })])).toHaveLength(0);
+  });
+
+  it("a question whose exam row is gone is ignored", () => {
+    expect(examEvidenceFromQuestions([q({ examId: "ghost" })], [exam()])).toHaveLength(0);
+  });
+
+  it("evidence outside the window is dropped by the engine", () => {
+    const old = examEvidenceFromQuestions([q({ answeredAt: new Date(NOW - 30 * DAY) })], [exam()]);
+    const out = computeWeaknessSignals({ logs: [], cards: [], topics, subjects, nowMs: NOW, examItems: old });
+    expect(out).toHaveLength(0);
+  });
+
+  it("a topic reachable ONLY through exam misses still surfaces as a weakness", () => {
+    const items = examEvidenceFromQuestions([q({ topicId: "t2" }), q({ id: "q2", topicId: "t2" })], [exam()]);
+    const out = computeWeaknessSignals({ logs: [], cards: [], topics, subjects, nowMs: NOW, examItems: items });
+    expect(out).toHaveLength(1);
+    expect(out[0].topicId).toBe("t2");
+    expect(out[0].label).toBe("Waves");
+    // Two weight-2 misses: the strongest evidence the engine accepts.
+    expect(out[0].score).toBeGreaterThanOrEqual(60);
+  });
+
+  it("exam misses raise a topic's score where reviews are mostly passing", () => {
+    const cards = [card({ id: "c1", topicId: "t1", subjectId: "s1" })];
+    const logs = [log("c1", 0, 1), log("c1", 5, 2), log("c1", 5, 3), log("c1", 5, 4), log("c1", 5, 5)];
+    const base = computeWeaknessSignals({ logs, cards, topics, subjects, nowMs: NOW });
+    const fed = computeWeaknessSignals({
+      logs,
+      cards,
+      topics,
+      subjects,
+      nowMs: NOW,
+      examItems: examEvidenceFromQuestions([q(), q({ id: "q2" })], [exam()]),
+    });
+    expect(base[0].score).toBeGreaterThan(0);
+    expect(fed[0].score).toBeGreaterThan(base[0].score);
+    expect(fed[0].evidence).toContain("exam miss");
   });
 });

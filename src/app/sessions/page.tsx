@@ -9,10 +9,10 @@ import GravityFall from "@/components/originkit/ui/falling-text";
 import { magneticHandlers } from "@/lib/interactions";
 import { SubjectTopicMenu } from "@/components/subject-topic-menu";
 import { motion, AnimatePresence } from "framer-motion";
-import { getStudySessions, createStudySession, deleteStudySession, getSubjects, getPomoPresets, createPomoPreset, deletePomoPreset } from "@/app/actions";
+import { getStudySessions, createStudySession, deleteStudySession, getSubjects, getPomoPresets, createPomoPreset, deletePomoPreset, getTasks } from "@/app/actions";
 import { formatDuration, formatDate } from "@/lib/utils";
 import { usePomodoro, phaseSeconds, BUILTIN_PRESETS, type PomoConfig } from "@/lib/pomodoro";
-import type { PomoPresetRec } from "@/lib/db";
+import type { PomoPresetRec, SessionActivity } from "@/lib/db";
 import { useLiveData } from "@/lib/use-live-data";
 
 type Session = Awaited<ReturnType<typeof getStudySessions>>[number];
@@ -67,6 +67,17 @@ export default function SessionsPage() {
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [selectedTopicId, setSelectedTopicId] = useState("");
   const [sessionTitle, setSessionTitle] = useState("");
+  // Study OS: a session can be attached to the real work it advanced. Linking
+  // a task is what lets the task close itself once enough time is logged.
+  const [selectedTaskId, setSelectedTaskId] = useState("");
+  const [openTasks, setOpenTasks] = useState<Awaited<ReturnType<typeof getTasks>>>([]);
+  const [activity, setActivity] = useState("");
+
+  useEffect(() => {
+    getTasks()
+      .then((all) => setOpenTasks(all.filter((x) => x.status !== "done")))
+      .catch(() => setOpenTasks([]));
+  }, []);
   const [saveError, setSaveError] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerStartedAtRef = useRef<Date | null>(null);
@@ -162,13 +173,20 @@ export default function SessionsPage() {
     const effectiveStart = startedAt ?? new Date(Date.now() - seconds * 1000);
     startTransition(async () => {
       try {
+        const linked = openTasks.find((x) => x.id === selectedTaskId) ?? null;
         await createStudySession({
-          subjectId: selectedSubjectId || undefined,
-          topicId: selectedTopicId || undefined,
+          subjectId: selectedSubjectId || linked?.subjectId || undefined,
+          topicId: selectedTopicId || linked?.topicId || undefined,
           title,
           durationMin: duration,
           completed: true,
           startedAt: effectiveStart,
+          // The task carries its own goal/exam, so the whole chain is linked
+          // from one selection — no second picker to keep in sync.
+          taskId: linked?.id ?? null,
+          goalId: linked?.goalId ?? null,
+          examId: linked?.examId ?? null,
+          activity: activity === "" ? null : (activity as SessionActivity),
         });
         // No optimistic prepend: the liveQuery above re-emits the sessions
         // table after this write, and prepending on top of its result is
@@ -381,6 +399,56 @@ export default function SessionsPage() {
             onSubjectChange={setSelectedSubjectId}
             onTopicChange={setSelectedTopicId}
           />
+
+          {/* Study OS links: the task this time advances (which carries its
+              own goal/exam), and what kind of work it was. */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
+                {t("sessions.linkedTask")}
+              </label>
+              <select
+                aria-label={t("sessions.linkedTask")}
+                value={selectedTaskId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedTaskId(id);
+                  const task = openTasks.find((x) => x.id === id);
+                  // A picked task names the session, which is almost always
+                  // what the student would have typed anyway.
+                  if (task && !sessionTitle.trim()) setSessionTitle(task.title);
+                }}
+                disabled={anyRunning}
+                className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg outline-none disabled:opacity-50"
+              >
+                <option value="">{t("sessions.noTask")}</option>
+                {openTasks.map((task) => (
+                  <option key={task.id} value={task.id}>
+                    {task.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-muted-fg tracking-wider mb-2 block">
+                {t("sessions.activity")}
+              </label>
+              <select
+                aria-label={t("sessions.activity")}
+                value={activity}
+                onChange={(e) => setActivity(e.target.value)}
+                disabled={anyRunning}
+                className="glass-inset w-full rounded-xl px-4 py-3 text-sm text-fg outline-none disabled:opacity-50"
+              >
+                <option value="">{t("sessions.activity.none")}</option>
+                <option value="review">{t("sessions.activity.review")}</option>
+                <option value="notes">{t("sessions.activity.notes")}</option>
+                <option value="exam">{t("sessions.activity.exam")}</option>
+                <option value="reading">{t("sessions.activity.reading")}</option>
+                <option value="other">{t("sessions.activity.other")}</option>
+              </select>
+            </div>
+          </div>
 
           {/* Pomodoro settings — custom technique builder */}
           {mode === "pomodoro" && (

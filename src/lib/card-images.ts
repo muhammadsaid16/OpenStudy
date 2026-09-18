@@ -6,7 +6,7 @@
 // IndexedDB (db v13) with the object-URL pattern proven by wallpapers:
 // create per render need, revoke on cleanup, never leak.
 
-import { db, uid, type CardImageRec } from "@/lib/db";
+import { db, uid, deleteMatching, type CardImageRec } from "@/lib/db";
 
 export const MAX_CARD_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB, same as wallpapers
 export const CARD_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"] as const;
@@ -30,7 +30,7 @@ export async function setCardImage(
   name: string
 ): Promise<CardImageRec> {
   if (!isSupportedImage(blob)) throw new Error("UNSUPPORTED_IMAGE");
-  await db.cardImages.where("[cardId+side]").equals([cardId, side]).delete();
+  await deleteMatching("cardImages", db.cardImages.where("[cardId+side]").equals([cardId, side]));
   const rec: CardImageRec = {
     id: uid(),
     cardId,
@@ -47,12 +47,12 @@ export async function setCardImage(
 
 /** Remove the image from one side. No-op when there is none. */
 export async function removeCardImage(cardId: string, side: "front" | "back"): Promise<void> {
-  await db.cardImages.where("[cardId+side]").equals([cardId, side]).delete();
+  await deleteMatching("cardImages", db.cardImages.where("[cardId+side]").equals([cardId, side]));
 }
 
 /** Delete every image owned by a card (card deletion cleanup). */
 export async function deleteCardImages(cardId: string): Promise<void> {
-  await db.cardImages.where("cardId").equals(cardId).delete();
+  await deleteMatching("cardImages", db.cardImages.where("cardId").equals(cardId));
 }
 
 /** Snapshot every image of a card BEFORE deletion, for faithful undo. */

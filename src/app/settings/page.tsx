@@ -10,7 +10,8 @@ import { LIVE_WALLPAPERS, STATIC_WALLPAPERS } from "@/components/wallpaper-host"
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { exportAllData, importAllData } from "@/app/actions";
-import { db, uid, type WallpaperRec } from "@/lib/db";
+import { SyncPanel } from "@/components/sync-panel";
+import { db, uid, deleteWithTombstones, type WallpaperRec } from "@/lib/db";
 import { showToast } from "@/components/toast";
 import { Download, Upload, Check, AlertTriangle, Sparkles, Trash2, ImageIcon } from "lucide-react";
 
@@ -176,7 +177,7 @@ export default function SettingsPage() {
   }, [t, setWallpaper]);
 
   const confirmDeleteUpload = useCallback(async (id: string) => {
-    await db.wallpapers.delete(id);
+    await deleteWithTombstones("wallpapers", [id]);
     setUploads((prev) => prev.filter((u) => u.id !== id));
     if (wallpaperId === id) setWallpaper("none");
     setDeleteUploadId(null);
@@ -668,6 +669,11 @@ export default function SettingsPage() {
           </div>
         </div>
       </section>
+
+      {/* Devices — the sync foundation (§19): identity, tombstones, and a
+          file exchange. Separate from Data (backup/restore) because the two
+          do different jobs: a backup replaces, a device merge reconciles. */}
+      <SyncPanel />
     </div>
   );
 }

@@ -52,6 +52,22 @@ interface AppState {
   lang: "en" | "ar";
   setLang: (l: "en" | "ar") => void;
 
+  // ── Study OS: planner settings + daily targets ──
+  // Planner capacity in minutes, or null to keep deriving it from the user's
+  // real sessions (the planner's original, honest default).
+  plannerDailyMinutes: number | null;
+  setPlannerDailyMinutes: (minutes: number | null) => void;
+  plannerHorizonDays: number;
+  setPlannerHorizonDays: (days: number) => void;
+  /** Weekdays (0 = Sunday … 6 = Saturday) the plan may spend work on. */
+  plannerStudyDays: number[];
+  setPlannerStudyDays: (days: number[]) => void;
+  /** Daily targets the dashboard measures today against. */
+  goalCardsPerDay: number;
+  setGoalCardsPerDay: (n: number) => void;
+  goalMinutesPerDay: number;
+  setGoalMinutesPerDay: (n: number) => void;
+
   // Hydrate persisted prefs from localStorage AFTER mount (post-hydration) so
   // the first client render always matches the server render. Reading
   // localStorage at module scope made sidebarOpen/theme differ between server
@@ -82,6 +98,30 @@ interface PersistedPrefs {
   wallpaperBlur?: number;
   wallpaperRotation?: number;
   uiOpacity?: number;
+  plannerDailyMinutes?: number | null;
+  plannerHorizonDays?: number;
+  plannerStudyDays?: number[];
+  goalCardsPerDay?: number;
+  goalMinutesPerDay?: number;
+}
+
+// Bounds live next to the store so a hand-edited localStorage value cannot put
+// the planner into a state its own tests never see.
+export const PLANNER_HORIZON_MIN = 7;
+export const PLANNER_HORIZON_MAX = 60;
+export const PLANNER_CAPACITY_MIN = 10;
+export const PLANNER_CAPACITY_MAX = 240;
+
+function clampHorizon(days: number): number {
+  return Math.max(PLANNER_HORIZON_MIN, Math.min(PLANNER_HORIZON_MAX, Math.round(days)));
+}
+function clampPlannerMinutes(minutes: number): number {
+  return Math.max(PLANNER_CAPACITY_MIN, Math.min(PLANNER_CAPACITY_MAX, Math.round(minutes)));
+}
+/** Weekdays, deduped and sorted; an empty choice means "every day". */
+function normalizeStudyDays(days: number[]): number[] {
+  const clean = [...new Set(days.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))].sort((a, b) => a - b);
+  return clean.length > 0 ? clean : [0, 1, 2, 3, 4, 5, 6];
 }
 
 function loadPrefs(): PersistedPrefs {
@@ -106,6 +146,11 @@ function persistAll(s: AppState) {
     wallpaperBlur: s.wallpaperBlur,
     wallpaperRotation: s.wallpaperRotation,
     uiOpacity: s.uiOpacity,
+    plannerDailyMinutes: s.plannerDailyMinutes,
+    plannerHorizonDays: s.plannerHorizonDays,
+    plannerStudyDays: s.plannerStudyDays,
+    goalCardsPerDay: s.goalCardsPerDay,
+    goalMinutesPerDay: s.goalMinutesPerDay,
   });
 }
 
@@ -183,6 +228,37 @@ export const useAppStore = create<AppState>((set, get) => ({
     persistAll({ ...get(), lang: l });
   },
 
+  plannerDailyMinutes: null,
+  setPlannerDailyMinutes: (minutes) => {
+    const v = minutes == null ? null : clampPlannerMinutes(minutes);
+    set({ plannerDailyMinutes: v });
+    persistAll({ ...get(), plannerDailyMinutes: v });
+  },
+  plannerHorizonDays: 14,
+  setPlannerHorizonDays: (days) => {
+    const v = clampHorizon(days);
+    set({ plannerHorizonDays: v });
+    persistAll({ ...get(), plannerHorizonDays: v });
+  },
+  plannerStudyDays: [0, 1, 2, 3, 4, 5, 6],
+  setPlannerStudyDays: (days) => {
+    const v = normalizeStudyDays(days);
+    set({ plannerStudyDays: v });
+    persistAll({ ...get(), plannerStudyDays: v });
+  },
+  goalCardsPerDay: 30,
+  setGoalCardsPerDay: (n) => {
+    const v = Math.max(1, Math.min(1000, Math.round(n || 1)));
+    set({ goalCardsPerDay: v });
+    persistAll({ ...get(), goalCardsPerDay: v });
+  },
+  goalMinutesPerDay: 60,
+  setGoalMinutesPerDay: (n) => {
+    const v = Math.max(5, Math.min(1440, Math.round(n || 5)));
+    set({ goalMinutesPerDay: v });
+    persistAll({ ...get(), goalMinutesPerDay: v });
+  },
+
   hydrateFromStorage: () => {
     const prefs = loadPrefs();
     const patch: Partial<AppState> = {};
@@ -194,6 +270,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (typeof prefs.wallpaperBlur === "number") patch.wallpaperBlur = prefs.wallpaperBlur;
     if (typeof prefs.wallpaperRotation === "number") patch.wallpaperRotation = ((Math.round(prefs.wallpaperRotation / 90) * 90) % 360 + 360) % 360;
     if (typeof prefs.uiOpacity === "number") patch.uiOpacity = clampUiOpacity(prefs.uiOpacity);
+    if (prefs.plannerDailyMinutes === null) patch.plannerDailyMinutes = null;
+    else if (typeof prefs.plannerDailyMinutes === "number") patch.plannerDailyMinutes = clampPlannerMinutes(prefs.plannerDailyMinutes);
+    if (typeof prefs.plannerHorizonDays === "number") patch.plannerHorizonDays = clampHorizon(prefs.plannerHorizonDays);
+    if (Array.isArray(prefs.plannerStudyDays)) patch.plannerStudyDays = normalizeStudyDays(prefs.plannerStudyDays);
+    if (typeof prefs.goalCardsPerDay === "number") patch.goalCardsPerDay = Math.max(1, Math.min(1000, Math.round(prefs.goalCardsPerDay)));
+    if (typeof prefs.goalMinutesPerDay === "number") patch.goalMinutesPerDay = Math.max(5, Math.min(1440, Math.round(prefs.goalMinutesPerDay)));
     if (prefs.theme) {
       patch.theme = normalizeTheme(prefs.theme);
       if (typeof document !== "undefined") {

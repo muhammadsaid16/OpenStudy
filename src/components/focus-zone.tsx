@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Square, SkipForward, Coffee, Brain, Music } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createStudySession, getSubjects, getPomoPresets, getDueCount } from "@/app/actions";
+import { createStudySession, getSubjects, getPomoPresets, getDueCount, getTasks } from "@/app/actions";
 import { usePomodoro, phaseSeconds, BUILTIN_PRESETS } from "@/lib/pomodoro";
 import { soundscape, type SoundscapeName } from "@/lib/soundscape";
 import { RemindMeControl } from "./remind-me-control";
@@ -58,6 +58,9 @@ export function FocusZone() {
   const [dueCount, setDueCount] = useState(0);
   const [subjectId, setSubjectId] = useState("");
   const [task, setTask] = useState("");
+  // Open tasks, for the banner's suggestions — a session named after one of
+  // these is that task's session (see stop()).
+  const [openTasks, setOpenTasks] = useState<{ id: string; title: string }[]>([]);
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const [soundscapeName, setSoundscapeName] = useState<SoundscapeName>("Silence");
 
@@ -66,12 +69,13 @@ export function FocusZone() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getSubjects(), getPomoPresets(), getDueCount()])
-      .then(([s, p, d]) => {
+    Promise.all([getSubjects(), getPomoPresets(), getDueCount(), getTasks()])
+      .then(([s, p, d, tasks]) => {
         if (cancelled) return;
         setSubjects(s.map((x) => ({ id: x.id, name: x.name })));
         setPresets(p);
         setDueCount(d);
+        setOpenTasks(tasks.filter((x) => x.status !== "done").map((x) => ({ id: x.id, title: x.title })));
       })
       .catch(() => { /* widget stays usable with empty lists on storage failure */ });
     // Stop ambient audio if this widget unmounts (route change)
@@ -118,6 +122,9 @@ export function FocusZone() {
       const duration = Math.max(1, Math.round(snap.workSeconds / 60));
       const title =
         snap.title.trim() || `Focus — ${snap.cycles} cycle${snap.cycles === 1 ? "" : "s"}`;
+      // A session named exactly after an open task IS that task's session, so
+      // the task advances/closes on save (createStudySession owns that rule).
+      const linked = openTasks.find((x) => x.title === title) ?? null;
       createStudySession({
         subjectId: snap.subjectId || undefined,
         title,
@@ -126,6 +133,7 @@ export function FocusZone() {
         // Stamp the true start so day-bucketing in weekly analytics/streaks
         // attributes a midnight-crossing session to the day it began.
         startedAt: new Date(snap.startedAt),
+        taskId: linked?.id ?? null,
       }).catch(() => {
         // Silent loss of a completed focus session is the worst failure mode
         // (user blame-shifts to the app's reliability). Say it, once, with
@@ -139,6 +147,7 @@ export function FocusZone() {
               durationMin: duration,
               completed: true,
               startedAt: new Date(snap.startedAt),
+              taskId: linked?.id ?? null,
             }).catch(() => {});
           },
           duration: 8000,
@@ -341,8 +350,15 @@ export function FocusZone() {
           onChange={(e) => setTask(e.target.value)}
           placeholder={t("focus.workingOn")}
           disabled={pomo.running}
+          list="focus-open-tasks"
           className="w-full rounded-lg bg-transparent text-sm font-medium text-fg placeholder:text-muted-fg/60 outline-none disabled:opacity-60"
         />
+        {/* Suggest real open tasks — picking one by name links the session. */}
+        <datalist id="focus-open-tasks">
+          {openTasks.map((x) => (
+            <option key={x.id} value={x.title} />
+          ))}
+        </datalist>
         {subjects.length > 0 && (
           <select
             aria-label={t("dash.subject")}

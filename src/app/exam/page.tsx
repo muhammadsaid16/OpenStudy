@@ -19,11 +19,13 @@ import {
   getAllFlashcards,
   listExams,
   deleteExam,
+  getExamTrace,
 } from "@/app/actions";
 import { filterExamPool } from "@/lib/exam";
 import { shuffled } from "@/lib/card-kinds";
 import { RATING_BUTTONS } from "@/lib/card-status";
 import { Button, EmptyState, Modal, Input, Skeleton } from "@/components/ui";
+import { CardImage } from "@/components/card-image";
 import { cn } from "@/lib/utils";
 import { db, type ExamQuestionRec, type ExamRec, type FlashcardRec, type SubjectRec } from "@/lib/db";
 import { ArrowLeft, Award, CheckCircle2, ChevronRight, Clock, FileQuestion, ListChecks, Timer, Trash2, XCircle } from "lucide-react";
@@ -390,6 +392,19 @@ function ExamRunner({ examId, onExit, onFinish }: { examId: string; onExit: () =
           {q.kind === "choice" ? t("exam.kind_choice") : t("exam.kind_self")}
         </p>
         <p className="whitespace-pre-wrap text-center text-2xl font-bold leading-relaxed tracking-tight">{q.frontText}</p>
+        {/* Snapshotted images — a picture question works in an exam exactly as
+            it does in review. The back image is the answer, so it appears only
+            after grading. */}
+        {q.frontImage && (
+          <div className="mt-5">
+            <CardImage rec={q.frontImage} maxWidth={320} />
+          </div>
+        )}
+        {q.isCorrect !== null && q.isCorrect !== undefined && q.backImage && (
+          <div className="mt-4">
+            <CardImage rec={q.backImage} maxWidth={320} />
+          </div>
+        )}
 
         {q.kind === "choice" ? (
           <div className="mt-8 grid gap-2">
@@ -407,7 +422,7 @@ function ExamRunner({ examId, onExit, onFinish }: { examId: string; onExit: () =
         ) : (
           <div className="mt-8">
             <p className="mb-3 text-center text-xs uppercase tracking-widest text-muted-fg">{t("exam.rate_prompt")}</p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {RATING_BUTTONS.map((btn) => (
                 <button
                   key={btn.value}
@@ -444,6 +459,9 @@ function ExamResults({ examId, onRetake }: { examId: string; onRetake: () => voi
   const t = useT();
   const [data, setData] = useState<Awaited<ReturnType<typeof getExamResults>>>(null);
   const [questions, setQuestions] = useState<ExamQuestionRec[]>([]);
+  // Relationship layer: this exam's per-topic verdict + the exact cards it
+  // proved were missed, which is what targeted practice runs on.
+  const [trace, setTrace] = useState<Awaited<ReturnType<typeof getExamTrace>>>(null);
 
   useEffect(() => {
     (async () => {
@@ -451,6 +469,7 @@ function ExamResults({ examId, onRetake }: { examId: string; onRetake: () => voi
       setData(res);
       const full = await getExam(examId);
       setQuestions(full?.questions ?? []);
+      setTrace(await getExamTrace(examId));
     })();
   }, [examId]);
 
@@ -458,6 +477,8 @@ function ExamResults({ examId, onRetake }: { examId: string; onRetake: () => voi
   const { exam, totals } = data;
   const wrong = questions.filter((q) => q.isCorrect === false);
   const passing = totals.scorePct >= 60;
+  // Deduped: a card can be missed on more than one question of the same exam.
+  const mistakeIds = [...new Set(trace?.mistakeCards ?? wrong.map((q) => q.flashcardId))];
 
   return (
     <div className="page-gutter">
@@ -501,6 +522,23 @@ function ExamResults({ examId, onRetake }: { examId: string; onRetake: () => voi
               {q.answer && <p className="mt-1 text-[10px] uppercase tracking-widest text-muted-fg">{t("exam.your_answer")}: {q.answer}</p>}
             </div>
           ))}
+        </div>
+      )}
+
+      {mistakeIds.length > 0 && (
+        <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-2xl p-6">
+          <div>
+            <p className="text-sm font-bold tracking-tight text-fg">
+              {t("exam.practice_mistakes")} · {mistakeIds.length}
+            </p>
+            <p className="mt-1 text-xs text-muted-fg">{t("exam.practice_mistakes_hint")}</p>
+          </div>
+          <Link href={`/subjects?tab=study&ids=${encodeURIComponent(mistakeIds.join(","))}`}>
+            <Button>
+              <ListChecks size={15} />
+              {t("exam.practice_mistakes")}
+            </Button>
+          </Link>
         </div>
       )}
 

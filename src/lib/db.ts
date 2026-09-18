@@ -1,8 +1,60 @@
-import Dexie, { type Table } from "dexie";
+import Dexie, { type Collection, type IndexableType, type Table } from "dexie";
 import { rescueBeforeReset } from "@/lib/safety-net";
+import {
+  applySyncPayload,
+  collectSince,
+  deleteRowsWithTombstones,
+  deviceIdentity,
+  installSyncHooks,
+  SYNC_TABLES,
+  type MergeReport,
+  type SyncPayload,
+  type SyncTableName,
+} from "@/lib/sync";
+
+// ─── Sync metadata (Study OS §19) ───────────────────────────────
+// Every synced record carries these. Optional in the type system because rows
+// written before the sync wave (and rows arriving from an old backup) have
+// none — an absent `updatedAt` reads as "oldest" in the merge. They are never
+// left unset on a write: installSyncHooks() stamps creating/updating hooks for
+// every table in SYNC_TABLES, so no call site can forget.
+//
+//   updatedAt     last write, the merge's primary ordering key
+//   rev           monotonic per-row version (1 on create), the tiebreaker
+//   lastDeviceId  which install wrote it — the deterministic final tiebreak
+//                 so two devices always agree on a winner instead of flapping
+/**
+ * Shared sync metadata for synced records. See lib/sync.ts for the merge rules.
+ */
+export interface SyncMetaFields {
+  updatedAt?: Date;
+  rev?: number;
+  lastDeviceId?: string;
+}
+
+// ─── Tombstones (Study OS §19) ─────────────────────────────────
+// Deletions must survive a merge. Rather than soft-deleting rows (which would
+// force every read in the app to filter `deletedAt`), a deleted row is removed
+// from its table and recorded here: reads stay untouched, and a sync peer
+// learns the row is gone instead of resurrecting it.
+//
+// `key` is the row's real IndexedDB key (an array for the tag-junction tables),
+// so applying a tombstone can delete it directly; `entityId` is the printable
+// form used for indexes, dedupe and diagnostics.
+export interface TombstoneRec {
+  /** `${table}:${entityId}` — one tombstone per row. */
+  id: string;
+  table: string;
+  entityId: string;
+  key: IndexableType;
+  deletedAt: number;
+  /** The row's version at delete time (0 when unknown). */
+  rev: number;
+  deviceId: string;
+}
 
 // ─── Record types (mirror the previous Prisma models 1:1) ───────
-export interface SubjectRec {
+export interface SubjectRec extends SyncMetaFields {
   id: string;
   name: string;
   description?: string | null;
@@ -12,7 +64,7 @@ export interface SubjectRec {
   updatedAt: Date;
 }
 
-export interface TopicRec {
+export interface TopicRec extends SyncMetaFields {
   id: string;
   subjectId: string;
   name: string;
@@ -22,7 +74,7 @@ export interface TopicRec {
   updatedAt: Date;
 }
 
-export interface ResourceRec {
+export interface ResourceRec extends SyncMetaFields {
   id: string;
   topicId: string;
   title: string;
@@ -34,7 +86,7 @@ export interface ResourceRec {
   updatedAt: Date;
 }
 
-export interface NoteRec {
+export interface NoteRec extends SyncMetaFields {
   id: string;
   topicId: string | null; // optional link — standalone notes allowed
   title: string;
@@ -46,22 +98,22 @@ export interface NoteRec {
   updatedAt: Date;
 }
 
-export interface TagRec {
+export interface TagRec extends SyncMetaFields {
   id: string;
   name: string;
 }
 
-export interface NoteTagRec {
+export interface NoteTagRec extends SyncMetaFields {
   noteId: string;
   tagId: string;
 }
 
-export interface CardTagRec {
+export interface CardTagRec extends SyncMetaFields {
   cardId: string;
   tagId: string;
 }
 
-export interface BundleRec {
+export interface BundleRec extends SyncMetaFields {
   id: string;
   name: string;
   description?: string | null;
@@ -74,7 +126,7 @@ export interface BundleRec {
 
 export type CardKind = "basic" | "cloze" | "choice";
 
-export interface FlashcardRec {
+export interface FlashcardRec extends SyncMetaFields {
   id: string;
   topicId?: string | null;
   subjectId?: string | null;
@@ -104,14 +156,18 @@ export interface FlashcardRec {
   updatedAt: Date;
 }
 
-export interface ReviewLogRec {
+export interface ReviewLogRec extends SyncMetaFields {
   id: string;
   flashcardId: string;
   quality: number;
   reviewedAt: Date;
 }
 
-export interface StudySessionRec {
+// What the time was actually spent on — the session's own label, so a week of
+// sessions can be read back as "mostly review" or "mostly reading".
+export type SessionActivity = "review" | "notes" | "exam" | "reading" | "other";
+
+export interface StudySessionRec extends SyncMetaFields {
   id: string;
   subjectId?: string | null;
   topicId?: string | null;
@@ -121,9 +177,17 @@ export interface StudySessionRec {
   completed: boolean;
   startedAt: Date;
   endedAt?: Date | null;
+  // ── Study OS links (all optional, non-indexed → no schema bump) ──
+  // A session is evidence for the work it advanced: linking it to a task is
+  // what lets the task close itself, and to a goal/exam so progress rolls up
+  // the same way cards and reviews do.
+  goalId?: string | null;
+  taskId?: string | null;
+  examId?: string | null;
+  activity?: SessionActivity | null;
 }
 
-export interface PomoPresetRec {
+export interface PomoPresetRec extends SyncMetaFields {
   id: string;
   name: string;
   workMin: number;
@@ -139,7 +203,7 @@ export type GoalHorizon = "long" | "regular"; // "regular" displays as "Todo"
 export type GoalStatus = "backlog" | "in_progress" | "done";
 export type GoalRepeat = "daily" | "weekly" | "monthly";
 
-export interface GoalRec {
+export interface GoalRec extends SyncMetaFields {
   id: string;
   title: string;
   description?: string | null;
@@ -155,7 +219,7 @@ export interface GoalRec {
   completedAt?: Date | null;
 }
 
-export interface MilestoneRec {
+export interface MilestoneRec extends SyncMetaFields {
   id: string;
   goalId: string;
   title: string;
@@ -175,7 +239,7 @@ export interface SettingRec {
 // Blobs live in IndexedDB (no size budget beyond disk quota, survives
 // reloads, works offline). The blob holds its own MIME type, so renderers
 // can build object URLs without guessing.
-export interface WallpaperRec {
+export interface WallpaperRec extends SyncMetaFields {
   id: string;
   name: string;
   type: string; // e.g. "image/jpeg", "image/png", "image/webp"
@@ -190,7 +254,7 @@ export interface WallpaperRec {
 // feeding rule in lib/contracts.ts).
 export type ExamStatus = "in_progress" | "completed" | "abandoned";
 
-export interface ExamRec {
+export interface ExamRec extends SyncMetaFields {
   id: string;
   title: string;
   status: ExamStatus;
@@ -210,7 +274,7 @@ export interface ExamRec {
 // at build time so a graded exam stays displayable even if the card is later
 // edited or deleted — flashcardId may dangle after a card deletion by design;
 // grade evidence lives here, not on the card.
-export interface ExamQuestionRec {
+export interface ExamQuestionRec extends SyncMetaFields {
   id: string;
   examId: string;
   flashcardId: string;
@@ -230,6 +294,12 @@ export interface ExamQuestionRec {
   // so no schema-version bump is required.
   topicId?: string | null;
   subjectId?: string | null;
+  // Image snapshots, taken with the text ones at build time. Held as whole
+  // CardImageRec records so the runner renders them through the same
+  // <CardImage> boundary as everywhere else (Contract 7) — a picture card
+  // looks the same in an exam as it does in review.
+  frontImage?: CardImageRec | null;
+  backImage?: CardImageRec | null;
 }
 
 // ─── Tasks (Study OS) ────────────────────────────────────────────
@@ -239,7 +309,7 @@ export interface ExamQuestionRec {
 // (goal milestones): a task is a step of study work with a time estimate.
 export type TaskStatus = "todo" | "in_progress" | "done";
 
-export interface TaskRec {
+export interface TaskRec extends SyncMetaFields {
   id: string;
   title: string;
   description?: string | null;
@@ -270,7 +340,7 @@ export interface CardRegion {
   label?: string;
 }
 
-export interface CardImageRec {
+export interface CardImageRec extends SyncMetaFields {
   id: string;
   cardId: string;
   side: "front" | "back";
@@ -284,7 +354,7 @@ export interface CardImageRec {
 // ─── The database ────────────────────────────────────────────────
 // Dexie/IndexedDB is the SINGLE source of truth — fully local,
 // fully offline, per-device. No server database anywhere.
-class OpenStudyDB extends Dexie {
+export class OpenStudyDB extends Dexie {
   subjects!: Table<SubjectRec, string>;
   topics!: Table<TopicRec, string>;
   resources!: Table<ResourceRec, string>;
@@ -305,9 +375,10 @@ class OpenStudyDB extends Dexie {
   examQuestions!: Table<ExamQuestionRec, string>;
   tasks!: Table<TaskRec, string>;
   cardImages!: Table<CardImageRec, string>;
+  tombstones!: Table<TombstoneRec, string>;
 
-  constructor() {
-    super("studymax");
+  constructor(name = "studymax") {
+    super(name);
     this.version(1).stores({
       subjects: "id, name, createdAt",
       topics: "id, subjectId, createdAt",
@@ -373,10 +444,21 @@ class OpenStudyDB extends Dexie {
     this.version(13).stores({
       cardImages: "id, cardId, side, createdAt, [cardId+side]",
     });
+    // v14: device-sync foundation — deletion tombstones (additive; no existing
+    // table is reshaped, and the stamping fields live on the records, not the
+    // indexes, so the row schemas themselves are unchanged)
+    this.version(14).stores({
+      tombstones: "id, table, entityId, deletedAt",
+    });
   }
 }
 
 export const db = new OpenStudyDB();
+
+// Stamp every synced write with updatedAt / rev / lastDeviceId. Installed on
+// the instance (not globally) so a test can stand up a second database and
+// exercise a real two-device exchange. See lib/sync.ts.
+installSyncHooks(db);
 
 db.on("versionchange", () => db.close());
 
@@ -418,6 +500,90 @@ if (typeof window !== "undefined") {
 export function uid(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+
+// ─── Device-sync plumbing on the live database ───────────────────
+// Thin, typed bindings of lib/sync.ts onto this instance. The rules themselves
+// live there (and are tested there, including against a second database).
+
+/**
+ * Delete rows and record their tombstones in ONE transaction (the rule and its
+ * reasoning live in lib/sync.ts, which is also what the tests drive).
+ */
+export async function deleteWithTombstones(table: SyncTableName, keys: IndexableType[]): Promise<number> {
+  return deleteRowsWithTombstones(db, table, keys);
+}
+
+/**
+ * Delete every row a query matches, tombstoning each one.
+ *
+ * This is the replacement for `collection.delete()` everywhere in the app. The
+ * cascade calls in actions.ts read as `deleteMatching("notes", db.notes.where(...))`
+ * precisely so the table name sits next to the query that chose it — a cascade
+ * that tombstones the wrong table is how a peer resurrects data.
+ */
+export async function deleteMatching<T, K extends IndexableType>(
+  table: SyncTableName,
+  collection: Collection<T, K>
+): Promise<number> {
+  const keys = (await collection.primaryKeys()) as K[];
+  if (keys.length === 0) return 0;
+  return deleteRowsWithTombstones(db, table, keys);
+}
+
+/** Rows and tombstones changed after `sinceMs` (0 = the whole local state). */
+export async function collectSyncChanges(
+  sinceMs = 0,
+  opts: { includeMedia?: boolean } = {}
+): Promise<SyncPayload> {
+  return collectSince(db, sinceMs, opts);
+}
+
+/** Merge a payload from another device into this one. */
+export async function applySyncChanges(payload: SyncPayload): Promise<MergeReport> {
+  return applySyncPayload(db, payload);
+}
+
+export interface SyncStatus {
+  deviceId: string;
+  deviceName: string;
+  tombstoneCount: number;
+  rowCount: number;
+  perTable: { table: string; rows: number }[];
+  oldestTombstoneAt: number | null;
+  newestTombstoneAt: number | null;
+}
+
+/** What this device knows, for the Settings panel (and troubleshooting). */
+export async function getSyncStatus(): Promise<SyncStatus> {
+  const identity = deviceIdentity();
+  const perTable: { table: string; rows: number }[] = [];
+  for (const table of SYNC_TABLES) {
+    const rows = await db.table(table).count();
+    if (rows > 0) perTable.push({ table, rows });
+  }
+  const tombstones = await db.tombstones.orderBy("deletedAt").toArray();
+  return {
+    deviceId: identity.id,
+    deviceName: identity.name,
+    tombstoneCount: tombstones.length,
+    rowCount: perTable.reduce((acc, t) => acc + t.rows, 0),
+    perTable,
+    oldestTombstoneAt: tombstones[0]?.deletedAt ?? null,
+    newestTombstoneAt: tombstones[tombstones.length - 1]?.deletedAt ?? null,
+  };
+}
+
+/**
+ * Drop tombstones older than the cutoff. Only safe once every peer has synced
+ * past them, so this is an explicit user action — never automatic. A pruned
+ * tombstone is how a deleted row comes back from a peer that had not synced
+ * yet, which is why the Settings copy says so out loud.
+ */
+export async function pruneTombstones(olderThanMs: number): Promise<number> {
+  const ids = await db.tombstones.where("deletedAt").below(olderThanMs).primaryKeys();
+  if (ids.length > 0) await db.tombstones.bulkDelete(ids);
+  return ids.length;
 }
 
 // ─── Legacy offline-cache helpers ────────────────────────────────

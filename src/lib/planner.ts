@@ -15,19 +15,103 @@ import type { NextAction, PlannerDay, WeaknessSignal } from "@/lib/contracts";
 const MINUTES_PER_CARD = 0.35; // ~21 cards / 7.5 min ≈ 20 cards per 10 min
 
 export interface PlannerConfig {
-  /** Daily study capacity in minutes (default 60). */
+  /** Fallback capacity when the user has no session history (default 60). */
   dailyMinutes: number;
+  /**
+   * Explicit capacity in minutes. Null (the default) derives capacity from the
+   * user's real sessions instead — the planner's original behaviour.
+   */
+  capacityMinutes?: number | null;
   /** Horizon of the generated plan, in days (default 14). */
   horizonDays: number;
-  /** Days per week the user studies (default 7; e.g. 6 skips one day). */
-  studyDaysPerWeek: number;
+  /**
+   * Weekdays (0 = Sunday … 6 = Saturday) study work may be placed on. Empty
+   * or absent means every day. Work due on a day the user does not study rolls
+   * forward to the next study day rather than disappearing — and when a card is
+   * due after the last study day of the horizon it stays on the horizon's last
+   * day, so the load is still visible.
+   *
+   * (This replaces the former `studyDaysPerWeek` knob, which was declared and
+   * defaulted but never read by the plan — a setting that silently did nothing.)
+   */
+  studyDays?: number[];
 }
 
 export const DEFAULT_PLANNER_CONFIG: PlannerConfig = {
   dailyMinutes: 60,
+  capacityMinutes: null,
   horizonDays: 14,
-  studyDaysPerWeek: 7,
+  studyDays: [0, 1, 2, 3, 4, 5, 6],
 };
+
+/** Capacity bounds — a plan built on 5 or 5000 minutes a day is not a plan. */
+const MIN_CAPACITY = 10;
+const MAX_CAPACITY = 240;
+
+/** Days before an exam whose capacity an exam may claim (latest-first). */
+export const EXAM_PREP_WINDOW_DAYS = 7;
+
+/** True for each day in the horizon the user studies on. */
+export function studyDayMask(
+  startDow: number,
+  days: number,
+  studyDays: number[] | undefined
+): boolean[] {
+  const set = new Set(
+    studyDays && studyDays.length > 0 ? studyDays.filter((d) => d >= 0 && d <= 6) : [0, 1, 2, 3, 4, 5, 6]
+  );
+  if (set.size === 0) for (let d = 0; d <= 6; d++) set.add(d);
+  return Array.from({ length: days }, (_, d) => set.has((startDow + d) % 7));
+}
+
+/**
+ * Push each day's work forward onto the next study day. Reviews are protected,
+ * so a card due on a rest day is not dropped: its minutes move to the next day
+ * the user actually studies. Anything left with no study day ahead of it stays
+ * on the last day of the horizon.
+ */
+export function rollForwardToStudyDays(values: number[], allowed: boolean[]): number[] {
+  const out = new Array(values.length).fill(0);
+  let carry = 0;
+  for (let d = 0; d < values.length; d++) {
+    carry += values[d];
+    if (allowed[d]) {
+      out[d] = carry;
+      carry = 0;
+    }
+  }
+  if (carry > 0 && values.length > 0) out[values.length - 1] += carry;
+  return out;
+}
+
+/**
+ * The order work should be placed in.
+ *
+ * With no exam inside the horizon this is simply day 0 upward. With an exam, the
+ * days immediately before it come FIRST, latest-first — so a student ramps into
+ * the exam (`exam at day 10` → day 9, then 8, then 7…) instead of spreading the
+ * same work evenly across the whole horizon. Reviews are unaffected: they are
+ * due-date driven and protected; only practice and tasks can be pulled.
+ */
+export function examWeightedWorkOrder(
+  days: number,
+  examDayIdxs: number[],
+  allowed: boolean[],
+  windowDays = EXAM_PREP_WINDOW_DAYS
+): number[] {
+  const seen = new Set<number>();
+  const order: number[] = [];
+  for (const examDay of [...examDayIdxs].sort((a, b) => a - b)) {
+    for (let d = examDay - 1; d >= Math.max(0, examDay - windowDays); d--) {
+      if (allowed[d] && !seen.has(d)) {
+        seen.add(d);
+        order.push(d);
+      }
+    }
+  }
+  for (let d = 0; d < days; d++) if (allowed[d] && !seen.has(d)) order.push(d);
+  return order;
+}
 
 /** The user's weekly average focus time, derived from real sessions. */
 export function deriveCapacity(
@@ -76,6 +160,10 @@ export interface PlanInput {
 export interface PlanResult {
   days: PlannerDay[];
   capacityPerDay: number;
+  /** Where that capacity came from — manual setting or recent sessions. */
+  capacitySource: "manual" | "derived";
+  /** Study days the plan was allowed to use (empty-safe: all seven). */
+  studyDays: number[];
   /** First day where the plan can't fit the recommended work. */
   overloadDay: string | null;
   totals: { reviewMinutes: number; practiceMinutes: number; taskMinutes: number };
@@ -89,12 +177,35 @@ export function buildPlan(input: PlanInput): PlanResult {
   const startMs = start.getTime();
   const days = config.horizonDays;
 
-  const capacity = deriveCapacity(input.sessions, nowMs);
+  // Capacity: the user's own number wins; otherwise the honest estimate from
+  // what they actually studied in the last fortnight.
+  const manual = typeof config.capacityMinutes === "number" && config.capacityMinutes > 0;
+  const capacity = manual
+    ? Math.max(MIN_CAPACITY, Math.min(MAX_CAPACITY, Math.round(config.capacityMinutes!)))
+    : deriveCapacity(input.sessions, nowMs);
+  const capacitySource: "manual" | "derived" = manual ? "manual" : "derived";
 
-  const reviewCards = reviewLoadPerDay(input.cards, startMs, days);
+  // Study days: work cannot be placed on a day the user doesn't study. A card
+  // due on a rest day rolls forward to the next study day (reviews are
+  // protected — nothing vanishes).
+  const allowed = studyDayMask(start.getDay(), days, config.studyDays);
+  const studyDays = config.studyDays && config.studyDays.length > 0
+    ? [...new Set(config.studyDays.filter((d) => d >= 0 && d <= 6))].sort((a, b) => a - b)
+    : [0, 1, 2, 3, 4, 5, 6];
+  const reviewCards = rollForwardToStudyDays(reviewLoadPerDay(input.cards, startMs, days), allowed);
   const reviewMinutes = reviewCards.map((n) => Math.round(n * MINUTES_PER_CARD));
 
-  // Weakness practice: distributed across the first days, capacity-permitting.
+  // Exams inside the horizon pull practice and tasks toward their days.
+  const examDayIdxs: number[] = [];
+  for (const e of input.exams) {
+    if (!e.dueDate || e.status === "abandoned") continue;
+    const dayIdx = Math.floor((new Date(e.dueDate).getTime() - startMs) / 86_400_000);
+    if (dayIdx >= 0 && dayIdx < days) examDayIdxs.push(dayIdx);
+  }
+  const workOrder = examWeightedWorkOrder(days, examDayIdxs, allowed);
+
+  // Weakness practice: capacity-permitting, on the days the work order says
+  // come first (the run-up to an exam when one is in view).
   const practiceByDay = new Array(days).fill(0);
   const practiceByDayTopics: string[][] = Array.from({ length: days }, () => []);
   const pending: { label: string; minutes: number }[] = input.weakness.map((w) => ({
@@ -103,7 +214,8 @@ export function buildPlan(input: PlanInput): PlanResult {
   }));
   // One weakness slot per day; more only when days remain after tasks fit.
   let pi = 0;
-  for (let d = 0; d < days && pi < pending.length; d++) {
+  for (const d of workOrder) {
+    if (pi >= pending.length) break;
     const item = pending[pi];
     const used = reviewMinutes[d];
     const free = Math.max(0, capacity - used);
@@ -139,7 +251,8 @@ export function buildPlan(input: PlanInput): PlanResult {
   const remainingEstimates = new Map<string, number>();
   const taskEstimate = (t: TaskRec) => remainingEstimates.get(t.id) ?? (t.estimateMin ?? 20);
   let ti = 0;
-  for (let d = 0; d < days && ti < openTasks.length; d++) {
+  for (const d of workOrder) {
+    if (ti >= openTasks.length) break;
     let free = capacity - reviewMinutes[d] - practiceByDay[d] - taskMinutesByDay[d];
     while (ti < openTasks.length && free >= Math.min(taskEstimate(openTasks[ti]), 15)) {
       const t = openTasks[ti];
@@ -159,7 +272,7 @@ export function buildPlan(input: PlanInput): PlanResult {
     }
   }
 
-  // Exams land on their dates.
+  // Exams land on their dates (indices resolved above, for the work order).
   const examByDay: string[][] = Array.from({ length: days }, () => []);
   for (const e of input.exams) {
     if (!e.dueDate || e.status === "abandoned") continue;
@@ -191,7 +304,7 @@ export function buildPlan(input: PlanInput): PlanResult {
     out.push(day);
   }
 
-  return { days: out, capacityPerDay: capacity, overloadDay, totals };
+  return { days: out, capacityPerDay: capacity, capacitySource, studyDays, overloadDay, totals };
 }
 
 // ─── Next Action (Contract 3) ────────────────────────────────────

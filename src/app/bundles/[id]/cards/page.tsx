@@ -17,6 +17,7 @@ import {
   Check,
 } from "lucide-react";
 import { Button, Modal, Input, EmptyState, Skeleton } from "@/components/ui";
+import { CardTracePanel } from "@/components/card-trace-panel";
 import { RevealHeading } from "@/components/reveal-heading";
 import { BulkActionBar } from "@/components/bulk-action-bar";
 import { TagInput } from "@/components/tag-input";
@@ -42,8 +43,8 @@ import type { BundleRec, CardKind } from "@/lib/db";
 import { cardKind, cleanChoices, shuffled } from "@/lib/card-kinds";
 import { CardKindFields } from "@/components/card-kind-fields";
 import { RATING_BUTTONS, isCorrect } from "@/lib/card-status";
-import { useCardSideImages } from "@/lib/card-images";
-import { CardImage } from "@/components/card-image";
+import { removeCardImage, setCardImage, useCardSideImages } from "@/lib/card-images";
+import { CardImage, CardImagePicker } from "@/components/card-image";
 import { useLiveData } from "@/lib/use-live-data";
 
 type CardTag = { tag: { id: string; name: string } };
@@ -108,6 +109,16 @@ export default function BundleCardsPage() {
   const [editError, setEditError] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Card | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Card images. Until now the picker existed only on the retired /flashcards
+  // route, so the live deck editor could show a card's pictures but never add
+  // or replace one. Drafts are Files; edit uses undefined = untouched,
+  // null = remove the stored image, File = replace it.
+  const [createFrontImg, setCreateFrontImg] = useState<File | null>(null);
+  const [createBackImg, setCreateBackImg] = useState<File | null>(null);
+  const [editFrontImg, setEditFrontImg] = useState<File | null | undefined>(undefined);
+  const [editBackImg, setEditBackImg] = useState<File | null | undefined>(undefined);
+  const editSideImages = useCardSideImages(editCard?.id ?? null);
 
   // Import
   const [importing, setImporting] = useState(false);
@@ -208,7 +219,7 @@ export default function BundleCardsPage() {
     setCreateError("");
     setCreating(true);
     try {
-      await createBundleFlashcard({
+      const created = await createBundleFlashcard({
         bundleId,
         front: front.trim(),
         back: back.trim(),
@@ -218,6 +229,11 @@ export default function BundleCardsPage() {
         kind: createKind,
         choices: createKind === "choice" ? cleanChoices(createChoicesText.split("\n")) : undefined,
       });
+      // Images land after the card exists (blobs are keyed by card id).
+      if (createFrontImg) await setCardImage(created.id, "front", createFrontImg, createFrontImg.name);
+      if (createBackImg) await setCardImage(created.id, "back", createBackImg, createBackImg.name);
+      setCreateFrontImg(null);
+      setCreateBackImg(null);
       setCreateOpen(false);
       setFront("");
       setBack("");
@@ -248,6 +264,12 @@ export default function BundleCardsPage() {
         kind: editKind,
         choices: editKind === "choice" ? cleanChoices(editChoicesText.split("\n")) : undefined,
       });
+      if (editFrontImg === null) await removeCardImage(editCard.id, "front");
+      else if (editFrontImg) await setCardImage(editCard.id, "front", editFrontImg, editFrontImg.name);
+      if (editBackImg === null) await removeCardImage(editCard.id, "back");
+      else if (editBackImg) await setCardImage(editCard.id, "back", editBackImg, editBackImg.name);
+      setEditFrontImg(undefined);
+      setEditBackImg(undefined);
       setEditCard(null);
       setLoaded(false);
       await load();
@@ -547,7 +569,7 @@ export default function BundleCardsPage() {
                   {!isFlipped ? (
                     <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">{t("cards.showAnswer")}</Button>
                   ) : (
-                    <div className="mt-6 grid grid-cols-3 gap-2">
+                    <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
                       {RATING_BUTTONS.map((btn) => (
                         <button key={btn.value} onClick={() => handleRate(btn.value)} disabled={reviewing} className={`rounded-xl border px-3 py-3 text-sm font-bold transition-colors disabled:opacity-50 ${btn.color}`}>
                           <span className="block text-xs uppercase tracking-widest">{btn.shortLabel}</span>
@@ -683,6 +705,8 @@ export default function BundleCardsPage() {
                           setEditKind(cardKind(card));
                           setEditChoicesText((card.choices ?? []).join("\n"));
                           setEditTags(card.tags.map((t) => t.tag.name));
+                          setEditFrontImg(undefined);
+                          setEditBackImg(undefined);
                         }}
                         aria-label={t("common.edit")}
                         className={cn("rounded-full p-2.5 transition-colors", flipped ? "text-on-primary-container/70 hover:bg-on-primary-container/15 hover:text-on-primary-container" : "text-muted-fg hover:bg-primary-container/15 hover:text-primary")}
@@ -798,6 +822,13 @@ export default function BundleCardsPage() {
             <TagInput tags={createTags} onChange={setCreateTags} />
           </div>
           <CardKindFields kind={createKind} onKindChange={setCreateKind} choicesText={createChoicesText} onChoicesTextChange={setCreateChoicesText} />
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.images")}</label>
+            <div className="flex flex-wrap gap-4">
+              <CardImagePicker file={createFrontImg} onFile={setCreateFrontImg} label={t("cards.imageFront")} />
+              <CardImagePicker file={createBackImg} onFile={setCreateBackImg} label={t("cards.imageBack")} />
+            </div>
+          </div>
           {createError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{createError}</p>}
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setCreateOpen(false)}>{t("common.cancel")}</Button>
@@ -842,6 +873,27 @@ export default function BundleCardsPage() {
               <TagInput tags={editTags} onChange={setEditTags} />
             </div>
             <CardKindFields kind={editKind} onKindChange={setEditKind} choicesText={editChoicesText} onChoicesTextChange={setEditChoicesText} />
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("fc.images")}</label>
+              <div className="flex flex-wrap gap-4">
+                <CardImagePicker
+                  file={editFrontImg === undefined ? null : editFrontImg}
+                  onFile={setEditFrontImg}
+                  label={t("cards.imageFront")}
+                  saved={editSideImages.front}
+                  onRemoveSaved={() => setEditFrontImg(null)}
+                />
+                <CardImagePicker
+                  file={editBackImg === undefined ? null : editBackImg}
+                  onFile={setEditBackImg}
+                  label={t("cards.imageBack")}
+                  saved={editSideImages.back}
+                  onRemoveSaved={() => setEditBackImg(null)}
+                />
+              </div>
+            </div>
+            {/* Relationship model, made visible: topic/deck, history, exams. */}
+            <CardTracePanel cardId={editCard.id} />
             {editError && <p className="text-[10px] font-bold uppercase tracking-widest text-danger">{editError}</p>}
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="ghost" onClick={() => setEditCard(null)}>{t("common.cancel")}</Button>

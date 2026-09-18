@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { useAppStore } from "@/lib/store";
 import { getPlannerData, createTask, moveTask, deleteTask } from "@/app/actions";
 import { buildPlan } from "@/lib/planner";
 import type { PlannerDay } from "@/lib/contracts";
@@ -18,6 +19,10 @@ import { cn } from "@/lib/utils";
 import { CalendarDays, CircleDot, Clock, Flame, Plus, Trash2, TrendingDown, TrendingUp, Zap } from "lucide-react";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_INITIALS = ["S", "M", "T", "W", "T", "F", "S"];
+
+/** Capacity presets offered next to Auto (minutes/day). */
+const CAPACITY_PRESETS = [30, 45, 60, 90, 120];
 
 export default function PlanPage() {
   const t = useT();
@@ -27,6 +32,14 @@ export default function PlanPage() {
   const [dueDate, setDueDate] = useState("");
   const [estimate, setEstimate] = useState("20");
   const [creating, setCreating] = useState(false);
+  // Planner settings live in the store (localStorage) so the plan the student
+  // shapes is the plan they get back next time.
+  const plannerDailyMinutes = useAppStore((s) => s.plannerDailyMinutes);
+  const plannerHorizonDays = useAppStore((s) => s.plannerHorizonDays);
+  const plannerStudyDays = useAppStore((s) => s.plannerStudyDays);
+  const setPlannerDailyMinutes = useAppStore((s) => s.setPlannerDailyMinutes);
+  const setPlannerHorizonDays = useAppStore((s) => s.setPlannerHorizonDays);
+  const setPlannerStudyDays = useAppStore((s) => s.setPlannerStudyDays);
 
   const reload = async () => {
     const d = await getPlannerData();
@@ -64,6 +77,12 @@ export default function PlanPage() {
     weakness: data.weakness,
     exams: data.exams.map((e) => ({ title: e.title, dueDate: e.startedAt as Date | string | null, status: e.status })),
     sessions: data.sessions.map((s) => ({ startedAt: s.startedAt, durationMin: s.durationMin })),
+    // The student's own settings (persisted, clamped by the store).
+    config: {
+      capacityMinutes: plannerDailyMinutes,
+      horizonDays: plannerHorizonDays,
+      studyDays: plannerStudyDays,
+    },
   });
 
   // Exam markers: in-progress exams act as study targets on their start day.
@@ -81,8 +100,94 @@ export default function PlanPage() {
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-fg/70">{t("nav.focus")}</p>
         <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-fg lg:text-[34px] lg:leading-tight">{t("page.plan")}</h1>
         <p className="mt-2 text-sm text-muted-fg">{t("page.plan.subtitle")}</p>
-      </div>        <div className="grid gap-4 sm:grid-cols-4">
-        <StatCard icon={<Clock size={15} />} label={t("plan.capacity")} value={`${plan.capacityPerDay}m`} hint={t("plan.capacity_hint")} />
+      </div>
+
+      {/* Plan settings — the knobs the planner actually reads. Auto keeps the
+          old behaviour (capacity derived from real sessions); an explicit
+          number, a longer horizon, or a shorter week reshape the plan live. */}
+      <section className="glass mb-4 space-y-3 rounded-2xl p-4">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("plan.settings")}</p>
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("plan.capacity")}</p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setPlannerDailyMinutes(null)}
+                aria-pressed={plannerDailyMinutes === null}
+                className={cn(
+                  "tap-target rounded-lg border px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest transition-colors",
+                  plannerDailyMinutes === null ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-fg hover:text-fg"
+                )}
+              >
+                {t("plan.capacity_auto")}
+              </button>
+              {CAPACITY_PRESETS.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setPlannerDailyMinutes(m)}
+                  aria-pressed={plannerDailyMinutes === m}
+                  className={cn(
+                    "tap-target rounded-lg border px-2.5 py-1 font-mono text-[11px] font-bold tabular-nums transition-colors",
+                    plannerDailyMinutes === m ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-fg hover:text-fg"
+                  )}
+                >
+                  {m}m
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("plan.horizon_setting")}</p>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={7}
+                max={60}
+                value={String(plannerHorizonDays)}
+                onChange={(e) => setPlannerHorizonDays(Number(e.target.value) || plannerHorizonDays)}
+                className="w-20"
+              />
+              <span className="text-[10px] uppercase tracking-widest text-muted-fg">{t("plan.days")}</span>
+            </div>
+          </div>
+          <div>
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("plan.study_days")}</p>
+            <div className="flex items-center gap-1">
+              {DAY_INITIALS.map((label, dow) => {
+                const on = plannerStudyDays.includes(dow);
+                return (
+                  <button
+                    key={dow}
+                    type="button"
+                    aria-label={DAY_LABELS[dow]}
+                    aria-pressed={on}
+                    onClick={() => {
+                      if (on && plannerStudyDays.length === 1) return; // keep at least one
+                      setPlannerStudyDays(on ? plannerStudyDays.filter((d) => d !== dow) : [...plannerStudyDays, dow]);
+                    }}
+                    className={cn(
+                      "tap-target h-8 w-8 rounded-lg border text-[11px] font-bold transition-colors",
+                      on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-fg hover:text-fg"
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-4 sm:grid-cols-4">
+        <StatCard
+          icon={<Clock size={15} />}
+          label={t("plan.capacity")}
+          value={`${plan.capacityPerDay}m`}
+          hint={plan.capacitySource === "manual" ? t("plan.capacity_hint_manual") : t("plan.capacity_hint")}
+        />
         <StatCard icon={<Zap size={15} />} label={t("plan.review")} value={`${plan.totals.reviewMinutes}m`} hint={t("plan.review_hint")} />
         <StatCard icon={<Flame size={15} />} label={t("plan.practice")} value={`${plan.totals.practiceMinutes}m`} hint={t("plan.practice_hint")} />
         <StatCard icon={<CircleDot size={15} />} label={t("plan.tasks")} value={`${plan.totals.taskMinutes}m`} hint={t("plan.tasks_hint")} />
@@ -90,7 +195,7 @@ export default function PlanPage() {
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("plan.horizon")}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("plan.horizon").replace("{n}", String(plan.days.length))}</p>
           <Button size="sm" variant="ghost" onClick={() => setModalOpen(true)}><Plus size={14} />{t("plan.add_task")}</Button>
         </div>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-7">

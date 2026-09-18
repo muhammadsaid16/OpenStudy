@@ -15,10 +15,17 @@
 //   - Scheduler (FSRS agent) owns its internals
 //   - quality scale stays 0…5 with isCorrect(≥3) as the pass boundary
 
-// ─── Contract 2: WeaknessSignal ──────────────────────────────────
+// ─── Contract 2: WeaknessSignal ───────────────────────────────────
 // Producer: lib/weakness.ts (Diagnostician).
 // Consumers: /plan (Planner), subject/topic hubs (Connector), dashboard
 // Next Action (Conductor), exam results screen (Examiner).
+//
+// Evidence: consumers that assemble inputs MUST pass `examItems` from
+// examEvidenceFromQuestions() alongside the review logs. Exam evidence is the
+// strongest signal the engine accepts (weight 2) and it can only reach the
+// engine this way — dropping it silently reduces a failed exam to an ordinary
+// lapse. The rule for which exams qualify (real, completed, answered) lives in
+// that adapter, not at the call sites.
 export type WeaknessTrend = "worsening" | "flat" | "improving";
 
 export interface WeaknessSignal {
@@ -87,11 +94,13 @@ export interface PlannerDay {
 export const EXAM_FEED_RULE = "wrong→schedule-lapse, correct→log-only, practice→log-only";
 
 // ─── Contract 6: FSRS rating mapping ─────────────────────────────
-// Scheduler maps the app's 0/3/5 quality scale onto FSRS grades centrally.
+// Scheduler maps the app's 0/3/4/5 quality scale onto FSRS grades centrally.
 // Semantics: 0 = "Didn't remember" → again; 3 = "Remembered with
-// difficulty" → hard; 5 = "Remembered easily" → easy. Anything below 3 is
-// a failed recall per isCorrect, so it maps to again — a fail can never
-// enter FSRS as a passing grade.
+// difficulty" → hard; 4 = "Remembered" → good; 5 = "Remembered easily" →
+// easy. Anything below 3 is a failed recall per isCorrect, so it maps to
+// again — a fail can never enter FSRS as a passing grade. All four grades are
+// reachable from the review UI (a 3-grade scale left `good` dead, which
+// jumped intervals from hard straight to easy).
 export type FsrsGrade = "again" | "hard" | "good" | "easy";
 export function gradeFromQuality(quality: number): FsrsGrade {
   if (quality < 3) return "again";
@@ -105,3 +114,21 @@ export function gradeFromQuality(quality: number): FsrsGrade {
 // Consumers (editor, review renderer, exam runner) never touch db.cardImages
 // directly. Occlusion readiness: regions live on CardImageRec; no behavior
 // ships for them yet.
+
+// ─── Contract 8: deletions are recorded, not just performed ──────
+// Producer: lib/sync.ts (deleteRowsWithTombstones), bound to the live database
+// by deleteWithTombstones / deleteMatching in lib/db.ts.
+// Consumers: every removal in app/actions.ts, lib/card-images.ts and the
+// settings page. No exceptions, including cascades.
+//
+// A hard delete is invisible to another install, so the removed row simply
+// comes back at the next merge. So: remove the rows and record a tombstone for
+// each in ONE transaction, and cascade tombstone-per-table (a cascade that
+// records only the parent leaves orphans returning on their own).
+//
+// Media rows (cardImages, wallpapers) follow the same rule even though their
+// bytes are not exchanged yet: when a binary channel lands, the deletions are
+// already complete rather than needing to be backfilled.
+//
+// `src/app/tombstones.test.ts` enforces this statically — a reappearing
+// db.<table>.delete() fails the suite by file and line.

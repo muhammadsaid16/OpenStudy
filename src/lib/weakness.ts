@@ -7,7 +7,14 @@
 // stored label — a topic the student masters decays out of the list on its
 // own, and improving trends lower the score.
 
-import type { FlashcardRec, ReviewLogRec, TopicRec, SubjectRec } from "@/lib/db";
+import type {
+  ExamQuestionRec,
+  ExamRec,
+  FlashcardRec,
+  ReviewLogRec,
+  TopicRec,
+  SubjectRec,
+} from "@/lib/db";
 import type { WeaknessSignal, WeaknessTrend } from "@/lib/contracts";
 import { isCorrect } from "@/lib/card-status";
 import { isDueCard } from "@/lib/review-queue";
@@ -81,6 +88,46 @@ export function collectExamEvidence(
       // under pressure, without the flip button.
       weight: 2,
     }));
+}
+
+/**
+ * Adapter: graded exam questions → the exam slice of weakness evidence.
+ *
+ * This is the single definition of the exam → weakness rule, so the planner,
+ * the topic hubs and the dashboard all see the same verdict on the same run.
+ *
+ * Only REAL exams contribute. Practice exams already reach this engine through
+ * their review logs (Contract 5 logs every practice answer via logReviewOnly),
+ * so feeding their questions here as well would count one failure twice — and
+ * at the weight-2 exam rate. Abandoned exams are skipped for the same reason
+ * the planner skips them: a bailed-out run is not a verdict on the material.
+ */
+export function examEvidenceFromQuestions(
+  questions: Pick<
+    ExamQuestionRec,
+    "examId" | "flashcardId" | "isCorrect" | "answeredAt" | "topicId" | "subjectId"
+  >[],
+  exams: Pick<ExamRec, "id" | "practiceOnly" | "status">[]
+): ExamEvidenceItem[] {
+  const examById = new Map(exams.map((e) => [e.id, e]));
+  const items: ExamEvidenceItem[] = [];
+  for (const q of questions) {
+    if (q.isCorrect === null || q.isCorrect === undefined) continue; // unanswered
+    const exam = examById.get(q.examId);
+    if (!exam || exam.practiceOnly || exam.status === "abandoned") continue;
+    const atMs = q.answeredAt ? new Date(q.answeredAt).getTime() : NaN;
+    if (!Number.isFinite(atMs)) continue;
+    items.push({
+      flashcardId: q.flashcardId,
+      isCorrect: q.isCorrect,
+      atMs,
+      topicId: q.topicId ?? null,
+      subjectId: q.subjectId ?? null,
+    });
+  }
+  // Windowing/weighting belongs to collectExamEvidence, which every consumer
+  // already goes through — applying it here too would only split the rule.
+  return items;
 }
 
 export function collectOverdueEvidence(

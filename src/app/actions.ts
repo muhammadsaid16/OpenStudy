@@ -8,6 +8,8 @@ import { z } from "zod";
 import {
   db,
   uid,
+  deleteMatching,
+  deleteWithTombstones,
   type SubjectRec,
   type TopicRec,
   type NoteRec,
@@ -25,6 +27,8 @@ import {
   type ExamRec,
   type ExamQuestionRec,
   type TaskRec,
+  type SessionActivity,
+  type CardImageRec,
 } from "@/lib/db";
 import { cardKind, cleanChoices, isCloze } from "@/lib/card-kinds";
 import {
@@ -33,7 +37,9 @@ import {
   stepFsrs,
 } from "@/lib/fsrs";
 import { buildQuestionSpecs, gradeAnswer, pickExamCards, scoreExam } from "@/lib/exam";
-import { computeWeaknessSignals } from "@/lib/weakness";
+import { getCardImage } from "@/lib/card-images";
+import { computeWeaknessSignals, examEvidenceFromQuestions } from "@/lib/weakness";
+import { getCardTraceability, getExamTraceability, getTopicGraph } from "@/lib/relations";
 import { byDueDateAsc, filterDueCards, isDueCard } from "@/lib/review-queue";
 import { isCorrect } from "@/lib/card-status";
 import { isMastered } from "@/lib/stats/mastery";
@@ -240,21 +246,21 @@ export async function deleteSubject(id: string) {
     const noteIds = notes.map((n) => n.id);
     const cards = await db.flashcards.where("topicId").anyOf(topicIds).toArray();
     const cardIds = cards.map((c) => c.id);
-    await db.resources.where("topicId").anyOf(topicIds).delete();
-    if (noteIds.length) await db.noteTags.where("noteId").anyOf(noteIds).delete();
-    await db.notes.where("topicId").anyOf(topicIds).delete();
+    await deleteMatching("resources", db.resources.where("topicId").anyOf(topicIds));
+    if (noteIds.length) await deleteMatching("noteTags", db.noteTags.where("noteId").anyOf(noteIds));
+    await deleteMatching("notes", db.notes.where("topicId").anyOf(topicIds));
     if (cardIds.length) {
-      await db.cardTags.where("cardId").anyOf(cardIds).delete();
-      await db.reviewLogs.where("flashcardId").anyOf(cardIds).delete();
+      await deleteMatching("cardTags", db.cardTags.where("cardId").anyOf(cardIds));
+      await deleteMatching("reviewLogs", db.reviewLogs.where("flashcardId").anyOf(cardIds));
     }
-    await db.flashcards.where("topicId").anyOf(topicIds).delete();
-    await db.topics.where("subjectId").equals(id).delete();
+    await deleteMatching("flashcards", db.flashcards.where("topicId").anyOf(topicIds));
+    await deleteMatching("topics", db.topics.where("subjectId").equals(id));
   } else {
-    await db.topics.where("subjectId").equals(id).delete();
+    await deleteMatching("topics", db.topics.where("subjectId").equals(id));
   }
   await db.flashcards.where("subjectId").equals(id).modify({ subjectId: null });
   await db.studySessions.where("subjectId").equals(id).modify({ subjectId: null });
-  if (subject) await db.subjects.delete(id);
+  if (subject) await deleteWithTombstones("subjects", [id]);
   return subject;
 }
 
@@ -279,24 +285,28 @@ export async function createTopic(data: {
 
 export async function deleteTopic(id: string) {
   const topic = await db.topics.get(id);
-  await db.resources.where("topicId").equals(id).delete();
+  await deleteMatching("resources", db.resources.where("topicId").equals(id));
   const notes = await db.notes.where("topicId").equals(id).toArray();
-  for (const n of notes) await db.noteTags.where("noteId").equals(n.id).delete();
-  await db.notes.where("topicId").equals(id).delete();
+  for (const n of notes) await deleteMatching("noteTags", db.noteTags.where("noteId").equals(n.id));
+  await deleteMatching("notes", db.notes.where("topicId").equals(id));
   const cards = await db.flashcards.where("topicId").equals(id).toArray();
   for (const c of cards) {
-    await db.cardTags.where("cardId").equals(c.id).delete();
-    await db.reviewLogs.where("flashcardId").equals(c.id).delete();
+    await deleteMatching("cardTags", db.cardTags.where("cardId").equals(c.id));
+    await deleteMatching("reviewLogs", db.reviewLogs.where("flashcardId").equals(c.id));
   }
-  await db.flashcards.where("topicId").equals(id).delete();
+  await deleteMatching("flashcards", db.flashcards.where("topicId").equals(id));
   // Detach everywhere the topic was referenced — no orphan links:
   // sessions keep the record, drop the topicId; bundles keep their cards,
   // drop topicId + denormalized subjectId. Goals link to subjects (not
   // topics) so they stay valid.
-  await db.studySessions.where("topicId").equals(id).modify({ topicId: null });
+  // topicId is deliberately not indexed on sessions (the link is optional and
+  // sessions are few), so this filters instead of querying an index —
+  // `where("topicId")` throws a SchemaError, which used to make deleting a
+  // topic fail outright.
+  await db.studySessions.toCollection().filter((s) => s.topicId === id).modify({ topicId: null });
   // Unlink bundles that were owned by this topic — keep the bundle/cards, just detach
   await db.bundles.where("topicId").equals(id).modify({ topicId: null, subjectId: null, updatedAt: new Date() });
-  if (topic) await db.topics.delete(id);
+  if (topic) await deleteWithTombstones("topics", [id]);
   return topic;
 }
 
@@ -349,7 +359,7 @@ export async function updateNote(
     const parsedRest = noteSchema.partial().omit({ topicId: true } as any).parse(rest);
     await db.notes.update(id, { ...parsedRest, topicId: null as any, updatedAt: new Date() });
     if (tags) {
-      await db.noteTags.where("noteId").equals(id).delete();
+      await deleteMatching("noteTags", db.noteTags.where("noteId").equals(id));
       for (const tagName of tags) {
         const tag = await upsertTag(tagName);
         await db.noteTags.add({ noteId: id, tagId: tag.id });
@@ -367,7 +377,7 @@ export async function updateNote(
   if (noteData.explanation !== undefined) (patch as any).explanationUpdatedAt = noteData.explanation ? new Date() : null;
   await db.notes.update(id, patch);
   if (tags) {
-    await db.noteTags.where("noteId").equals(id).delete();
+    await deleteMatching("noteTags", db.noteTags.where("noteId").equals(id));
     for (const tagName of tags) {
       const tag = await upsertTag(tagName);
       await db.noteTags.add({ noteId: id, tagId: tag.id });
@@ -378,8 +388,8 @@ export async function updateNote(
 
 export async function deleteNote(id: string) {
   const note = await db.notes.get(id);
-  await db.noteTags.where("noteId").equals(id).delete();
-  if (note) await db.notes.delete(id);
+  await deleteMatching("noteTags", db.noteTags.where("noteId").equals(id));
+  if (note) await deleteWithTombstones("notes", [id]);
   return note;
 }
 
@@ -512,6 +522,17 @@ export async function updateFlashcard(
 // which corrupted scheduling and made reviews invisible to streaks/heatmaps.)
 
 // ─── Flashcard Management (MANAGE ALL) ──────────────────────────
+/**
+ * Cards by an explicit id list, in the order asked for, missing ids skipped.
+ * Used by targeted practice (exam mistakes) — an intentional card set, not a
+ * due-date query, so none of the due filters apply.
+ */
+export async function getFlashcardsByIds(ids: string[]): Promise<FlashcardRec[]> {
+  if (ids.length === 0) return [];
+  const rows = await db.flashcards.bulkGet(ids);
+  return rows.filter((c): c is FlashcardRec => Boolean(c));
+}
+
 export async function getAllFlashcards() {
   const all = await db.flashcards.toArray();
   all.sort((a, b) => a.reviewCount - b.reviewCount || b.createdAt.getTime() - a.createdAt.getTime());
@@ -528,9 +549,9 @@ export async function getAllFlashcards() {
 
 export async function deleteFlashcard(id: string) {
   const card = await db.flashcards.get(id);
-  await db.cardTags.where("cardId").equals(id).delete();
-  await db.reviewLogs.where("flashcardId").equals(id).delete();
-  if (card) await db.flashcards.delete(id);
+  await deleteMatching("cardTags", db.cardTags.where("cardId").equals(id));
+  await deleteMatching("reviewLogs", db.reviewLogs.where("flashcardId").equals(id));
+  if (card) await deleteWithTombstones("flashcards", [id]);
   return card;
 }
 
@@ -577,6 +598,11 @@ export async function createStudySession(data: {
   notes?: string;
   completed?: boolean;
   startedAt?: Date;
+  // Study OS links — the session becomes evidence for real work.
+  goalId?: string | null;
+  taskId?: string | null;
+  examId?: string | null;
+  activity?: SessionActivity | null;
 }) {
   const now = new Date();
   const session: StudySessionRec = {
@@ -593,14 +619,31 @@ export async function createStudySession(data: {
     completed: data.completed ?? true,
     startedAt: data.startedAt ?? now,
     endedAt: now,
+    goalId: data.goalId ?? null,
+    taskId: data.taskId ?? null,
+    examId: data.examId ?? null,
+    activity: data.activity ?? null,
   };
   await db.studySessions.add(session);
+
+  // A session with a linked task is evidence for that task, so the loop closes
+  // by itself: enough time completes it, partial time moves it to in_progress.
+  // Tasks already done are left alone (re-logging time must not resurrect
+  // completion state), and a missing task is ignored — the session still stands.
+  if (data.taskId) {
+    const task = await db.tasks.get(data.taskId);
+    if (task && task.status !== "done") {
+      const estimate = task.estimateMin ?? null;
+      const covered = session.completed && (estimate == null || session.durationMin >= estimate);
+      await moveTask(data.taskId, covered ? "done" : "in_progress");
+    }
+  }
   return session;
 }
 
 export async function deleteStudySession(id: string) {
   const session = await db.studySessions.get(id);
-  if (session) await db.studySessions.delete(id);
+  if (session) await deleteWithTombstones("studySessions", [id]);
   return session;
 }
 
@@ -625,7 +668,7 @@ export async function updatePomoPreset(id: string, input: Partial<PomoPresetInpu
 }
 
 export async function deletePomoPreset(id: string) {
-  await db.pomoPresets.delete(id);
+  await deleteWithTombstones("pomoPresets", [id]);
   return { id };
 }
 
@@ -946,12 +989,12 @@ export async function deleteBundle(id: string) {
   // then the bundle itself — matches "DELETE & ALL ITS FLASHCARDS".
   const cards = await db.flashcards.where("bundleId").equals(id).toArray();
   for (const c of cards) {
-    await db.cardTags.where("cardId").equals(c.id).delete();
-    await db.reviewLogs.where("flashcardId").equals(c.id).delete();
+    await deleteMatching("cardTags", db.cardTags.where("cardId").equals(c.id));
+    await deleteMatching("reviewLogs", db.reviewLogs.where("flashcardId").equals(c.id));
   }
-  await db.flashcards.where("bundleId").equals(id).delete();
+  await deleteMatching("flashcards", db.flashcards.where("bundleId").equals(id));
   const bundle = await db.bundles.get(id);
-  if (bundle) await db.bundles.delete(id);
+  if (bundle) await deleteWithTombstones("bundles", [id]);
   return bundle;
 }
 
@@ -969,7 +1012,7 @@ export async function getBundleCards(bundleId: string) {
 
 // ─── Card tag helpers ────────────────────────────────────────
 export async function setCardTags(cardId: string, tagNames: string[]) {
-  await db.cardTags.where("cardId").equals(cardId).delete();
+  await deleteMatching("cardTags", db.cardTags.where("cardId").equals(cardId));
   for (const name of tagNames) {
     const tag = await upsertTag(name);
     await db.cardTags.add({ cardId, tagId: tag.id });
@@ -1374,10 +1417,10 @@ export async function editBundleFromFlashcards(
 export async function batchDeleteCards(ids: string[]) {
   if (!ids.length) return { count: 0 };
   for (const id of ids) {
-    await db.cardTags.where("cardId").equals(id).delete();
-    await db.reviewLogs.where("flashcardId").equals(id).delete();
+    await deleteMatching("cardTags", db.cardTags.where("cardId").equals(id));
+    await deleteMatching("reviewLogs", db.reviewLogs.where("flashcardId").equals(id));
   }
-  await db.flashcards.bulkDelete(ids);
+  await deleteWithTombstones("flashcards", ids);
   return { count: ids.length };
 }
 
@@ -1531,8 +1574,8 @@ export async function moveGoal(id: string, status: GoalStatus, index: number): P
 
 export async function deleteGoal(id: string): Promise<void> {
   // Genuine cascade — milestones must die with the goal.
-  await db.milestones.where("goalId").equals(id).delete();
-  await db.goals.delete(id);
+  await deleteMatching("milestones", db.milestones.where("goalId").equals(id));
+  await deleteWithTombstones("goals", [id]);
 }
 
 export async function getMilestones(goalId: string): Promise<MilestoneRec[]> {
@@ -1563,7 +1606,7 @@ export async function toggleMilestone(id: string, done: boolean): Promise<void> 
 }
 
 export async function deleteMilestone(id: string): Promise<void> {
-  await db.milestones.delete(id);
+  await deleteWithTombstones("milestones", [id]);
 }
 
 // ─── Full Data Export / Import ───────────────────────────────
@@ -1894,7 +1937,10 @@ export async function importAllData(json: string): Promise<{ imported: string }>
     let topicId: string | null = null;
     let subjectId: string | null = null;
     if (b.topicName) {
-      const topics = await db.topics.where("name").equals(b.topicName).toArray();
+      // No `name` index on topics (subjects and tags have one), so this scans.
+      // `where("name")` threw a SchemaError here and aborted the restore of
+      // any backup containing topic-owned bundles.
+      const topics = (await db.topics.toArray()).filter((t) => t.name === b.topicName);
       let match: TopicRec | undefined;
       if (b.subjectName) {
         const subj = await db.subjects.where("name").equals(b.subjectName).first();
@@ -2126,7 +2172,7 @@ export async function batchResetCardProgress(ids: string[]): Promise<number> {
     updatedAt: now,
   });
   // Clear review history so the card drops from Hardest cards (accuracy is computed from logs).
-  await db.reviewLogs.where("flashcardId").anyOf(ids).delete();
+  await deleteMatching("reviewLogs", db.reviewLogs.where("flashcardId").anyOf(ids));
   return ids.length;
 }
 
@@ -2181,22 +2227,40 @@ export async function createExam(setup: {
   const picked = pickExamCards(pool, count, seed);
 
   const specs = buildQuestionSpecs(picked);
-  const rows: ExamQuestionRec[] = specs.map((s, i) => ({
-    id: uid(),
-    examId: exam.id,
-    flashcardId: s.flashcardId,
-    order: i,
-    frontText: s.frontText,
-    backText: s.backText,
-    kind: s.kind,
-    choicesSnapshot: s.choicesSnapshot,
-    topicId: s.topicId,
-    subjectId: s.subjectId,
-    answer: null,
-    quality: null,
-    isCorrect: null,
-    answeredAt: null,
-  }));
+  // Image snapshots, same rule as the text snapshots: a graded exam stays
+  // displayable even if the card or its pictures change afterwards. Loaded in
+  // one pass over the picked set, and only for cards that actually have one.
+  const imageByCard = new Map<string, { front: CardImageRec | null; back: CardImageRec | null }>();
+  await Promise.all(
+    picked.map(async (card) => {
+      const [front, back] = await Promise.all([
+        getCardImage(card.id, "front"),
+        getCardImage(card.id, "back"),
+      ]);
+      if (front || back) imageByCard.set(card.id, { front, back });
+    })
+  );
+  const rows: ExamQuestionRec[] = specs.map((s, i) => {
+    const img = imageByCard.get(s.flashcardId);
+    return {
+      id: uid(),
+      examId: exam.id,
+      flashcardId: s.flashcardId,
+      order: i,
+      frontText: s.frontText,
+      backText: s.backText,
+      kind: s.kind,
+      choicesSnapshot: s.choicesSnapshot,
+      topicId: s.topicId,
+      subjectId: s.subjectId,
+      answer: null,
+      quality: null,
+      isCorrect: null,
+      answeredAt: null,
+      frontImage: img?.front ?? null,
+      backImage: img?.back ?? null,
+    };
+  });
   await db.examQuestions.bulkAdd(rows);
   // The exam actually delivered what was built (the pool may be smaller
   // than requested) — store the built count so "8/8" never renders as "8/15".
@@ -2217,8 +2281,8 @@ export async function listExams(): Promise<ExamRec[]> {
 }
 
 export async function deleteExam(examId: string): Promise<void> {
-  await db.examQuestions.where("examId").equals(examId).delete();
-  await db.exams.delete(examId);
+  await deleteMatching("examQuestions", db.examQuestions.where("examId").equals(examId));
+  await deleteWithTombstones("exams", [examId]);
 }
 
 /**
@@ -2394,49 +2458,138 @@ export async function updateTask(id: string, data: Partial<Pick<TaskRec, "title"
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  await db.tasks.delete(id);
+  await deleteWithTombstones("tasks", [id]);
+}
+
+// ─── Study OS: exam evidence for the Weakness Engine ─────────────
+// One definition of where exam evidence comes from, so every consumer of
+// Contract 2 (planner, hubs, dashboard) sees the same verdict. The rule
+// itself — real exams only, practice is already in the review logs — lives
+// in lib/weakness.ts (examEvidenceFromQuestions).
+async function collectExamWeaknessEvidence() {
+  const [exams, questions] = await Promise.all([
+    db.exams.toArray(),
+    db.examQuestions.filter((q) => q.isCorrect != null).toArray(),
+  ]);
+  return examEvidenceFromQuestions(questions, exams);
 }
 
 // ─── Study OS: Planner data assembly ─────────────────────────────
 /** Gathers everything the planner needs in one round trip. */
 export async function getPlannerData() {
-  const [cards, tasks, logs, topics, subjects, sessions] = await Promise.all([
+  const [cards, tasks, logs, topics, subjects, sessions, examItems] = await Promise.all([
     db.flashcards.toArray(),
     getTasks(),
     db.reviewLogs.toArray(),
     db.topics.toArray(),
     db.subjects.toArray(),
     getStudySessions(1000),
+    collectExamWeaknessEvidence(),
   ]);
   const exams = (await listExams()).filter((e) => e.status !== "abandoned");
-  // Weakness signals from the shared engine (Contract 2 producer).
-  const weakness = computeWeaknessSignals({ logs, cards, topics, subjects });
+  // Weakness signals from the shared engine (Contract 2 producer), fed with
+  // BOTH review history and real-exam evidence.
+  const weakness = computeWeaknessSignals({ logs, cards, topics, subjects, examItems });
   return { cards, tasks, weakness, exams, sessions };
 }
 
 // ─── Study OS: Topic hub data (Connector) ────────────────────────
-/** Per-topic live counts + weakness for the subject/topic hub panels. */
+// Per-topic live counts + weakness for the subject/topic hub panels. The
+// counts come from the shared relationship layer (lib/relations.ts) instead
+// of a second hand-rolled pass over the same tables, so the hub and any other
+// consumer of a topic's shape can never disagree.
 export async function getTopicHubData(topicIds: string[]) {
   if (topicIds.length === 0) return [];
-  const [cards, logs, topics, subjects, sessions, tasks] = await Promise.all([
+  const [cards, notes, bundles, logs, topics, subjects, sessions, tasks, examItems] =
+    await Promise.all([
+      db.flashcards.toArray(),
+      db.notes.toArray(),
+      db.bundles.toArray(),
+      db.reviewLogs.toArray(),
+      db.topics.toArray(),
+      db.subjects.toArray(),
+      db.studySessions.toArray(),
+      getTasks(),
+      collectExamWeaknessEvidence(),
+    ]);
+  const weakness = computeWeaknessSignals({ logs, cards, topics, subjects, examItems });
+  const nowMs = Date.now();
+  const nodes = getTopicGraph({
+    topics,
+    subjects,
+    cards,
+    notes,
+    bundles,
+    sessions,
+    tasks,
+    nowMs,
+  });
+  const subjectById = new Map(subjects.map((s) => [s.id, s]));
+  const nodeById = new Map(nodes.map((n) => [n.topic.id, n]));
+  return topicIds.flatMap((topicId) => {
+    const node = nodeById.get(topicId);
+    if (!node) return [];
+    return [{
+      topicId,
+      subjectName: subjectById.get(node.topic.subjectId)?.name ?? null,
+      sessions: node.counts.sessions,
+      tasks: node.counts.openTasks,
+      due: node.counts.dueCards,
+      // Additive: the rest of the topic's graph, for panels that want it.
+      cards: node.counts.cards,
+      notes: node.counts.notes,
+      bundles: node.counts.bundles,
+      minutes: node.cardsTotalMinutes,
+      weakness: weakness.find((w) => w.topicId === topicId) ?? null,
+    }];
+  });
+}
+
+// ─── Study OS: relationship traversal (Connector) ────────────────
+// Thin assembly for lib/relations.ts — the traversal itself is pure and lives
+// there; these actions only gather the tables it needs.
+
+/** Everything one card is connected to: topic, subject, bundle, history, exams. */
+export async function getCardTrace(cardId: string) {
+  const [cards, topics, subjects, bundles, reviewLogs, exams, examQuestions] = await Promise.all([
     db.flashcards.toArray(),
-    db.reviewLogs.toArray(),
     db.topics.toArray(),
     db.subjects.toArray(),
-    db.studySessions.toArray(),
-    getTasks(),
+    db.bundles.toArray(),
+    db.reviewLogs.toArray(),
+    db.exams.toArray(),
+    db.examQuestions.toArray(),
   ]);
-  const weakness = computeWeaknessSignals({ logs, cards, topics, subjects });
-  const dueNow = Date.now();
-  return topicIds.map((topicId) => {
-    const topic = topics.find((t) => t.id === topicId);
-    return {
-      topicId,
-      subjectName: topic ? subjects.find((s) => s.id === topic.subjectId)?.name ?? null : null,
-      sessions: sessions.filter((s) => s.topicId === topicId).length,
-      tasks: tasks.filter((t) => t.topicId === topicId && t.status !== "done").length,
-      due: cards.filter((c) => c.topicId === topicId && isDueCard(c, dueNow)).length,
-      weakness: weakness.find((w) => w.topicId === topicId) ?? null,
-    };
+  return getCardTraceability(cardId, {
+    cards,
+    topics,
+    subjects,
+    bundles,
+    reviewLogs,
+    exams,
+    examQuestions,
+    nowMs: Date.now(),
   });
+}
+
+/** A graded exam as a per-topic breakdown plus the cards it proved you missed. */
+export async function getExamTrace(examId: string) {
+  const [exams, questions, topics, subjects] = await Promise.all([
+    db.exams.toArray(),
+    db.examQuestions.where("examId").equals(examId).sortBy("order"),
+    db.topics.toArray(),
+    db.subjects.toArray(),
+  ]);
+  const exam = exams.find((e) => e.id === examId);
+  if (!exam) return null;
+  const topicById = new Map(topics.map((t) => [t.id, t]));
+  const subjectById = new Map(subjects.map((s) => [s.id, s]));
+  const labelFor = (topicId: string | null) => {
+    if (!topicId) return "General";
+    const topic = topicById.get(topicId);
+    if (!topic) return "General";
+    const subject = subjectById.get(topic.subjectId);
+    return subject ? `${subject.name} › ${topic.name}` : topic.name;
+  };
+  return getExamTraceability(exam, questions, labelFor);
 }
