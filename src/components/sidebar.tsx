@@ -16,7 +16,6 @@ import {
   ChevronRight,
   Sun,
   Moon,
-  Sparkles,
   Headphones,
   FileQuestion,
   CalendarRange,
@@ -89,12 +88,15 @@ export function Sidebar() {
       {/* Wordmark + collapse */}
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         {sidebarOpen && (
-          <Link href="/" aria-label={t("ui.openstudy_home")} className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
-              <Sparkles size={15} aria-hidden />
-            </span>
-            <span className="text-base font-bold tracking-tight text-fg">
-              Open<span className="text-primary">Study</span>
+          <Link href="/" aria-label={t("ui.openstudy_home")} className="flex items-center gap-2.5">
+            <img src="/brand/ruvren-mark.png" alt="" className="h-7 w-7 object-contain" />
+            <span className="leading-none">
+              <span className="block text-[15px] font-bold tracking-[0.18em] text-fg">
+                RUV<span className="text-primary">REN</span>
+              </span>
+              <span className="mt-0.5 block text-[8px] font-semibold uppercase tracking-[0.22em] text-muted-fg">
+                Your Knowledge OS
+              </span>
             </span>
           </Link>
         )}
@@ -192,7 +194,7 @@ export function Sidebar() {
               </button>
             </div>
             <p className="mt-3 px-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-fg/50">
-              v2.0 · OpenStudy
+              v2.0 · Ruvren
             </p>
           </>
         ) : (

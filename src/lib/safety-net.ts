@@ -401,7 +401,7 @@ export async function migrateLegacyLocalBackup(): Promise<boolean> {
 /** Suggests a filename for a downloaded copy. */
 export function snapshotFilename(rec: { id: SnapshotId; createdAt: number }): string {
   const stamp = new Date(rec.createdAt).toISOString().slice(0, 19).replace(/[:T]/g, "-");
-  return `openstudy-${rec.id === "pre-reset" ? "recovered" : "backup"}-${stamp}.json`;
+  return `ruvren-${rec.id === "pre-reset" ? "recovered" : "backup"}-${stamp}.json`;
 }
 
 export const SAFETY_DB = { name: SAFETY_DB_NAME, legacyLocalKey: LEGACY_LOCAL_KEY };

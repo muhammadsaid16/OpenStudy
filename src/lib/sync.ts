@@ -485,7 +485,7 @@ export function decodeBundle(json: string): DecodeResult {
   }
   const p = parsed as Partial<SyncPayload> & { format?: string };
   if (!p || p.format !== "openstudy-sync") {
-    return { ok: false, error: "Not an OpenStudy sync bundle" };
+    return { ok: false, error: "Not a Ruvren sync bundle" };
   }
   if (typeof p.deviceId !== "string" || typeof p.rows !== "object" || p.rows === null) {
     return { ok: false, error: "Bundle is missing its device or payload" };

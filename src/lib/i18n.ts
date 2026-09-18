@@ -326,7 +326,7 @@ const DICT: Dict = {
   "settings.exportDataHint": { en: "Download a full backup of subjects, notes, cards, and sessions.", ar: "نزّل نسخة احتياطية كاملة من المواد والملاحظات والبطاقات والجلسات." },
   "settings.exporting": { en: "Exporting…", ar: "جارٍ التصدير…" },
   "settings.importBackup": { en: "Import backup", ar: "استيراد نسخة احتياطية" },
-  "settings.importBackupHint": { en: "Restore from an OpenStudy backup file. Existing data may be replaced.", ar: "استعد من ملف نسخة احتياطية. البيانات الحالية قد تُستبدل." },
+  "settings.importBackupHint": { en: "Restore from a Ruvren backup file. Existing data may be replaced.", ar: "استعد من ملف نسخة احتياطية من Ruvren. البيانات الحالية قد تُستبدل." },
   "settings.importConfirm": { en: "Import backup?", ar: "استيراد النسخة الاحتياطية؟" },
   "settings.importConfirmHint": { en: "Existing data may be replaced.", ar: "البيانات الحالية قد تُستبدل." },
   // ─── Devices (sync foundation §19) ───────────────────────
@@ -447,7 +447,7 @@ const DICT: Dict = {
   // ─── loader ─────────────────────────────────────────────
   "loader.cards": { en: "Cards", ar: "البطاقات" },
   "loader.dashboard": { en: "Dashboard", ar: "لوحة التحكم" },
-  "loader.generic": { en: "OpenStudy", ar: "OpenStudy" },
+  "loader.generic": { en: "Ruvren", ar: "Ruvren" },
   "loader.page": { en: "Page", ar: "صفحة" },
 
   // ─── err ─────────────────────────────────────────────
@@ -1009,9 +1009,9 @@ const DICT: Dict = {
   "ui.not_enough_review_data_yet": { en: "NOT ENOUGH REVIEW DATA YET", ar: "NOT ENOUGH REVIEW DATA YET" },
   "ui.notebooklm": { en: "NotebookLM", ar: "NotebookLM" },
   "ui.open_notebooklm": { en: "Open NotebookLM", ar: "Open NotebookLM" },
-  "ui.openstudy": { en: "OPENSTUDY", ar: "OPENSTUDY" },
-  "ui.openstudy_hit_a_snag": { en: "OpenStudy hit a snag", ar: "OpenStudy hit a snag" },
-  "ui.openstudy_home": { en: "OpenStudy home", ar: "OpenStudy home" },
+  "ui.openstudy": { en: "RUVREN", ar: "RUVREN" },
+  "ui.openstudy_hit_a_snag": { en: "Ruvren hit a snag", ar: "واجه Ruvren مشكلة" },
+  "ui.openstudy_home": { en: "Ruvren home", ar: "الرئيسية في Ruvren" },
   "ui.optional_hint": { en: "Optional hint", ar: "Optional hint" },
   "ui.paste_notebooklm_answer_here": { en: "Paste NotebookLM answer here", ar: "Paste NotebookLM answer here" },
   "ui.paste_notebooklm_json_output": { en: "Paste NotebookLM JSON output", ar: "Paste NotebookLM JSON output" },

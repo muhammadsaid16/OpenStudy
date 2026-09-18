@@ -27,7 +27,7 @@ test("study-os routes render: /exam and /plan", async ({ page }) => {
   for (const route of ["/exam", "/plan"]) {
     await page.goto(route);
     await expect
-      .poll(async () => (await page.locator("body").innerText()).includes("Loading OpenStudy"), {
+      .poll(async () => (await page.locator("body").innerText()).includes("Loading Ruvren"), {
         timeout: 20_000,
       })
       .toBe(false);
@@ -125,7 +125,7 @@ test("exam run feeds wrong answers into the real review schedule", async ({ page
 test("dashboard Next Action renders the Conductor wiring", async ({ page }) => {
   await page.goto("/");
   await expect
-    .poll(async () => (await page.locator("body").innerText()).includes("Loading OpenStudy"), { timeout: 20_000 })
+    .poll(async () => (await page.locator("body").innerText()).includes("Loading Ruvren"), { timeout: 20_000 })
     .toBe(false);
   // With no due cards/weakness, the engine falls through to the planned-session action.
   await expect(page.getByText(/start a focus session/i).first()).toBeVisible({ timeout: 15_000 });

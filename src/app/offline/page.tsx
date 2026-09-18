@@ -12,6 +12,7 @@ export default function OfflinePage() {
   const t = useT();
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center p-8 text-center">
+      <img src="/brand/ruvren-mark.png" alt="" aria-hidden className="mb-6 h-14 w-14 object-contain" />
       <div className="mb-6 rounded-2xl border border-border bg-bg px-6 py-3">
         <span className="text-4xl lg:text-6xl font-black tracking-tighter text-fg">
           {t("offline.badge")}

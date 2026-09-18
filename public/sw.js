@@ -1,10 +1,10 @@
-/* StudyMax service worker — local-first PWA
+/* Ruvren service worker — local-first PWA
    Strategy:
    - navigation/RSC requests: network-first, fall back to cache, then /offline
    - /_next/static + icons: cache-first (immutable content)
    - never intercept non-GET
 */
-const VERSION = "studymax-v2";
+const VERSION = "ruvren-v1";
 const STATIC_CACHE = VERSION + "-static";
 const PAGE_CACHE = VERSION + "-pages";
 const OFFLINE_URL = "/offline";
@@ -15,6 +15,7 @@ const PRECACHE = [
   "/icon-512.png",
   "/maskable-192.png",
   "/maskable-512.png",
+  "/brand/ruvren-mark.png",
 ];
 
 self.addEventListener("install", (event) => {

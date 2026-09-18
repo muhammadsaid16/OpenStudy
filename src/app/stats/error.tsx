@@ -26,6 +26,7 @@ export default function RouteError({
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 p-10 text-center">
+      <img src="/brand/ruvren-mark.png" alt="" aria-hidden className="h-12 w-12 object-contain" />
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-danger/10 text-danger">
         <AlertTriangle size={32} aria-hidden />
       </div>

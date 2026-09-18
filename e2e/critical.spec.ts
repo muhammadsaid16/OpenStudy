@@ -32,7 +32,7 @@ test("hard-load: every primary route renders past the loader", async ({ page }) 
     await page.goto(route);
     // Loader text must disappear (hydration completed + first data arrived)
     await expect
-      .poll(async () => (await page.locator("body").innerText()).includes("Loading OpenStudy"),
+      .poll(async () => (await page.locator("body").innerText()).includes("Loading Ruvren"),
         { timeout: 20_000 })
       .toBe(false);
     await expect(page.locator("body")).not.toContainText("Something broke");
@@ -41,7 +41,7 @@ test("hard-load: every primary route renders past the loader", async ({ page }) 
 
 test("realtime: creating a subject on /subjects updates the dashboard without reload", async ({ page }) => {
   await page.goto("/subjects");
-  await expect(page.locator("body")).not.toContainText("Loading OpenStudy", { timeout: 20_000 });
+  await expect(page.locator("body")).not.toContainText("Loading Ruvren", { timeout: 20_000 });
 
   // Open the New Subject modal (populated header button or empty-state CTA)
   await page.getByRole("button", { name: /new subject|create subject/i }).first().click();
@@ -53,12 +53,12 @@ test("realtime: creating a subject on /subjects updates the dashboard without re
   // SPA-nav to dashboard — subject shortcut should appear without reload
   await page.getByRole("link", { name: "Dashboard" }).first().click();
   await expect(page.getByText("E2E Realtime Subject").first()).toBeVisible({ timeout: 10_000 });
-  await expect(page.locator("body")).not.toContainText("Loading OpenStudy");
+  await expect(page.locator("body")).not.toContainText("Loading Ruvren");
 });
 
 test("deck: create → card count → edit rename → delete with undo", async ({ page }) => {
   await page.goto("/subjects");
-  await expect(page.locator("body")).not.toContainText("Loading OpenStudy", { timeout: 20_000 });
+  await expect(page.locator("body")).not.toContainText("Loading Ruvren", { timeout: 20_000 });
   await page.getByRole("tab", { name: /decks/i }).click();
 
   // Scoped to the deck card in the grid — the 5s undo toast also echoes the
@@ -89,7 +89,7 @@ test("deck: create → card count → edit rename → delete with undo", async (
 
 test("share: empty deck cannot produce a link; seeded deck link round-trips", async ({ page }) => {
   await page.goto("/subjects");
-  await expect(page.locator("body")).not.toContainText("Loading OpenStudy", { timeout: 20_000 });
+  await expect(page.locator("body")).not.toContainText("Loading Ruvren", { timeout: 20_000 });
   await page.getByRole("tab", { name: /decks/i }).click();
 
   // Empty deck → share warns, no success toast
@@ -131,7 +131,7 @@ test("practice mode: rating a not-yet-due card does not advance its schedule", a
   // Load the app first so Dexie has created the v6 schema, seed, then reload
   // so the mount-fetch runs with the seeded data in place.
   await page.goto("/subjects");
-  await expect(page.locator("body")).not.toContainText("Loading OpenStudy", { timeout: 20_000 });
+  await expect(page.locator("body")).not.toContainText("Loading Ruvren", { timeout: 20_000 });
   await page.evaluate(async () => {
     const now = new Date();
     const far = new Date(now.getTime() + 30 * 86_400_000);
@@ -188,7 +188,7 @@ test("practice mode: rating a not-yet-due card does not advance its schedule", a
 
   // Reload: seeded data exists before this run's mount-fetch
   await page.reload();
-  await expect(page.locator("body")).not.toContainText("Loading OpenStudy", { timeout: 20_000 });
+  await expect(page.locator("body")).not.toContainText("Loading Ruvren", { timeout: 20_000 });
   await page.getByRole("tab", { name: /decks/i }).click();
   // live hook refetches on tab-visible; if the seeded deck isn't there in 10s, fail with count
   const found = await page.evaluate(async () => {

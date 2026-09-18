@@ -24,7 +24,7 @@ export interface ThemeDef {
 }
 
 export const THEMES: ThemeDef[] = [
-  { id: "aurora", name: "Aurora", bg: "#111316", accent: "#c0c1ff", fg: "#e2e2e6" },
+  { id: "aurora", name: "Aurora", bg: "#0B1220", accent: "#7cbcff", fg: "#F8FAFC" },
   { id: "midnight", name: "Midnight", bg: "#111316", accent: "#adc6ff", fg: "#e2e2e6" },
   { id: "nebula", name: "Nebula", bg: "#111316", accent: "#d4bfff", fg: "#e2e2e6" },
   { id: "matrix", name: "Matrix", bg: "#111316", accent: "#6EE7B7", fg: "#e2e2e6" },
@@ -34,7 +34,7 @@ export const THEMES: ThemeDef[] = [
   { id: "arctic", name: "Arctic", bg: "#111316", accent: "#7dd3fc", fg: "#e2e2e6" },
   { id: "sandstone", name: "Sandstone", bg: "#111316", accent: "#E8B45C", fg: "#e2e2e6" },
   { id: "mono", name: "Mono", bg: "#09090B", accent: "#FFFFFF", fg: "#FAFAFA" },
-  { id: "light", name: "Light", nameKey: "nav.light", bg: "#F6F7F9", accent: "#4f46e5", fg: "#0F172A" },
+  { id: "light", name: "Light", nameKey: "nav.light", bg: "#F6F7F9", accent: "#0b6ed6", fg: "#0F172A" },
   { id: "paper", name: "Paper", bg: "#FAF7F2", accent: "#9A3412", fg: "#292018" },
 ];
 

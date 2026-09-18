@@ -13,7 +13,6 @@ import {
   BarChart3,
   Clock,
   Settings,
-  Sparkles,
   CalendarRange,
   FileQuestion,
 } from "lucide-react";
@@ -73,12 +72,10 @@ export function BottomNav() {
       })}
       <Link
         href="/settings"
-        aria-label="OpenStudy"
+        aria-label="Ruvren"
         className="flex w-12 items-center justify-center text-muted-fg"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
-          <Sparkles size={14} aria-hidden />
-        </span>
+        <img src="/brand/ruvren-mark.png" alt="" className="h-7 w-7 object-contain" />
       </Link>
     </nav>
   );

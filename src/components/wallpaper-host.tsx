@@ -5,6 +5,7 @@ import { useAppStore } from "@/lib/store";
 import { db } from "@/lib/db";
 
 export const LIVE_WALLPAPERS = [
+  { id: "knowledge-flow", name: "Knowledge Flow", desc: "Ruvren connection lines — structure and flow" },
   { id: "aurora", name: "Aurora Waves", desc: "Flowing ambient gradient waves" },
   { id: "starfield", name: "Cosmic Starfield", desc: "Drifting particle stars in deep space" },
   { id: "matrix", name: "Matrix Code", desc: "Cyber digital rain stream" },
@@ -258,6 +259,41 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
       height = canvas.height = window.innerHeight;
     };
     window.addEventListener("resize", handleResize);
+    const handleFlowResize = () => buildFlow();
+    window.addEventListener("resize", handleFlowResize);
+
+    // Preset 0: Knowledge Flow — the brand's connection pattern. Nodes linked
+    // by right-angle circuit lines (Connection / Structure / Knowledge Flow);
+    // a slow pulse travels the edges, dots breathe on their joints. This is
+    // the Ruvren identity pattern from the brand sheet.
+    interface FlowNode { x: number; y: number; r: number; phase: number; }
+    interface FlowEdge { a: FlowNode; b: FlowNode; mid: number; speed: number; offset: number; }
+    const nodeCount = reducedMotion ? 8 : 14;
+    let flowNodes: FlowNode[] = [];
+    let flowEdges: FlowEdge[] = [];
+    const buildFlow = () => {
+      flowNodes = Array.from({ length: nodeCount }, (_, i) => ({
+        x: (0.08 + 0.84 * ((i * 0.618 + 0.13) % 1)) * width,
+        y: (0.1 + 0.8 * (((i * 0.377) + Math.floor(i / 3) * 0.31) % 1)) * height,
+        r: 2.5 + (i % 3),
+        phase: Math.random() * Math.PI * 2,
+      }));
+      flowEdges = [];
+      for (let i = 0; i < flowNodes.length; i++) {
+        // Each node links to its 2 nearest neighbours — the circuit look.
+        const others = flowNodes
+          .filter((_, j) => j !== i)
+          .map((n) => ({ n, d: Math.hypot(n.x - flowNodes[i].x, n.y - flowNodes[i].y) }))
+          .sort((p, q) => p.d - q.d)
+          .slice(0, 2);
+        for (const { n } of others) {
+          if (!flowEdges.some((e) => (e.a === n && e.b === flowNodes[i]))) {
+            flowEdges.push({ a: flowNodes[i], b: n, mid: Math.random(), speed: 0.0015 + Math.random() * 0.002, offset: Math.random() });
+          }
+        }
+      }
+    };
+    buildFlow();
 
     // Preset 1: Aurora Waves
     const waves = [
@@ -280,7 +316,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
     const fontSize = 14;
     const columns = Math.floor(width / fontSize);
     const drops = Array.from({ length: columns }, () => Math.floor(Math.random() * -50));
-    const chars = "01010101XYZOPENSTUDYAMK789";
+    const chars = "01010101XYZRUVRENAMK789";
 
     // Preset 4: Glowing Bokeh Orbs
     const numOrbs = reducedMotion ? 8 : 18;
@@ -299,7 +335,52 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
       step++;
       ctx.clearRect(0, 0, width, height);
 
-      if (preset === "starfield") {
+      if (preset === "knowledge-flow") {
+        ctx.fillStyle = "#0B1220";
+        ctx.fillRect(0, 0, width, height);
+
+        // Right-angle circuit traces between linked nodes.
+        ctx.lineWidth = 1;
+        for (const e of flowEdges) {
+          const bendX = e.a.x + (e.b.x - e.a.x) * e.mid;
+          ctx.strokeStyle = "rgba(10, 132, 255, 0.22)";
+          ctx.beginPath();
+          ctx.moveTo(e.a.x, e.a.y);
+          ctx.lineTo(bendX, e.a.y);
+          ctx.lineTo(bendX, e.b.y);
+          ctx.lineTo(e.b.x, e.b.y);
+          ctx.stroke();
+
+          // A slow pulse travelling along the trace (skipped for reduced motion):
+          // parametrized over the horizontal-then-vertical path through the bend.
+          if (!reducedMotion) {
+            const t = (step * e.speed + e.offset) % 1;
+            const total = Math.abs(bendX - e.a.x) + Math.abs(e.b.y - e.a.y) || 1;
+            const dist = t * total;
+            const hx = Math.abs(bendX - e.a.x);
+            const pulse = dist <= hx
+              ? { x: e.a.x + Math.sign(bendX - e.a.x) * dist, y: e.a.y }
+              : { x: bendX, y: e.a.y + Math.sign(e.b.y - e.a.y) * (dist - hx) };
+            ctx.fillStyle = "rgba(124, 188, 255, 0.9)";
+            ctx.beginPath();
+            ctx.arc(pulse.x, pulse.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Nodes breathe on their joints.
+        for (const n of flowNodes) {
+          const breathe = reducedMotion ? 1 : 1 + 0.25 * Math.sin(step * 0.01 + n.phase);
+          ctx.fillStyle = "rgba(10, 132, 255, 0.85)";
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r * breathe, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "rgba(248, 250, 252, 0.35)";
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r * breathe * 0.45, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (preset === "starfield") {
         ctx.fillStyle = "#0c0e11";
         ctx.fillRect(0, 0, width, height);
 
@@ -390,6 +471,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleFlowResize);
     };
   }, [preset, reducedMotion]);
 

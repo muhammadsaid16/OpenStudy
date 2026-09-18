@@ -209,7 +209,7 @@ export function SyncPanel() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `openstudy-emergency-backup-${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `ruvren-emergency-backup-${new Date().toISOString().split("T")[0]}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();

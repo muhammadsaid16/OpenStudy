@@ -99,10 +99,10 @@ describe("snapshot storage", () => {
 
   it("names a downloaded copy by slot and time", () => {
     expect(snapshotFilename({ id: "pre-reset", createdAt: Date.UTC(2026, 0, 2, 3, 4, 5) })).toBe(
-      "openstudy-recovered-2026-01-02-03-04-05.json"
+      "ruvren-recovered-2026-01-02-03-04-05.json"
     );
     expect(snapshotFilename({ id: "latest", createdAt: 0 })).toBe(
-      "openstudy-backup-1970-01-01-00-00-00.json"
+      "ruvren-backup-1970-01-01-00-00-00.json"
     );
   });
 });

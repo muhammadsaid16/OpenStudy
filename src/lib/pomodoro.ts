@@ -230,13 +230,13 @@ function emit() {
 function setDocumentTitle(d: ReturnType<typeof deriveState> | null): void {
   if (typeof document === "undefined") return;
   if (!active || active.paused || !d) {
-    document.title = "OpenStudy — Learn Smarter";
+    document.title = "Ruvren — Learn Smarter";
     return;
   }
   const m = Math.floor(d.seconds / 60).toString().padStart(2, "0");
   const sec = (d.seconds % 60).toString().padStart(2, "0");
   const label = d.phase === "work" ? "FOCUS" : d.phase === "break" ? "BREAK" : "LONG BREAK";
-  document.title = `${m}:${sec} ${label} · OpenStudy`;
+  document.title = `${m}:${sec} ${label} · Ruvren`;
 }
 
 function onPhaseBoundary(newPhase: PomoPhase): void {
@@ -252,7 +252,7 @@ function onPhaseBoundary(newPhase: PomoPhase): void {
           : active?.config
             ? `Time for a ${active.config.breakMin}-min ${newPhase === "long" ? "long " : ""}break.`
             : "Take a short break.";
-      new Notification(`OpenStudy — ${title}`, { body });
+      new Notification(`Ruvren — ${title}`, { body });
     } catch { /* notifications unavailable */ }
   }
   if (typeof window !== "undefined") {

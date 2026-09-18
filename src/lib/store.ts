@@ -178,8 +178,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     persistAll({ ...get(), theme: t });
   },
 
-  wallpaperType: "none",
-  wallpaperId: "aurora",
+  // Brand default: the Knowledge Flow pattern (new users; a saved preference
+  // always wins, so nobody's existing setup changes).
+  wallpaperType: "live",
+  wallpaperId: "knowledge-flow",
   wallpaperOpacity: 0.7,
   wallpaperBlur: 0,
   wallpaperRotation: 0,

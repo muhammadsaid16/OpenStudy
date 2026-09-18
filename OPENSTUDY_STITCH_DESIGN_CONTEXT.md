@@ -1,4 +1,6 @@
-# OpenStudy — Stitch Design Context
+# Ruvren — Stitch Design Context
+
+> **Branding note:** the product is now named **Ruvren** (formerly OpenStudy/StudyMax). This document keeps its original code-grounded references; user-visible naming has changed, while internal identifiers (Dexie db `studymax`, `openstudy.*` localStorage keys, `openstudy-sync` format tag, `.studymax-bundle.json` share extension) are intentionally unchanged for data compatibility. Brand accent since the rename: logo blue `#1682f6` (primary `#a3d0fa` on dark, `#0b6ed6` on light).
 
 ### A reverse-engineered X-ray of the existing product, written for AI design tools (Google Stitch), senior designers, frontend engineers, and coding agents
 

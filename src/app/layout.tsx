@@ -42,7 +42,7 @@ root.style.setProperty('--ui-alpha',String(alpha));
 }catch(e){document.documentElement.setAttribute('data-theme',${JSON.stringify(DEFAULT_THEME)});}})();`;
 
 export const metadata: Metadata = {
-  title: "OpenStudy — Learn Smarter",
+  title: "Ruvren — Learn Smarter",
   description: "Full-stack study management with spaced repetition, notes, and progress tracking.",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#111316",
+  themeColor: "#0B1220",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

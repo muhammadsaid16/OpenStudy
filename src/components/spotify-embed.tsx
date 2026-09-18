@@ -495,7 +495,7 @@ export function SpotifyEmbedPicker({ className }: { className?: string }) {
             {!searched && !loading && query.trim().length < 2 && (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-bg/50 px-4 py-8 text-center">
                 <Music2 size={20} className="text-muted-fg" />
-                <p className="text-sm font-semibold text-fg">Search without leaving OpenStudy</p>
+                <p className="text-sm font-semibold text-fg">Search without leaving Ruvren</p>
                 <p className="max-w-xs text-xs text-muted-fg">Type anything — tap to play, or open a collection to pick a specific sound. No Premium or login needed.</p>
               </div>
             )}

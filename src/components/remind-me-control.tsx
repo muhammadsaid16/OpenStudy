@@ -49,7 +49,7 @@ export function RemindMeControl({ dueCount }: { dueCount: number }) {
       const startedAt = Date.now();
       setNow(startedAt); // seed the countdown before the first tick
       const when = new Date(startedAt + minutes * 60 * 1000);
-      schedule(when, t("ui.time_to_review"), `${dueCount} card${dueCount === 1 ? "" : "s"} due in OpenStudy.`);
+      schedule(when, t("ui.time_to_review"), `${dueCount} card${dueCount === 1 ? "" : "s"} due in Ruvren.`);
       setRemindAt(when);
       setOpen(false);
     },

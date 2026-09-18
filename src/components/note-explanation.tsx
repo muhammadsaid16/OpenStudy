@@ -284,7 +284,7 @@ export function NoteExplanation({
         .meta{font-size:11px; color:#6b7280; margin-bottom:16px; border-bottom:1px solid #f3f4f6; padding-bottom:12px;}
         @media print{body{margin:24px;}}
       </style></head><body>
-      <div class="meta">${esc(title)} — Explanation · ${new Date().toLocaleDateString()} · OpenStudy</div>
+      <div class="meta">${esc(title)} — Explanation · ${new Date().toLocaleDateString()} · Ruvren</div>
       ${html}
     </body></html>`);
     win.document.close();

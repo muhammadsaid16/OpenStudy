@@ -25,7 +25,7 @@ const ERR = {
     reloadKey: "ui.reload_app",
   },
   ar: {
-    title: "واجه OpenStudy مشكلة",
+    title: "واجه Ruvren مشكلة",
     body: "حدث خطأ على مستوى هيكل التطبيق. بياناتك المحلية آمنة.",
     reload: "إعادة تحميل التطبيق",
   },
@@ -46,7 +46,7 @@ export default function GlobalError({
       <body
         style={{
           margin: 0,
-          background: "#111316",
+          background: "#0B1220",
           color: "#e2e2e6",
           fontFamily: "system-ui, sans-serif",
           display: "flex",
@@ -71,8 +71,8 @@ export default function GlobalError({
               padding: "10px 24px",
               borderRadius: 999,
               border: "none",
-              background: "#8083ff",
-              color: "#0d0096",
+              background: "#0A84FF",
+              color: "#ffffff",
               fontWeight: 700,
               fontSize: 14,
               cursor: "pointer",

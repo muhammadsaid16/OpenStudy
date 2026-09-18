@@ -25,6 +25,12 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/offline").catch(() => {});
   await page.evaluate(async () => {
     localStorage.clear();
+    // This spec drives Playwright's FAKE CLOCK (page.clock.runFor), which
+    // also fires requestAnimationFrame. The brand-default "Knowledge Flow"
+    // live wallpaper runs a rAF loop, so minutes of virtual time would force
+    // tens of thousands of canvas redraws and starve the exam countdown.
+    // Tests get a static background; real users keep their wallpaper choice.
+    localStorage.setItem("study-prefs", JSON.stringify({ wallpaperType: "none" }));
     const dbs = (await indexedDB.databases?.()) ?? [];
     for (const db of dbs) {
       if (db.name) indexedDB.deleteDatabase(db.name);
@@ -38,7 +44,7 @@ test.beforeEach(async ({ page }) => {
 
 async function waitReady(page: Page) {
   await expect
-    .poll(async () => (await page.locator("body").innerText()).includes("Loading OpenStudy"), {
+    .poll(async () => (await page.locator("body").innerText()).includes("Loading Ruvren"), {
       timeout: 20_000,
     })
     .toBe(false);
