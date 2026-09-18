@@ -67,3 +67,30 @@ export function tiltHandlers(max = 6) {
     },
   };
 }
+
+/**
+ * Combined 3D tilt + spotlight handler for unified interactive cards.
+ */
+export function cardHoverHandlers(maxTilt = 5) {
+  return {
+    onMouseMove: (e: React.MouseEvent<HTMLElement>) => {
+      const el = e.currentTarget as HTMLElement;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--sx", `${e.clientX - r.left}px`);
+      el.style.setProperty("--sy", `${e.clientY - r.top}px`);
+      
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        el.style.transition = "transform 80ms linear";
+        el.style.transform = `perspective(800px) rotateX(${-py * maxTilt}deg) rotateY(${px * maxTilt}deg) translateZ(4px)`;
+      }
+    },
+    onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
+      const el = e.currentTarget as HTMLElement;
+      el.style.transition = "transform 350ms cubic-bezier(0.22, 1, 0.36, 1)";
+      el.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg)";
+    },
+  };
+}
+

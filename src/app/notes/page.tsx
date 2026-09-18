@@ -16,7 +16,7 @@ import { formatRelative } from "@/lib/utils";
 import { NoteAiImportButton } from "@/components/note-ai-import-button";
 import { showUndo } from "@/components/undo-toast";
 import { showToast } from "@/components/toast";
-import { spotlightProps } from "@/lib/interactions";
+import { cardHoverHandlers } from "@/lib/interactions";
 import type { BundleRec } from "@/lib/db";
 import { useLiveData } from "@/lib/use-live-data";
 
@@ -426,8 +426,8 @@ function NotesContent() {
             <div
               key={note.id}
               onClick={() => router.push("/notes/" + note.id)}
-              {...spotlightProps()}
-              className="spotlight-card group relative flex h-[320px] w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-1 cursor-pointer"
+              {...cardHoverHandlers(5)}
+              className="spotlight-card group relative flex h-[320px] w-full flex-col justify-between overflow-hidden rounded-2xl glass p-6 text-start transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 cursor-pointer will-change-transform"
               style={{ backgroundImage: `radial-gradient(140% 120% at 0% 0%, color-mix(in srgb, ${accent} 8%, transparent), transparent 55%)` }}
             >
               {/* Header: icon + actions */}
