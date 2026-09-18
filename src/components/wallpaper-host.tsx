@@ -99,6 +99,7 @@ export function WallpaperHost() {
   const wallpaperBlur = useAppStore((s) => s.wallpaperBlur);
   const wallpaperRotation = useAppStore((s) => s.wallpaperRotation);
   const reducedMotion = useAppStore((s) => s.reducedMotion);
+  const theme = useAppStore((s) => s.theme);
 
   if (wallpaperType === "none") return null;
 
@@ -112,7 +113,10 @@ export function WallpaperHost() {
       }}
     >
       {wallpaperType === "live" && (
-        <LiveCanvas preset={wallpaperId} reducedMotion={reducedMotion} />
+        <>
+          <LiveCanvas preset={wallpaperId} reducedMotion={reducedMotion} theme={theme} />
+          <ThemeScrim />
+        </>
       )}
       {wallpaperType === "static" && (
         <StaticWallpaper preset={wallpaperId} rotation={wallpaperRotation} animate={!reducedMotion} />
@@ -271,7 +275,7 @@ function UploadedWallpaper({ id, rotation, animate }: { id: string; rotation: nu
   );
 }
 
-function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: boolean }) {
+function LiveCanvas({ preset, reducedMotion, theme }: { preset: string; reducedMotion: boolean; theme?: string }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -302,10 +306,22 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
     const handleFlowResize = () => buildFlow();
     window.addEventListener("resize", handleFlowResize);
 
-    // Preset 0: Knowledge Flow — the brand's connection pattern. Nodes linked
-    // by right-angle circuit lines (Connection / Structure / Knowledge Flow);
-    // a slow pulse travels the edges, dots breathe on their joints. This is
-    // the Ruvren identity pattern from the brand sheet.
+    const getCanvasTheme = () => {
+      if (typeof window === "undefined") {
+        return { bg: "#0B1220", primary: "#0A84FF", fg: "#F8FAFC", isLight: false, isPaper: false };
+      }
+      const activeTheme = document.documentElement.getAttribute("data-theme") || "aurora";
+      const isLight = activeTheme === "light" || activeTheme === "paper";
+      const isPaper = activeTheme === "paper";
+      
+      const bg = isLight ? (isPaper ? "#FAF7F2" : "#F8FAFC") : "#0B1220";
+      const primary = isLight ? (isPaper ? "#9A3412" : "#0b6ed6") : "#0A84FF";
+      const fg = isLight ? (isPaper ? "#292018" : "#0F172A") : "#F8FAFC";
+
+      return { bg, primary, fg, isLight, isPaper };
+    };
+
+    // Preset 0: Knowledge Flow — the brand's connection pattern.
     interface FlowNode { x: number; y: number; r: number; phase: number; }
     interface FlowEdge { a: FlowNode; b: FlowNode; mid: number; speed: number; offset: number; }
     const nodeCount = reducedMotion ? 8 : 14;
@@ -320,7 +336,6 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
       }));
       flowEdges = [];
       for (let i = 0; i < flowNodes.length; i++) {
-        // Each node links to its 2 nearest neighbours — the circuit look.
         const others = flowNodes
           .filter((_, j) => j !== i)
           .map((n) => ({ n, d: Math.hypot(n.x - flowNodes[i].x, n.y - flowNodes[i].y) }))
@@ -374,16 +389,16 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
     const render = () => {
       step++;
       ctx.clearRect(0, 0, width, height);
+      const themeColors = getCanvasTheme();
 
       if (preset === "knowledge-flow") {
-        ctx.fillStyle = "#0B1220";
+        ctx.fillStyle = themeColors.bg;
         ctx.fillRect(0, 0, width, height);
 
         // Right-angle circuit traces between linked nodes.
         for (const e of flowEdges) {
           const bendX = e.a.x + (e.b.x - e.a.x) * e.mid;
-          // Outer subtle glow trace
-          ctx.strokeStyle = "rgba(10, 132, 255, 0.08)";
+          ctx.strokeStyle = themeColors.isLight ? "rgba(11, 110, 214, 0.08)" : "rgba(10, 132, 255, 0.08)";
           ctx.lineWidth = 3.5;
           ctx.beginPath();
           ctx.moveTo(e.a.x, e.a.y);
@@ -392,8 +407,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
           ctx.lineTo(e.b.x, e.b.y);
           ctx.stroke();
 
-          // Inner crisp trace
-          ctx.strokeStyle = "rgba(10, 132, 255, 0.25)";
+          ctx.strokeStyle = themeColors.isLight ? "rgba(11, 110, 214, 0.35)" : "rgba(10, 132, 255, 0.25)";
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(e.a.x, e.a.y);
@@ -402,8 +416,6 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
           ctx.lineTo(e.b.x, e.b.y);
           ctx.stroke();
 
-          // A slow pulse travelling along the trace (skipped for reduced motion):
-          // parametrized over the horizontal-then-vertical path through the bend.
           if (!reducedMotion) {
             const t = (step * e.speed + e.offset) % 1;
             const total = Math.abs(bendX - e.a.x) + Math.abs(e.b.y - e.a.y) || 1;
@@ -413,7 +425,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
               ? { x: e.a.x + Math.sign(bendX - e.a.x) * dist, y: e.a.y }
               : { x: bendX, y: e.a.y + Math.sign(e.b.y - e.a.y) * (dist - hx) };
             
-            ctx.fillStyle = "rgba(163, 208, 250, 0.95)";
+            ctx.fillStyle = themeColors.isLight ? "rgba(11, 110, 214, 0.95)" : "rgba(163, 208, 250, 0.95)";
             ctx.beginPath();
             ctx.arc(pulse.x, pulse.y, 2.5, 0, Math.PI * 2);
             ctx.fill();
@@ -423,24 +435,23 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
         // Nodes breathe on their joints.
         for (const n of flowNodes) {
           const breathe = reducedMotion ? 1 : 1 + 0.25 * Math.sin(step * 0.01 + n.phase);
-          // Soft outer ambient halo
-          ctx.fillStyle = "rgba(10, 132, 255, 0.15)";
+          ctx.fillStyle = themeColors.isLight ? "rgba(11, 110, 214, 0.15)" : "rgba(10, 132, 255, 0.15)";
           ctx.beginPath();
           ctx.arc(n.x, n.y, n.r * breathe * 2.2, 0, Math.PI * 2);
           ctx.fill();
 
-          ctx.fillStyle = "rgba(10, 132, 255, 0.85)";
+          ctx.fillStyle = themeColors.isLight ? "rgba(11, 110, 214, 0.85)" : "rgba(10, 132, 255, 0.85)";
           ctx.beginPath();
           ctx.arc(n.x, n.y, n.r * breathe, 0, Math.PI * 2);
           ctx.fill();
 
-          ctx.fillStyle = "rgba(248, 250, 252, 0.85)";
+          ctx.fillStyle = themeColors.isLight ? "rgba(255, 255, 255, 0.9)" : "rgba(248, 250, 252, 0.85)";
           ctx.beginPath();
           ctx.arc(n.x, n.y, n.r * breathe * 0.45, 0, Math.PI * 2);
           ctx.fill();
         }
       } else if (preset === "starfield") {
-        ctx.fillStyle = "#0B1220";
+        ctx.fillStyle = themeColors.bg;
         ctx.fillRect(0, 0, width, height);
 
         for (const star of stars) {
@@ -453,14 +464,14 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
           }
           ctx.beginPath();
           ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+          ctx.fillStyle = themeColors.isLight ? `rgba(15, 23, 42, ${star.opacity * 0.4})` : `rgba(255, 255, 255, ${star.opacity})`;
           ctx.fill();
         }
       } else if (preset === "matrix") {
-        ctx.fillStyle = "rgba(11, 18, 32, 0.18)";
+        ctx.fillStyle = themeColors.isLight ? "rgba(248, 250, 252, 0.18)" : "rgba(11, 18, 32, 0.18)";
         ctx.fillRect(0, 0, width, height);
 
-        ctx.fillStyle = "#4edea3";
+        ctx.fillStyle = themeColors.isLight ? "#059669" : "#4edea3";
         ctx.font = `${fontSize}px monospace`;
 
         for (let i = 0; i < drops.length; i++) {
@@ -476,7 +487,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
           if (!reducedMotion) drops[i]++;
         }
       } else if (preset === "bokeh") {
-        ctx.fillStyle = "#0B1220";
+        ctx.fillStyle = themeColors.bg;
         ctx.fillRect(0, 0, width, height);
 
         for (const orb of orbs) {
@@ -490,7 +501,8 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
           }
 
           const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-          grad.addColorStop(0, `hsla(${orb.hue}, 80%, 65%, 0.3)`);
+          const alpha = themeColors.isLight ? 0.15 : 0.3;
+          grad.addColorStop(0, `hsla(${orb.hue}, 80%, 65%, ${alpha})`);
           grad.addColorStop(1, `hsla(${orb.hue}, 80%, 65%, 0)`);
 
           ctx.fillStyle = grad;
@@ -500,7 +512,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
         }
       } else {
         // Default: Aurora Waves
-        ctx.fillStyle = "#0B1220";
+        ctx.fillStyle = themeColors.bg;
         ctx.fillRect(0, 0, width, height);
 
         for (const wave of waves) {
@@ -517,7 +529,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
           ctx.lineTo(0, height);
           ctx.closePath();
 
-          ctx.fillStyle = wave.color;
+          ctx.fillStyle = themeColors.isLight ? wave.color.replace("0.35)", "0.15)").replace("0.3)", "0.12)").replace("0.25)", "0.10)") : wave.color;
           ctx.fill();
         }
       }
@@ -532,7 +544,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("resize", handleFlowResize);
     };
-  }, [preset, reducedMotion]);
+  }, [preset, reducedMotion, theme]);
 
   return <canvas ref={canvasRef} className="h-full w-full" />;
 }
