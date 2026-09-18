@@ -250,13 +250,22 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
     if (!ctx) return;
 
     let animationFrameId: number;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    const dpr = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2);
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    const setupCanvas = () => {
+      if (!canvas) return;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+    };
+    setupCanvas();
 
     const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      setupCanvas();
     };
     window.addEventListener("resize", handleResize);
     const handleFlowResize = () => buildFlow();
@@ -340,10 +349,21 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
         ctx.fillRect(0, 0, width, height);
 
         // Right-angle circuit traces between linked nodes.
-        ctx.lineWidth = 1;
         for (const e of flowEdges) {
           const bendX = e.a.x + (e.b.x - e.a.x) * e.mid;
-          ctx.strokeStyle = "rgba(10, 132, 255, 0.22)";
+          // Outer subtle glow trace
+          ctx.strokeStyle = "rgba(10, 132, 255, 0.08)";
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.moveTo(e.a.x, e.a.y);
+          ctx.lineTo(bendX, e.a.y);
+          ctx.lineTo(bendX, e.b.y);
+          ctx.lineTo(e.b.x, e.b.y);
+          ctx.stroke();
+
+          // Inner crisp trace
+          ctx.strokeStyle = "rgba(10, 132, 255, 0.25)";
+          ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(e.a.x, e.a.y);
           ctx.lineTo(bendX, e.a.y);
@@ -361,9 +381,10 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
             const pulse = dist <= hx
               ? { x: e.a.x + Math.sign(bendX - e.a.x) * dist, y: e.a.y }
               : { x: bendX, y: e.a.y + Math.sign(e.b.y - e.a.y) * (dist - hx) };
-            ctx.fillStyle = "rgba(124, 188, 255, 0.9)";
+            
+            ctx.fillStyle = "rgba(163, 208, 250, 0.95)";
             ctx.beginPath();
-            ctx.arc(pulse.x, pulse.y, 2, 0, Math.PI * 2);
+            ctx.arc(pulse.x, pulse.y, 2.5, 0, Math.PI * 2);
             ctx.fill();
           }
         }
@@ -371,17 +392,24 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
         // Nodes breathe on their joints.
         for (const n of flowNodes) {
           const breathe = reducedMotion ? 1 : 1 + 0.25 * Math.sin(step * 0.01 + n.phase);
+          // Soft outer ambient halo
+          ctx.fillStyle = "rgba(10, 132, 255, 0.15)";
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r * breathe * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+
           ctx.fillStyle = "rgba(10, 132, 255, 0.85)";
           ctx.beginPath();
           ctx.arc(n.x, n.y, n.r * breathe, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = "rgba(248, 250, 252, 0.35)";
+
+          ctx.fillStyle = "rgba(248, 250, 252, 0.85)";
           ctx.beginPath();
           ctx.arc(n.x, n.y, n.r * breathe * 0.45, 0, Math.PI * 2);
           ctx.fill();
         }
       } else if (preset === "starfield") {
-        ctx.fillStyle = "#0c0e11";
+        ctx.fillStyle = "#0B1220";
         ctx.fillRect(0, 0, width, height);
 
         for (const star of stars) {
@@ -398,7 +426,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
           ctx.fill();
         }
       } else if (preset === "matrix") {
-        ctx.fillStyle = "rgba(2, 6, 23, 0.15)";
+        ctx.fillStyle = "rgba(11, 18, 32, 0.18)";
         ctx.fillRect(0, 0, width, height);
 
         ctx.fillStyle = "#4edea3";
@@ -417,7 +445,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
           if (!reducedMotion) drops[i]++;
         }
       } else if (preset === "bokeh") {
-        ctx.fillStyle = "#0c0e11";
+        ctx.fillStyle = "#0B1220";
         ctx.fillRect(0, 0, width, height);
 
         for (const orb of orbs) {
@@ -441,7 +469,7 @@ function LiveCanvas({ preset, reducedMotion }: { preset: string; reducedMotion: 
         }
       } else {
         // Default: Aurora Waves
-        ctx.fillStyle = "#111316";
+        ctx.fillStyle = "#0B1220";
         ctx.fillRect(0, 0, width, height);
 
         for (const wave of waves) {
