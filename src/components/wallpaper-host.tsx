@@ -117,6 +117,9 @@ export function WallpaperHost() {
       {wallpaperType === "static" && (
         <StaticWallpaper preset={wallpaperId} rotation={wallpaperRotation} animate={!reducedMotion} />
       )}
+      {wallpaperType === "gradient" && (
+        <GradientWallpaper rotation={wallpaperRotation} animate={!reducedMotion} />
+      )}
       {wallpaperType === "custom" && (
         <CustomWallpaper url={wallpaperId} rotation={wallpaperRotation} animate={!reducedMotion} />
       )}
@@ -124,6 +127,34 @@ export function WallpaperHost() {
         <UploadedWallpaper id={wallpaperId} rotation={wallpaperRotation} animate={!reducedMotion} />
       )}
     </div>
+  );
+}
+
+function GradientWallpaper({ rotation, animate }: { rotation: number; animate: boolean }) {
+  const mode = useAppStore((s) => s.wallpaperGradientMode);
+  const color1 = useAppStore((s) => s.wallpaperGradientColor1);
+  const color2 = useAppStore((s) => s.wallpaperGradientColor2);
+  const color3 = useAppStore((s) => s.wallpaperGradientColor3);
+  const angle = useAppStore((s) => s.wallpaperGradientAngle);
+
+  const stops = [color1, color3?.trim() ? color3 : null, color2].filter(Boolean).join(", ");
+  let backgroundStyle = "";
+  if (mode === "radial") {
+    backgroundStyle = `radial-gradient(circle at center, ${stops})`;
+  } else if (mode === "conic") {
+    backgroundStyle = `conic-gradient(from ${angle}deg at 50% 50%, ${stops})`;
+  } else {
+    backgroundStyle = `linear-gradient(${angle}deg, ${stops})`;
+  }
+
+  return (
+    <RotatedLayer deg={rotation} animate={animate}>
+      <div
+        className="h-full w-full transition-all duration-700"
+        style={{ background: backgroundStyle }}
+      />
+      <ThemeScrim />
+    </RotatedLayer>
   );
 }
 

@@ -10,7 +10,8 @@ import { UI_OPACITY_DEFAULT, clampUiOpacity } from "@/lib/ui-opacity";
 export type { ThemeName };
 export { normalizeTheme };
 
-export type WallpaperType = "none" | "static" | "live" | "custom" | "upload";
+export type WallpaperType = "none" | "static" | "live" | "gradient" | "custom" | "upload";
+export type GradientMode = "linear" | "radial" | "conic";
 
 interface AppState {
   sidebarOpen: boolean;
@@ -27,17 +28,29 @@ interface AppState {
   theme: ThemeName;
   setTheme: (t: ThemeName) => void;
 
-  // Wallpapers (Optional: Live, Static, Custom)
+  // Wallpapers (Optional: Live, Static, Gradient, Custom)
   wallpaperType: WallpaperType;
   wallpaperId: string;
   wallpaperOpacity: number;
   wallpaperBlur: number;
   /** Clockwise, in degrees. Only 0 / 90 / 180 / 270 are meaningful. */
   wallpaperRotation: number;
+  wallpaperGradientMode: GradientMode;
+  wallpaperGradientColor1: string;
+  wallpaperGradientColor2: string;
+  wallpaperGradientColor3: string;
+  wallpaperGradientAngle: number;
   setWallpaper: (type: WallpaperType, id?: string) => void;
   setWallpaperOpacity: (opacity: number) => void;
   setWallpaperBlur: (blur: number) => void;
   setWallpaperRotation: (deg: number) => void;
+  setWallpaperGradientConfig: (config: Partial<{
+    mode: GradientMode;
+    color1: string;
+    color2: string;
+    color3: string;
+    angle: number;
+  }>) => void;
 
   // Interface opacity — how far the app's own surfaces step back to let the
   // wallpaper through. 1 = fully opaque (the original look).
@@ -97,6 +110,11 @@ interface PersistedPrefs {
   wallpaperOpacity?: number;
   wallpaperBlur?: number;
   wallpaperRotation?: number;
+  wallpaperGradientMode?: GradientMode;
+  wallpaperGradientColor1?: string;
+  wallpaperGradientColor2?: string;
+  wallpaperGradientColor3?: string;
+  wallpaperGradientAngle?: number;
   uiOpacity?: number;
   plannerDailyMinutes?: number | null;
   plannerHorizonDays?: number;
@@ -145,6 +163,11 @@ function persistAll(s: AppState) {
     wallpaperOpacity: s.wallpaperOpacity,
     wallpaperBlur: s.wallpaperBlur,
     wallpaperRotation: s.wallpaperRotation,
+    wallpaperGradientMode: s.wallpaperGradientMode,
+    wallpaperGradientColor1: s.wallpaperGradientColor1,
+    wallpaperGradientColor2: s.wallpaperGradientColor2,
+    wallpaperGradientColor3: s.wallpaperGradientColor3,
+    wallpaperGradientAngle: s.wallpaperGradientAngle,
     uiOpacity: s.uiOpacity,
     plannerDailyMinutes: s.plannerDailyMinutes,
     plannerHorizonDays: s.plannerHorizonDays,
@@ -185,6 +208,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   wallpaperOpacity: 0.7,
   wallpaperBlur: 0,
   wallpaperRotation: 0,
+  wallpaperGradientMode: "linear",
+  wallpaperGradientColor1: "#0A84FF",
+  wallpaperGradientColor2: "#0B1220",
+  wallpaperGradientColor3: "#4edea3",
+  wallpaperGradientAngle: 135,
   setWallpaper: (type, id = "aurora") => {
     set({ wallpaperType: type, wallpaperId: id });
     persistAll({ ...get(), wallpaperType: type, wallpaperId: id });
@@ -205,6 +233,17 @@ export const useAppStore = create<AppState>((set, get) => ({
     const v = ((Math.round(deg / 90) * 90) % 360 + 360) % 360;
     set({ wallpaperRotation: v });
     persistAll({ ...get(), wallpaperRotation: v });
+  },
+  setWallpaperGradientConfig: (config) => {
+    const next = {
+      wallpaperGradientMode: config.mode ?? get().wallpaperGradientMode,
+      wallpaperGradientColor1: config.color1 ?? get().wallpaperGradientColor1,
+      wallpaperGradientColor2: config.color2 ?? get().wallpaperGradientColor2,
+      wallpaperGradientColor3: config.color3 !== undefined ? config.color3 : get().wallpaperGradientColor3,
+      wallpaperGradientAngle: config.angle ?? get().wallpaperGradientAngle,
+    };
+    set(next);
+    persistAll({ ...get(), ...next });
   },
 
   uiOpacity: UI_OPACITY_DEFAULT,
@@ -271,6 +310,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (typeof prefs.wallpaperOpacity === "number") patch.wallpaperOpacity = prefs.wallpaperOpacity;
     if (typeof prefs.wallpaperBlur === "number") patch.wallpaperBlur = prefs.wallpaperBlur;
     if (typeof prefs.wallpaperRotation === "number") patch.wallpaperRotation = ((Math.round(prefs.wallpaperRotation / 90) * 90) % 360 + 360) % 360;
+    if (prefs.wallpaperGradientMode) patch.wallpaperGradientMode = prefs.wallpaperGradientMode;
+    if (prefs.wallpaperGradientColor1) patch.wallpaperGradientColor1 = prefs.wallpaperGradientColor1;
+    if (prefs.wallpaperGradientColor2) patch.wallpaperGradientColor2 = prefs.wallpaperGradientColor2;
+    if (typeof prefs.wallpaperGradientColor3 === "string") patch.wallpaperGradientColor3 = prefs.wallpaperGradientColor3;
+    if (typeof prefs.wallpaperGradientAngle === "number") patch.wallpaperGradientAngle = prefs.wallpaperGradientAngle;
     if (typeof prefs.uiOpacity === "number") patch.uiOpacity = clampUiOpacity(prefs.uiOpacity);
     if (prefs.plannerDailyMinutes === null) patch.plannerDailyMinutes = null;
     else if (typeof prefs.plannerDailyMinutes === "number") patch.plannerDailyMinutes = clampPlannerMinutes(prefs.plannerDailyMinutes);

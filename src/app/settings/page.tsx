@@ -15,6 +15,15 @@ import { db, uid, deleteWithTombstones, type WallpaperRec } from "@/lib/db";
 import { showToast } from "@/components/toast";
 import { Download, Upload, Check, AlertTriangle, Sparkles, Trash2, ImageIcon } from "lucide-react";
 
+const CURATED_GRADIENTS = [
+  { id: "ruvren-flow", name: "Ruvren Flow", mode: "linear" as const, color1: "#0A84FF", color2: "#0B1220", color3: "#4edea3", angle: 135 },
+  { id: "sunset-glow", name: "Sunset Glow", mode: "linear" as const, color1: "#ff5451", color2: "#0B1220", color3: "#9333ea", angle: 135 },
+  { id: "cosmic-aurora", name: "Cosmic Aurora", mode: "radial" as const, color1: "#7cbcff", color2: "#0B1220", color3: "#1E293B", angle: 0 },
+  { id: "emerald-pulse", name: "Emerald Pulse", mode: "linear" as const, color1: "#00a572", color2: "#0B1220", color3: "#7cbcff", angle: 160 },
+  { id: "cyber-twilight", name: "Cyber Twilight", mode: "conic" as const, color1: "#93000a", color2: "#0B1220", color3: "#0A84FF", angle: 45 },
+  { id: "paper-warmth", name: "Paper Warmth", mode: "linear" as const, color1: "#FAF7F2", color2: "#9A3412", color3: "#F1EADD", angle: 135 },
+];
+
 function Toggle({
   label,
   description,
@@ -230,6 +239,13 @@ export default function SettingsPage() {
     }
   };
 
+  const wallpaperGradientMode = useAppStore((s) => s.wallpaperGradientMode);
+  const wallpaperGradientColor1 = useAppStore((s) => s.wallpaperGradientColor1);
+  const wallpaperGradientColor2 = useAppStore((s) => s.wallpaperGradientColor2);
+  const wallpaperGradientColor3 = useAppStore((s) => s.wallpaperGradientColor3);
+  const wallpaperGradientAngle = useAppStore((s) => s.wallpaperGradientAngle);
+  const setWallpaperGradientConfig = useAppStore((s) => s.setWallpaperGradientConfig);
+
   return (
     <div className="page-gutter cq">
       <div className="mb-8">
@@ -306,7 +322,7 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* Wallpapers (Optional: Live, Static, Custom) */}
+      {/* Wallpapers (Optional: Live, Static, Gradient, Custom) */}
       <section className="mb-12">
         <div className="mb-4">
           <h2 className="text-lg font-bold tracking-tight text-fg">{t("settings.wallpapers")}</h2>
@@ -320,6 +336,7 @@ export default function SettingsPage() {
               { type: "none" as const, label: t("settings.wpNone") },
               { type: "live" as const, label: t("settings.wpLive") },
               { type: "static" as const, label: t("settings.wpStatic") },
+              { type: "gradient" as const, label: t("settings.wpGradient") },
               { type: "custom" as const, label: t("settings.wpCustom") },
               { type: "upload" as const, label: t("settings.wpUpload") },
             ].map((tab) => {
@@ -327,7 +344,7 @@ export default function SettingsPage() {
               return (
                 <button
                   key={tab.type}
-                  onClick={() => setWallpaper(tab.type, tab.type === "live" ? "aurora" : tab.type === "static" ? "deep-space" : wallpaperId)}
+                  onClick={() => setWallpaper(tab.type, tab.type === "live" ? "knowledge-flow" : tab.type === "static" ? "bg-01" : tab.type === "gradient" ? "ruvren-flow" : wallpaperId)}
                   className={cn(
                     "rounded-xl px-4 py-2 text-xs font-bold transition-all",
                     active ? "bg-primary-container text-on-primary-container shadow-sm" : "border border-border bg-bg text-muted-fg hover:text-fg"
@@ -405,6 +422,148 @@ export default function SettingsPage() {
                     );
                   })}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Gradient Wallpapers — Curated presets + Custom Gradient builder */}
+          {wallpaperType === "gradient" && (
+            <div className="space-y-6">
+              <div>
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("settings.wpGradientPresets")}</p>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                  {CURATED_GRADIENTS.map((g) => {
+                    const active = wallpaperId === g.id;
+                    const stops = [g.color1, g.color3, g.color2].filter(Boolean).join(", ");
+                    const bgStyle = g.mode === "radial"
+                      ? `radial-gradient(circle, ${stops})`
+                      : g.mode === "conic"
+                      ? `conic-gradient(from ${g.angle}deg, ${stops})`
+                      : `linear-gradient(${g.angle}deg, ${stops})`;
+                    return (
+                      <button
+                        key={g.id}
+                        onClick={() => {
+                          setWallpaper("gradient", g.id);
+                          setWallpaperGradientConfig({ mode: g.mode, color1: g.color1, color2: g.color2, color3: g.color3, angle: g.angle });
+                        }}
+                        className={cn(
+                          "group flex h-24 flex-col justify-between overflow-hidden rounded-xl border p-3 text-start transition-all",
+                          active ? "border-primary ring-2 ring-primary" : "border-border hover:border-primary"
+                        )}
+                        style={{ background: bgStyle }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="rounded bg-black/40 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white backdrop-blur">{g.mode}</span>
+                          {active && <Check size={14} className="text-white drop-shadow" />}
+                        </div>
+                        <span className="text-xs font-bold text-white drop-shadow">{g.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Custom Gradient Generator */}
+              <div className="space-y-4 rounded-xl border border-border bg-bg/60 p-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("settings.wpGradientCustom")}</p>
+                
+                {/* Gradient Mode Selector */}
+                <div>
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("settings.wpGradientMode")}</label>
+                  <div className="flex flex-wrap gap-2">
+                    {(["linear", "radial", "conic"] as const).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setWallpaperGradientConfig({ mode: m })}
+                        className={cn(
+                          "rounded-lg px-3.5 py-1.5 text-xs font-bold capitalize transition-all",
+                          wallpaperGradientMode === m ? "bg-primary text-on-primary-container shadow-sm" : "border border-border bg-surface text-muted-fg hover:text-fg"
+                        )}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Color Inputs */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("settings.wpGradientColor1")}</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={wallpaperGradientColor1}
+                        onChange={(e) => setWallpaperGradientConfig({ color1: e.target.value })}
+                        className="h-9 w-12 cursor-pointer rounded-lg border border-border bg-transparent p-0.5"
+                      />
+                      <input
+                        type="text"
+                        value={wallpaperGradientColor1}
+                        onChange={(e) => setWallpaperGradientConfig({ color1: e.target.value })}
+                        className="h-9 w-full rounded-lg border border-border bg-bg px-2.5 font-mono text-xs uppercase text-fg focus:border-primary focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("settings.wpGradientColor2")}</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={wallpaperGradientColor2}
+                        onChange={(e) => setWallpaperGradientConfig({ color2: e.target.value })}
+                        className="h-9 w-12 cursor-pointer rounded-lg border border-border bg-transparent p-0.5"
+                      />
+                      <input
+                        type="text"
+                        value={wallpaperGradientColor2}
+                        onChange={(e) => setWallpaperGradientConfig({ color2: e.target.value })}
+                        className="h-9 w-full rounded-lg border border-border bg-bg px-2.5 font-mono text-xs uppercase text-fg focus:border-primary focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-muted-fg">{t("settings.wpGradientColor3")}</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={wallpaperGradientColor3 || "#000000"}
+                        onChange={(e) => setWallpaperGradientConfig({ color3: e.target.value })}
+                        className="h-9 w-12 cursor-pointer rounded-lg border border-border bg-transparent p-0.5"
+                      />
+                      <input
+                        type="text"
+                        value={wallpaperGradientColor3}
+                        onChange={(e) => setWallpaperGradientConfig({ color3: e.target.value })}
+                        placeholder="Optional"
+                        className="h-9 w-full rounded-lg border border-border bg-bg px-2.5 font-mono text-xs uppercase text-fg focus:border-primary focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Angle Slider */}
+                {wallpaperGradientMode !== "radial" && (
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs font-semibold text-fg">
+                      <span>{t("settings.wpGradientAngle")}</span>
+                      <span>{wallpaperGradientAngle}°</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={360}
+                      step={5}
+                      value={wallpaperGradientAngle}
+                      onChange={(e) => setWallpaperGradientConfig({ angle: parseInt(e.target.value, 10) })}
+                      className="h-1.5 w-full accent-[var(--color-accent)]"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
