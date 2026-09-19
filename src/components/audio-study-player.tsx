@@ -122,18 +122,71 @@ export function AudioStudyPlayer({ card, isFlipped, onFlipTo, onRate, onCloseHan
     }
   };
 
+  // Unmount cleanup — cancel any speech synthesis and stop mic
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch {}
+      }
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch {}
+      }
+    };
+  }, []);
+
+  // Card / Flip change cleanup — stop previous speech immediately to avoid queue piling
+  useEffect(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try { window.speechSynthesis.cancel(); } catch {}
+    }
+  }, [card?.front, card?.back, isFlipped]);
+
+  // Keyboard shortcut listeners (1, 2, 3, 4, Space)
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
+      if (e.key === "1") {
+        e.preventDefault();
+        onRate(1);
+      } else if (e.key === "2") {
+        e.preventDefault();
+        onRate(2);
+      } else if (e.key === "3") {
+        e.preventDefault();
+        onRate(3);
+      } else if (e.key === "4") {
+        e.preventDefault();
+        onRate(4);
+      } else if (e.code === "Space") {
+        e.preventDefault();
+        if (!isFlipped) {
+          onFlipTo(true);
+        } else {
+          setIsPlaying((p) => !p);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isFlipped, onFlipTo, onRate]);
+
   // Automated study flow effect
   useEffect(() => {
     if (!card || !isPlaying) return;
 
+    let timer: NodeJS.Timeout | null = null;
     if (!isFlipped) {
       setCurrentStep("reading_front");
       speakText(card.front, () => {
         setCurrentStep("thinking");
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           onFlipTo(true);
         }, 2500);
-        return () => clearTimeout(timer);
       });
     } else {
       setCurrentStep("reading_back");
@@ -141,7 +194,24 @@ export function AudioStudyPlayer({ card, isFlipped, onFlipTo, onRate, onCloseHan
         setCurrentStep("listening");
       });
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch {}
+      }
+    };
   }, [card, isFlipped, isPlaying, speakText, onFlipTo]);
+
+  const handleExit = () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try { window.speechSynthesis.cancel(); } catch {}
+    }
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+    }
+    onCloseHandsFree();
+  };
 
   if (!card) return null;
 
@@ -171,7 +241,7 @@ export function AudioStudyPlayer({ card, isFlipped, onFlipTo, onRate, onCloseHan
             <option value={1.5}>1.5x Speed</option>
           </select>
 
-          <Button variant="secondary" size="sm" onClick={onCloseHandsFree}>
+          <Button variant="secondary" size="sm" onClick={handleExit}>
             Exit Hands-Free
           </Button>
         </div>
@@ -220,14 +290,19 @@ export function AudioStudyPlayer({ card, isFlipped, onFlipTo, onRate, onCloseHan
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg transition-transform hover:scale-105"
+            aria-label={isPlaying ? "Pause audio playback" : "Play audio playback"}
           >
             {isPlaying ? <Pause size={20} /> : <Play size={20} className="ms-0.5" />}
           </button>
 
           <button
             onClick={toggleMic}
+            disabled={!speechRecognitionSupported}
+            title={!speechRecognitionSupported ? "Voice rating unavailable on this browser" : isMicActive ? "Turn microphone off" : "Turn microphone on"}
             className={`flex h-12 w-12 items-center justify-center rounded-full border transition-transform hover:scale-105 ${
-              isMicActive
+              !speechRecognitionSupported
+                ? "border-border bg-bg/50 text-muted-fg/40 cursor-not-allowed"
+                : isMicActive
                 ? "border-red-500 bg-red-500/20 text-red-500 animate-pulse"
                 : "border-border bg-bg text-muted-fg"
             }`}
@@ -236,31 +311,42 @@ export function AudioStudyPlayer({ card, isFlipped, onFlipTo, onRate, onCloseHan
           </button>
         </div>
 
-        {/* Voice Command Hints */}
-        <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-muted-fg">
-          <span>Say:</span>
-          <span className="rounded bg-bg px-2 py-0.5 border border-border">&quot;Again&quot;</span>
-          <span className="rounded bg-bg px-2 py-0.5 border border-border">&quot;Hard&quot;</span>
-          <span className="rounded bg-bg px-2 py-0.5 border border-border">&quot;Good&quot;</span>
-          <span className="rounded bg-bg px-2 py-0.5 border border-border">&quot;Easy&quot;</span>
-        </div>
+        {/* Voice Command Hints / Chromium Fallback Status */}
+        {speechRecognitionSupported ? (
+          <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-muted-fg">
+            <span>Say:</span>
+            <span className="rounded bg-bg px-2 py-0.5 border border-border">&quot;Again&quot;</span>
+            <span className="rounded bg-bg px-2 py-0.5 border border-border">&quot;Hard&quot;</span>
+            <span className="rounded bg-bg px-2 py-0.5 border border-border">&quot;Good&quot;</span>
+            <span className="rounded bg-bg px-2 py-0.5 border border-border">&quot;Easy&quot;</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 rounded-full border border-border bg-bg/80 px-3 py-1.5 text-[11px] font-medium text-muted-fg">
+            <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+            <span>Audio Readout Active • Voice ratings available on Chromium</span>
+          </div>
+        )}
 
         {/* Rating Buttons */}
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={() => onRate(1)} className="text-red-400">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={() => onRate(1)} className="text-red-400 min-h-[36px]">
             Again (1)
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => onRate(2)} className="text-amber-400">
+          <Button variant="secondary" size="sm" onClick={() => onRate(2)} className="text-amber-400 min-h-[36px]">
             Hard (2)
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => onRate(3)} className="text-emerald-400">
+          <Button variant="secondary" size="sm" onClick={() => onRate(3)} className="text-emerald-400 min-h-[36px]">
             Good (3)
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => onRate(4)} className="text-blue-400">
+          <Button variant="secondary" size="sm" onClick={() => onRate(4)} className="text-blue-400 min-h-[36px]">
             Easy (4)
           </Button>
         </div>
       </div>
+
+      <p className="mt-3 text-center text-[10px] text-muted-fg/70 uppercase tracking-widest font-mono">
+        Keyboard: Space (Flip / Pause) • 1-4 (Rate Card)
+      </p>
     </div>
   );
 }

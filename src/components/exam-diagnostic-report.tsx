@@ -38,6 +38,7 @@ export function ExamDiagnosticReport({
   const [data, setData] = useState<Awaited<ReturnType<typeof getExamResults>> | null>(null);
   const [questions, setQuestions] = useState<ExamQuestionRec[]>([]);
   const [remediating, setRemediating] = useState(false);
+  const [createdBundleId, setCreatedBundleId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -71,7 +72,7 @@ export function ExamDiagnosticReport({
 
   // Remediation Action: Extract missed questions and create a dedicated Remediation Bundle
   const handleGenerateRemediationDeck = async () => {
-    if (totals.wrongQuestions.length === 0) return;
+    if (totals.wrongQuestions.length === 0 || remediating || createdBundleId) return;
     setRemediating(true);
 
     try {
@@ -97,9 +98,8 @@ export function ExamDiagnosticReport({
 
       await bulkCreateFlashcards(bundleId, JSON.stringify(cards));
 
+      setCreatedBundleId(bundleId);
       showToast(`Created Remediation Deck: "${bundleName}"!`, "success");
-      // Navigate to review mode for this new bundle
-      router.push(`/flashcards?bundle=${bundleId}`);
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Remediation failed", "danger");
     } finally {
@@ -155,10 +155,24 @@ export function ExamDiagnosticReport({
               </p>
             </div>
           </div>
-          <Button onClick={handleGenerateRemediationDeck} disabled={remediating}>
-            <Sparkles size={14} />
-            {remediating ? "Creating Deck…" : "Generate Flashcards for Missed Concepts"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            {createdBundleId ? (
+              <>
+                <Button disabled variant="secondary" className="opacity-90 cursor-default">
+                  <CheckCircle2 size={14} className="text-success" />
+                  ✓ Added {totals.wrongQuestions.length} Flashcards to Remediation Deck
+                </Button>
+                <Button onClick={() => router.push(`/flashcards?bundle=${createdBundleId}`)}>
+                  Review Remediation Deck Now →
+                </Button>
+              </>
+            ) : (
+              <Button onClick={handleGenerateRemediationDeck} disabled={remediating}>
+                <Sparkles size={14} />
+                {remediating ? "Creating Deck…" : "Generate Flashcards for Missed Concepts"}
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

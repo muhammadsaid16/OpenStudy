@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useLiveData } from "@/lib/use-live-data";
 import { getSubjects, getAllTopics as getTopics, getAllNotes, getBundles, listExams as getExams } from "@/app/actions";
 import { Card, Button } from "@/components/ui";
-import { Search, ZoomIn, ZoomOut, RefreshCw, Network, BookOpen, FileText, Layers, FileQuestion, Filter, Tag } from "lucide-react";
+import { Search, ZoomIn, ZoomOut, RefreshCw, Network, BookOpen, FileText, Layers, FileQuestion, Filter, Tag, Sparkles } from "lucide-react";
+import { loadSampleData } from "@/lib/sample-data";
+import { showToast } from "@/components/toast";
 import type { SubjectRec, TopicRec, NoteRec, BundleRec, ExamRec } from "@/lib/db";
 
 export type GraphNodeType = "subject" | "topic" | "note" | "bundle" | "exam" | "tag";
@@ -39,7 +42,25 @@ export function KnowledgeGraph() {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDraggingPan, setIsDraggingPan] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
+
+  const handleLoadStarter = async () => {
+    setSeeding(true);
+    try {
+      const res = await loadSampleData();
+      if (res.created) {
+        showToast(`Loaded starter deck: ${res.subjectName}`, "success");
+        router.refresh();
+      } else {
+        showToast("Library already has content", "info");
+      }
+    } catch {
+      showToast("Failed to load starter deck", "danger");
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const data = useLiveData(
     () => Promise.all([getSubjects(), getTopics(), getAllNotes(), getBundles(), getExams()]),
@@ -603,15 +624,53 @@ export function KnowledgeGraph() {
           className="h-full w-full cursor-grab active:cursor-grabbing"
         />
 
+        {/* Empty State Overlay */}
+        {initialNodes.length === 0 && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-bg/90 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-3xl border border-primary/30 bg-primary-container/15 text-primary shadow-xl">
+              <Network size={38} className="animate-pulse" />
+              <Sparkles size={18} className="absolute -top-1.5 -end-1.5 text-accent" />
+            </div>
+
+            <h3 className="text-xl font-bold tracking-tight text-fg max-w-md">
+              Your Knowledge Graph is waiting for thoughts
+            </h3>
+            <p className="mt-2 text-sm text-muted-fg max-w-md leading-relaxed">
+              Add subjects, write notes, or create flashcards to watch your neural web grow and connect.
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Button
+                variant="primary"
+                onClick={handleLoadStarter}
+                disabled={seeding}
+                className="gap-2 shadow-lg"
+              >
+                <Sparkles size={14} />
+                {seeding ? "Loading Starter Deck…" : "Load Starter Deck"}
+              </Button>
+              <Link
+                href="/notes"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-fg transition-colors hover:border-primary/40 hover:bg-surface-hover"
+              >
+                <FileText size={14} />
+                Create Note
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Legend Overlay */}
-        <div className="absolute bottom-4 start-4 flex items-center gap-3 rounded-xl border border-border/80 bg-bg/90 p-2.5 backdrop-blur text-[10px] font-mono uppercase tracking-widest text-muted-fg">
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-indigo-500" /> Subject</span>
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-purple-500" /> Topic</span>
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-blue-500" /> Note</span>
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Tag</span>
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-violet-500" /> Deck</span>
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Exam</span>
-        </div>
+        {initialNodes.length > 0 && (
+          <div className="absolute bottom-4 start-4 flex items-center gap-3 rounded-xl border border-border/80 bg-bg/90 p-2.5 backdrop-blur text-[10px] font-mono uppercase tracking-widest text-muted-fg">
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-indigo-500" /> Subject</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-purple-500" /> Topic</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-blue-500" /> Note</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Tag</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-violet-500" /> Deck</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Exam</span>
+          </div>
+        )}
 
         {/* Node Hover / Selection Popup */}
         {(hoveredNode || selectedNode) && (

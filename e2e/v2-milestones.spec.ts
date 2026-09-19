@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Ruvren V2.0 Milestone Features E2E", () => {
   test("1. Universal Knowledge Graph Visualizer renders and provides filters", async ({ page }) => {
     await page.goto("/graph");
-    await expect(page.getByRole("heading", { name: "Knowledge Graph" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Knowledge Graph", exact: true })).toBeVisible();
 
     // Verify canvas element exists
     const canvas = page.locator("canvas.cursor-grab");
@@ -46,5 +46,21 @@ test.describe("Ruvren V2.0 Milestone Features E2E", () => {
   test("5. Share page decodes links and handles imports", async ({ page }) => {
     await page.goto("/share");
     await expect(page.locator("body")).toBeVisible();
+  });
+
+  test("6. Knowledge Graph Empty State overlay displays CTA and loads starter deck", async ({ page }) => {
+    await page.goto("/graph");
+    const emptyHeading = page.getByRole("heading", { name: "Your Knowledge Graph is waiting for thoughts" });
+    if (await emptyHeading.isVisible()) {
+      await expect(page.getByText("Add subjects, write notes, or create flashcards to watch your neural web grow and connect.")).toBeVisible();
+      const loadBtn = page.getByRole("button", { name: "Load Starter Deck" });
+      await expect(loadBtn).toBeVisible();
+      const createNoteLink = page.getByRole("link", { name: "Create Note" });
+      await expect(createNoteLink).toBeVisible();
+
+      // Click load starter deck
+      await loadBtn.click();
+      await expect(emptyHeading).not.toBeVisible();
+    }
   });
 });

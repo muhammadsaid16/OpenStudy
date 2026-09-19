@@ -85,7 +85,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
   // If Hands-Free Mode is active, render AudioStudyPlayer
   if (isHandsFree && p.activeCard) {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-2xl pb-20 md:pb-6">
         <AudioStudyPlayer
           card={{ front: p.activeCard.front, back: p.activeCard.back }}
           isFlipped={p.isFlipped}
@@ -200,7 +200,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6 pb-20 md:pb-6">
       {/* Session stats bar */}
       <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-fg">
         <span>{p.completedCount} reviewed • {p.totalReviewed} total</span>
@@ -410,7 +410,7 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
 
       {/* Show Answer button */}
       {!p.isFlipped && p.activeCard && (
-        <Button className="w-full" onClick={() => p.onFlipTo(true)}>{t("cards.showAnswer")}</Button>
+        <Button className="w-full min-h-[48px]" onClick={() => p.onFlipTo(true)}>{t("cards.showAnswer")}</Button>
       )}
 
       {/* Rating buttons */}
@@ -423,23 +423,26 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
           val === 0 ? "again" : val === 3 ? "hard" : val === 4 ? "good" : "easy";
 
         return (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
             {RATING_BUTTONS.map((q, idx) => {
               const interval = predictions[gradeKeyFor(q.value)];
               return (
                 <button
                   key={q.value}
-                  className={cn("rounded-2xl border bg-bg p-4 text-center transition-all duration-200 active:scale-95", q.color)}
+                  className={cn(
+                    "min-h-[48px] rounded-2xl border bg-bg p-3 sm:p-4 text-center transition-all duration-200 active:scale-95 flex flex-col items-center justify-center",
+                    q.color
+                  )}
                   onClick={() => p.onRate(q.value)}
                   disabled={p.reviewing}
                 >
-                  <div className="flex items-center justify-center gap-1.5">
-                    <p className="text-sm font-bold uppercase tracking-tighter">{q.label}</p>
+                  <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
+                    <p className="text-sm font-bold uppercase tracking-tight sm:tracking-tighter">{q.label}</p>
                     <span className="rounded-md bg-muted/80 px-1.5 py-0.5 font-mono text-[10px] font-bold text-fg/80">
                       {interval}
                     </span>
                   </div>
-                  <p className="mt-1 text-[10px] text-muted-fg/50">[{idx + 1}]</p>
+                  <p className="mt-0.5 text-[10px] text-muted-fg/50">[{idx + 1}]</p>
                 </button>
               );
             })}

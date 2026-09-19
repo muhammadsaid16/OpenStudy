@@ -31,6 +31,17 @@ export interface ExamRunnerProps {
   onFinish: () => void;
 }
 
+export interface ActiveExamState {
+  examId: string;
+  answers: Record<string, string>;
+  selfGrades: Record<string, number>;
+  flaggedIndices: number[];
+  remainingSeconds: number | null;
+  lastUpdated: number;
+}
+
+const STORAGE_KEY = (id: string) => `ruvren_active_exam_${id}`;
+
 export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
   const [exam, setExam] = useState<ExamRec | null>(null);
   const [questions, setQuestions] = useState<ExamQuestionRec[]>([]);
@@ -48,6 +59,26 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
   const [submitting, setSubmitting] = useState(false);
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
 
+  const persistState = (
+    currentAnswers = answers,
+    currentSelf = selfGrades,
+    currentFlagged = flagged,
+    currentRemaining = remainingSec
+  ) => {
+    if (typeof window === "undefined" || submitting) return;
+    try {
+      const state: ActiveExamState = {
+        examId,
+        answers: currentAnswers,
+        selfGrades: currentSelf,
+        flaggedIndices: Array.from(currentFlagged),
+        remainingSeconds: currentRemaining,
+        lastUpdated: Date.now(),
+      };
+      localStorage.setItem(STORAGE_KEY(examId), JSON.stringify(state));
+    } catch {}
+  };
+
   useEffect(() => {
     (async () => {
       const data = await getExam(examId);
@@ -58,24 +89,59 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
       setExam(data.exam);
       setQuestions(data.questions);
 
-      // Pre-fill existing answers
+      // Pre-fill existing answers from DB
       const initialAns: Record<string, string> = {};
       const initialSelf: Record<string, number> = {};
       data.questions.forEach((q: ExamQuestionRec) => {
         if (q.answer) initialAns[q.id] = q.answer;
         if (typeof q.quality === "number") initialSelf[q.id] = q.quality;
       });
+
+      // Restore from localStorage if active session exists
+      let restoredFromLocal = false;
+      let initialRemaining: number | null = null;
+
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY(examId));
+        if (raw) {
+          const saved: ActiveExamState = JSON.parse(raw);
+          if (saved && saved.examId === examId) {
+            if (saved.answers) Object.assign(initialAns, saved.answers);
+            if (saved.selfGrades) Object.assign(initialSelf, saved.selfGrades);
+            if (Array.isArray(saved.flaggedIndices)) {
+              setFlagged(new Set(saved.flaggedIndices));
+            }
+            if (typeof saved.remainingSeconds === "number") {
+              const elapsedAway = Math.max(0, Math.floor((Date.now() - saved.lastUpdated) / 1000));
+              initialRemaining = Math.max(0, saved.remainingSeconds - elapsedAway);
+            }
+            restoredFromLocal = true;
+            showToast("Restored exam session in progress", "info");
+          }
+        }
+      } catch {}
+
       setAnswers(initialAns);
       setSelfGrades(initialSelf);
 
-      // Set countdown timer
-      if (data.exam.timeLimitSec) {
+      if (initialRemaining !== null) {
+        setRemainingSec(initialRemaining);
+      } else if (data.exam.timeLimitSec) {
         const elapsed = Math.floor((Date.now() - new Date(data.exam.startedAt).getTime()) / 1000);
         const rem = Math.max(0, data.exam.timeLimitSec - elapsed);
         setRemainingSec(rem);
       }
     })();
   }, [examId]);
+
+  // Periodic 5-second persistence interval
+  useEffect(() => {
+    if (!exam || submitting) return;
+    const interval = setInterval(() => {
+      persistState();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [exam, answers, selfGrades, flagged, remainingSec, submitting]);
 
   // Countdown timer effect
   useEffect(() => {
@@ -113,12 +179,15 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
       const next = new Set(prev);
       if (next.has(i)) next.delete(i);
       else next.add(i);
+      persistState(answers, selfGrades, next, remainingSec);
       return next;
     });
   };
 
   const handlePickChoice = async (opt: string) => {
-    setAnswers((prev) => ({ ...prev, [curQ.id]: opt }));
+    const nextAnswers = { ...answers, [curQ.id]: opt };
+    setAnswers(nextAnswers);
+    persistState(nextAnswers, selfGrades, flagged, remainingSec);
     await answerExamQuestion(curQ.id, { mode: "choice", answer: opt });
     if (idx < questions.length - 1) {
       setIdx((i) => i + 1);
@@ -128,8 +197,11 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
   };
 
   const handleSelfGrade = async (quality: number) => {
-    setSelfGrades((prev) => ({ ...prev, [curQ.id]: quality }));
-    setAnswers((prev) => ({ ...prev, [curQ.id]: quality >= 3 ? "Correct" : "Incorrect" }));
+    const nextSelf = { ...selfGrades, [curQ.id]: quality };
+    const nextAnswers = { ...answers, [curQ.id]: quality >= 3 ? "Correct" : "Incorrect" };
+    setSelfGrades(nextSelf);
+    setAnswers(nextAnswers);
+    persistState(nextAnswers, nextSelf, flagged, remainingSec);
     await answerExamQuestion(curQ.id, { mode: "self", quality });
     if (idx < questions.length - 1) {
       setIdx((i) => i + 1);
@@ -138,9 +210,17 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
     }
   };
 
+  const handleExit = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY(examId));
+    } catch {}
+    onExit();
+  };
+
   const handleSubmitExam = async () => {
     setSubmitting(true);
     try {
+      localStorage.removeItem(STORAGE_KEY(examId));
       await completeExam(examId);
       showToast("Exam completed!", "success");
       onFinish();
@@ -184,7 +264,7 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
             </div>
           )}
 
-          <Button variant="secondary" size="sm" onClick={onExit}>
+          <Button variant="secondary" size="sm" onClick={handleExit}>
             Exit
           </Button>
           <Button size="sm" onClick={() => setConfirmSubmitOpen(true)} disabled={submitting}>

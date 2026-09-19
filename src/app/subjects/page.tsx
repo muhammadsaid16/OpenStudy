@@ -1053,15 +1053,15 @@ export default function SubjectsPage() {
                       {isFlipped && (activeCard as any).description && <p className="mt-3 text-sm text-muted-fg">{(activeCard as any).description}</p>}
                     </div>
                     {!isFlipped ? (
-                      <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full">{t("cards.showAnswer")}</Button>
+                      <Button onClick={() => setIsFlipped(true)} className="mt-6 w-full min-h-[48px]">{t("cards.showAnswer")}</Button>
                     ) : (
-                      <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
                         {RATING_BUTTONS.map((btn) => (
                           <button
                             key={btn.value}
                             onClick={() => handleRate(btn.value)}
                             disabled={reviewing}
-                            className={`rounded-xl border px-3 py-3 text-sm font-bold transition-colors disabled:opacity-50 ${btn.color}`}
+                            className={`min-h-[48px] rounded-xl border px-3 py-3 text-sm font-bold transition-colors disabled:opacity-50 ${btn.color}`}
                           >
                             <span className="block text-xs uppercase tracking-widest">{btn.shortLabel}</span>
                             <span className="block text-[10px] font-normal normal-case opacity-70">{btn.label}</span>
