@@ -6,18 +6,19 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { createBundle, importCardsIntoBundle } from "@/app/actions";
-import { decodeShare, decodeShareEncrypted, isEncryptedPayload, parseSharedBundle, type SharedBundle } from "@/lib/share";
+import { decodeShareAsync, decodeShareEncrypted, isEncryptedPayload, parseSharedBundle, type SharedBundle } from "@/lib/share";
 
 type SharedState = { bundle: SharedBundle } | { encrypted: true; hash: string } | { bad: true; reason: string } | { empty: true };
 
-function decodeFromHash(hash: string): SharedState {
+async function decodeFromHash(hash: string): Promise<SharedState> {
   const raw = hash.startsWith("#") ? hash.slice(1) : hash;
   if (!raw.trim()) return { empty: true };
   if (isEncryptedPayload(hash)) {
     return { encrypted: true, hash: raw };
   }
   try {
-    const bundle = parseSharedBundle(decodeShare<unknown>(hash));
+    const rawBundle = await decodeShareAsync<unknown>(hash);
+    const bundle = parseSharedBundle(rawBundle);
     return { bundle };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -31,10 +32,7 @@ function decodeFromHash(hash: string): SharedState {
 export default function SharePage() {
   const t = useT();
   const router = useRouter();
-  const [shared, setShared] = useState<SharedState>(() => {
-    if (typeof window === "undefined") return { empty: true };
-    return decodeFromHash(window.location.hash);
-  });
+  const [shared, setShared] = useState<SharedState>({ empty: true });
   const bundle = "bundle" in shared ? shared.bundle : null;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -43,7 +41,11 @@ export default function SharePage() {
   const [decrypting, setDecrypting] = useState(false);
 
   useEffect(() => {
-    const sync = () => setShared(decodeFromHash(window.location.hash));
+    const sync = async () => {
+      const res = await decodeFromHash(window.location.hash);
+      setShared(res);
+    };
+    sync();
     window.addEventListener("hashchange", sync);
     return () => window.removeEventListener("hashchange", sync);
   }, []);
@@ -125,7 +127,7 @@ export default function SharePage() {
         <h1 className="text-2xl font-bold uppercase">{t("share.noData")}</h1>
         <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">OPEN THE LINK THE SENDER GAVE YOU — IT MUST END WITH # AND A LONG CODE. IF YOU HAVE A .STUDYMAX-BUNDLE.JSON FILE, IMPORT IT BELOW.</p>
         <label className="mt-6 inline-flex cursor-pointer items-center rounded-full border border-border bg-bg px-5 py-2.5 text-xs font-bold uppercase tracking-widest">
-          <input type="file" accept=".json,application/json" className="hidden" onChange={onFile} disabled={fileBusy} />
+          <input type="file" accept=".json,.ruvren,application/json" className="hidden" onChange={onFile} disabled={fileBusy} />
           {fileBusy ? "Reading…" : t("ui.import_from_file")}
         </label>
         {error !== "" && <p className="mt-3 text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
@@ -140,7 +142,7 @@ export default function SharePage() {
         <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">ASK THE SENDER FOR A FRESH LINK OR FILE. LINKS ARE LONG — SOME APPS CUT THEM OFF. THE FILE (.STUDYMAX-BUNDLE.JSON) ALWAYS WORKS.</p>
         <div className="mt-6 flex flex-col items-center gap-3">
           <label className="inline-flex cursor-pointer items-center rounded-full border border-border bg-bg px-5 py-2.5 text-xs font-bold uppercase tracking-widest">
-            <input type="file" accept=".json,application/json" className="hidden" onChange={onFile} disabled={fileBusy} />
+            <input type="file" accept=".json,.ruvren,application/json" className="hidden" onChange={onFile} disabled={fileBusy} />
             {fileBusy ? "Reading…" : t("ui.import_from_file_instead")}
           </label>
           <Button variant="secondary" onClick={() => router.push("/subjects")}>{t("share.backToLibrary")}</Button>
@@ -182,7 +184,7 @@ export default function SharePage() {
       <div className="mt-8 border-t border-border pt-6">
         <p className="text-xs uppercase tracking-widest text-muted-fg">Or import a .studymax-bundle.json file instead</p>
         <label className="mt-3 inline-flex cursor-pointer items-center rounded-full border border-border bg-bg px-5 py-2.5 text-xs font-bold uppercase tracking-widest">
-          <input type="file" accept=".json,application/json" className="hidden" onChange={onFile} disabled={fileBusy} />
+          <input type="file" accept=".json,.ruvren,application/json" className="hidden" onChange={onFile} disabled={fileBusy} />
           {fileBusy ? "Reading…" : t("ui.choose_file")}
         </label>
       </div>

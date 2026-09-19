@@ -12,7 +12,7 @@ import { showUndo } from "@/components/undo-toast";
 import { showToast } from "@/components/toast";
 import { SubjectTopicMenu } from "@/components/subject-topic-menu";
 import { exportBundle, getBundles, createBundle, updateBundle, deleteBundle, importCardsIntoBundle, getSubjects } from "@/app/actions";
-import { encodeShare, parseSharedBundle, SHARE_URL_LIMIT } from "@/lib/share";
+import { encodeShareCompressed, parseSharedBundle, SHARE_URL_LIMIT } from "@/lib/share";
 import { BundleColorPicker } from "@/components/bundle-color-picker";
 import { themeAccent } from "@/lib/bundle-colors";
 import { useAppStore } from "@/lib/store";
@@ -266,7 +266,7 @@ export default function BundlesPage() {
                           return;
                         }
                         const payload = { name: data.name, ...(data.description ? { description: data.description } : {}), cards: data.cards.map((c) => ({ front: c.front, back: c.back, ...(c.description ? { description: c.description } : {}), ...(c.kind && c.kind !== "basic" ? { kind: c.kind as "cloze" | "choice" } : {}), ...(c.choices?.length ? { choices: c.choices } : {}), ...(c.tags?.length ? { tags: c.tags } : {}) })) };
-                        const hash = encodeShare(payload as Parameters<typeof encodeShare>[0]);
+                        const hash = await encodeShareCompressed(payload as Parameters<typeof encodeShareCompressed>[0]);
                         if (hash.length > SHARE_URL_LIMIT) {
                           // Too big for a link — download file instead (same as ShareBundleButton fallback)
                           const blob = new Blob([JSON.stringify({ app: "studymax-share", version: 1, ...payload }, null, 2)], { type: "application/json" });

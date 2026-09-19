@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { Button, Modal } from "@/components/ui";
 import { exportBundle } from "@/app/actions";
-import { SHARE_URL_LIMIT, encodeShare, type SharedBundle } from "@/lib/share";
+import { SHARE_URL_LIMIT, encodeShareCompressed, type SharedBundle } from "@/lib/share";
 
 // SHARE button for the bundle cards page: copy a link (/share#…,
 // works offline — the payload rides in the hash, no server) or download
@@ -46,7 +46,7 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
         setError(`"${bundleName}" HAS NO CARDS YET — ADD CARDS BEFORE SHARING.`);
         return;
       }
-      const hash = encodeShare(p);
+      const hash = await encodeShareCompressed(p);
       if (hash.length > SHARE_URL_LIMIT) {
         setTooBig(true); setLink(null);
       } else {
@@ -57,7 +57,7 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
     finally { setBusy(false); }
   }
 
-  async function download() {
+  async function download(ext: "json" | "ruvren" = "ruvren") {
     setBusy(true); setError("");
     try {
       const p = await payload();
@@ -68,7 +68,7 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
       const blob = new Blob([JSON.stringify({ app: "studymax-share", version: 1, ...p }, null, 2)], { type: "application/json" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = bundleName.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".studymax-bundle.json";
+      a.download = bundleName.toLowerCase().replace(/[^a-z0-9]+/g, "-") + (ext === "ruvren" ? ".ruvren" : ".studymax-bundle.json");
       a.click();
       URL.revokeObjectURL(a.href);
     } catch { setError(t("ui.could_not_build_share_file")); }
@@ -94,7 +94,7 @@ export function ShareBundleButton({ bundleId, bundleName }: { bundleId: string; 
           </p>
           <div className="grid grid-cols-2 gap-2">
             <Button variant="secondary" disabled={busy} onClick={makeLink}>{busy ? "…" : t("ui.copy_link")}</Button>
-            <Button variant="secondary" disabled={busy} onClick={download}>{busy ? "…" : t("ui.save_file")}</Button>
+            <Button variant="secondary" disabled={busy} onClick={() => download("ruvren")}>{busy ? "…" : t("ui.save_file")}</Button>
           </div>
           {link && (
             <button type="button" onClick={copy} className="w-full break-all rounded-xl border border-primary bg-primary-container/10 p-3 text-start text-xs">

@@ -340,7 +340,9 @@ export function KnowledgeGraph() {
     };
   }, [links, filteredNodeIds, hoveredNode, selectedNode, zoom, pan]);
 
-  // Canvas Mouse events for Hover & Click & Drag Pan
+  const draggedNodeRef = useRef<GraphNode | null>(null);
+
+  // Canvas Mouse events for Hover & Click & Node Drag & Pan
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -348,6 +350,14 @@ export function KnowledgeGraph() {
     const rect = canvas.getBoundingClientRect();
     const mouseX = (e.clientX - rect.left - pan.x) / zoom;
     const mouseY = (e.clientY - rect.top - pan.y) / zoom;
+
+    if (draggedNodeRef.current) {
+      draggedNodeRef.current.x = mouseX;
+      draggedNodeRef.current.y = mouseY;
+      draggedNodeRef.current.vx = 0;
+      draggedNodeRef.current.vy = 0;
+      return;
+    }
 
     if (isDraggingPan) {
       setPan({
@@ -369,6 +379,7 @@ export function KnowledgeGraph() {
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (hoveredNode) {
       setSelectedNode(hoveredNode);
+      draggedNodeRef.current = hoveredNode;
     } else {
       setIsDraggingPan(true);
       dragStartRef.current = {
@@ -379,6 +390,12 @@ export function KnowledgeGraph() {
   };
 
   const handleMouseUp = () => {
+    draggedNodeRef.current = null;
+    setIsDraggingPan(false);
+  };
+
+  const handleMouseLeave = () => {
+    draggedNodeRef.current = null;
     setIsDraggingPan(false);
   };
 
@@ -453,6 +470,7 @@ export function KnowledgeGraph() {
           onMouseMove={handleMouseMove}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
           onDoubleClick={handleDoubleClick}
           className="h-full w-full cursor-grab active:cursor-grabbing"
         />

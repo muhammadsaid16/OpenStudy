@@ -27,22 +27,84 @@ export type SharedBundle = z.infer<typeof sharedBundleSchema>;
 
 export const SHARE_URL_LIMIT = 1800;
 
+// GZIP Compression / Decompression helpers
+export async function compressPayload(text: string): Promise<string> {
+  if (typeof CompressionStream !== "undefined") {
+    try {
+      const stream = new Blob([new TextEncoder().encode(text)])
+        .stream()
+        .pipeThrough(new CompressionStream("gzip"));
+      const buffer = await new Response(stream).arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      let binary = "";
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return "gz:" + btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+    } catch {
+      // Fallback if stream piping fails
+    }
+  }
+  return btoa(unescape(encodeURIComponent(text)))
+    .replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+}
+
+export async function decompressPayload(hash: string): Promise<string> {
+  let clean = hash.startsWith("#") ? hash.slice(1) : hash;
+  clean = clean.trim().replaceAll("\n", "").replaceAll("\r", "").replaceAll(" ", "");
+
+  if (clean.startsWith("gz:")) {
+    const rawB64 = clean.slice(3).replaceAll("-", "+").replaceAll("_", "/");
+    let padded = rawB64;
+    const pad = rawB64.length % 4;
+    if (pad === 2) padded += "==";
+    else if (pad === 3) padded += "=";
+
+    const bytes = Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
+    const stream = new Blob([bytes])
+      .stream()
+      .pipeThrough(new DecompressionStream("gzip"));
+    const buffer = await new Response(stream).arrayBuffer();
+    return new TextDecoder().decode(buffer);
+  }
+
+  let padded = clean.replaceAll("-", "+").replaceAll("_", "/");
+  const pad = padded.length % 4;
+  if (pad === 1) throw new Error("Invalid share payload");
+  if (pad === 2) padded += "==";
+  else if (pad === 3) padded += "=";
+  return decodeURIComponent(escape(atob(padded)));
+}
+
 export function encodeShare(bundle: SharedBundle): string {
   const json = JSON.stringify({ app: "studymax-share", version: 1, ...bundle });
   return btoa(unescape(encodeURIComponent(json)))
     .replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
+export async function encodeShareCompressed(bundle: SharedBundle): Promise<string> {
+  const json = JSON.stringify({ app: "studymax-share", version: 1, ...bundle });
+  return compressPayload(json);
+}
+
 export function decodeShare<T>(hash: string): T {
   let clean = hash.startsWith("#") ? hash.slice(1) : hash;
   clean = clean.trim();
   clean = clean.replaceAll("\n", "").replaceAll("\r", "").replaceAll(" ", "");
+  if (clean.startsWith("gz:")) {
+    throw new Error("Use decodeShareAsync for compressed payload");
+  }
   let padded = clean.replaceAll("-", "+").replaceAll("_", "/");
   const pad = padded.length % 4;
   if (pad === 1) throw new Error("Invalid share payload");
   if (pad === 2) padded += "==";
   else if (pad === 3) padded += "=";
   const json = decodeURIComponent(escape(atob(padded)));
+  return JSON.parse(json) as T;
+}
+
+export async function decodeShareAsync<T>(hash: string): Promise<T> {
+  const json = await decompressPayload(hash);
   return JSON.parse(json) as T;
 }
 
@@ -109,7 +171,7 @@ export async function decodeShareEncrypted<T>(hash: string, passcode: string): P
 
   const salt = new Uint8Array(parts[1].match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
   const iv = new Uint8Array(parts[2].match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
-  
+
   let cipherB64 = parts[3].replaceAll("-", "+").replaceAll("_", "/");
   const pad = cipherB64.length % 4;
   if (pad === 2) cipherB64 += "==";
@@ -137,4 +199,5 @@ export async function decodeShareEncrypted<T>(hash: string, passcode: string): P
   const json = new TextDecoder().decode(decrypted);
   return JSON.parse(json) as T;
 }
+
 

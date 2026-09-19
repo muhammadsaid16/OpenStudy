@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   decodeShare,
+  decodeShareAsync,
+  decodeShareEncrypted,
   encodeShare,
+  encodeShareCompressed,
+  encodeShareEncrypted,
+  isEncryptedPayload,
   parseSharedBundle,
   type SharedBundle,
 } from "@/lib/share";
@@ -23,6 +28,23 @@ describe("share codec", () => {
     expect(back.name).toBe("Biology 101");
     expect(back.cards).toHaveLength(3);
     expect(back.cards[2].choices).toEqual(["Liver", "Skin", "Heart"]);
+  });
+
+  it("round-trips a compressed bundle via decodeShareAsync", async () => {
+    const hash = await encodeShareCompressed(BUNDLE);
+    expect(hash.startsWith("gz:")).toBe(true);
+    const back = await decodeShareAsync<SharedBundle>(hash);
+    expect(back.name).toBe("Biology 101");
+    expect(back.cards).toHaveLength(3);
+  });
+
+  it("round-trips an encrypted bundle with AES-GCM", async () => {
+    const hash = await encodeShareEncrypted(BUNDLE, "secret123");
+    expect(isEncryptedPayload(hash)).toBe(true);
+    const back = await decodeShareEncrypted<SharedBundle>(hash, "secret123");
+    expect(back.name).toBe("Biology 101");
+
+    await expect(decodeShareEncrypted<SharedBundle>(hash, "wrongpass")).rejects.toThrow();
   });
 
   it("produces URL-safe output", () => {

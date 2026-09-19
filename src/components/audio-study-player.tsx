@@ -23,6 +23,8 @@ export function AudioStudyPlayer({ card, isFlipped, onFlipTo, onRate, onCloseHan
   const [speechRate, setSpeechRate] = useState<number>(1.0);
   const recognitionRef = useRef<any>(null);
 
+  const [speechRecognitionSupported, setSpeechRecognitionSupported] = useState(false);
+
   // Speak helper
   const speakText = useCallback(
     (text: string, onEnd?: () => void) => {
@@ -30,18 +32,22 @@ export function AudioStudyPlayer({ card, isFlipped, onFlipTo, onRate, onCloseHan
         onEnd?.();
         return;
       }
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = speechRate;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = speechRate;
 
-      utterance.onend = () => {
-        onEnd?.();
-      };
-      utterance.onerror = () => {
-        onEnd?.();
-      };
+        utterance.onend = () => {
+          onEnd?.();
+        };
+        utterance.onerror = () => {
+          onEnd?.();
+        };
 
-      window.speechSynthesis.speak(utterance);
+        window.speechSynthesis.speak(utterance);
+      } catch {
+        onEnd?.();
+      }
     },
     [speechRate]
   );
@@ -49,50 +55,70 @@ export function AudioStudyPlayer({ card, isFlipped, onFlipTo, onRate, onCloseHan
   // Recognition setup
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    try {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-    if (SpeechRecognition) {
-      const rec = new SpeechRecognition();
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.lang = "en-US";
+      if (SpeechRecognition) {
+        setSpeechRecognitionSupported(true);
+        const rec = new SpeechRecognition();
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.lang = "en-US";
 
-      rec.onresult = (event: any) => {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        transcript = transcript.trim().toLowerCase();
-        setRecognizedSpeech(transcript);
+        rec.onresult = (event: any) => {
+          let transcript = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          transcript = transcript.trim().toLowerCase();
+          setRecognizedSpeech(transcript);
 
-        if (transcript.includes("again") || transcript.includes("wrong")) {
-          onRate(1);
-          setRecognizedSpeech("Rated: AGAIN");
-        } else if (transcript.includes("hard")) {
-          onRate(2);
-          setRecognizedSpeech("Rated: HARD");
-        } else if (transcript.includes("good") || transcript.includes("got it")) {
-          onRate(3);
-          setRecognizedSpeech("Rated: GOOD");
-        } else if (transcript.includes("easy") || transcript.includes("perfect")) {
-          onRate(4);
-          setRecognizedSpeech("Rated: EASY");
-        }
-      };
+          if (transcript.includes("again") || transcript.includes("wrong")) {
+            onRate(1);
+            setRecognizedSpeech("Rated: AGAIN");
+          } else if (transcript.includes("hard")) {
+            onRate(2);
+            setRecognizedSpeech("Rated: HARD");
+          } else if (transcript.includes("good") || transcript.includes("got it")) {
+            onRate(3);
+            setRecognizedSpeech("Rated: GOOD");
+          } else if (transcript.includes("easy") || transcript.includes("perfect")) {
+            onRate(4);
+            setRecognizedSpeech("Rated: EASY");
+          }
+        };
 
-      recognitionRef.current = rec;
+        rec.onerror = () => {
+          setIsMicActive(false);
+          setRecognizedSpeech("Mic unavailable - use buttons below");
+        };
+
+        recognitionRef.current = rec;
+      } else {
+        setSpeechRecognitionSupported(false);
+      }
+    } catch {
+      setSpeechRecognitionSupported(false);
     }
   }, [onRate]);
 
   // Voice toggle
   const toggleMic = () => {
-    if (!recognitionRef.current) return;
+    if (!speechRecognitionSupported || !recognitionRef.current) {
+      setRecognizedSpeech("Voice input not supported on this browser. Use TTS + rating buttons.");
+      return;
+    }
     if (isMicActive) {
       try { recognitionRef.current.stop(); } catch {}
       setIsMicActive(false);
     } else {
-      try { recognitionRef.current.start(); } catch {}
-      setIsMicActive(true);
+      try {
+        recognitionRef.current.start();
+        setIsMicActive(true);
+      } catch {
+        setIsMicActive(false);
+        setRecognizedSpeech("Mic permission denied or busy");
+      }
     }
   };
 
