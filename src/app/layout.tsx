@@ -66,19 +66,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="bg-bg text-fg antialiased">
         <WallpaperHost />
-        <div className="relative z-10 flex h-screen overflow-hidden">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
-            <StorageGuard />
-            <PageTransition>{children}</PageTransition>
-          </main>
+        <div className="ui-layer">
+          <div className="relative z-10 flex h-screen overflow-hidden">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+              <StorageGuard />
+              <PageTransition>{children}</PageTransition>
+            </main>
+          </div>
+          <BottomNav />
+          <SpotifyMiniPlayer />
+          <SpotifyAudioSource />
+          <UndoToastHost />
+          <ToastHost />
+          <CommandPalette />
         </div>
-        <BottomNav />
-        <SpotifyMiniPlayer />
-        <SpotifyAudioSource />
-        <UndoToastHost />
-        <ToastHost />
-        <CommandPalette />
         <ThemeEffects />
         <VitalsGuard />
         <SwRegister />

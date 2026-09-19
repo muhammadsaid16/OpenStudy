@@ -216,33 +216,39 @@ html[data-wallpaper-active="true"] body {
   background-color: transparent !important;
 }
 
-/* Base surface background overrides so all Tailwind bg- classes honor --ui-alpha */
+/* Overall UI layer opacity controller — controls whole UI opacity excluding site background */
+.ui-layer {
+  opacity: var(--ui-alpha, 1);
+  transition: opacity 0.15s ease;
+}
+
+/* Base surface background overrides */
 .bg-bg {
-  background-color: color-mix(in srgb, var(--color-bg) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+  background-color: var(--color-bg) !important;
 }
 .bg-surface {
-  background-color: color-mix(in srgb, var(--color-surface) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+  background-color: var(--color-surface) !important;
 }
 .bg-surface-raised {
-  background-color: color-mix(in srgb, var(--color-surface-raised) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+  background-color: var(--color-surface-raised) !important;
 }
 .bg-surface-hover {
-  background-color: color-mix(in srgb, var(--color-surface-hover) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+  background-color: var(--color-surface-hover) !important;
 }
 .bg-muted {
-  background-color: color-mix(in srgb, var(--color-muted) calc(var(--ui-alpha, 1) * 100%), transparent) !important;
+  background-color: var(--color-muted) !important;
 }
 
 /* Level 2 — Standard surface card (the universal container) */
 @utility glass {
-  background: color-mix(in srgb, var(--color-surface) calc(var(--ui-alpha, 1) * 100%), transparent);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   box-shadow: none;
 }
 
 /* Level 3 — Raised surface: modals, popovers, command palette */
 @utility glass-raised {
-  background: color-mix(in srgb, var(--color-surface-raised) calc(var(--ui-alpha, 1) * 100%), transparent);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border-strong);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -251,7 +257,7 @@ html[data-wallpaper-active="true"] body {
 
 /* Level 0/1 — Inset well: inputs, fields, recessed areas */
 @utility glass-inset {
-  background: color-mix(in srgb, var(--color-muted) calc(var(--ui-alpha, 1) * 100%), transparent);
+  background: var(--color-muted);
   border: 1px solid var(--color-border);
   box-shadow: none;
 }
@@ -645,12 +651,12 @@ html[data-wallpaper-active="true"] body {
 }
 
 html {
-  background-color: color-mix(in srgb, var(--color-bg) calc(var(--ui-alpha) * 100%), transparent);
+  background-color: var(--color-bg);
   color: var(--color-fg);
 }
 
 body {
-  background-color: color-mix(in srgb, var(--color-bg) calc(var(--ui-alpha) * 100%), transparent);
+  background-color: var(--color-bg);
   color: var(--color-fg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
