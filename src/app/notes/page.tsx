@@ -24,6 +24,7 @@ import { NoteSelectionToolbar } from "@/components/note-selection-toolbar";
 import { QuickFlashcardModal } from "@/components/quick-flashcard-modal";
 import { AiGenerateModal } from "@/components/ai-generate-modal";
 import { AIGeneratorModal } from "@/components/ai-generator-modal";
+import { WikiSuggestTextarea } from "@/components/wiki-suggest-textarea";
 
 type Note = Omit<Awaited<ReturnType<typeof getAllNotes>>[number], "topic"> & {
   topic: Awaited<ReturnType<typeof getAllNotes>>[number]["topic"] | null;
@@ -587,13 +588,17 @@ function NotesContent() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <Textarea
-            label={t("notes.contentField")}
-            placeholder="Write your note here... (Tip: use [[Other Note Title]] or #hashtags to connect concepts in the Knowledge Graph)"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={8}
-          />
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.contentField")}</label>
+            <WikiSuggestTextarea
+              value={content}
+              onChange={setContent}
+              customNotes={notes}
+              customBundles={bundles}
+              rows={8}
+              placeholder="Write your note here... (Type [[ to suggest and link other notes or decks)"
+            />
+          </div>
           <TagInput label={t("notes.tags")} tags={tags} onChange={setTags} />
           <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary-container/10 p-3 text-xs text-muted-fg">
             <Sparkles size={14} className="mt-0.5 shrink-0 text-primary" />
@@ -659,15 +664,16 @@ function NotesContent() {
             {/* Textarea with ref for selection toolbar */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.contentField")}</label>
-              <textarea
+              <WikiSuggestTextarea
                 ref={editTextareaRef}
                 value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
+                onChange={setEditContent}
+                customNotes={notes}
+                customBundles={bundles}
                 rows={8}
-                className="w-full resize-y rounded-xl border border-border bg-bg p-3 text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:outline-none"
-                placeholder={t("notes.writeHere")}
+                placeholder="Write your note here... (Type [[ to suggest and link other notes or decks)"
               />
-              <p className="text-[11px] text-muted-fg/60">Select text to convert it to a flashcard or practice question.</p>
+              <p className="text-[11px] text-muted-fg/60">Type [[ to auto-suggest notes & decks. Select text to create flashcards.</p>
             </div>
             <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />
             <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary-container/10 p-3 text-xs text-muted-fg">

@@ -173,6 +173,12 @@ export function KnowledgeGraph() {
         if (targetNote) {
           addLink(nodeId, `note-${targetNote.id}`);
         }
+        const targetBundle = (bundles as BundleRec[]).find(
+          (b) => b.name?.toLowerCase() === targetTitle.toLowerCase()
+        );
+        if (targetBundle) {
+          addLink(nodeId, `bundle-${targetBundle.id}`);
+        }
       });
 
       // Index tags

@@ -29,6 +29,10 @@ function renderInline(text: string): string {
     /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
     '<a href="$2" target="_blank" rel="noopener noreferrer" class="md-link">$1</a>'
   );
+  s = s.replace(
+    /\[\[([^\]]+)\]\]/g,
+    '<span class="inline-flex items-center gap-1 rounded-md bg-primary-container/20 px-1.5 py-0.5 text-xs font-semibold text-primary border border-primary/20">🔗 $1</span>'
+  );
   return s;
 }
 

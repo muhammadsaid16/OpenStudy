@@ -18,6 +18,7 @@ import { getAllNotes, updateNote, deleteNote, getBundles } from "@/app/actions";
 import { showUndo } from "@/components/undo-toast";
 import type { BundleRec } from "@/lib/db";
 import { useLiveData } from "@/lib/use-live-data";
+import { WikiSuggestTextarea } from "@/components/wiki-suggest-textarea";
 
 type Note = Awaited<ReturnType<typeof getAllNotes>>[number];
 
@@ -324,11 +325,12 @@ export default function NotePage() {
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("notes.contentField")}</label>
-            <textarea
+            <WikiSuggestTextarea
               value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
+              onChange={setEditContent}
+              customBundles={bundles}
               rows={10}
-              className="glass-inset flex w-full rounded-xl px-4 py-3 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-primary/20 resize-none"
+              placeholder="Write your note here... (Type [[ to suggest and link other notes or decks)"
             />
           </div>
           <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />
