@@ -18,7 +18,7 @@ import {
   snapshotHasContent,
 } from "@/lib/safety-net";
 
-const PROD_HOST = "openstudy-v1.vercel.app";
+const PROD_HOST = "ruvren.vercel.app";
 
 function isPreviewHost(host: string) {
   if (host === PROD_HOST) return false;

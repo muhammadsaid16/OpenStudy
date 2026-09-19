@@ -4,9 +4,10 @@
 // Three concentric SVG rings (cards reviewed / focus minutes / daily goal),
 // anime.js staggered dashoffset fill, CountUp centers.
 
-import { useEffect, useRef } from "react";
-import { Flame, Layers, Timer } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Flame, Layers, Timer, Share2, Download } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { generateProgressImage } from "@/components/share-progress-card";
 
 export interface DailyProgressData {
   cardsReviewed: number;
@@ -63,6 +64,7 @@ function Ring({
 
 export function DailyProgress({ data }: { data: DailyProgressData }) {
   const t = useT();
+  const [sharing, setSharing] = useState(false);
   // Three separate ref objects — passed to <Ring> by NAME in JSX (never
   // indexed/dereferenced during render) and gathered into an array only
   // inside the effect below, where ref access is allowed.
@@ -121,6 +123,40 @@ export function DailyProgress({ data }: { data: DailyProgressData }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.cardsReviewed, data.minutesToday, data.streakDays]);
 
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const blob = await generateProgressImage(data);
+      const file = new File([blob], "ruvren-progress.png", { type: "image/png" });
+      const url = URL.createObjectURL(blob);
+
+      // Web Share API (mobile/PWA) — falls back to download
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "My Ruvren Progress",
+          text: `🔥 ${data.streakDays}-day streak · 🃏 ${data.cardsReviewed} cards · ⏱ ${data.minutesToday}m focus`,
+        });
+      } else {
+        // Desktop fallback: download PNG
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `ruvren-progress-${new Date().toISOString().slice(0, 10)}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      // User cancelled share — not an error
+      if (e instanceof Error && e.name !== "AbortError") {
+        console.warn("Share failed:", e);
+      }
+    } finally {
+      setSharing(false);
+    }
+  };
+
   return (
     <div className="glass flex flex-col gap-4 rounded-2xl p-6 sm:flex-row sm:items-center sm:gap-6" role="img"
       aria-label={t("dailyProgress.aria").replace("{c}", String(data.cardsReviewed)).replace("{cg}", String(data.cardsGoal)).replace("{m}", String(data.minutesToday)).replace("{mg}", String(data.minutesGoal)).replace("{s}", String(data.streakDays))}>
@@ -133,9 +169,24 @@ export function DailyProgress({ data }: { data: DailyProgressData }) {
         <Ring pct={clamped[2]} color={RING[2].color} size={52} stroke={10} circleRef={streakCircle} />
       </div>
       <div className="min-w-0 flex-1 space-y-3">
-        <p className="text-xs font-bold text-muted-fg">
-          {t("dailyProgress.today")}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-bold text-muted-fg">
+            {t("dailyProgress.today")}
+          </p>
+          <button
+            type="button"
+            onClick={handleShare}
+            disabled={sharing}
+            title="Share today's progress as an image"
+            aria-label="Share today's progress"
+            className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-50"
+          >
+            {sharing
+              ? <><Download size={11} className="animate-bounce" />Saving…</>
+              : <><Share2 size={11} />Share</>
+            }
+          </button>
+        </div>
         {[
           { label: t("dash.cardsReviewed"), value: `${data.cardsReviewed}/${data.cardsGoal}`, color: RING[0].color },
           { label: t("dash.focusMinutes"), value: `${data.minutesToday}/${data.minutesGoal}`, color: RING[1].color },

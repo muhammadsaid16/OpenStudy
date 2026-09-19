@@ -4,6 +4,7 @@ import { useT } from "@/lib/i18n";
 
 // Direct AI card generation — paste source text or upload an image, the server
 // calls Gemini, and the result is previewed for one-click bulk-accept.
+// Also supports Practice Quiz mode: generates multiple-choice questions.
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -17,7 +18,7 @@ import {
   Image as ImageIcon,
   FileText,
   Upload,
-  Link2,
+  HelpCircle,
 } from "lucide-react";
 import { Button, Modal } from "./ui";
 import { bulkCreateFlashcards } from "@/app/actions";
@@ -28,17 +29,28 @@ import type { BundleRec } from "@/lib/db";
 
 type BundleLike = Pick<BundleRec, "id" | "name">;
 
+// MCQ item from /api/ai/generate-quiz
+export interface MCQItem {
+  question: string;
+  options: string[];    // correct is index 0 before shuffle
+  correctIndex: number; // 0 before shuffle; client shuffles and updates
+  explanation: string;
+}
+
+type OutputMode = "flashcards" | "quiz";
+
 type Phase =
-  | "input" // user is typing/picking source
-  | "generating" // server is calling Gemini
-  | "preview" // cards are back, user can prune + accept
-  | "saving" // bulk-create in flight
-  | "done" // saved
+  | "input"       // user is typing/picking source
+  | "generating"  // server is calling Gemini
+  | "preview"     // cards/questions back, user can prune + accept
+  | "saving"      // bulk-create in flight
+  | "done"        // saved
   | "error";
 
 const MAX_CHARS = 8_000;
 const MIN_CHARS = 20;
 const GEN_STAGES = ["ui.reading_source", "ui.extracting_concepts", "ui.writing_cards"] as const;
+const QUIZ_STAGES = ["ui.reading_source", "ui.extracting_concepts", "Crafting questions…"] as const;
 
 interface ApiSuccess {
   ok: true;
@@ -70,6 +82,7 @@ export function AiGenerateModal({
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const [mode, setMode] = useState<"text" | "image">("text");
+  const [outputMode, setOutputMode] = useState<OutputMode>("flashcards");
   const [phase, setPhase] = useState<Phase>("input");
   const [source, setSource] = useState(defaultPrompt ?? "");
 
@@ -83,6 +96,7 @@ export function AiGenerateModal({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [bundleId, setBundleId] = useState<string>(defaultBundleId ?? bundles[0]?.id ?? "");
   const [cards, setCards] = useState<AiCardInput[]>([]);
+  const [questions, setQuestions] = useState<MCQItem[]>([]);
   const [rejected, setRejected] = useState<Set<number>>(new Set());
   const [err, setErr] = useState("");
   const [errCode, setErrCode] = useState<string>("");
@@ -183,22 +197,54 @@ export function AiGenerateModal({
       setErrCode("");
       setMeta(null);
       try {
-        const r = await fetch("/api/ai/generate-cards", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ text: source }),
-        });
-        const data = (await r.json()) as ApiSuccess | ApiError;
-        if (!data.ok) {
-          setErr(data.message);
-          setErrCode(data.error);
-          setPhase("error");
-          return;
+        if (outputMode === "quiz") {
+          // Practice Quiz mode — call the MCQ generator endpoint
+          const r = await fetch("/api/ai/generate-quiz", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ text: source }),
+          });
+          const data = (await r.json()) as { ok: true; questions: MCQItem[]; model: string; elapsedMs: number } | { ok: false; error: string; message: string };
+          if (!data.ok) {
+            setErr((data as { message: string }).message);
+            setErrCode((data as { error: string }).error);
+            setPhase("error");
+            return;
+          }
+          const okData = data as { ok: true; questions: MCQItem[]; model: string; elapsedMs: number };
+          // Shuffle options for each question and track the new correctIndex
+          const shuffled = okData.questions.map((q) => {
+            const opts = [...q.options];
+            const correct = opts[0]; // correct is always first before shuffle
+            for (let i = opts.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts, correctIndex: opts.indexOf(correct) };
+          });
+          setQuestions(shuffled);
+          setRejected(new Set());
+          setMeta({ model: okData.model, elapsedMs: okData.elapsedMs });
+          setPhase("preview");
+        } else {
+          // Flashcard mode — existing flow
+          const r = await fetch("/api/ai/generate-cards", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ text: source }),
+          });
+          const data = (await r.json()) as ApiSuccess | ApiError;
+          if (!data.ok) {
+            setErr(data.message);
+            setErrCode(data.error);
+            setPhase("error");
+            return;
+          }
+          setCards(data.cards);
+          setRejected(new Set());
+          setMeta({ model: data.model, elapsedMs: data.elapsedMs });
+          setPhase("preview");
         }
-        setCards(data.cards);
-        setRejected(new Set());
-        setMeta({ model: data.model, elapsedMs: data.elapsedMs });
-        setPhase("preview");
       } catch (e) {
         setErr(e instanceof Error ? e.message : String(e));
         setErrCode("NETWORK");
@@ -311,37 +357,61 @@ export function AiGenerateModal({
   // ─── Input step ──────────────────────────────────────────────────
   const inputStep = (
     <div className="space-y-4">
-      {/* Mode switcher (text vs image) */}
+      {/* Output mode: Flashcards vs Practice Quiz */}
       <div className="flex gap-1 rounded-xl border border-border bg-bg p-1">
         <button
           type="button"
-          onClick={() => { if (phase !== "generating" && phase !== "saving") setMode("text"); }}
+          onClick={() => { if (phase !== "generating" && phase !== "saving") setOutputMode("flashcards"); }}
           disabled={phase === "generating" || phase === "saving"}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${mode === "text"
-              ? "bg-primary-container text-on-primary-container"
-              : "text-muted-fg hover:text-primary disabled:opacity-50"
-            }`}
-          aria-pressed={mode === "text"}
+          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${outputMode === "flashcards" ? "bg-primary-container text-on-primary-container" : "text-muted-fg hover:text-primary disabled:opacity-50"}`}
+          aria-pressed={outputMode === "flashcards"}
         >
-          <FileText size={14} />{t("ui.text")}</button>
+          <Sparkles size={14} />Flashcards</button>
         <button
           type="button"
-          onClick={() => { if (phase !== "generating" && phase !== "saving") setMode("image"); }}
+          onClick={() => { if (phase !== "generating" && phase !== "saving") { setOutputMode("quiz"); setMode("text"); } }}
           disabled={phase === "generating" || phase === "saving"}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${mode === "image"
-              ? "bg-primary-container text-on-primary-container"
-              : "text-muted-fg hover:text-primary disabled:opacity-50"
-            }`}
-          aria-pressed={mode === "image"}
+          className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${outputMode === "quiz" ? "bg-primary-container text-on-primary-container" : "text-muted-fg hover:text-primary disabled:opacity-50"}`}
+          aria-pressed={outputMode === "quiz"}
         >
-          <ImageIcon size={14} />{t("ui.image")}</button>
+          <HelpCircle size={14} />Practice Quiz</button>
       </div>
+
+      {/* Source mode switcher (text vs image) — hidden in quiz mode, quiz is text-only */}
+      {outputMode === "flashcards" && (
+        <div className="flex gap-1 rounded-xl border border-border bg-bg p-1">
+          <button
+            type="button"
+            onClick={() => { if (phase !== "generating" && phase !== "saving") setMode("text"); }}
+            disabled={phase === "generating" || phase === "saving"}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${mode === "text"
+                ? "bg-primary-container text-on-primary-container"
+                : "text-muted-fg hover:text-primary disabled:opacity-50"
+              }`}
+            aria-pressed={mode === "text"}
+          >
+            <FileText size={14} />{t("ui.text")}</button>
+          <button
+            type="button"
+            onClick={() => { if (phase !== "generating" && phase !== "saving") setMode("image"); }}
+            disabled={phase === "generating" || phase === "saving"}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${mode === "image"
+                ? "bg-primary-container text-on-primary-container"
+                : "text-muted-fg hover:text-primary disabled:opacity-50"
+              }`}
+            aria-pressed={mode === "image"}
+          >
+            <ImageIcon size={14} />{t("ui.image")}</button>
+        </div>
+      )}
 
       {/* Source description */}
       <p className="rounded-lg border border-border/60 bg-bg/60 px-3 py-2 text-[11px] leading-relaxed text-muted-fg">
-        {mode === "text"
-          ? "Paste lesson notes, a chapter, or any teachable text. Gemini turns it into flashcards."
-          : "Take a photo of notes, a textbook page, a slide, or a whiteboard."}
+        {outputMode === "quiz"
+          ? "Paste lesson notes or any source text. Gemini generates multiple-choice practice questions you can review before saving."
+          : mode === "text"
+            ? "Paste lesson notes, a chapter, or any teachable text. Gemini turns it into flashcards."
+            : "Take a photo of notes, a textbook page, a slide, or a whiteboard."}
       </p>
 
       {/* Bundle picker */}
@@ -681,12 +751,94 @@ export function AiGenerateModal({
     </div>
   );
 
+  // ─── Quiz preview step ───────────────────────────────────────────
+  const quizPreviewStep = (
+    <div className="space-y-4">
+      {meta && (
+        <div className="flex items-center justify-between rounded-xl border border-border bg-bg/50 px-3 py-2 text-[11px] uppercase tracking-widest text-muted-fg">
+          <span><span className="font-bold text-fg">{questions.length}</span> QUESTION{questions.length !== 1 ? "S" : ""}</span>
+          <span>{(meta.elapsedMs / 1000).toFixed(1)}S · {meta.model}</span>
+        </div>
+      )}
+      <ul className="max-h-[420px] space-y-3 overflow-y-auto pe-1">
+        {questions.map((q, i) => {
+          const off = rejected.has(i);
+          return (
+            <li key={i} className={`rounded-xl border p-4 transition-colors ${off ? "border-border bg-bg/30 opacity-50" : "border-border bg-bg hover:border-primary/40"}`}>
+              <div className="flex items-start gap-3">
+                <button
+                  type="button"
+                  onClick={() => toggleReject(i)}
+                  aria-pressed={!off}
+                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors ${off ? "border-border bg-bg text-muted-fg" : "border-primary bg-primary-container text-on-primary-container"}`}
+                >
+                  {off ? <X size={14} /> : <Check size={14} />}
+                </button>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <p className={`text-sm font-bold leading-snug ${off ? "line-through text-muted-fg" : "text-fg"}`}>
+                    {q.question}
+                  </p>
+                  <ul className="space-y-1">
+                    {q.options.map((opt, oi) => (
+                      <li key={oi} className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium ${oi === q.correctIndex ? "border border-success/30 bg-success/10 text-success" : "border border-border/40 bg-muted/20 text-muted-fg"}`}>
+                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${oi === q.correctIndex ? "bg-success" : "bg-border"}`} />
+                        {opt}
+                      </li>
+                    ))}
+                  </ul>
+                  {q.explanation && (
+                    <p className="text-[11px] leading-relaxed text-muted-fg/80 italic">
+                      💡 {q.explanation}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-fg">
+          {questions.length - rejected.size} OF {questions.length} SELECTED
+        </span>
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" onClick={() => { setPhase("input"); setQuestions([]); setRejected(new Set()); }}>Back</Button>
+          <Button size="sm" onClick={async () => {
+            // Save quiz questions as flashcards (Q→A pairs) so they slot into the review system
+            const keep = questions.filter((_, i) => !rejected.has(i));
+            if (keep.length === 0) return;
+            setPhase("saving");
+            try {
+              const cards = keep.map((q) => ({
+                front: q.question,
+                back: q.options[q.correctIndex],
+                description: q.explanation || undefined,
+              }));
+              const r = await bulkCreateFlashcards(bundleId, JSON.stringify(cards));
+              if (!r.ok) { setErr(r.error ?? "Save failed"); setErrCode("BULK_FAILED"); setPhase("error"); return; }
+              setSavedCount(r.created);
+              setPhase("done");
+              try { if (onCreated) await onCreated(); else router.refresh(); } catch { /* ignore */ }
+            } catch (e) {
+              setErr(e instanceof Error ? e.message : String(e));
+              setErrCode("BULK_FAILED");
+              setPhase("error");
+            }
+          }} disabled={questions.length - rejected.size === 0}>
+            <Check size={14} />SAVE {questions.length - rejected.size} Q{questions.length - rejected.size !== 1 ? "S" : ""}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <Modal open={open} onClose={close} title={t("modal.aiCards")}>
+    <Modal open={open} onClose={close} title={outputMode === "quiz" ? "AI Practice Quiz Generator" : t("modal.aiCards")}>
       <div className="space-y-4">
         {phase === "input" && inputStep}
         {phase === "generating" && generatingStep}
-        {phase === "preview" && previewStep}
+        {phase === "preview" && outputMode === "quiz" && quizPreviewStep}
+        {phase === "preview" && outputMode !== "quiz" && previewStep}
         {phase === "saving" && savingStep}
         {phase === "done" && doneStep}
         {phase === "error" && (

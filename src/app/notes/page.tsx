@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition, Suspense, useRef } from "react";
 import { useT } from "@/lib/i18n";
-import { Plus, Trash2, Pin, StickyNote, Pencil, Eye, BookOpen, Search, X, Download, Upload, Lightbulb, ClockAlert } from "lucide-react";
+import { Plus, Trash2, Pin, StickyNote, Pencil, Eye, BookOpen, Search, X, Download, Upload, Lightbulb, ClockAlert, Sparkles } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button, Modal, Input, EmptyState, Skeleton, Textarea } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
@@ -19,6 +19,9 @@ import { showToast } from "@/components/toast";
 import { cardHoverHandlers } from "@/lib/interactions";
 import type { BundleRec } from "@/lib/db";
 import { useLiveData } from "@/lib/use-live-data";
+import { NoteSelectionToolbar } from "@/components/note-selection-toolbar";
+import { QuickFlashcardModal } from "@/components/quick-flashcard-modal";
+import { AiGenerateModal } from "@/components/ai-generate-modal";
 
 type Note = Omit<Awaited<ReturnType<typeof getAllNotes>>[number], "topic"> & {
   topic: Awaited<ReturnType<typeof getAllNotes>>[number]["topic"] | null;
@@ -50,6 +53,11 @@ function NotesContent() {
   const [editContent, setEditContent] = useState("");
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editTopicId, setEditTopicId] = useState("");
+  const editTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Quick action state
+  const [quickFlashcard, setQuickFlashcard] = useState<string | null>(null); // selected text
+  const [aiGenerateNote, setAiGenerateNote] = useState<Note | null>(null);   // note to feed AI modal
 
   // Realtime: re-runs on ANY table change (same tab, other tab, import).
   const live = useLiveData(() => Promise.all([getAllNotes(), getSubjects(), getBundles()]), []);
@@ -593,6 +601,19 @@ function NotesContent() {
       <Modal open={!!editNote} onClose={() => { setEditNote(null); setEditTopicId(""); }} title={t("modal.editNote")}>
         {editNote && (
           <div className="space-y-6">
+            {/* Quick actions header */}
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase tracking-widest text-muted-fg">Quick Actions</p>
+              <button
+                type="button"
+                onClick={() => { setAiGenerateNote(editNote); }}
+                className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary-container/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary-container/30"
+                title="Generate flashcards from this note's content using AI"
+              >
+                <Sparkles size={11} />
+                Generate Flashcards
+              </button>
+            </div>
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.topic")}</label>
               <SubjectTopicSelect
@@ -619,12 +640,19 @@ function NotesContent() {
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
             />
-            <Textarea
-              label={t("notes.contentField")}
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              rows={8}
-            />
+            {/* Textarea with ref for selection toolbar */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.contentField")}</label>
+              <textarea
+                ref={editTextareaRef}
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={8}
+                className="w-full resize-y rounded-xl border border-border bg-bg p-3 text-sm text-fg leading-relaxed placeholder:text-muted-fg/50 focus:outline-none"
+                placeholder={t("notes.writeHere")}
+              />
+              <p className="text-[11px] text-muted-fg/60">Select text to convert it to a flashcard or practice question.</p>
+            </div>
             <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="ghost" onClick={() => { setEditNote(null); setEditTopicId(""); }}>{t("common.cancel")}</Button>
@@ -633,6 +661,38 @@ function NotesContent() {
           </div>
         )}
       </Modal>
+
+      {/* Selection toolbar — floats above selected text in the edit textarea */}
+      {editNote && (
+        <NoteSelectionToolbar
+          targetRef={editTextareaRef}
+          onMakeFlashcard={(text) => setQuickFlashcard(text)}
+          onMakePracticeQ={(text) => {
+            // Pre-populate AI modal with the selected passage for quiz generation
+            setAiGenerateNote({ ...editNote, content: text });
+          }}
+        />
+      )}
+
+      {/* Quick Flashcard Modal */}
+      {quickFlashcard !== null && (
+        <QuickFlashcardModal
+          initialFront={quickFlashcard}
+          bundles={bundles.map((b) => ({ id: b.id, name: b.name }))}
+          defaultBundleId={bundles[0]?.id}
+          onClose={() => setQuickFlashcard(null)}
+        />
+      )}
+
+      {/* AI Generate Modal — launched from "Generate Flashcards" or "Practice Q" */}
+      {aiGenerateNote && (
+        <AiGenerateModal
+          bundles={bundles.map((b) => ({ id: b.id, name: b.name }))}
+          defaultBundleId={bundles[0]?.id}
+          defaultPrompt={aiGenerateNote.content || aiGenerateNote.title}
+          onClose={() => setAiGenerateNote(null)}
+        />
+      )}
 </div>
   );
 }

@@ -54,12 +54,13 @@ export function TopBar({ dueCards }: { dueCards: number }) {
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-fg/70">
           {now
-            ? now.toLocaleDateString(undefined, {
+            ? now.toLocaleDateString("en-US", {
                 weekday: "long",
-                month: "long",
+                month: "short",
                 day: "numeric",
+                year: "numeric",
               })
-            : " "}
+            : "\u00a0"}
         </p>
         <h1 className="truncate text-2xl font-bold tracking-tight text-fg lg:text-3xl">
           {now ? `${greetingFor(now.getHours(), t)}, ${t("topbar.learner")}` : t("topbar.welcomeBack")}

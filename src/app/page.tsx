@@ -26,6 +26,8 @@ import type { NextAction, WeaknessSignal } from "@/lib/contracts";
 import { ArrowRight, CalendarRange, FileQuestion, GraduationCap, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui";
 import { evaluateStudyOSReminders } from "@/lib/notifications";
+import { loadSampleData } from "@/lib/sample-data";
+import { Package } from "lucide-react";
 
 type Stats = Awaited<ReturnType<typeof getDashboardStats>>;
 type Weekly = Awaited<ReturnType<typeof getWeeklyAnalytics>>;
@@ -54,6 +56,17 @@ export default function DashboardPage() {
   const [reviewLogs, setReviewLogs] = useState<ReviewLogRec[]>([]);
   // Spec §1: full goal list for the UPCOMING card (dueDate + subject).
   const [goals, setGoals] = useState<Awaited<ReturnType<typeof getGoals>>>([]);
+  const [starterLoading, setStarterLoading] = useState(false);
+
+  const loadStarter = async () => {
+    setStarterLoading(true);
+    try {
+      await loadSampleData();
+      // useLiveData will auto-refresh all stats via Dexie hooks
+    } finally {
+      setStarterLoading(false);
+    }
+  };
 
   // Realtime: one live query fan-outs to the same setState shape.
   const live = useLiveData(
@@ -144,6 +157,35 @@ export default function DashboardPage() {
                 </span>
               </div>
             </Link>
+          </motion.div>
+        )}
+
+        {/* ── Onboarding CTA ─────────────────────────────────────── */}
+        {stats.totalSubjects === 0 && (
+          <motion.div variants={item} className="mb-6">
+            <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary-container/20 via-bg to-bg px-6 py-5">
+              <div className="absolute end-4 top-4 text-5xl opacity-10 select-none">🎓</div>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Package size={16} className="text-primary" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-primary">Get Started Instantly</p>
+                  </div>
+                  <h2 className="mt-1.5 text-lg font-bold tracking-tight text-fg">Load a Starter Deck</h2>
+                  <p className="mt-1 max-w-md text-sm text-muted-fg">
+                    Try Ruvren right away with a curated <strong>Modern Web Architecture</strong> subject — 12 flashcards, a pinned note, topics, and a sample session ready for review.
+                  </p>
+                  <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] font-bold uppercase tracking-widest text-muted-fg">
+                    {["🃏 12 Flashcards", "📝 1 Note", "🏷️ 2 Topics", "⏱ 1 Sample Session"].map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <Button onClick={loadStarter} disabled={starterLoading} size="sm">
+                  {starterLoading ? "Loading…" : "Load Starter Deck"}
+                </Button>
+              </div>
+            </div>
           </motion.div>
         )}
         {stats.dueCards > 0 && (

@@ -11,7 +11,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Square, SkipForward, Coffee, Brain, Music } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createStudySession, getSubjects, getPomoPresets, getDueCount, getTasks } from "@/app/actions";
+import { createStudySession, getSubjects, getTopics, getPomoPresets, getDueCount, getTasks } from "@/app/actions";
+import { showToast } from "@/components/toast";
 import { usePomodoro, phaseSeconds, BUILTIN_PRESETS } from "@/lib/pomodoro";
 import { soundscape, type SoundscapeName } from "@/lib/soundscape";
 import { RemindMeControl } from "./remind-me-control";
@@ -54,9 +55,11 @@ const PHASE_META = {
 export function FocusZone() {
   const t = useT();
   const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
+  const [topics, setTopics] = useState<{ id: string; name: string }[]>([]);
   const [presets, setPresets] = useState<PomoPresetRec[]>([]);
   const [dueCount, setDueCount] = useState(0);
   const [subjectId, setSubjectId] = useState("");
+  const [topicId, setTopicId] = useState("");
   const [task, setTask] = useState("");
   // Open tasks, for the banner's suggestions — a session named after one of
   // these is that task's session (see stop()).
@@ -95,6 +98,20 @@ export function FocusZone() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Dynamically load topics when a subject is selected
+  useEffect(() => {
+    if (!subjectId) { setTopics([]); setTopicId(""); return; }
+    let cancelled = false;
+    getTopics(subjectId)
+      .then((ts) => {
+        if (cancelled) return;
+        setTopics(ts.map((x) => ({ id: x.id, name: x.name })));
+        setTopicId("");
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [subjectId]);
+
   const pickSoundscape = (name: SoundscapeName) => {
     setSoundscapeName(name);
     soundscape.play(name); // "Silence" stops the engine
@@ -125,8 +142,15 @@ export function FocusZone() {
       // A session named exactly after an open task IS that task's session, so
       // the task advances/closes on save (createStudySession owns that rule).
       const linked = openTasks.find((x) => x.title === title) ?? null;
+      // Build a human-readable label for the post-session toast.
+      const subjectName = subjects.find((s) => s.id === (snap.subjectId ?? subjectId))?.name;
+      const topicName = topics.find((tp) => tp.id === topicId)?.name;
+      const loggedTo = subjectName
+        ? topicName ? `${subjectName} › ${topicName}` : subjectName
+        : null;
       createStudySession({
-        subjectId: snap.subjectId || undefined,
+        subjectId: snap.subjectId || subjectId || undefined,
+        topicId: topicId || undefined,
         title,
         durationMin: duration,
         completed: true,
@@ -134,6 +158,13 @@ export function FocusZone() {
         // attributes a midnight-crossing session to the day it began.
         startedAt: new Date(snap.startedAt),
         taskId: linked?.id ?? null,
+      }).then(() => {
+        showToast(
+          loggedTo
+            ? `✓ ${duration}m logged to ${loggedTo}`
+            : `✓ ${duration}m session saved`,
+          "success"
+        );
       }).catch(() => {
         // Silent loss of a completed focus session is the worst failure mode
         // (user blame-shifts to the app's reliability). Say it, once, with
@@ -142,7 +173,8 @@ export function FocusZone() {
           message: "Session completed — couldn't save",
           undo: () => {
             createStudySession({
-              subjectId: snap.subjectId || undefined,
+              subjectId: snap.subjectId || subjectId || undefined,
+              topicId: topicId || undefined,
               title,
               durationMin: duration,
               completed: true,
@@ -374,6 +406,25 @@ export function FocusZone() {
               </option>
             ))}
           </select>
+        )}
+        {topics.length > 0 && (
+          <>
+            <span className="h-3 w-px shrink-0 bg-border" aria-hidden />
+            <select
+              aria-label="Topic"
+              value={topicId}
+              onChange={(e) => setTopicId(e.target.value)}
+              disabled={pomo.running}
+              className="shrink-0 cursor-pointer rounded-full bg-transparent text-xs text-muted-fg outline-none disabled:opacity-60"
+            >
+              <option value="">All topics</option>
+              {topics.map((tp) => (
+                <option key={tp.id} value={tp.id}>
+                  {tp.name}
+                </option>
+              ))}
+            </select>
+          </>
         )}
       </motion.div>
     </div>
