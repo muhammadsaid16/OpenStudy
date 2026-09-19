@@ -332,6 +332,12 @@ export default function NotePage() {
             />
           </div>
           <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />
+          <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary-container/10 p-3 text-xs text-muted-fg">
+            <Sparkles size={14} className="mt-0.5 shrink-0 text-primary" />
+            <div>
+              <strong className="text-fg">Knowledge Graph:</strong> Notes sharing matching tags or referencing other notes via <code className="rounded bg-bg-raised px-1 py-0.5 font-mono text-primary">[[Note Title]]</code> automatically link together in your <Link href="/graph" className="font-semibold text-primary underline">Knowledge Graph</Link>.
+            </div>
+          </div>
           <div className="flex justify-end gap-4 pt-4">
             <Button variant="ghost" onClick={() => setEditOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleEditSave} disabled={!editTitle.trim()}>{t("common.save")}</Button>
