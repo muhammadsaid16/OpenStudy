@@ -120,12 +120,22 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
   const handlePickChoice = async (opt: string) => {
     setAnswers((prev) => ({ ...prev, [curQ.id]: opt }));
     await answerExamQuestion(curQ.id, { mode: "choice", answer: opt });
+    if (idx < questions.length - 1) {
+      setIdx((i) => i + 1);
+    } else {
+      await handleSubmitExam();
+    }
   };
 
   const handleSelfGrade = async (quality: number) => {
     setSelfGrades((prev) => ({ ...prev, [curQ.id]: quality }));
     setAnswers((prev) => ({ ...prev, [curQ.id]: quality >= 3 ? "Correct" : "Incorrect" }));
     await answerExamQuestion(curQ.id, { mode: "self", quality });
+    if (idx < questions.length - 1) {
+      setIdx((i) => i + 1);
+    } else {
+      await handleSubmitExam();
+    }
   };
 
   const handleSubmitExam = async () => {
@@ -191,7 +201,7 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
             <div className="flex items-center justify-between border-b border-border/60 pb-3">
               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-fg">Question Navigator</h3>
               <span className="font-mono text-xs font-bold text-primary">
-                {answeredCount}/{questions.length}
+                {answeredCount}/{questions.length} answered
               </span>
             </div>
 
@@ -246,7 +256,7 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
             {/* Top row: question index + flag button */}
             <div className="flex items-center justify-between border-b border-border/60 pb-4">
               <span className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-                Question {idx + 1} of {questions.length}
+                Question {idx + 1} of {questions.length} <span className="ms-2 font-mono text-primary">({idx + 1} / {questions.length})</span>
               </span>
               <button
                 type="button"
@@ -268,9 +278,15 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
                 <Markdown content={curQ.frontText} align="center" />
               </div>
 
+              {curQ.frontImage && (
+                <div className="mt-4 flex justify-center">
+                  <CardImage rec={curQ.frontImage} />
+                </div>
+              )}
+
               {/* Multiple Choice Options */}
               {curQ.choicesSnapshot && curQ.choicesSnapshot.length > 0 ? (
-                <div className="grid gap-3 pt-4">
+                <div className="glass grid gap-3 pt-4 p-2 rounded-2xl">
                   {curQ.choicesSnapshot.map((opt) => {
                     const sel = curAns === opt;
                     return (
@@ -278,7 +294,7 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
                         key={opt}
                         type="button"
                         onClick={() => handlePickChoice(opt)}
-                        className={`flex items-center justify-between rounded-xl border p-4 text-start text-sm font-bold transition-colors ${
+                        className={`glass flex items-center justify-between rounded-xl border p-4 text-start text-sm font-bold transition-colors ${
                           sel
                             ? "border-primary bg-primary-container text-on-primary-container"
                             : "border-border bg-bg/50 text-fg hover:border-primary/40 hover:bg-primary-container/10"
@@ -291,25 +307,43 @@ export function ExamRunner({ examId, onExit, onFinish }: ExamRunnerProps) {
                   })}
                 </div>
               ) : (
-                /* Basic / Cloze Self Grade (Strict exam rules: no instant answer leak during run) */
+                /* Basic / Cloze Self Grade */
                 <div className="space-y-3 pt-4">
                   <p className="text-xs font-bold uppercase tracking-widest text-muted-fg">
-                    Rate your confidence for this concept:
+                    Rate your response:
                   </p>
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <Button
-                      variant={curSelf === 0 ? "primary" : "secondary"}
-                      onClick={() => handleSelfGrade(0)}
+                      variant={curSelf === 1 ? "primary" : "secondary"}
+                      onClick={() => handleSelfGrade(1)}
                       size="sm"
+                      className="text-red-400"
                     >
-                      Unsure / Incorrect
+                      Again
+                    </Button>
+                    <Button
+                      variant={curSelf === 2 ? "primary" : "secondary"}
+                      onClick={() => handleSelfGrade(2)}
+                      size="sm"
+                      className="text-amber-400"
+                    >
+                      Hard
+                    </Button>
+                    <Button
+                      variant={curSelf === 3 ? "primary" : "secondary"}
+                      onClick={() => handleSelfGrade(3)}
+                      size="sm"
+                      className="text-emerald-400"
+                    >
+                      Good
                     </Button>
                     <Button
                       variant={curSelf === 5 ? "primary" : "secondary"}
                       onClick={() => handleSelfGrade(5)}
                       size="sm"
+                      className="text-blue-400"
                     >
-                      Confident / Correct
+                      Easy
                     </Button>
                   </div>
                 </div>

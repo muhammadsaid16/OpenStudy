@@ -79,6 +79,7 @@ const DICT: Dict = {
   "page.plan": { en: "Planner", ar: "المخطط" },
   "page.plan.subtitle": { en: "Your workload, distributed by your real data", ar: "حجم عملك موزّعاً ببياناتك الحقيقية" },
   "nav.plan": { en: "Planner", ar: "المخطط" },
+  "nav.graph": { en: "Knowledge Graph", ar: "شبكة المعرفة" },
   "nav.practice": { en: "Practice", ar: "التدريب" },
 
   // ─── exam (Study OS) ───────────────────────────────────

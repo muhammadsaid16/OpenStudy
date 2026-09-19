@@ -6,19 +6,21 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { createBundle, importCardsIntoBundle } from "@/app/actions";
-import { decodeShare, parseSharedBundle, type SharedBundle } from "@/lib/share";
+import { decodeShare, decodeShareEncrypted, isEncryptedPayload, parseSharedBundle, type SharedBundle } from "@/lib/share";
 
-type SharedState = { bundle: SharedBundle } | { bad: true; reason: string } | { empty: true };
+type SharedState = { bundle: SharedBundle } | { encrypted: true; hash: string } | { bad: true; reason: string } | { empty: true };
 
 function decodeFromHash(hash: string): SharedState {
   const raw = hash.startsWith("#") ? hash.slice(1) : hash;
   if (!raw.trim()) return { empty: true };
+  if (isEncryptedPayload(hash)) {
+    return { encrypted: true, hash: raw };
+  }
   try {
     const bundle = parseSharedBundle(decodeShare<unknown>(hash));
     return { bundle };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    // A deck shared with 0 cards — friendlier than "invalid link".
     if (msg.includes("cards") && (msg.includes("too_small") || msg.includes(">= 1"))) {
       return { bad: true, reason: "THE SENDER SHARED AN EMPTY DECK — IT HAS NO CARDS YET. ASK THEM TO ADD CARDS AND SHARE AGAIN." };
     }
@@ -37,12 +39,29 @@ export default function SharePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [fileBusy, setFileBusy] = useState(false);
+  const [passcode, setPasscode] = useState("");
+  const [decrypting, setDecrypting] = useState(false);
 
   useEffect(() => {
     const sync = () => setShared(decodeFromHash(window.location.hash));
     window.addEventListener("hashchange", sync);
     return () => window.removeEventListener("hashchange", sync);
   }, []);
+
+  async function handleDecrypt() {
+    if (!("encrypted" in shared)) return;
+    setDecrypting(true);
+    setError("");
+    try {
+      const raw = await decodeShareEncrypted<unknown>(shared.hash, passcode);
+      const parsed = parseSharedBundle(raw);
+      setShared({ bundle: parsed });
+    } catch {
+      setError("INCORRECT PASSCODE OR CORRUPT PAYLOAD.");
+    } finally {
+      setDecrypting(false);
+    }
+  }
 
   async function doImport() {
     if (!bundle) return;
@@ -74,6 +93,30 @@ export default function SharePage() {
       setShared({ bundle: parsed });
     } catch { setError("INVALID FILE — ASK THE SENDER FOR A FRESH EXPORT."); }
     finally { setFileBusy(false); e.target.value = ""; }
+  }
+
+  if ("encrypted" in shared) {
+    return (
+      <div className="mx-auto max-w-lg p-12 text-center">
+        <h1 className="text-2xl font-bold uppercase">Encrypted Deck</h1>
+        <p className="mt-2 text-xs uppercase tracking-widest text-muted-fg">
+          THIS DECK IS PASSWORD PROTECTED WITH AES-GCM ENCRYPTION. ENTER THE PASSCODE BELOW TO UNLOCK.
+        </p>
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <input
+            type="password"
+            placeholder="Enter passcode..."
+            value={passcode}
+            onChange={(e) => setPasscode(e.target.value)}
+            className="w-full max-w-xs rounded-full border border-border bg-bg px-4 py-2 text-center text-sm font-bold text-fg focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <Button onClick={handleDecrypt} disabled={decrypting || !passcode.trim()}>
+            {decrypting ? "Decrypting..." : "Unlock & Preview Deck"}
+          </Button>
+        </div>
+        {error !== "" && <p className="mt-4 text-xs font-bold uppercase tracking-widest text-danger">{error}</p>}
+      </div>
+    );
   }
 
   if ("empty" in shared) {

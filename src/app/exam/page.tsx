@@ -56,7 +56,7 @@ function ExamContent() {
     return <ExamRunner examId={examId} onExit={async () => { await abandonExam(examId); setPhase("setup"); }} onFinish={() => setPhase("results")} />;
   }
   if (phase === "results" && examId) {
-    return <ExamDiagnosticReport examId={examId} onRetake={() => setPhase("setup")} />;
+    return <ExamDiagnosticReport examId={examId} onRetake={() => setPhase("setup")} onNewExam={() => setPhase("setup")} />;
   }
   return <ExamSetup onStart={(id) => { setExamId(id); setPhase("running"); }} history={history} onDeleteExam={deleteExam} />;
 }

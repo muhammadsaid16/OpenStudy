@@ -87,7 +87,7 @@ export function SyncPanel() {
   const [currentPairingCode, setCurrentPairingCode] = useState("");
   const [copiedCode, setCopiedCode] = useState(false);
   const [isSyncingManual, setIsSyncingManual] = useState(false);
-  const [showBackupSection, setShowBackupSection] = useState(false);
+  const [showBackupSection, setShowBackupSection] = useState(true);
 
   // Backup & emergency export state
   const [status, setStatus] = useState<SyncStatus | null>(null);
@@ -225,16 +225,21 @@ export function SyncPanel() {
   const handleImportBundle = async (file: File) => {
     setBusy("import");
     try {
-      const decoded = decodeBundle(await file.text());
+      const text = await file.text();
+      const decoded = decodeBundle(text);
       if (!decoded.ok || !decoded.payload) {
-        showToast("Invalid backup file", "danger");
+        showToast("That file is a full database backup — not a device file. Use 'Restore from backup' below.", "warning");
+        return;
+      }
+      if (decoded.payload.deviceId === deviceIdentity().id) {
+        showToast("That file came from this device", "warning");
         return;
       }
       const report = await applySyncChanges(decoded.payload);
       showToast(`Restored: ${report.inserted} added, ${report.replaced} updated`, "success");
       refreshData();
     } catch {
-      showToast("Import failed", "danger");
+      showToast("That file is a full database backup — not a device file. Use 'Restore from backup' below.", "warning");
     } finally {
       setBusy(null);
     }
@@ -596,7 +601,7 @@ export function SyncPanel() {
           <div className="mt-4 space-y-4 border-t border-border/60 pt-4">
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="secondary" loading={busy === "export"} onClick={handleExportBundle}>
-                <Download size={14} /> Export Backup File
+                <Download size={14} /> Export for another device
               </Button>
               <Button
                 size="sm"
@@ -609,6 +614,7 @@ export function SyncPanel() {
               <input
                 ref={fileRef}
                 type="file"
+                aria-label="Merge from another device"
                 accept=".json,application/json"
                 className="hidden"
                 onChange={(e) => {

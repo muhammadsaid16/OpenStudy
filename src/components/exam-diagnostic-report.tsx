@@ -28,9 +28,11 @@ import { useRouter } from "next/navigation";
 export function ExamDiagnosticReport({
   examId,
   onRetake,
+  onNewExam,
 }: {
   examId: string;
   onRetake?: () => void;
+  onNewExam?: () => void;
 }) {
   const router = useRouter();
   const [data, setData] = useState<Awaited<ReturnType<typeof getExamResults>> | null>(null);
@@ -124,7 +126,7 @@ export function ExamDiagnosticReport({
             <div className="text-center">
               <p className="text-4xl font-black tracking-tight text-fg">{totals.scorePct}%</p>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-fg mt-0.5">
-                {totals.correct} of {totals.total} Correct
+                {totals.correct} of {totals.answered} correct
               </p>
             </div>
             <div className="h-10 w-px bg-border/60" />
@@ -134,6 +136,11 @@ export function ExamDiagnosticReport({
             </div>
           </div>
         </div>
+        {exam.practiceOnly && (
+          <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-muted-fg">
+            Practice exam — nothing was scheduled.
+          </p>
+        )}
       </div>
 
       {/* 1-Click Remediation Action Banner (if missed questions exist) */}
@@ -219,8 +226,8 @@ export function ExamDiagnosticReport({
             <RotateCcw size={14} />Retake Exam
           </Button>
         )}
-        <Button onClick={() => router.push("/exam")}>
-          Back to Exams
+        <Button onClick={() => (onNewExam ? onNewExam() : router.push("/exam"))}>
+          New Exam
         </Button>
       </div>
     </div>

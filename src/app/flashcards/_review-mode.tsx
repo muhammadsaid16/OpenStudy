@@ -75,8 +75,27 @@ export interface ReviewModeProps<C extends ReviewCard> {
   onStopTts: () => void;
 }
 
+import { AudioStudyPlayer } from "@/components/audio-study-player";
+import { useState } from "react";
+
 export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
   const t = useT();
+  const [isHandsFree, setIsHandsFree] = useState(false);
+
+  // If Hands-Free Mode is active, render AudioStudyPlayer
+  if (isHandsFree && p.activeCard) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <AudioStudyPlayer
+          card={{ front: p.activeCard.front, back: p.activeCard.back }}
+          isFlipped={p.isFlipped}
+          onFlipTo={p.onFlipTo}
+          onRate={p.onRate}
+          onCloseHandsFree={() => setIsHandsFree(false)}
+        />
+      </div>
+    );
+  }
   // No bundle selected → overview grid
   if (!p.selectedBundle && !p.allDue && !p.topicParam) {
     return (
@@ -201,8 +220,8 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
         />
       </div>
 
-      {/* Speed Sprint toggle */}
-      <div className="flex items-center gap-4">
+      {/* Speed Sprint & Hands-Free Audio toggles */}
+      <div className="flex items-center gap-3">
         <button
           onClick={p.onToggleSprint}
           className={cn(
@@ -211,6 +230,13 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
           )}
         >
           <Timer size={14} />{t("ui.speed_sprint")}</button>
+
+        <button
+          onClick={() => setIsHandsFree(true)}
+          className="flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/20"
+        >
+          <Volume2 size={14} /> Hands-Free Audio Mode
+        </button>
         {p.sprintMode && p.isFlipped && (
           <div className="flex items-center gap-2">
             <div className="h-2 w-24 rounded-full bg-muted">

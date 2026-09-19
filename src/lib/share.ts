@@ -63,3 +63,78 @@ export function parseSharedBundle(raw: unknown): SharedBundle {
   }
   return sharedBundleSchema.parse(norm);
 }
+
+// ─── AES-GCM Encryption Extensions ─────────────────────────────
+export function isEncryptedPayload(hash: string): boolean {
+  const clean = hash.startsWith("#") ? hash.slice(1) : hash;
+  return clean.startsWith("enc:");
+}
+
+export async function encodeShareEncrypted(bundle: SharedBundle, passcode: string): Promise<string> {
+  const json = JSON.stringify({ app: "studymax-share", version: 1, ...bundle });
+  const enc = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(passcode),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt"]
+  );
+
+  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(json));
+
+  const saltHex = Array.from(salt).map((b) => b.toString(16).padStart(2, "0")).join("");
+  const ivHex = Array.from(iv).map((b) => b.toString(16).padStart(2, "0")).join("");
+  const cipherB64 = btoa(String.fromCharCode(...new Uint8Array(ciphertext)))
+    .replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+
+  return `enc:${saltHex}:${ivHex}:${cipherB64}`;
+}
+
+export async function decodeShareEncrypted<T>(hash: string, passcode: string): Promise<T> {
+  const clean = hash.startsWith("#") ? hash.slice(1) : hash;
+  const parts = clean.split(":");
+  if (parts.length !== 4 || parts[0] !== "enc") throw new Error("Invalid encrypted payload format");
+
+  const salt = new Uint8Array(parts[1].match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
+  const iv = new Uint8Array(parts[2].match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
+  
+  let cipherB64 = parts[3].replaceAll("-", "+").replaceAll("_", "/");
+  const pad = cipherB64.length % 4;
+  if (pad === 2) cipherB64 += "==";
+  else if (pad === 3) cipherB64 += "=";
+  const ciphertext = Uint8Array.from(atob(cipherB64), (c) => c.charCodeAt(0));
+
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(passcode),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
+
+  const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+  const json = new TextDecoder().decode(decrypted);
+  return JSON.parse(json) as T;
+}
+

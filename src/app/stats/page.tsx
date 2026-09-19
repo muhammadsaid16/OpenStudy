@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useT } from "@/lib/i18n";
-import { Card } from "@/components/ui";
+import { Card, Button } from "@/components/ui";
 import { RevealHeading } from "@/components/reveal-heading";
 import { ScrambleSubtitle } from "@/components/scramble-subtitle";
 import { PageLoader } from "@/components/page-loader";
@@ -11,7 +11,7 @@ import { StatsHeatmap } from "@/components/stats-heatmap";
 import { RetentionCurve } from "@/components/retention-curve";
 import { HardestCardsTable } from "@/components/hardest-cards-table";
 import { ForecastCard, BundleMasteryTable } from "@/components/stats-forecast-mastery";
-import { getAllReviewLogs, getBundles, getFlashcards, getStudySessions, getSubjects } from "@/app/actions";
+import { getAllReviewLogs, getBundles, getFlashcards, getStudySessions, getSubjects, createBundle, importCardsIntoBundle } from "@/app/actions";
 import { computeStreak } from "@/lib/stats";
 import { isDueCard } from "@/lib/review-queue";
 import { isCorrect } from "@/lib/card-status";
@@ -397,9 +397,49 @@ export default function StatsPage() {
       </Card>
 
       <Card className="mt-6 !p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <p className="font-semibold tracking-tight">{t("ui.hardest_cards")}</p>
-          {leeches > 0 && <span className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-on-color">{leeches} leeches</span>}
+        <div className="flex items-center justify-between mb-1">
+          <div>
+            <p className="font-semibold tracking-tight">FSRS Memory Stability Tiers</p>
+            <p className="text-[11px] uppercase tracking-widest text-muted-fg">Card distribution by memory retention stability</p>
+          </div>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-fg">{cards.length} Total Cards</span>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: "Fragile (<1d)", count: cards.filter(c => (c.fsrsStability ?? c.intervalDays) < 1).length, color: "var(--color-danger)" },
+            { label: "Learning (1-7d)", count: cards.filter(c => (c.fsrsStability ?? c.intervalDays) >= 1 && (c.fsrsStability ?? c.intervalDays) < 7).length, color: "var(--color-warning)" },
+            { label: "Solid (7-30d)", count: cards.filter(c => (c.fsrsStability ?? c.intervalDays) >= 7 && (c.fsrsStability ?? c.intervalDays) < 30).length, color: "var(--color-accent)" },
+            { label: "Permanent (>30d)", count: cards.filter(c => (c.fsrsStability ?? c.intervalDays) >= 30).length, color: "var(--color-grow)" },
+          ].map((tier) => (
+            <div key={tier.label} className="rounded-xl border border-border bg-bg/50 p-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-fg" style={{ color: tier.color }}>
+                {tier.label}
+              </span>
+              <p className="mt-1 font-mono text-2xl font-bold">{tier.count}</p>
+              <p className="text-[10px] text-muted-fg">{cards.length ? Math.round((tier.count / cards.length) * 100) : 0}% of deck</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="mt-6 !p-5">
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <p className="font-semibold tracking-tight">{t("ui.hardest_cards")}</p>
+            {leeches > 0 && <span className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-on-color">{leeches} leeches</span>}
+          </div>
+          <Button
+            size="sm"
+            onClick={async () => {
+              const weakCards = cards.filter(c => c.isLeech || (c.fsrsStability ?? c.intervalDays) < 3).slice(0, 20);
+              if (weakCards.length === 0) return;
+              const b = await createBundle({ name: "Revision: Weak Concepts (" + new Date().toLocaleDateString() + ")" });
+              await importCardsIntoBundle(b.id, weakCards.map(c => ({ front: c.front, back: c.back, kind: c.kind ?? undefined, choices: c.choices ?? undefined })));
+              window.location.href = "/bundles/" + b.id + "/cards";
+            }}
+          >
+            Create Weakness Revision Deck
+          </Button>
         </div>
         <p className="mb-3 text-[11px] uppercase tracking-widest text-muted-fg">Lowest accuracy (min. 3 reviews) · filtered by period</p>
         <HardestCardsTable reviews={filteredReviews} cards={cards} bundles={bundles} />

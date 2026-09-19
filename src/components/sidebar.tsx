@@ -19,6 +19,7 @@ import {
   Headphones,
   FileQuestion,
   CalendarRange,
+  Network,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -30,6 +31,7 @@ const navGroups: { headingKey: string; items: { href: string; labelKey: string; 
     items: [
       { href: "/subjects", labelKey: "nav.library", icon: Library },
       { href: "/notes", labelKey: "nav.notes", icon: StickyNote },
+      { href: "/graph", labelKey: "nav.graph", icon: Network },
     ],
   },
   {

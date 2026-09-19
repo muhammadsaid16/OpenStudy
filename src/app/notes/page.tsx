@@ -22,6 +22,7 @@ import { useLiveData } from "@/lib/use-live-data";
 import { NoteSelectionToolbar } from "@/components/note-selection-toolbar";
 import { QuickFlashcardModal } from "@/components/quick-flashcard-modal";
 import { AiGenerateModal } from "@/components/ai-generate-modal";
+import { AIGeneratorModal } from "@/components/ai-generator-modal";
 
 type Note = Omit<Awaited<ReturnType<typeof getAllNotes>>[number], "topic"> & {
   topic: Awaited<ReturnType<typeof getAllNotes>>[number]["topic"] | null;
@@ -37,6 +38,7 @@ function NotesContent() {
   const [bundles, setBundles] = useState<BundleRec[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [aiGenModalOpen, setAiGenModalOpen] = useState(false);
   const [selectedTopicId, setSelectedTopicId] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -347,6 +349,13 @@ function NotesContent() {
                 </>
               )}
             </div>
+            <button
+              onClick={() => setAiGenModalOpen(true)}
+              className="flex h-10 items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/20"
+            >
+              <Sparkles size={14} />
+              AI Card Gen
+            </button>
             <button
               onClick={() => importInputRef.current?.click()}
               disabled={importing}
@@ -693,7 +702,9 @@ function NotesContent() {
           onClose={() => setAiGenerateNote(null)}
         />
       )}
-</div>
+      {/* Universal AI Card Generator Modal */}
+      <AIGeneratorModal open={aiGenModalOpen} onClose={() => setAiGenModalOpen(false)} />
+    </div>
   );
 }
 
