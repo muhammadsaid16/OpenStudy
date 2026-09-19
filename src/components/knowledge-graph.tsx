@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLiveData } from "@/lib/use-live-data";
-import { getSubjects, getAllTopics as getTopics, getAllNotes as getNotes, getBundles, listExams as getExams } from "@/app/actions";
+import { getSubjects, getAllTopics as getTopics, getAllNotes, getBundles, listExams as getExams } from "@/app/actions";
 import { Card, Button } from "@/components/ui";
-import { Search, ZoomIn, ZoomOut, RefreshCw, Network, BookOpen, FileText, Layers, FileQuestion, Filter } from "lucide-react";
+import { Search, ZoomIn, ZoomOut, RefreshCw, Network, BookOpen, FileText, Layers, FileQuestion, Filter, Tag } from "lucide-react";
 import type { SubjectRec, TopicRec, NoteRec, BundleRec, ExamRec } from "@/lib/db";
 
-export type GraphNodeType = "subject" | "topic" | "note" | "bundle" | "exam";
+export type GraphNodeType = "subject" | "topic" | "note" | "bundle" | "exam" | "tag";
 
 export interface GraphNode {
   id: string;
@@ -42,7 +42,7 @@ export function KnowledgeGraph() {
   const dragStartRef = useRef({ x: 0, y: 0 });
 
   const data = useLiveData(
-    () => Promise.all([getSubjects(), getTopics(), getNotes(), getBundles(), getExams()]),
+    () => Promise.all([getSubjects(), getTopics(), getAllNotes(), getBundles(), getExams()]),
     []
   );
 
@@ -52,6 +52,16 @@ export function KnowledgeGraph() {
   const { initialNodes, links } = useMemo(() => {
     const rawNodes: GraphNode[] = [];
     const rawLinks: GraphLink[] = [];
+    const linkSet = new Set<string>();
+
+    const addLink = (source: string, target: string) => {
+      if (!source || !target || source === target) return;
+      const key = [source, target].sort().join("---");
+      if (!linkSet.has(key)) {
+        linkSet.add(key);
+        rawLinks.push({ source, target });
+      }
+    };
 
     const width = 800;
     const height = 600;
@@ -75,7 +85,7 @@ export function KnowledgeGraph() {
     });
 
     // 2. Topics
-    (topics as TopicRec[]).forEach((t, idx) => {
+    (topics as TopicRec[]).forEach((t) => {
       const parentSub = rawNodes.find((n) => n.id === `subject-${t.subjectId}`);
       const px = parentSub ? parentSub.x : width / 2;
       const py = parentSub ? parentSub.y : height / 2;
@@ -95,18 +105,49 @@ export function KnowledgeGraph() {
       });
 
       if (parentSub) {
-        rawLinks.push({ source: `subject-${t.subjectId}`, target: `topic-${t.id}` });
+        addLink(`subject-${t.subjectId}`, `topic-${t.id}`);
       }
     });
 
-    // 3. Notes
-    (notes as NoteRec[]).forEach((n) => {
+    // 3. Notes & Tag Map
+    const tagToNodeMap = new Map<string, { tagName: string; nodeIds: string[] }>();
+
+    (notes as (NoteRec & { tags?: unknown[] })[]).forEach((n) => {
       const parentTopic = n.topicId ? rawNodes.find((x) => x.id === `topic-${n.topicId}`) : null;
       const px = parentTopic ? parentTopic.x : width / 2 + (Math.random() - 0.5) * 250;
       const py = parentTopic ? parentTopic.y : height / 2 + (Math.random() - 0.5) * 250;
 
+      // Extract all tag names for this note
+      const tagNames: string[] = [];
+      if (Array.isArray(n.tags)) {
+        for (const t of n.tags) {
+          if (typeof t === "string" && t.trim()) {
+            tagNames.push(t.trim());
+          } else if (t && typeof t === "object") {
+            const name = (t as { tag?: { name?: string }; name?: string }).tag?.name || (t as { name?: string }).name;
+            if (typeof name === "string" && name.trim()) {
+              tagNames.push(name.trim());
+            }
+          }
+        }
+      }
+
+      // Check inline #hashtags in title or content
+      const inlineMatches = `${n.title || ""} ${n.content || ""}`.match(/(?:^|\s)#([a-zA-Z0-9_\u0600-\u06FF-]+)/g);
+      if (inlineMatches) {
+        for (const m of inlineMatches) {
+          const clean = m.trim().replace(/^#/, "");
+          if (clean && !tagNames.some((t) => t.toLowerCase() === clean.toLowerCase())) {
+            tagNames.push(clean);
+          }
+        }
+      }
+
+      const nodeId = `note-${n.id}`;
+      const tagDisplay = tagNames.length ? ` · #${tagNames.join(" #")}` : "";
+
       rawNodes.push({
-        id: `note-${n.id}`,
+        id: nodeId,
         label: n.title || "Untitled Note",
         type: "note",
         color: "#3b82f6",
@@ -116,12 +157,32 @@ export function KnowledgeGraph() {
         vx: 0,
         vy: 0,
         href: `/notes/${n.id}`,
-        meta: `Note · ${n.isPinned ? "Pinned" : "Standard"}`,
+        meta: `Note · ${n.isPinned ? "Pinned" : "Standard"}${tagDisplay}`,
       });
 
       if (parentTopic) {
-        rawLinks.push({ source: parentTopic.id, target: `note-${n.id}` });
+        addLink(parentTopic.id, nodeId);
       }
+
+      // Wikilinks [[Title]]
+      const wikilinks = Array.from(`${n.title || ""} ${n.content || ""}`.matchAll(/\[\[(.*?)\]\]/g)).map((m) => m[1].trim());
+      wikilinks.forEach((targetTitle) => {
+        const targetNote = (notes as NoteRec[]).find(
+          (other) => other.id !== n.id && other.title?.toLowerCase() === targetTitle.toLowerCase()
+        );
+        if (targetNote) {
+          addLink(nodeId, `note-${targetNote.id}`);
+        }
+      });
+
+      // Index tags
+      tagNames.forEach((tag) => {
+        const key = tag.toLowerCase();
+        if (!tagToNodeMap.has(key)) {
+          tagToNodeMap.set(key, { tagName: tag, nodeIds: [] });
+        }
+        tagToNodeMap.get(key)!.nodeIds.push(nodeId);
+      });
     });
 
     // 4. Bundles
@@ -133,8 +194,9 @@ export function KnowledgeGraph() {
       const px = parent ? parent.x : width / 2 + (Math.random() - 0.5) * 250;
       const py = parent ? parent.y : height / 2 + (Math.random() - 0.5) * 250;
 
+      const nodeId = `bundle-${b.id}`;
       rawNodes.push({
-        id: `bundle-${b.id}`,
+        id: nodeId,
         label: b.name,
         type: "bundle",
         color: b.color || "#8b5cf6",
@@ -148,14 +210,15 @@ export function KnowledgeGraph() {
       });
 
       if (parent) {
-        rawLinks.push({ source: parent.id, target: `bundle-${b.id}` });
+        addLink(parent.id, nodeId);
       }
     });
 
     // 5. Exams
     (exams as ExamRec[]).forEach((e) => {
+      const nodeId = `exam-${e.id}`;
       rawNodes.push({
-        id: `exam-${e.id}`,
+        id: nodeId,
         label: e.title || "Practice Exam",
         type: "exam",
         color: "#f59e0b",
@@ -170,8 +233,46 @@ export function KnowledgeGraph() {
 
       if (e.subjectIds && e.subjectIds.length > 0) {
         e.subjectIds.forEach((subId) => {
-          rawLinks.push({ source: `subject-${subId}`, target: `exam-${e.id}` });
+          addLink(`subject-${subId}`, nodeId);
         });
+      }
+    });
+
+    // 6. Tags & Tag-based Connections
+    tagToNodeMap.forEach(({ tagName, nodeIds }, key) => {
+      const tagNodeId = `tag-${key}`;
+      const connectedNodes = rawNodes.filter((n) => nodeIds.includes(n.id));
+      let avgX = width / 2;
+      let avgY = height / 2;
+      if (connectedNodes.length > 0) {
+        avgX = connectedNodes.reduce((acc, n) => acc + n.x, 0) / connectedNodes.length;
+        avgY = connectedNodes.reduce((acc, n) => acc + n.y, 0) / connectedNodes.length;
+      }
+
+      rawNodes.push({
+        id: tagNodeId,
+        label: `#${tagName}`,
+        type: "tag",
+        color: "#10b981", // Emerald
+        radius: 13,
+        x: avgX + (Math.random() - 0.5) * 50,
+        y: avgY + (Math.random() - 0.5) * 50,
+        vx: 0,
+        vy: 0,
+        href: `/notes`,
+        meta: `Tag · ${nodeIds.length} item${nodeIds.length === 1 ? "" : "s"} tagged #${tagName}`,
+      });
+
+      // Link the tag node to each tagged note
+      nodeIds.forEach((nodeId) => {
+        addLink(tagNodeId, nodeId);
+      });
+
+      // Directly connect notes that share this tag
+      for (let i = 0; i < nodeIds.length; i++) {
+        for (let j = i + 1; j < nodeIds.length; j++) {
+          addLink(nodeIds[i], nodeIds[j]);
+        }
       }
     });
 
@@ -283,7 +384,6 @@ export function KnowledgeGraph() {
       ctx.scale(zoom, zoom);
 
       // Draw links
-      ctx.lineWidth = 1.5;
       links.forEach((link) => {
         const source = activeNodes.find((n) => n.id === link.source);
         const target = activeNodes.find((n) => n.id === link.target);
@@ -292,13 +392,34 @@ export function KnowledgeGraph() {
           const targetVisible = filteredNodeIds.has(target.id);
           const isHighlighted = sourceVisible && targetVisible;
 
+          const isConnectedToHovered =
+            (hoveredNode && (source.id === hoveredNode.id || target.id === hoveredNode.id)) ||
+            (selectedNode && (source.id === selectedNode.id || target.id === selectedNode.id));
+
+          const isTagLink = source.type === "tag" || target.type === "tag";
+
           ctx.beginPath();
           ctx.moveTo(source.x, source.y);
           ctx.lineTo(target.x, target.y);
-          ctx.strokeStyle = isHighlighted ? "rgba(99, 102, 241, 0.35)" : "rgba(100, 116, 139, 0.08)";
+
+          if (isConnectedToHovered) {
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = isTagLink ? "rgba(16, 185, 129, 0.95)" : "rgba(99, 102, 241, 0.95)";
+          } else if (isHighlighted) {
+            ctx.lineWidth = 1.8;
+            ctx.strokeStyle = isTagLink ? "rgba(16, 185, 129, 0.6)" : "rgba(99, 102, 241, 0.5)";
+          } else {
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "rgba(100, 116, 139, 0.15)";
+          }
           ctx.stroke();
         }
       });
+
+      // Computed theme text color
+      const computedTextColor = typeof window !== "undefined"
+        ? window.getComputedStyle(canvas).color || "#0f172a"
+        : "#0f172a";
 
       // Draw nodes
       activeNodes.forEach((n) => {
@@ -316,12 +437,12 @@ export function KnowledgeGraph() {
 
         if (isVisible) {
           ctx.lineWidth = isSelected ? 3 : 1.5;
-          ctx.strokeStyle = isSelected ? "#ffffff" : "rgba(255, 255, 255, 0.4)";
+          ctx.strokeStyle = isSelected ? "#ffffff" : "rgba(255, 255, 255, 0.6)";
           ctx.stroke();
 
-          // Text label
+          // Text label with theme-aware color
           ctx.font = `${isHovered ? "bold " : ""}11px Inter, sans-serif`;
-          ctx.fillStyle = "#f8fafc";
+          ctx.fillStyle = computedTextColor;
           ctx.textAlign = "center";
           ctx.fillText(n.label, n.x, n.y + n.radius + 14);
         }
@@ -428,6 +549,7 @@ export function KnowledgeGraph() {
             { id: "subject", label: "Subjects", icon: BookOpen },
             { id: "topic", label: "Topics", icon: Filter },
             { id: "note", label: "Notes", icon: FileText },
+            { id: "tag", label: "Tags", icon: Tag },
             { id: "bundle", label: "Decks", icon: Layers },
             { id: "exam", label: "Exams", icon: FileQuestion },
           ].map((f) => {
@@ -480,6 +602,7 @@ export function KnowledgeGraph() {
           <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-indigo-500" /> Subject</span>
           <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-purple-500" /> Topic</span>
           <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-blue-500" /> Note</span>
+          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Tag</span>
           <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-violet-500" /> Deck</span>
           <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Exam</span>
         </div>

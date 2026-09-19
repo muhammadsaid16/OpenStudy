@@ -13,6 +13,7 @@ test.describe("Ruvren V2.0 Milestone Features E2E", () => {
     await expect(page.getByRole("button", { name: /All Nodes/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Subjects/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Notes/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Tags/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Decks/i })).toBeVisible();
   });
 
