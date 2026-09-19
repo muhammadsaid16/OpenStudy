@@ -218,5 +218,73 @@ function isCorrectLike(quality: number): boolean {
   return quality >= 3; // mirrors card-status.isCorrect without importing it (purity)
 }
 
+/**
+ * Format an interval (in days) into a clean, human-readable string.
+ * Examples: 10m, 6h, 1.5d, 4d, 9d, 2.5mo, 1.2y.
+ */
+export function formatFsrsInterval(days: number): string {
+  if (!Number.isFinite(days) || days <= 0) return "10m";
+  if (days < 1 / 24) {
+    const mins = Math.max(10, Math.round(days * 1440));
+    return `${mins}m`;
+  }
+  if (days < 1) {
+    const hrs = Math.max(1, Math.round(days * 24));
+    return `${hrs}h`;
+  }
+  if (days < 30) {
+    const d = Math.round(days * 10) / 10;
+    return `${d}d`;
+  }
+  if (days < 365) {
+    const mo = Math.round((days / 30) * 10) / 10;
+    return `${mo}mo`;
+  }
+  const y = Math.round((days / 365) * 10) / 10;
+  return `${y}y`;
+}
+
+export interface FsrsIntervalPredictions {
+  again: string;
+  hard: string;
+  good: string;
+  easy: string;
+}
+
+/**
+ * Predict next review intervals for all four rating grades for a card at `now`.
+ */
+export function predictFsrsIntervals(
+  card: Sm2Like & { fsrsStability?: number | null; fsrsDifficulty?: number | null; fsrsLapses?: number | null },
+  nowMs: number = Date.now()
+): FsrsIntervalPredictions {
+  const hasFsrs =
+    typeof card.fsrsStability === "number" &&
+    typeof card.fsrsDifficulty === "number" &&
+    typeof card.fsrsLapses === "number";
+
+  const state: FsrsCardState = hasFsrs
+    ? {
+        stability: card.fsrsStability!,
+        difficulty: card.fsrsDifficulty!,
+        lapses: card.fsrsLapses!,
+        lastReview: card.lastReview ? new Date(card.lastReview).getTime() : null,
+        reviewCount: card.reviewCount,
+      }
+    : deriveFsrsState(card);
+
+  const stepHard = stepFsrs(state, "hard", nowMs);
+  const stepGood = stepFsrs(state, "good", nowMs);
+  const stepEasy = stepFsrs(state, "easy", nowMs);
+
+  return {
+    again: "10m",
+    hard: formatFsrsInterval(stepHard.intervalDays),
+    good: formatFsrsInterval(stepGood.intervalDays),
+    easy: formatFsrsInterval(stepEasy.intervalDays),
+  };
+}
+
 // Re-export so callers import the mapping from one place.
 export { gradeFromQuality };
+

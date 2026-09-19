@@ -1,12 +1,10 @@
-"use client";
-
-// ─── TopBar — greeting, live clock, global search trigger ─────────
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Menu } from "lucide-react";
+import { Search, Menu, Upload } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useAppStore } from "@/lib/store";
+import { db } from "@/lib/db";
+import { UniversalImportModal } from "@/components/universal-import-modal";
 
 function greetingFor(h: number, t: (k: string) => string) {
   if (h < 5) return t("topbar.greeting.late");
@@ -21,6 +19,9 @@ export function TopBar({ dueCards }: { dueCards: number }) {
   const [now, setNow] = useState<Date | null>(null);
   const [q, setQ] = useState("");
   const router = useRouter();
+
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [bundles, setBundles] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setNow(new Date()));
@@ -41,6 +42,12 @@ export function TopBar({ dueCards }: { dueCards: number }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  const handleOpenImport = async () => {
+    const bs = await db.bundles.toArray();
+    setBundles(bs.map((b) => ({ id: b.id, name: b.name })));
+    setImportModalOpen(true);
+  };
 
   return (
     <div className="mb-8 flex flex-wrap items-center gap-4">
@@ -72,7 +79,16 @@ export function TopBar({ dueCards }: { dueCards: number }) {
         </h1>
       </div>
 
-      <label className="glass-inset relative hidden h-10 w-full max-w-md items-center rounded-lg sm:flex lg:w-96">
+      <button
+        onClick={handleOpenImport}
+        title="Universal Importer & Vault Backup"
+        className="flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-3.5 text-xs font-bold uppercase tracking-widest text-muted-fg transition-colors hover:border-primary hover:text-primary hover:bg-primary-container/15"
+      >
+        <Upload size={14} />
+        Import / Backup
+      </button>
+
+      <label className="glass-inset relative hidden h-10 w-full max-w-md items-center rounded-lg sm:flex lg:w-80">
         <Search size={15} aria-hidden className="absolute start-3.5 text-muted-fg" />
         <input
           id="global-search"
@@ -88,6 +104,14 @@ export function TopBar({ dueCards }: { dueCards: number }) {
           className="w-full bg-transparent ps-10 pe-4 text-sm text-fg placeholder:text-muted-fg/60 outline-none"
         />
       </label>
+
+      {importModalOpen && (
+        <UniversalImportModal
+          bundles={bundles}
+          onClose={() => setImportModalOpen(false)}
+          onImportComplete={() => router.refresh()}
+        />
+      )}
     </div>
   );
 }

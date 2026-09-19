@@ -15,6 +15,7 @@ import { spotlightProps } from "@/lib/interactions";
 import { Markdown } from "@/components/markdown";
 import { Volume2, VolumeX } from "lucide-react";
 import { RATING_BUTTONS } from "@/lib/card-status";
+import { predictFsrsIntervals } from "@/lib/fsrs";
 import { CardImage } from "@/components/card-image";
 import type { CardImageRec } from "@/lib/db";
 
@@ -387,21 +388,38 @@ export function ReviewMode<C extends ReviewCard>(p: ReviewModeProps<C>) {
       )}
 
       {/* Rating buttons */}
-      {p.isFlipped && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {RATING_BUTTONS.map((q, idx) => (
-            <button
-              key={q.value}
-              className={cn("rounded-2xl border bg-bg p-5 text-center transition-all duration-200 active:scale-95", q.color)}
-              onClick={() => p.onRate(q.value)}
-              disabled={p.reviewing}
-            >
-              <p className="text-sm font-bold uppercase tracking-tighter">{q.label}</p>
-              <p className="mt-1 text-[10px] text-muted-fg/50">[{idx + 1}]</p>
-            </button>
-          ))}
-        </div>
-      )}
+      {p.isFlipped && (() => {
+        const predictions = p.activeCard
+          ? predictFsrsIntervals(p.activeCard as any, p.nowMs)
+          : { again: "10m", hard: "1d", good: "3d", easy: "7d" };
+
+        const gradeKeyFor = (val: number): keyof typeof predictions =>
+          val === 0 ? "again" : val === 3 ? "hard" : val === 4 ? "good" : "easy";
+
+        return (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {RATING_BUTTONS.map((q, idx) => {
+              const interval = predictions[gradeKeyFor(q.value)];
+              return (
+                <button
+                  key={q.value}
+                  className={cn("rounded-2xl border bg-bg p-4 text-center transition-all duration-200 active:scale-95", q.color)}
+                  onClick={() => p.onRate(q.value)}
+                  disabled={p.reviewing}
+                >
+                  <div className="flex items-center justify-center gap-1.5">
+                    <p className="text-sm font-bold uppercase tracking-tighter">{q.label}</p>
+                    <span className="rounded-md bg-muted/80 px-1.5 py-0.5 font-mono text-[10px] font-bold text-fg/80">
+                      {interval}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-fg/50">[{idx + 1}]</p>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       <p className="text-center text-xs text-muted-fg uppercase tracking-widest">
         Space: flip • 1-4: rate
