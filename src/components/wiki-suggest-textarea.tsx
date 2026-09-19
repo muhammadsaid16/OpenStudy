@@ -217,8 +217,8 @@ export const WikiSuggestTextarea = forwardRef<HTMLTextAreaElement, WikiSuggestTe
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 max-h-60 w-80 overflow-y-auto rounded-2xl border border-border bg-bg/95 p-1.5 shadow-2xl backdrop-blur-md transition-all animate-in fade-in zoom-in-95 duration-100"
-          style={{ bottom: "100%", marginBottom: "8px" }}
+          className="absolute z-50 max-h-52 w-80 overflow-y-auto rounded-2xl border border-border bg-bg/95 p-1.5 shadow-2xl backdrop-blur-md transition-all animate-in fade-in zoom-in-95 duration-100"
+          style={{ top: "100%", marginTop: "6px" }}
         >
           <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-border/60 text-[10px] font-bold uppercase tracking-wider text-muted-fg">
             <span className="flex items-center gap-1.5">

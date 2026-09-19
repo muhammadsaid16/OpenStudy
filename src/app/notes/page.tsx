@@ -562,51 +562,51 @@ function NotesContent() {
 
       {/* Create Modal */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={t("modal.newNote")}>
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.topic")}</label>
-            <SubjectTopicSelect
-              subjects={subjects}
-              value={selectedTopicId}
-              onChange={setSelectedTopicId}
+        <div className="space-y-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+            <Input
+              label={t("notes.titleField")}
+              placeholder={t("notes.noteTitle")}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
-            {selectedTopicId && (
-              <button
-                type="button"
-                onClick={() => setSelectedTopicId("")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs font-bold text-muted-fg transition-colors hover:border-danger/20 hover:bg-danger/10 hover:text-danger"
-              >
-                <X size={12} />{t("notes.remove")}</button>
-            )}
-            <p className="text-[11px] uppercase tracking-widest text-muted-fg">
-              {selectedTopicId ? t("notes.linkedHint") : t("notes.optionalHint")}
-            </p>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.topic")}</label>
+                {selectedTopicId && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTopicId("")}
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-muted-fg hover:text-danger"
+                  >
+                    <X size={10} />{t("notes.remove")}
+                  </button>
+                )}
+              </div>
+              <SubjectTopicSelect
+                subjects={subjects}
+                value={selectedTopicId}
+                onChange={setSelectedTopicId}
+              />
+            </div>
           </div>
-          <Input
-            label={t("notes.titleField")}
-            placeholder={t("notes.noteTitle")}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.contentField")}</label>
             <WikiSuggestTextarea
               value={content}
               onChange={setContent}
               customNotes={notes}
               customBundles={bundles}
-              rows={8}
+              rows={4}
               placeholder="Write your note here... (Type [[ to suggest and link other notes or decks)"
             />
           </div>
           <TagInput label={t("notes.tags")} tags={tags} onChange={setTags} />
-          <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary-container/10 p-3 text-xs text-muted-fg">
-            <Sparkles size={14} className="mt-0.5 shrink-0 text-primary" />
-            <div>
-              <strong className="text-fg">Knowledge Graph:</strong> Notes sharing matching tags or referencing other notes via <code className="rounded bg-bg-raised px-1 py-0.5 font-mono text-primary">[[Note Title]]</code> automatically link together in your <Link href="/graph" className="font-semibold text-primary underline">Knowledge Graph</Link>.
-            </div>
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-fg">
+            <Sparkles size={12} className="shrink-0 text-primary" />
+            <span>Link via <code className="rounded bg-bg-raised px-1 py-0.5 font-mono text-primary text-[10px]">[[Note]]</code> or matching tags to connect in <Link href="/graph" className="font-semibold text-primary underline">Knowledge Graph</Link>.</span>
           </div>
-          <div className="flex justify-end gap-4 pt-4">
+          <div className="flex justify-end gap-3 pt-2">
             <Button variant="ghost" onClick={() => setModalOpen(false)}>{t("common.cancel")}</Button>
             <Button
               onClick={handleCreate}
@@ -621,48 +621,48 @@ function NotesContent() {
       {/* Edit Modal */}
       <Modal open={!!editNote} onClose={() => { setEditNote(null); setEditTopicId(""); }} title={t("modal.editNote")}>
         {editNote && (
-          <div className="space-y-6">
+          <div className="space-y-3.5">
             {/* Quick actions header */}
             <div className="flex items-center justify-between">
-              <p className="text-[11px] uppercase tracking-widest text-muted-fg">Quick Actions</p>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-fg">Quick Actions</span>
               <button
                 type="button"
                 onClick={() => { setAiGenerateNote(editNote); }}
-                className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary-container/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary-container/30"
+                className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary-container/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary-container/30"
                 title="Generate flashcards from this note's content using AI"
               >
                 <Sparkles size={11} />
                 Generate Flashcards
               </button>
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.topic")}</label>
-              <SubjectTopicSelect
-                subjects={subjects}
-                value={editTopicId}
-                onChange={setEditTopicId}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+              <Input
+                label={t("notes.titleField")}
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
               />
-              {editTopicId && (
-                <button
-                  type="button"
-                  onClick={() => setEditTopicId("")}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs font-bold text-muted-fg transition-colors hover:border-danger/20 hover:bg-danger/10 hover:text-danger"
-                >
-                  <X size={12} />{t("notes.remove")}</button>
-              )}
-              {!editTopicId && subjects.length > 0 && (
-                <p className="text-[11px] uppercase tracking-widest text-tertiary">
-                  {t("notes.pickSubject")}
-                </p>
-              )}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.topic")}</label>
+                  {editTopicId && (
+                    <button
+                      type="button"
+                      onClick={() => setEditTopicId("")}
+                      className="inline-flex items-center gap-1 text-[10px] font-bold text-muted-fg hover:text-danger"
+                    >
+                      <X size={10} />{t("notes.remove")}
+                    </button>
+                  )}
+                </div>
+                <SubjectTopicSelect
+                  subjects={subjects}
+                  value={editTopicId}
+                  onChange={setEditTopicId}
+                />
+              </div>
             </div>
-            <Input
-              label={t("notes.titleField")}
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-            />
             {/* Textarea with ref for selection toolbar */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-fg">{t("notes.contentField")}</label>
               <WikiSuggestTextarea
                 ref={editTextareaRef}
@@ -670,19 +670,17 @@ function NotesContent() {
                 onChange={setEditContent}
                 customNotes={notes}
                 customBundles={bundles}
-                rows={8}
+                rows={4}
                 placeholder="Write your note here... (Type [[ to suggest and link other notes or decks)"
               />
-              <p className="text-[11px] text-muted-fg/60">Type [[ to auto-suggest notes & decks. Select text to create flashcards.</p>
+              <p className="text-[10px] text-muted-fg/60">Type [[ to auto-suggest notes & decks. Select text to create flashcards.</p>
             </div>
             <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />
-            <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary-container/10 p-3 text-xs text-muted-fg">
-              <Sparkles size={14} className="mt-0.5 shrink-0 text-primary" />
-              <div>
-                <strong className="text-fg">Knowledge Graph:</strong> Notes sharing matching tags or referencing other notes via <code className="rounded bg-bg-raised px-1 py-0.5 font-mono text-primary">[[Note Title]]</code> automatically link together in your <Link href="/graph" className="font-semibold text-primary underline">Knowledge Graph</Link>.
-              </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-fg">
+              <Sparkles size={12} className="shrink-0 text-primary" />
+              <span>Link via <code className="rounded bg-bg-raised px-1 py-0.5 font-mono text-primary text-[10px]">[[Note]]</code> or matching tags to connect in <Link href="/graph" className="font-semibold text-primary underline">Knowledge Graph</Link>.</span>
             </div>
-            <div className="flex justify-end gap-4 pt-4">
+            <div className="flex justify-end gap-3 pt-2">
               <Button variant="ghost" onClick={() => { setEditNote(null); setEditTopicId(""); }}>{t("common.cancel")}</Button>
               <Button onClick={handleEditSave} disabled={!editTitle.trim()}>{t("common.save")}</Button>
             </div>

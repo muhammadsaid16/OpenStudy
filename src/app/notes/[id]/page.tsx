@@ -314,33 +314,31 @@ export default function NotePage() {
 
       {/* Edit Modal */}
       <Modal open={editOpen} onClose={() => setEditOpen(false)} title={t("notesDetail.editNote")}>
-        <div className="space-y-6">
-          <div className="space-y-1.5">
+        <div className="space-y-3.5">
+          <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("notes.titleField")}</label>
             <input
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className="glass-inset flex h-12 w-full rounded-xl px-4 py-2 text-base font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-primary/20"
+              className="glass-inset flex h-10 w-full rounded-xl px-3 py-2 text-sm font-medium tracking-tight text-fg placeholder:text-muted-fg/60 focus:outline-none focus:!border-primary/20"
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("notes.contentField")}</label>
             <WikiSuggestTextarea
               value={editContent}
               onChange={setEditContent}
               customBundles={bundles}
-              rows={10}
+              rows={5}
               placeholder="Write your note here... (Type [[ to suggest and link other notes or decks)"
             />
           </div>
           <TagInput label={t("notes.tags")} tags={editTags} onChange={setEditTags} />
-          <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary-container/10 p-3 text-xs text-muted-fg">
-            <Sparkles size={14} className="mt-0.5 shrink-0 text-primary" />
-            <div>
-              <strong className="text-fg">Knowledge Graph:</strong> Notes sharing matching tags or referencing other notes via <code className="rounded bg-bg-raised px-1 py-0.5 font-mono text-primary">[[Note Title]]</code> automatically link together in your <Link href="/graph" className="font-semibold text-primary underline">Knowledge Graph</Link>.
-            </div>
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-fg">
+            <Sparkles size={12} className="shrink-0 text-primary" />
+            <span>Link via <code className="rounded bg-bg-raised px-1 py-0.5 font-mono text-primary text-[10px]">[[Note]]</code> or matching tags to connect in <Link href="/graph" className="font-semibold text-primary underline">Knowledge Graph</Link>.</span>
           </div>
-          <div className="flex justify-end gap-4 pt-4">
+          <div className="flex justify-end gap-3 pt-2">
             <Button variant="ghost" onClick={() => setEditOpen(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleEditSave} disabled={!editTitle.trim()}>{t("common.save")}</Button>
           </div>

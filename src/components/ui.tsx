@@ -190,9 +190,18 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  maxWidth?: string;
+  className?: string;
 }
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  maxWidth = "max-w-lg",
+  className = "",
+}: ModalProps) {
   const t = useT();
   const mounted = useSyncExternalStore(
     () => () => {},
@@ -258,7 +267,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
   if (!open || !mounted || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-[rise_0.2s_ease-out]"
         onClick={onClose}
@@ -269,19 +278,21 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="modal-pop relative w-full max-w-md rounded-2xl border border-border-strong glass-raised p-6 shadow-2xl"
+        className={`modal-pop relative w-full ${maxWidth} max-h-[85vh] flex flex-col rounded-2xl border border-border-strong glass-raised shadow-2xl overflow-hidden my-auto ${className}`}
       >
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight">{title}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border/40 shrink-0">
+          <h2 className="text-lg font-bold tracking-tight">{title}</h2>
           <button
             onClick={onClose}
             aria-label={t("common.close")}
-            className="rounded-lg p-2 text-muted-fg transition-colors hover:bg-surface-hover hover:text-fg"
+            className="rounded-lg p-1.5 text-muted-fg transition-colors hover:bg-surface-hover hover:text-fg"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
-        {children}
+        <div className="overflow-y-auto px-6 py-4 flex-1">
+          {children}
+        </div>
       </div>
     </div>,
     document.body
