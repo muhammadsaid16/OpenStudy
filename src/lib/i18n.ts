@@ -954,30 +954,30 @@ const DICT: Dict = {
   "ui.move_to_done": { en: "Move to done", ar: "انقل إلى منجز" },
   "ui.move_to_in_progress": { en: "Move to in progress", ar: "انقل إلى قيد التنفيذ" },
   "ui.my_topics": { en: "My topics", ar: "مواضيعي" },
-  "ui.ai_generate": { en: "AI GENERATE", ar: "AI GENERATE" },
-  "ui.ai_import": { en: "AI IMPORT", ar: "AI IMPORT" },
-  "ui.all_subjects": { en: "All subjects", ar: "All subjects" },
-  "ui.analyzing": { en: "Analyzing", ar: "Analyzing" },
-  "ui.back": { en: "BACK", ar: "BACK" },
+  "ui.ai_generate": { en: "AI GENERATE", ar: "توليد بالذكاء الاصطناعي" },
+  "ui.ai_import": { en: "AI IMPORT", ar: "استيراد بالذكاء الاصطناعي" },
+  "ui.all_subjects": { en: "All subjects", ar: "جميع المواد" },
+  "ui.analyzing": { en: "Analyzing", ar: "جارٍ التحليل…" },
+  "ui.back": { en: "BACK", ar: "رجوع" },
   "ui.play": { en: "Play", ar: "تشغيل" },
   "ui.pause": { en: "Pause", ar: "إيقاف مؤقت" },
-  "ui.backup_solution": { en: "Backup solution", ar: "Backup solution" },
-  "ui.bundle_not_found": { en: "BUNDLE NOT FOUND", ar: "BUNDLE NOT FOUND" },
-  "ui.card_type": { en: "CARD TYPE", ar: "CARD TYPE" },
-  "ui.clear": { en: "CLEAR", ar: "CLEAR" },
-  "ui.click": { en: "Click", ar: "Click" },
-  "ui.click_or_press_space_to_reveal": { en: "Click or press Space to reveal", ar: "Click or press Space to reveal" },
-  "ui.click_to_pick_an_image": { en: "CLICK TO PICK AN IMAGE", ar: "CLICK TO PICK AN IMAGE" },
-  "ui.create_first_card": { en: "Create first card", ar: "Create first card" },
+  "ui.backup_solution": { en: "Backup solution", ar: "حل احتياطي" },
+  "ui.bundle_not_found": { en: "BUNDLE NOT FOUND", ar: "المجموعة غير موجودة" },
+  "ui.card_type": { en: "CARD TYPE", ar: "نوع البطاقة" },
+  "ui.clear": { en: "CLEAR", ar: "مسح" },
+  "ui.click": { en: "Click", ar: "انقر" },
+  "ui.click_or_press_space_to_reveal": { en: "Click or press Space to reveal", ar: "انقر أو اضغط مسافة للإظهار" },
+  "ui.click_to_pick_an_image": { en: "CLICK TO PICK AN IMAGE", ar: "انقر لاختيار صورة" },
+  "ui.create_first_card": { en: "Create first card", ar: "أنشئ أول بطاقة" },
   "ui.ctrl_k": { en: "Ctrl K", ar: "Ctrl K" },
-  "ui.delete": { en: "DELETE", ar: "DELETE" },
-  "ui.destination_bundle_1": { en: "DESTINATION BUNDLE", ar: "DESTINATION BUNDLE" },
-  "ui.done_1": { en: "DONE", ar: "DONE" },
-  "ui.due_date": { en: "Due date", ar: "Due date" },
-  "ui.generate_with_ai": { en: "Generate with AI", ar: "Generate with AI" },
+  "ui.delete": { en: "DELETE", ar: "حذف" },
+  "ui.destination_bundle_1": { en: "DESTINATION BUNDLE", ar: "المجموعة المستهدفة" },
+  "ui.done_1": { en: "DONE", ar: "تم" },
+  "ui.due_date": { en: "Due date", ar: "تاريخ الاستحقاق" },
+  "ui.generate_with_ai": { en: "Generate with AI", ar: "توليد بالذكاء الاصطناعي" },
   "ui.go_to_option_2": { en: "Go to Option 2", ar: "Go to Option 2" },
   "ui.gravity_fall": { en: "Gravity Fall", ar: "Gravity Fall" },
-  "ui.horizon": { en: "Horizon", ar: "Horizon" },
+  "ui.horizon": { en: "Horizon", ar: "المدى" },
   "ui.icon": { en: "ICON", ar: "ICON" },
   "ui.image": { en: "IMAGE", ar: "IMAGE" },
   "ui.import_share": { en: "Import share", ar: "Import share" },
@@ -1003,80 +1003,80 @@ const DICT: Dict = {
   "review.uncategorized": { en: "Uncategorized", ar: "غير مصنف" },
   "review.dailyActivity": { en: "Daily activity", ar: "النشاط اليومي" },
   "ui.m3_3v18h18": { en: "M3 3v18h18", ar: "M3 3v18h18" },
-  "ui.make_flashcards": { en: "Make flashcards", ar: "Make flashcards" },
-  "ui.manage": { en: "Manage", ar: "Manage" },
-  "ui.mark_step_done": { en: "Mark step done", ar: "Mark step done" },
-  "ui.mark_step_not_done": { en: "Mark step not done", ar: "Mark step not done" },
+  "ui.make_flashcards": { en: "Make flashcards", ar: "إنشاء بطاقات استذكار" },
+  "ui.manage": { en: "Manage", ar: "إدارة" },
+  "ui.mark_step_done": { en: "Mark step done", ar: "تحديد الخطوة كمكتملة" },
+  "ui.mark_step_not_done": { en: "Mark step not done", ar: "تحديد الخطوة كغير مكتملة" },
   "ui.move": { en: "Move", ar: "نقل" },
-  "ui.move_1": { en: "MOVE", ar: "MOVE" },
-  "ui.new_notebook": { en: "New notebook", ar: "New notebook" },
-  "ui.no_bundle": { en: "No bundle", ar: "No bundle" },
-  "ui.no_color": { en: "No color", ar: "No color" },
-  "ui.no_data_yet": { en: "No data yet", ar: "No data yet" },
-  "ui.no_explanation_yet": { en: "No explanation yet", ar: "No explanation yet" },
-  "ui.no_matches": { en: "NO MATCHES", ar: "NO MATCHES" },
-  "ui.no_study_sessions_yet": { en: "No study sessions yet", ar: "No study sessions yet" },
-  "ui.not_enough_review_data_yet": { en: "NOT ENOUGH REVIEW DATA YET", ar: "NOT ENOUGH REVIEW DATA YET" },
+  "ui.move_1": { en: "MOVE", ar: "نقل" },
+  "ui.new_notebook": { en: "New notebook", ar: "دفتر جديد" },
+  "ui.no_bundle": { en: "No bundle", ar: "بدون مجموعة" },
+  "ui.no_color": { en: "No color", ar: "بدون لون" },
+  "ui.no_data_yet": { en: "No data yet", ar: "لا توجد بيانات بعد" },
+  "ui.no_explanation_yet": { en: "No explanation yet", ar: "لا يوجد تفسير بعد" },
+  "ui.no_matches": { en: "NO MATCHES", ar: "لا توجد نتائج مطابقة" },
+  "ui.no_study_sessions_yet": { en: "No study sessions yet", ar: "لا توجد جلسات دراسة بعد" },
+  "ui.not_enough_review_data_yet": { en: "NOT ENOUGH REVIEW DATA YET", ar: "بيانات المراجعة غير كافية بعد" },
   "ui.notebooklm": { en: "NotebookLM", ar: "NotebookLM" },
   "ui.open_notebooklm": { en: "Open NotebookLM", ar: "Open NotebookLM" },
   "ui.openstudy": { en: "RUVREN", ar: "RUVREN" },
   "ui.openstudy_hit_a_snag": { en: "Ruvren hit a snag", ar: "واجه Ruvren مشكلة" },
   "ui.openstudy_home": { en: "Ruvren home", ar: "الرئيسية في Ruvren" },
-  "ui.optional_hint": { en: "Optional hint", ar: "Optional hint" },
+  "ui.optional_hint": { en: "Optional hint", ar: "تلميح اختياري" },
   "ui.paste_notebooklm_answer_here": { en: "Paste NotebookLM answer here", ar: "Paste NotebookLM answer here" },
   "ui.paste_notebooklm_json_output": { en: "Paste NotebookLM JSON output", ar: "Paste NotebookLM JSON output" },
   "ui.paste_some_json_first": { en: "Paste some JSON first.", ar: "Paste some JSON first." },
   "ui.paste_the_json_here": { en: "Paste the JSON here", ar: "Paste the JSON here" },
   "ui.pick_a_destination_bundle_first": { en: "Pick a destination bundle first.", ar: "Pick a destination bundle first." },
   "ui.pick_an_image_first": { en: "Pick an image first.", ar: "Pick an image first." },
-  "ui.pin_note": { en: "Pin note", ar: "Pin note" },
+  "ui.pin_note": { en: "Pin note", ar: "تثبيت الملاحظة" },
   "ui.promise": { en: "Promise", ar: "Promise" },
   "ui.prompt_to_copy_into_notebooklm": { en: "Prompt to copy into NotebookLM", ar: "Prompt to copy into NotebookLM" },
   "ui.rate_it_below": { en: "Rate it below", ar: "Rate it below" },
   "ui.regenerate": { en: "Regenerate", ar: "إعادة التوليد" },
-  "ui.reload_app": { en: "Reload app", ar: "Reload app" },
-  "ui.remind_me": { en: "REMIND ME", ar: "REMIND ME" },
-  "ui.reminder_sent": { en: "REMINDER SENT", ar: "REMINDER SENT" },
-  "ui.remove_image": { en: "Remove image", ar: "Remove image" },
-  "ui.repeats": { en: "Repeats", ar: "Repeats" },
-  "ui.reset": { en: "RESET", ar: "RESET" },
-  "ui.reveal_answer": { en: "Reveal answer", ar: "Reveal answer" },
-  "ui.review_cards": { en: "REVIEW CARDS", ar: "REVIEW CARDS" },
-  "ui.review_heatmap": { en: "Review heatmap", ar: "Review heatmap" },
-  "ui.reviews_today": { en: "Reviews today", ar: "Reviews today" },
-  "ui.save_1": { en: "SAVE", ar: "SAVE" },
-  "ui.save_file": { en: "Save file", ar: "Save file" },
-  "ui.search_all_cards": { en: "Search all cards...", ar: "Search all cards..." },
-  "ui.search_bundles": { en: "Search bundles...", ar: "Search bundles..." },
-  "ui.search_cards_bundles_subjects_no": { en: "SEARCH CARDS, BUNDLES, SUBJECTS, NOTES…", ar: "SEARCH CARDS, BUNDLES, SUBJECTS, NOTES…" },
-  "ui.selected_study_material": { en: "Selected study material", ar: "Selected study material" },
-  "ui.session_log_failed": { en: "Session log failed", ar: "Session log failed" },
-  "ui.show_question": { en: "Show question", ar: "Show question" },
-  "ui.skip": { en: "Skip", ar: "Skip" },
-  "ui.someday_not_started": { en: "Someday / not started", ar: "Someday / not started" },
+  "ui.reload_app": { en: "Reload app", ar: "إعادة تحميل التطبيق" },
+  "ui.remind_me": { en: "REMIND ME", ar: "ذكّرني" },
+  "ui.reminder_sent": { en: "REMINDER SENT", ar: "تم إرسال التذكير" },
+  "ui.remove_image": { en: "Remove image", ar: "إزالة الصورة" },
+  "ui.repeats": { en: "Repeats", ar: "التكرار" },
+  "ui.reset": { en: "RESET", ar: "إعادة تعيين" },
+  "ui.reveal_answer": { en: "Reveal answer", ar: "إظهار الإجابة" },
+  "ui.review_cards": { en: "REVIEW CARDS", ar: "مراجعة البطاقات" },
+  "ui.review_heatmap": { en: "Review heatmap", ar: "خريطة المراجعات" },
+  "ui.reviews_today": { en: "Reviews today", ar: "مراجعات اليوم" },
+  "ui.save_1": { en: "SAVE", ar: "حفظ" },
+  "ui.save_file": { en: "Save file", ar: "حفظ الملف" },
+  "ui.search_all_cards": { en: "Search all cards...", ar: "البحث في كل البطاقات..." },
+  "ui.search_bundles": { en: "Search bundles...", ar: "البحث في المجموعات..." },
+  "ui.search_cards_bundles_subjects_no": { en: "SEARCH CARDS, BUNDLES, SUBJECTS, NOTES…", ar: "البحث في البطاقات، المجموعات، المواد، الملاحظات..." },
+  "ui.selected_study_material": { en: "Selected study material", ar: "المواد الدراسية المختارة" },
+  "ui.session_log_failed": { en: "Session log failed", ar: "فشل تسجيل الجلسة" },
+  "ui.show_question": { en: "Show question", ar: "إظهار السؤال" },
+  "ui.skip": { en: "Skip", ar: "تخطي" },
+  "ui.someday_not_started": { en: "Someday / not started", ar: "يوماً ما / لم يبدأ بعد" },
   "ui.source_text_for_ai_card_generati": { en: "Source text for AI card generation", ar: "Source text for AI card generation" },
-  "ui.speed_sprint": { en: "Speed sprint", ar: "Speed sprint" },
-  "ui.start_a_session_to_find_yours": { en: "Start a session to find yours.", ar: "Start a session to find yours." },
-  "ui.start_a_streak": { en: "Start a streak", ar: "Start a streak" },
+  "ui.speed_sprint": { en: "Speed sprint", ar: "سباق السرعة" },
+  "ui.start_a_session_to_find_yours": { en: "Start a session to find yours.", ar: "ابدأ جلسة لتحديد أوقاتك المثالية." },
+  "ui.start_a_streak": { en: "Start a streak", ar: "ابدأ سلسلة متتالية" },
   "ui.step_02": { en: "Step 02", ar: "Step 02" },
   "ui.step_03": { en: "Step 03", ar: "Step 03" },
   "ui.sw_registration_failed": { en: "SW registration failed", ar: "SW registration failed" },
-  "ui.switch_to_dark_mode": { en: "Switch to dark mode", ar: "Switch to dark mode" },
-  "ui.switch_to_light_mode": { en: "Switch to light mode", ar: "Switch to light mode" },
-  "ui.tap_to_copy": { en: "Tap to copy", ar: "Tap to copy" },
+  "ui.switch_to_dark_mode": { en: "Switch to dark mode", ar: "التبديل إلى الوضع الداكن" },
+  "ui.switch_to_light_mode": { en: "Switch to light mode", ar: "التبديل إلى الوضع الفاتح" },
+  "ui.tap_to_copy": { en: "Tap to copy", ar: "انقر للنسخ" },
   "ui.text": { en: "TEXT", ar: "TEXT" },
-  "ui.this_month": { en: "This month", ar: "This month" },
-  "ui.this_week": { en: "This week", ar: "This week" },
-  "ui.time_to_review": { en: "Time to review", ar: "Time to review" },
+  "ui.this_month": { en: "This month", ar: "هذا الشهر" },
+  "ui.this_week": { en: "This week", ar: "هذا الأسبوع" },
+  "ui.time_to_review": { en: "Time to review", ar: "حان وقت المراجعة" },
   "ui.topic_linked": { en: "Topic linked", ar: "تم ربط الموضوع" },
-  "ui.try_a_different_search_or_filter": { en: "Try a different search or filter.", ar: "Try a different search or filter." },
+  "ui.try_a_different_search_or_filter": { en: "Try a different search or filter.", ar: "جرّب بحثاً أو فلترة مختلفة." },
   "ui.uncheck_at_least_one_card_to_acc": { en: "Uncheck at least one card to accept.", ar: "Uncheck at least one card to accept." },
-  "ui.undo": { en: "Undo", ar: "Undo" },
-  "ui.unpin_note": { en: "Unpin note", ar: "Unpin note" },
+  "ui.undo": { en: "Undo", ar: "تراجع" },
+  "ui.unpin_note": { en: "Unpin note", ar: "إلغاء تثبيت الملاحظة" },
   "ui.what_the_model_read": { en: "WHAT THE MODEL READ", ar: "WHAT THE MODEL READ" },
-  "ui.your_image": { en: "YOUR IMAGE", ar: "YOUR IMAGE" },
-  "ui.your_source_text": { en: "YOUR SOURCE TEXT", ar: "YOUR SOURCE TEXT" },
-  "ui.your_subjects_appear_here_as_you": { en: "Your subjects appear here as you study.", ar: "Your subjects appear here as you study." },
+  "ui.your_image": { en: "YOUR IMAGE", ar: "صورتك" },
+  "ui.your_source_text": { en: "YOUR SOURCE TEXT", ar: "النص المصدر الخاص بك" },
+  "ui.your_subjects_appear_here_as_you": { en: "Your subjects appear here as you study.", ar: "ستظهر موادك هنا أثناء دراستك." },
   "ui.long_break": { en: "Long Break", ar: "استراحة طويلة" },
   "ui.long_break_1": { en: "Long break", ar: "استراحة طويلة" },
   "ui.no_study_sessions_this_week": { en: "No study sessions this week", ar: "لا جلسات دراسة هذا الأسبوع" },
@@ -1088,17 +1088,75 @@ const DICT: Dict = {
   "ui.achieved": { en: "Achieved", ar: "تم الإنجاز" },
   "ui.reading_source": { en: "Reading source", ar: "قراءة المصدر" },
   "ui.writing_cards": { en: "Writing cards", ar: "كتابة البطاقات" },
+  "goal.repeat.never": { en: "Never", ar: "أبداً" },
+  "goal.repeat.daily": { en: "Daily", ar: "يومياً" },
+  "goal.repeat.weekly": { en: "Weekly", ar: "أسبوعياً" },
+  "goal.repeat.monthly": { en: "Monthly", ar: "شهرياً" },
 };
+
+export type TranslationKey = keyof typeof DICT;
+
+export function isTranslationKey(val: string): val is TranslationKey {
+  return typeof val === "string" && val in DICT;
+}
+
+export function humanizeKey(key: string): string {
+  if (!key || typeof key !== "string") return "";
+  const part = key.includes(".") ? key.split(".").pop()! : key;
+  return part
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
+}
+
+export function formatString(
+  template: string,
+  vars?: Record<string, string | number>
+): string {
+  if (!vars) return template;
+  let res = template;
+  for (const [k, v] of Object.entries(vars)) {
+    res = res.replaceAll(`{${k}}`, String(v));
+  }
+  return res;
+}
 
 export function useT() {
   const lang = useAppStore((s) => s.lang);
-  return (key: string): string => {
-    const entry = DICT[key];
-    return entry ? entry[lang] : key;
+  return (
+    key: TranslationKey | (string & {}),
+    vars?: Record<string, string | number>
+  ): string => {
+    const entry = DICT[key as TranslationKey];
+    if (entry) {
+      const raw = entry[lang] || entry["en"] || humanizeKey(key);
+      return formatString(raw, vars);
+    }
+    // Key not in dictionary: if it contains dots (e.g. goals.longTerm or ui.repeats), humanize it gracefully
+    if (key && key.includes(".")) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(`[i18n] Missing translation key: "${key}" (lang: "${lang}")`);
+      }
+      return formatString(humanizeKey(key), vars);
+    }
+    return formatString(key, vars);
   };
 }
 
-export function tFor(lang: "en" | "ar", key: string): string {
-  const entry = DICT[key];
-  return entry ? entry[lang] : key;
+export function tFor(
+  lang: "en" | "ar",
+  key: TranslationKey | (string & {}),
+  vars?: Record<string, string | number>
+): string {
+  const entry = DICT[key as TranslationKey];
+  if (entry) {
+    const raw = entry[lang] || entry["en"] || humanizeKey(key);
+    return formatString(raw, vars);
+  }
+  if (key && key.includes(".")) {
+    return formatString(humanizeKey(key), vars);
+  }
+  return formatString(key, vars);
 }
+

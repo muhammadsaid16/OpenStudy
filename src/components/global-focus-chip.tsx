@@ -35,7 +35,7 @@ export function GlobalFocusChip() {
   return (
     <Link
       href="/sessions"
-      aria-label={`${pomo.paused ? t("sessions.paused") : "Running"} ${PHASE_LABEL[pomo.phase].toLowerCase()} timer: ${fmt(pomo.seconds)} remaining — open sessions`}
+      aria-label={`${pomo.paused ? t("sessions.paused") : "Running"} ${t(PHASE_LABEL[pomo.phase]).toLowerCase()} timer: ${fmt(pomo.seconds)} remaining — open sessions`}
       className="glass-inset pointer-events-auto fixed bottom-20 start-1/2 z-[80] flex -translate-x-1/2 items-center gap-2 rounded-full border border-primary/40 bg-bg/90 px-4 py-2 shadow-lg backdrop-blur-md transition-transform hover:scale-105 md:bottom-6"
     >
       <span className="relative flex h-2.5 w-2.5" aria-hidden>

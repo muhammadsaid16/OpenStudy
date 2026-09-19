@@ -16,8 +16,8 @@ import { Rocket, ListTodo, Repeat } from "lucide-react";
 
 // Swatch palette drawn from theme tokens — resolved at runtime so every
 // theme recolors them. `null` = no custom color.
-const SWATCHES: { value: string | null; css: string; label: string }[] = [
-  { value: null, css: "transparent", label: "ui.no_color" },
+const SWATCHES: { value: string | null; css: string; label: string; labelKey?: string }[] = [
+  { value: null, css: "transparent", label: "No color", labelKey: "ui.no_color" },
   { value: "var(--color-accent)", css: "var(--color-accent)", label: "Accent" },
   { value: "var(--color-flow)", css: "var(--color-flow)", label: "Flow" },
   { value: "var(--color-grow)", css: "var(--color-grow)", label: "Grow" },
@@ -123,10 +123,10 @@ function GoalForm({
   };
 
   return (
-    <Modal open onClose={onClose} title={goal ? "ui.edit_goal" : t("goal.newGoal")}>
+    <Modal open onClose={onClose} title={goal ? t("ui.edit_goal") : t("goal.newGoal")}>
       <div className="space-y-4">
         <Input
-          placeholder={"modal.exampleGoal"}
+          placeholder={t("modal.exampleGoal")}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => {
@@ -135,7 +135,7 @@ function GoalForm({
           autoFocus
         />
         <Textarea
-          placeholder={"modal.whyMatters"}
+          placeholder={t("modal.whyMatters")}
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -143,12 +143,12 @@ function GoalForm({
 
         {/* Horizon picker */}
         <div>
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">{"ui.horizon"}</p>
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("ui.horizon")}</p>
           <div className="inline-flex w-full rounded-full border border-glass-border bg-glass p-1">
             {(
               [
-                { id: "long", label: "goals.longTerm", icon: Rocket },
-                { id: "regular", label: "goals.todo", icon: ListTodo },
+                { id: "long", label: t("goals.longTerm"), icon: Rocket },
+                { id: "regular", label: t("goals.todo"), icon: ListTodo },
               ] as const
             ).map(({ id, label, icon: Icon }) => (
               <button
@@ -175,18 +175,18 @@ function GoalForm({
         {/* Repeat picker */}
         <div>
           <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">
-            <Repeat size={11} />{"ui.repeats"}</p>
+            <Repeat size={11} />{t("ui.repeats")}</p>
           <div className="inline-flex w-full rounded-full border border-glass-border bg-glass p-1">
             {(
               [
-                { id: null, label: "Never" },
-                { id: "daily", label: "Daily" },
-                { id: "weekly", label: "Weekly" },
-                { id: "monthly", label: "Monthly" },
+                { id: null, label: t("goal.repeat.never") },
+                { id: "daily", label: t("goal.repeat.daily") },
+                { id: "weekly", label: t("goal.repeat.weekly") },
+                { id: "monthly", label: t("goal.repeat.monthly") },
               ] as const
             ).map(({ id, label }) => (
               <button
-                key={label}
+                key={id ?? "none"}
                 type="button"
                 onClick={() => setRepeat(id)}
                 className={cn(
@@ -210,7 +210,7 @@ function GoalForm({
 
         {/* Due date */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{"ui.due_date"}</label>
+          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("ui.due_date")}</label>
           <input
             type="date"
             value={dueDate}
@@ -221,7 +221,7 @@ function GoalForm({
 
         {/* Subject + topic context */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{"dash.subject"}</label>
+          <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("dash.subject")}</label>
           <SubjectTopicMenu
             subjects={subjects}
             subjectId={subjectId}
@@ -233,35 +233,38 @@ function GoalForm({
 
         {/* Color swatches */}
         <div>
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">{"fc.color"}</p>
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-fg">{t("fc.color")}</p>
           <div className="flex flex-wrap items-center gap-2">
-            {SWATCHES.map((s) => (
-              <button
-                key={s.label}
-                type="button"
-                aria-label={s.label}
-                title={s.label}
-                onClick={() => setColor(s.value)}
-                className={cn(
-                  "h-7 w-7 rounded-full border border-glass-border transition-transform hover:scale-110",
-                  color === s.value &&
-                    "ring-2 ring-primary ring-offset-2 ring-offset-bg-raised"
-                )}
-                style={{
-                  background:
-                    s.value === null
-                      ? "repeating-linear-gradient(45deg, transparent, transparent 3px, color-mix(in srgb, var(--color-muted-fg) 30%, transparent) 3px, color-mix(in srgb, var(--color-muted-fg) 30%, transparent) 6px)"
-                      : s.css,
-                }}
-              />
-            ))}
+            {SWATCHES.map((s) => {
+              const swatchLabel = s.labelKey ? t(s.labelKey) : s.label;
+              return (
+                <button
+                  key={s.label}
+                  type="button"
+                  aria-label={swatchLabel}
+                  title={swatchLabel}
+                  onClick={() => setColor(s.value)}
+                  className={cn(
+                    "h-7 w-7 rounded-full border border-glass-border transition-transform hover:scale-110",
+                    color === s.value &&
+                      "ring-2 ring-primary ring-offset-2 ring-offset-bg-raised"
+                  )}
+                  style={{
+                    background:
+                      s.value === null
+                        ? "repeating-linear-gradient(45deg, transparent, transparent 3px, color-mix(in srgb, var(--color-muted-fg) 30%, transparent) 3px, color-mix(in srgb, var(--color-muted-fg) 30%, transparent) 6px)"
+                        : s.css,
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="secondary" onClick={onClose}>{"common.cancel"}</Button>
+          <Button variant="secondary" onClick={onClose}>{t("common.cancel")}</Button>
           <Button onClick={handleSubmit} disabled={!title.trim() || saving}>
-            {saving ? "fc.saving" : goal ? t("common.saveChanges") : "ui.create_goal"}
+            {saving ? t("fc.saving") : goal ? t("common.saveChanges") : t("ui.create_goal")}
           </Button>
         </div>
       </div>

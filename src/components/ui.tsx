@@ -1,6 +1,6 @@
 "use client";
 
-import { useT } from "@/lib/i18n";
+import { useT, isTranslationKey } from "@/lib/i18n";
 
 import { cn } from "@/lib/utils";
 import {
@@ -31,6 +31,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", loading = false, disabled, children, ...props }, ref) => {
+    const t = useT();
+    const resolvedChildren =
+      typeof children === "string" && isTranslationKey(children) ? t(children) : children;
+
     return (
       <button
         ref={ref}
@@ -127,16 +131,21 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, ...props }, ref) => {
+  ({ className, label, error, placeholder, ...props }, ref) => {
+    const t = useT();
+    const resolvedLabel = label && isTranslationKey(label) ? t(label) : label;
+    const resolvedPlaceholder = placeholder && isTranslationKey(placeholder) ? t(placeholder) : placeholder;
+
     return (
       <div className="space-y-1.5">
-        {label && (
+        {resolvedLabel && (
           <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">
-            {label}
+            {resolvedLabel}
           </label>
         )}
         <input
           ref={ref}
+          placeholder={resolvedPlaceholder}
           className={cn(
             "glass-inset flex h-11 w-full rounded-lg px-3.5 py-2 text-sm font-medium tracking-tight",
             "text-fg placeholder:text-muted-fg/60",
@@ -160,15 +169,20 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   error?: string;
 }
 
-export function Textarea({ className, label, error, ...props }: TextareaProps) {
+export function Textarea({ className, label, error, placeholder, ...props }: TextareaProps) {
+  const t = useT();
+  const resolvedLabel = label && isTranslationKey(label) ? t(label) : label;
+  const resolvedPlaceholder = placeholder && isTranslationKey(placeholder) ? t(placeholder) : placeholder;
+
   return (
     <div className="space-y-1.5">
-      {label && (
+      {resolvedLabel && (
         <label className="text-xs font-semibold uppercase tracking-widest text-muted-fg">
-          {label}
+          {resolvedLabel}
         </label>
       )}
       <textarea
+        placeholder={resolvedPlaceholder}
         className={cn(
           "glass-inset flex w-full rounded-lg px-3.5 py-3 text-sm font-medium tracking-tight",
           "text-fg placeholder:text-muted-fg/60",
@@ -266,6 +280,8 @@ export function Modal({
 
   if (!open || !mounted || typeof document === "undefined") return null;
 
+  const resolvedTitle = isTranslationKey(title) ? t(title) : title;
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       <div
@@ -276,12 +292,12 @@ export function Modal({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={resolvedTitle}
         tabIndex={-1}
         className={`modal-pop relative w-full ${maxWidth} max-h-[85vh] flex flex-col rounded-2xl border border-border-strong glass-raised shadow-2xl overflow-hidden my-auto ${className}`}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border/40 shrink-0">
-          <h2 className="text-lg font-bold tracking-tight">{title}</h2>
+          <h2 className="text-lg font-bold tracking-tight">{resolvedTitle}</h2>
           <button
             onClick={onClose}
             aria-label={t("common.close")}
